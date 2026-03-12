@@ -1,59 +1,39 @@
-import { useWorkout } from './hooks/useWorkout'
-import { useExercises } from './hooks/useExercises'
-import StartWorkout from './components/StartWorkout'
-import ActiveWorkout from './components/ActiveWorkout'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
 
-function App() {
-  const {
-    workout,
-    saving,
-    error,
-    startWorkout,
-    addExercise,
-    removeExercise,
-    addSet,
-    removeSet,
-    finishWorkout,
-    discardWorkout,
-    isActive,
-  } = useWorkout()
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Logger = lazy(() => import('./pages/Logger'))
+const History = lazy(() => import('./pages/History'))
+const WorkoutDetail = lazy(() => import('./pages/WorkoutDetail'))
+const Progress = lazy(() => import('./pages/Progress'))
+const AICoach = lazy(() => import('./pages/AICoach'))
+const Profile = lazy(() => import('./pages/Profile'))
 
-  const { exercises } = useExercises()
-
-  async function handleFinish() {
-    try {
-      // TODO: get real user id from auth
-      await finishWorkout('00000000-0000-0000-0000-000000000000')
-    } catch {
-      // error is set in hook
-    }
-  }
-
+function PageLoader() {
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {!isActive ? (
-        <>
-          <header className="border-b border-gray-800 px-4 py-4">
-            <h1 className="text-xl font-bold tracking-tight">Coach</h1>
-          </header>
-          <StartWorkout onStart={startWorkout} />
-        </>
-      ) : (
-        <ActiveWorkout
-          workout={workout}
-          exercises={exercises}
-          onAddExercise={addExercise}
-          onRemoveExercise={removeExercise}
-          onAddSet={addSet}
-          onRemoveSet={removeSet}
-          onFinish={handleFinish}
-          onDiscard={discardWorkout}
-          saving={saving}
-          error={error}
-        />
-      )}
+    <div className="flex h-[60vh] items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-orange-500" />
     </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/log" element={<Logger />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/history/:id" element={<WorkoutDetail />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/coach" element={<AICoach />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  )
+}
