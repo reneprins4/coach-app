@@ -1,39 +1,57 @@
-import './App.css'
+import { useWorkout } from './hooks/useWorkout'
+import { useExercises } from './hooks/useExercises'
+import StartWorkout from './components/StartWorkout'
+import ActiveWorkout from './components/ActiveWorkout'
 
 function App() {
+  const {
+    workout,
+    saving,
+    error,
+    startWorkout,
+    addExercise,
+    removeExercise,
+    addSet,
+    removeSet,
+    finishWorkout,
+    discardWorkout,
+    isActive,
+  } = useWorkout()
+
+  const { exercises } = useExercises()
+
+  async function handleFinish() {
+    try {
+      // TODO: get real user id from auth
+      await finishWorkout('00000000-0000-0000-0000-000000000000')
+    } catch {
+      // error is set in hook
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <header className="border-b border-gray-800 px-6 py-4">
-        <h1 className="text-2xl font-bold tracking-tight">
-          🏋️ Coach App
-        </h1>
-      </header>
-
-      <main className="mx-auto max-w-4xl px-6 py-12">
-        <div className="rounded-2xl bg-gray-900 p-8 text-center">
-          <h2 className="mb-4 text-3xl font-semibold">
-            Welcome to Coach
-          </h2>
-          <p className="text-lg text-gray-400">
-            Your AI-powered workout companion. Track sets, log workouts,
-            and get intelligent coaching feedback.
-          </p>
-          <div className="mt-8 flex justify-center gap-4">
-            <span className="rounded-full bg-blue-600/20 px-4 py-2 text-sm text-blue-400">
-              React 18
-            </span>
-            <span className="rounded-full bg-emerald-600/20 px-4 py-2 text-sm text-emerald-400">
-              Supabase
-            </span>
-            <span className="rounded-full bg-purple-600/20 px-4 py-2 text-sm text-purple-400">
-              Claude AI
-            </span>
-            <span className="rounded-full bg-cyan-600/20 px-4 py-2 text-sm text-cyan-400">
-              Tailwind CSS
-            </span>
-          </div>
-        </div>
-      </main>
+      {!isActive ? (
+        <>
+          <header className="border-b border-gray-800 px-4 py-4">
+            <h1 className="text-xl font-bold tracking-tight">Coach</h1>
+          </header>
+          <StartWorkout onStart={startWorkout} />
+        </>
+      ) : (
+        <ActiveWorkout
+          workout={workout}
+          exercises={exercises}
+          onAddExercise={addExercise}
+          onRemoveExercise={removeExercise}
+          onAddSet={addSet}
+          onRemoveSet={removeSet}
+          onFinish={handleFinish}
+          onDiscard={discardWorkout}
+          saving={saving}
+          error={error}
+        />
+      )}
     </div>
   )
 }
