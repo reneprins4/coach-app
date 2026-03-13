@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles } from 'lucide-react'
+import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2 } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises, useFilteredExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
 import { getExerciseHistory } from '../hooks/useWorkouts'
+import { getExerciseSubstitute } from '../lib/anthropic'
+import { getSettings } from '../lib/settings'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
 import FinishModal from '../components/FinishModal'
@@ -14,10 +16,12 @@ export default function Logger() {
   const aw = useActiveWorkout()
   const { exercises } = useExercises()
   const rest = useRestTimer()
+  const settings = getSettings()
   const [showPicker, setShowPicker] = useState(false)
   const [showFinish, setShowFinish] = useState(false)
   const [finishResult, setFinishResult] = useState(null)
   const [showDiscard, setShowDiscard] = useState(false)
+  const [swapTarget, setSwapTarget] = useState(null) // exercise being swapped
 
   // Auto-load AI-generated pending workout when navigating from Coach
   useEffect(() => {
@@ -112,6 +116,7 @@ export default function Logger() {
             }}
             onRemoveSet={(id) => aw.removeSet(exercise.name, id)}
             onRemove={() => aw.removeExercise(exercise.name)}
+            onSwap={() => setSwapTarget(exercise)}
             lastUsed={aw.getLastUsed(exercise.name)}
           />
         ))}
@@ -179,11 +184,167 @@ export default function Logger() {
           </div>
         </div>
       )}
+
+      {/* Swap exercise modal */}
+      {swapTarget && (
+        <SwapModal
+          exercise={swapTarget}
+          settings={settings}
+          onAccept={(sub) => {
+            aw.replaceExercise(swapTarget.name, {
+              name: sub.name,
+              muscle_group: sub.muscle_group,
+              category: '',
+              plan: {
+                sets: sub.sets,
+                reps_min: sub.reps_min,
+                reps_max: sub.reps_max,
+                weight_kg: sub.weight_kg,
+                rpe_target: sub.rpe_target,
+                rest_seconds: sub.rest_seconds,
+                notes: sub.notes,
+              },
+            })
+            setSwapTarget(null)
+          }}
+          onClose={() => setSwapTarget(null)}
+        />
+      )}
     </div>
   )
 }
 
-function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, lastUsed }) {
+// ── SWAP MODAL ───────────────────────────────────────────────────────────────
+const SWAP_REASONS = [
+  { value: 'machine_busy', label: '🔴 Machine busy', desc: 'Equipment occupied' },
+  { value: 'no_equipment', label: '⚠️ No equipment', desc: 'Not available here' },
+  { value: 'want_variety', label: '🔄 Want variety', desc: 'Something different' },
+  { value: 'feels_off', label: '💪 Feels off', desc: 'Not feeling this one' },
+]
+
+function SwapModal({ exercise, settings, onAccept, onClose }) {
+  const [reason, setReason] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [suggestion, setSuggestion] = useState(null)
+  const [error, setError] = useState(null)
+
+  async function handleFetch() {
+    if (!reason) return
+    setLoading(true)
+    setError(null)
+    try {
+      const sub = await getExerciseSubstitute({
+        exercise,
+        reason,
+        equipment: settings.equipment,
+        experienceLevel: settings.experienceLevel,
+        bodyweight: settings.bodyweight,
+      })
+      setSuggestion(sub)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-white">Swap Exercise</h3>
+          <button onClick={onClose} className="p-1 text-gray-500"><X size={20} /></button>
+        </div>
+
+        <div className="mb-4 rounded-xl bg-gray-800 px-3 py-2">
+          <p className="text-xs text-gray-500">Replacing</p>
+          <p className="font-semibold text-white">{exercise.name}</p>
+          {exercise.muscle_group && (
+            <p className="text-xs capitalize text-orange-400">{exercise.muscle_group}</p>
+          )}
+        </div>
+
+        {!suggestion ? (
+          <>
+            <p className="mb-3 text-sm text-gray-400">Why are you swapping?</p>
+            <div className="mb-4 space-y-2">
+              {SWAP_REASONS.map(r => (
+                <button
+                  key={r.value}
+                  onClick={() => setReason(r.value)}
+                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
+                    reason === r.value
+                      ? 'bg-orange-500/20 ring-1 ring-orange-500/50'
+                      : 'bg-gray-800 ring-1 ring-gray-700'
+                  }`}
+                >
+                  <span className="font-medium text-white">{r.label}</span>
+                  <span className="text-xs text-gray-500">{r.desc}</span>
+                </button>
+              ))}
+            </div>
+
+            {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
+
+            <button
+              onClick={handleFetch}
+              disabled={!reason || loading}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 font-bold text-white disabled:opacity-50"
+            >
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Finding alternative...</> : <><RefreshCw size={18} /> Find substitute</>}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="mb-4 rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-orange-400">Suggested substitute</p>
+              <p className="text-xl font-black text-white">{suggestion.name}</p>
+              <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-lg bg-gray-800 py-2">
+                  <p className="font-bold text-white">{suggestion.sets}×{suggestion.reps_min}-{suggestion.reps_max}</p>
+                  <p className="text-[10px] text-gray-500">sets×reps</p>
+                </div>
+                <div className="rounded-lg bg-orange-500/20 py-2">
+                  <p className="font-bold text-orange-400">{suggestion.weight_kg}kg</p>
+                  <p className="text-[10px] text-gray-500">weight</p>
+                </div>
+                <div className="rounded-lg bg-gray-800 py-2">
+                  <p className="font-bold text-white">RPE {suggestion.rpe_target}</p>
+                  <p className="text-[10px] text-gray-500">intensity</p>
+                </div>
+              </div>
+              {suggestion.why && (
+                <p className="mt-3 text-xs text-gray-400">{suggestion.why}</p>
+              )}
+              {suggestion.notes && (
+                <p className="mt-1 text-xs text-orange-300">{suggestion.notes}</p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setSuggestion(null); setReason(null) }}
+                className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700"
+              >
+                Try another
+              </button>
+              <button
+                onClick={() => onAccept(suggestion)}
+                className="h-12 flex-1 rounded-xl bg-orange-500 font-bold text-white active:scale-[0.97] transition-transform"
+              >
+                Use this
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── EXERCISE BLOCK ────────────────────────────────────────────────────────────
+function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, lastUsed }) {
   const [weight, setWeight] = useState(
     exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
   )
@@ -227,9 +388,19 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, lastUsed }) 
     <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-base font-bold text-white">{exercise.name}</h3>
-        <button onClick={onRemove} className="p-2 text-gray-600 active:text-red-400">
-          <X size={18} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onSwap}
+            className="flex items-center gap-1 rounded-lg bg-gray-800 px-2 py-1.5 text-xs text-gray-400 active:text-orange-400"
+            title="Swap exercise"
+          >
+            <RefreshCw size={13} />
+            <span>Swap</span>
+          </button>
+          <button onClick={onRemove} className="p-2 text-gray-600 active:text-red-400">
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
       {/* AI plan targets */}

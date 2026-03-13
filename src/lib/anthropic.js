@@ -116,3 +116,54 @@ Return ONLY valid JSON (no markdown, no code fences, no comments):
     throw new Error('Failed to parse AI response. Please try again.')
   }
 }
+
+
+export async function getExerciseSubstitute({ exercise, reason, equipment, experienceLevel, bodyweight }) {
+  const prompt = `Suggest ONE substitute exercise for: "${exercise.name}" (targets: ${exercise.muscle_group || 'same muscle group'})
+
+Reason for substitution: ${reason}
+Equipment available: ${equipment || 'full_gym'}
+Athlete level: ${experienceLevel || 'intermediate'}
+Bodyweight: ${bodyweight ? bodyweight + 'kg' : 'unknown'}
+
+Rules:
+- Must train the SAME primary muscle group (${exercise.muscle_group})
+- Must be practical with the available equipment
+- If reason is "machine busy" → suggest free-weight or cable alternative
+- If reason is "no equipment" → suggest bodyweight or dumbbell alternative
+- Suggest appropriate starting weight (NEVER 0kg)
+
+Return ONLY this JSON (no markdown):
+{
+  "name": "exercise name",
+  "muscle_group": "${exercise.muscle_group || 'same'}",
+  "weight_kg": number,
+  "sets": ${exercise.plan?.sets || 3},
+  "reps_min": ${exercise.plan?.reps_min || 8},
+  "reps_max": ${exercise.plan?.reps_max || 12},
+  "rpe_target": ${exercise.plan?.rpe_target || 8},
+  "rest_seconds": ${exercise.plan?.rest_seconds || 90},
+  "notes": "brief coaching cue + why this is a good substitute",
+  "why": "one sentence explaining why this works as a substitute"
+}`
+
+  const response = await fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  })
+
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`API error ${response.status}: ${err}`)
+  }
+
+  const data = await response.json()
+  if (data.error) throw new Error(data.error)
+
+  try {
+    return JSON.parse(data.content)
+  } catch {
+    throw new Error('Failed to parse substitute response.')
+  }
+}

@@ -52,6 +52,18 @@ export function useActiveWorkout() {
     setWorkout(prev => prev ? { ...prev, exercises: prev.exercises.filter(e => e.name !== name) } : prev)
   }, [])
 
+  const replaceExercise = useCallback((oldName, newExercise) => {
+    setWorkout(prev => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        exercises: prev.exercises.map(e =>
+          e.name === oldName ? { ...newExercise, sets: [] } : e
+        ),
+      }
+    })
+  }, [])
+
   const addSet = useCallback((exerciseName, setData) => {
     // Save to last-used
     const store = load(LAST_USED_KEY) || {}
@@ -153,7 +165,7 @@ export function useActiveWorkout() {
 
   return {
     workout, saving, error, elapsed, totalSets, totalVolume,
-    startWorkout, addExercise, removeExercise, addSet, removeSet,
+    startWorkout, addExercise, removeExercise, replaceExercise, addSet, removeSet,
     updateNotes, finishWorkout, discardWorkout, getLastUsed,
     isActive: !!workout,
   }
