@@ -164,28 +164,18 @@ export default function AICoach() {
             </div>
           </div>
 
-          {/* Recommended split */}
-          <div className="mb-5">
-            <h2 className="mb-3 text-sm font-semibold text-gray-300">Recommended Split</h2>
-            <div className="flex flex-wrap gap-2">
-              {splitScores.map((split, i) => (
-                <button
-                  key={split.name}
-                  onClick={() => setSelectedSplit(split.name)}
-                  className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
-                    selectedSplit === split.name
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
-                  }`}
-                >
-                  {split.name}
-                  {i === 0 && selectedSplit === split.name && (
-                    <span className="ml-1.5 text-[10px] opacity-70">recommended</span>
-                  )}
-                </button>
-              ))}
+          {/* Recommended split — auto-selected, no user choice */}
+          {selectedSplit && (
+            <div className="mb-5 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-orange-400">Today's workout</p>
+              <p className="mt-1 text-xl font-black text-white">{selectedSplit}</p>
+              {splitScores[0] && (
+                <p className="mt-1 text-xs text-gray-400">
+                  {splitScores[0].reasoning || 'Optimal based on your recovery and weekly volume.'}
+                </p>
+              )}
             </div>
-          </div>
+          )}
 
           {/* Energy level */}
           <div className="mb-4">
@@ -249,12 +239,12 @@ export default function AICoach() {
             {generating ? (
               <>
                 <Loader2 size={20} className="animate-spin" />
-                Generating...
+                Generating optimal workout...
               </>
             ) : (
               <>
                 <Sparkles size={20} />
-                Generate {selectedSplit} Workout
+                Generate my workout
               </>
             )}
           </button>

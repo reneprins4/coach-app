@@ -189,9 +189,28 @@ export function scoreSplits(muscleStatus) {
     scores[splitName] = Math.round(score * 10) / 10
   }
 
-  // Sort by score descending
+  // Sort by score descending and add reasoning
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1])
-  return sorted.map(([name, score]) => ({ name, score }))
+  return sorted.map(([name, score]) => {
+    const muscles = SPLIT_MUSCLES[name] || []
+    const ready = muscles.filter(m => muscleStatus[m]?.status === 'ready')
+    const needsWork = muscles.filter(m => muscleStatus[m]?.status === 'needs_work')
+    const recovering = muscles.filter(m => muscleStatus[m]?.status === 'recovering')
+
+    let reasoning = ''
+    if (needsWork.length > 0) {
+      reasoning += `${needsWork.join(', ')} need volume. `
+    }
+    if (ready.length > 0) {
+      reasoning += `${ready.join(', ')} fully recovered. `
+    }
+    if (recovering.length > 0) {
+      reasoning += `${recovering.join(', ')} still recovering — weights adjusted.`
+    }
+    if (!reasoning) reasoning = 'Optimal based on your training balance.'
+
+    return { name, score, reasoning }
+  })
 }
 
 /**
