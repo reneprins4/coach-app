@@ -1,17 +1,20 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Dumbbell, Clock, TrendingUp, User } from 'lucide-react'
+import { LayoutDashboard, Dumbbell, CalendarDays, TrendingUp, User } from 'lucide-react'
 
 const tabs = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/log', icon: Dumbbell, label: 'Log' },
-  { to: '/history', icon: Clock, label: 'History' },
-  { to: '/progress', icon: TrendingUp, label: 'Progress' },
-  { to: '/profile', icon: User, label: 'Profile' },
+  { to: '/',        icon: LayoutDashboard, label: 'Home'    },
+  { to: '/plan',    icon: CalendarDays,    label: 'Plan'    },
+  { to: '/log',     icon: Dumbbell,        label: 'Train'   },
+  { to: '/progress',icon: TrendingUp,      label: 'Progress'},
+  { to: '/profile', icon: User,            label: 'Profile' },
 ]
 
 export default function Layout() {
   const location = useLocation()
-  const hideNav = location.pathname.startsWith('/history/') || location.pathname === '/coach'
+  const hideNav =
+    location.pathname.startsWith('/history/') ||
+    location.pathname === '/coach' ||
+    location.pathname === '/history'
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-950">

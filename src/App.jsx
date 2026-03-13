@@ -9,6 +9,7 @@ const WorkoutDetail = lazy(() => import('./pages/WorkoutDetail'))
 const Progress = lazy(() => import('./pages/Progress'))
 const AICoach = lazy(() => import('./pages/AICoach'))
 const Profile = lazy(() => import('./pages/Profile'))
+const Plan = lazy(() => import('./pages/Plan'))
 
 function PageLoader() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/plan" element={<Plan />} />
             <Route path="/log" element={<Logger />} />
             <Route path="/history" element={<History />} />
             <Route path="/history/:id" element={<WorkoutDetail />} />

@@ -58,6 +58,10 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
     ? `\nFOCUS MUSCLES (add extra sets/exercises): ${preferences.focusedMuscles.join(', ')}`
     : ''
 
+  const periodizationNote = preferences.trainingPhase
+    ? `\n## Training Block\n- Phase: ${preferences.trainingPhase} (Week ${preferences.blockWeek}/${preferences.blockTotalWeeks})\n- ${preferences.isDeload ? '🔄 DELOAD WEEK: Reduce volume 40-50%, keep same weight, RPE max 6. No grinding.' : `Target RPE: ${preferences.targetRPE} | Rep range: ${preferences.targetRepRange?.[0]}-${preferences.targetRepRange?.[1]} reps`}\n- Volume note: ${preferences.weekTargetNote || 'standard'}`
+    : ''
+
   const prompt = `## Athlete Profile
 - Name: ${preferences.name || 'athlete'}
 - Bodyweight: ${bw}
@@ -68,6 +72,7 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
 - Energy today: ${preferences.energy || 'medium'}
 - Available time: ${preferences.time || 60} min
 ${focusNote}
+${periodizationNote}
 
 ${weightGuidance}
 
@@ -85,6 +90,7 @@ VOLUME RULES (strict):
 - If energy=high and time>=75: aim for 8-10 exercises
 - Each compound exercise gets 3-5 sets; each isolation gets 3-4 sets
 - For focused muscles: add 1-2 extra exercises or sets vs normal
+${preferences.isDeload ? '- DELOAD: 2-3 sets max per exercise, RPE never above 6' : preferences.trainingPhase ? `- This is ${preferences.trainingPhase} Week ${preferences.blockWeek}: strictly follow the target RPE ${preferences.targetRPE} — do not go heavier even if the athlete feels good` : ''}
 
 PROGRESSIVE OVERLOAD:
 - RPE <8 last time → add 2.5-5kg

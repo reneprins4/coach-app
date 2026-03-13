@@ -6,8 +6,9 @@ import {
 } from 'lucide-react'
 import { generateScientificWorkout } from '../lib/anthropic'
 import { fetchRecentHistory } from '../hooks/useWorkouts'
-import { analyzeTraining, scoreSplits, getRelevantHistory } from '../lib/training-analysis'
+import { analyzeTraining, scoreSplits, getRelevantHistory, calcMuscleRecovery } from '../lib/training-analysis'
 import { getSettings } from '../lib/settings'
+import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
 
 const TIME_OPTIONS = [45, 60, 75, 90]
 
@@ -26,16 +27,13 @@ const VS_ICONS = {
 
 const ALL_MUSCLES = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
 
-// Recovery % based on days since trained + RPE
-function calcRecovery(daysSince, avgRpe) {
-  if (daysSince === null) return 100
-  const base = Math.min(100, daysSince * 45)
-  const rpePenalty = avgRpe > 8 ? (avgRpe - 8) * 12 : 0
-  return Math.max(0, Math.round(base - rpePenalty))
+// Use imported calcMuscleRecovery from training-analysis
+function calcRecovery(muscle, ms) {
+  return calcMuscleRecovery(muscle, ms.hoursSinceLastTrained, ms.avgRpeLastSession, ms.setsLastSession)
 }
 
 function RecoveryBar({ muscle, ms }) {
-  const recovery = calcRecovery(ms.daysSinceLastTrained, ms.avgRpeLastSession)
+  const recovery = ms.recoveryPct ?? calcRecovery(muscle, ms)
   const isOverTrained = ms.setsThisWeek >= ms.target.max
   const effectiveRecovery = isOverTrained ? Math.min(recovery, 60) : recovery
 
@@ -82,6 +80,10 @@ export default function AICoach() {
   const [muscleStatus, setMuscleStatus] = useState(null)
   const [splitScores, setSplitScores] = useState([])
   const [selectedSplit, setSelectedSplit] = useState(null)
+
+  const block = getCurrentBlock()
+  const weekTarget = block ? getCurrentWeekTarget(block) : null
+  const phase = block ? PHASES[block.phase] : null
 
   const [energy, setEnergy] = useState('medium')
   const [time, setTime] = useState(60)
@@ -142,6 +144,13 @@ export default function AICoach() {
           squatMax: settings.squatMax || null,
           deadliftMax: settings.deadliftMax || null,
           focusedMuscles,
+          trainingPhase: phase?.label || null,
+          blockWeek: block?.currentWeek || null,
+          blockTotalWeeks: phase?.weeks || null,
+          targetRPE: weekTarget?.rpe || null,
+          targetRepRange: weekTarget?.repRange || null,
+          isDeload: weekTarget?.isDeload || false,
+          weekTargetNote: weekTarget?.setNote || null,
         },
       })
       setResult(workout)
@@ -269,6 +278,19 @@ export default function AICoach() {
             )}
           </div>
 
+          {/* ── BLOCK CONTEXT ──────────────────────────────── */}
+          {block && phase && weekTarget && (
+            <div className={`mb-4 rounded-xl border border-${phase.color === 'gray' ? 'gray' : phase.color}-500/30 bg-${phase.color === 'gray' ? 'gray' : phase.color}-500/10 px-4 py-3`}>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                {phase.emoji} {phase.label} · Week {block.currentWeek}/{phase.weeks}
+              </p>
+              <p className="mt-1 text-sm font-bold text-white">
+                {weekTarget.isDeload ? '🔄 Deload — easy session today' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
+              </p>
+              <p className="text-xs text-gray-500">{weekTarget.setNote}</p>
+            </div>
+          )}
+
           {/* ── TODAY'S SPLIT ───────────────────────────────── */}
           {selectedSplit && (
             <div className="mb-5 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3">
@@ -303,7 +325,7 @@ export default function AICoach() {
             <div className="flex flex-wrap gap-2">
               {ALL_MUSCLES.map(m => {
                 const ms = muscleStatus?.[m]
-                const recovery = ms ? calcRecovery(ms.daysSinceLastTrained, ms.avgRpeLastSession) : 100
+                const recovery = ms ? (ms.recoveryPct ?? calcRecovery(m, ms)) : 100
                 const focused = focusedMuscles.includes(m)
                 return (
                   <button
