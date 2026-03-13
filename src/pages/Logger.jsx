@@ -705,11 +705,11 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               <span>Plates</span>
             </button>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="grid grid-cols-[48px_1fr_48px] gap-1.5">
             <button
               type="button"
               onClick={() => adjustWeight(-2.5)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
             >
               <Minus size={20} />
             </button>
@@ -720,12 +720,12 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               placeholder="0"
-              className="h-12 flex-1 rounded-xl bg-gray-800 px-3 text-center text-xl font-bold text-white outline-none"
+              className="h-12 w-full min-w-0 rounded-xl bg-gray-800 px-3 text-center text-xl font-bold text-white outline-none"
             />
             <button
               type="button"
               onClick={() => adjustWeight(2.5)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
             >
               <Plus size={20} />
             </button>
@@ -735,11 +735,11 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         {/* Reps input */}
         <div className="mb-4">
           <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">Herhalingen</label>
-          <div className="flex items-center gap-1.5">
+          <div className="grid grid-cols-[48px_1fr_48px] gap-1.5">
             <button
               type="button"
               onClick={() => adjustReps(-1)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
             >
               <Minus size={20} />
             </button>
@@ -749,12 +749,12 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               value={reps}
               onChange={(e) => setReps(e.target.value)}
               placeholder="0"
-              className="h-12 flex-1 rounded-xl bg-gray-800 px-3 text-center text-xl font-bold text-white outline-none"
+              className="h-12 w-full min-w-0 rounded-xl bg-gray-800 px-3 text-center text-xl font-bold text-white outline-none"
             />
             <button
               type="button"
               onClick={() => adjustReps(1)}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
             >
               <Plus size={20} />
             </button>
