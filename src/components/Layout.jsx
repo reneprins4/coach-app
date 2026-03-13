@@ -1,12 +1,12 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Dumbbell, CalendarDays, TrendingUp, User, Timer } from 'lucide-react'
+import { LayoutDashboard, Dumbbell, CalendarDays, TrendingUp, User, Timer, ClipboardList } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const tabs = [
   { to: '/',         icon: LayoutDashboard, label: 'Home'     },
-  { to: '/calendar', icon: CalendarDays,    label: 'Kalender' },
+  { to: '/plan',     icon: ClipboardList,   label: 'Plan'     },
   { to: '/log',      icon: Dumbbell,        label: 'Trainen'  },
-  { to: '/progress', icon: TrendingUp,      label: 'Voortgang'},
+  { to: '/calendar', icon: CalendarDays,    label: 'Kalender' },
   { to: '/profile',  icon: User,            label: 'Profiel'  },
 ]
 
