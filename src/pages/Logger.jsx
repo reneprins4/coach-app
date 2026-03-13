@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight } from 'lucide-react'
+import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Info } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises, useFilteredExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
@@ -11,6 +11,7 @@ import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodizat
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
 import FinishModal from '../components/FinishModal'
+import ExerciseGuide from '../components/ExerciseGuide'
 
 export default function Logger() {
   const nav = useNavigate()
@@ -406,6 +407,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
   const [showRpe, setShowRpe] = useState(false)
   const [prevData, setPrevData] = useState(null)
   const [prevLoaded, setPrevLoaded] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
 
   // Load previous session data
   if (!prevLoaded) {
@@ -440,7 +442,12 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
       <div className="mb-1 flex items-center justify-between">
-        <h3 className="text-base font-bold text-white">{exercise.name}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-bold text-white">{exercise.name}</h3>
+          <button onClick={() => setShowGuide(true)} className="text-gray-600 active:text-red-400">
+            <Info size={15} />
+          </button>
+        </div>
         <div className="flex items-center gap-1">
           <button
             onClick={onSwap}
@@ -455,6 +462,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
           </button>
         </div>
       </div>
+      {showGuide && <ExerciseGuide exercise={exercise} onClose={() => setShowGuide(false)} />}
 
       {/* AI plan targets */}
       {exercise.plan && (

@@ -208,3 +208,34 @@ Return ONLY this JSON (no markdown):
 
   return extractJSON(data.content)
 }
+
+
+export async function getExerciseGuide(exerciseName) {
+  const prompt = `Geef een beknopte uitvoeringshandleiding voor: "${exerciseName}"
+
+Return ONLY this JSON (no markdown):
+{
+  "steps": ["stap 1 tekst", "stap 2 tekst", "stap 3 tekst", "stap 4 tekst"],
+  "muscles": ["primaire spier", "secundaire spier"],
+  "mistakes": ["fout 1", "fout 2"],
+  "tip": "1 gouden tip voor optimale uitvoering"
+}
+
+Regels:
+- Stappen: max 5, elke stap max 12 woorden, concreet en actionabel
+- Spieren: max 4, Nederlandse namen
+- Fouten: max 3, meest gemaakte fouten
+- Tip: max 15 woorden, impactvol
+- Alles in het Nederlands`
+
+  const response = await fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  })
+
+  if (!response.ok) throw new Error(`API error ${response.status}`)
+  const data = await response.json()
+  if (data.error) throw new Error(data.error)
+  return extractJSON(data.content)
+}
