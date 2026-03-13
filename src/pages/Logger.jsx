@@ -17,6 +17,7 @@ import ExerciseGuide from '../components/ExerciseGuide'
 import Toast from '../components/Toast'
 import PlateCalculator from '../components/PlateCalculator'
 import TemplateLibrary from '../components/TemplateLibrary'
+import SupersetModal from '../components/SupersetModal'
 
 export default function Logger() {
   const nav = useNavigate()
@@ -35,6 +36,8 @@ export default function Logger() {
   const [toast, setToast] = useState(null)
   const [plateCalcWeight, setPlateCalcWeight] = useState(null)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [showSupersetModal, setShowSupersetModal] = useState(false)
+  const [supersetMode, setSupersetMode] = useState(null) // { supersets: [...], active: true }
 
   useEffect(() => {
     const raw = localStorage.getItem('coach-pending-workout')
@@ -91,6 +94,19 @@ export default function Logger() {
     } catch (err) {
       setToast({ message: 'Kon template niet verwijderen' })
     }
+  }
+
+  function handleApplySupersets(reorderedExercises, supersets) {
+    // Update workout exercises in superset order
+    // Note: We'll track superset groups visually, not reorder the actual state
+    setSupersetMode({ supersets, active: true })
+    setShowSupersetModal(false)
+    setToast({ message: 'Superset modus actief' })
+  }
+
+  function handleExitSupersetMode() {
+    setSupersetMode(null)
+    setToast({ message: 'Superset modus uitgeschakeld' })
   }
 
   if (!aw.isActive) {
@@ -206,6 +222,25 @@ export default function Logger() {
               </div>
             </div>
             <div className="flex gap-2">
+              {!supersetMode && aw.workout.exercises.length >= 2 && (
+                <button
+                  onClick={() => setShowSupersetModal(true)}
+                  className="flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-red-400 ring-1 ring-red-500/30 active:bg-red-500/10"
+                  title="Superset modus"
+                >
+                  <Sparkles size={16} />
+                  <span className="hidden sm:inline">Superset</span>
+                </button>
+              )}
+              {supersetMode && (
+                <button
+                  onClick={handleExitSupersetMode}
+                  className="flex h-10 items-center gap-1.5 rounded-xl bg-red-500/20 px-3 text-sm font-medium text-red-400 ring-1 ring-red-500/50 active:bg-red-500/30"
+                >
+                  <Sparkles size={16} />
+                  <span className="hidden sm:inline">Superset aan</span>
+                </button>
+              )}
               <button
                 onClick={() => setShowDiscard(true)}
                 className="h-10 rounded-xl px-3 text-sm text-gray-400 ring-1 ring-gray-700 active:bg-gray-900"
@@ -232,22 +267,45 @@ export default function Logger() {
 
       {/* Exercise list */}
       <div className="flex-1 space-y-4 px-4 py-4">
-        {aw.workout.exercises.map(exercise => (
-          <ExerciseBlock
-            key={exercise.name}
-            exercise={exercise}
-            userId={user?.id}
-            onAddSet={(data) => {
-              aw.addSet(exercise.name, data)
-              rest.start()
-            }}
-            onRemoveSet={(id, setData) => handleRemoveSet(exercise.name, id, setData)}
-            onRemove={() => aw.removeExercise(exercise.name)}
-            onSwap={() => setSwapTarget(exercise)}
-            onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
-            lastUsed={aw.getLastUsed(exercise.name)}
-          />
-        ))}
+        {supersetMode ? (
+          // Render exercises grouped by superset
+          supersetMode.supersets.map((group, groupIdx) => (
+            <SupersetGroupBlock
+              key={groupIdx}
+              group={group}
+              groupIndex={groupIdx}
+              allExercises={aw.workout.exercises}
+              userId={user?.id}
+              onAddSet={(exerciseName, data) => {
+                aw.addSet(exerciseName, data)
+                rest.start()
+              }}
+              onRemoveSet={(exerciseName, id, setData) => handleRemoveSet(exerciseName, id, setData)}
+              onRemove={(exerciseName) => aw.removeExercise(exerciseName)}
+              onSwap={(exercise) => setSwapTarget(exercise)}
+              onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
+              getLastUsed={aw.getLastUsed}
+            />
+          ))
+        ) : (
+          // Normal rendering
+          aw.workout.exercises.map(exercise => (
+            <ExerciseBlock
+              key={exercise.name}
+              exercise={exercise}
+              userId={user?.id}
+              onAddSet={(data) => {
+                aw.addSet(exercise.name, data)
+                rest.start()
+              }}
+              onRemoveSet={(id, setData) => handleRemoveSet(exercise.name, id, setData)}
+              onRemove={() => aw.removeExercise(exercise.name)}
+              onSwap={() => setSwapTarget(exercise)}
+              onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
+              lastUsed={aw.getLastUsed(exercise.name)}
+            />
+          ))
+        )}
 
         {aw.workout.exercises.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20">
@@ -375,6 +433,14 @@ export default function Logger() {
         <PlateCalculator
           targetWeight={plateCalcWeight}
           onClose={() => setPlateCalcWeight(null)}
+        />
+      )}
+
+      {showSupersetModal && (
+        <SupersetModal
+          exercises={aw.workout.exercises}
+          onApply={handleApplySupersets}
+          onClose={() => setShowSupersetModal(false)}
         />
       )}
 
@@ -545,7 +611,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
 }
 
 // ── EXERCISE BLOCK (REDESIGNED) ──────────────────────────────────────────────
-function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed }) {
+function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed, compact }) {
   const [weight, setWeight] = useState(
     exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
   )
@@ -608,12 +674,12 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
   ) : null
 
   return (
-    <div className="rounded-2xl border border-gray-800 bg-gray-900 min-w-0 w-full">
+    <div className={`rounded-2xl border min-w-0 w-full ${compact ? 'border-gray-700 bg-gray-800/50' : 'border-gray-800 bg-gray-900'}`}>
       {/* Header */}
-      <div className="border-b border-gray-800 px-4 py-3">
+      <div className={`border-b border-gray-800 px-4 ${compact ? 'py-2' : 'py-3'}`}>
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-white truncate">{exercise.name}</h3>
+            <h3 className={`font-bold text-white truncate ${compact ? 'text-base' : 'text-lg'}`}>{exercise.name}</h3>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               {exercise.muscle_group && (
                 <span className="capitalize">{exercise.muscle_group}</span>
@@ -799,6 +865,86 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         </button>
       </div>
     </div>
+  )
+}
+
+// ── SUPERSET GROUP BLOCK ─────────────────────────────────────────────────────
+function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, getLastUsed }) {
+  // Find actual exercise data from workout
+  const exerciseData = group.exercises.map(ex => 
+    allExercises.find(e => e.name === ex.name) || ex
+  )
+
+  if (group.type === 'superset') {
+    return (
+      <div className="rounded-2xl border-2 border-red-500/30 bg-red-500/5 p-3">
+        {/* Superset header */}
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <Sparkles size={14} className="text-red-500" />
+          <span className="text-xs font-bold uppercase tracking-wider text-red-400">
+            Superset {groupIndex + 1}
+          </span>
+          <span className="text-xs text-gray-500">- {group.pairReason}</span>
+        </div>
+        
+        {/* Exercise A */}
+        <div className="mb-2">
+          <div className="mb-1 flex items-center gap-2 px-1">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">A</span>
+            <span className="text-xs text-gray-400">Geen rust na deze</span>
+          </div>
+          <ExerciseBlock
+            exercise={exerciseData[0]}
+            userId={userId}
+            onAddSet={(data) => onAddSet(exerciseData[0].name, data)}
+            onRemoveSet={(id, setData) => onRemoveSet(exerciseData[0].name, id, setData)}
+            onRemove={() => onRemove(exerciseData[0].name)}
+            onSwap={() => onSwap(exerciseData[0])}
+            onOpenPlateCalc={onOpenPlateCalc}
+            lastUsed={getLastUsed(exerciseData[0].name)}
+            compact
+          />
+        </div>
+        
+        {/* Arrow connector */}
+        <div className="my-2 flex items-center justify-center">
+          <div className="h-6 w-px bg-red-500/30"></div>
+        </div>
+        
+        {/* Exercise B */}
+        <div>
+          <div className="mb-1 flex items-center gap-2 px-1">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">B</span>
+            <span className="text-xs text-gray-400">{group.restAfter}s rust na deze</span>
+          </div>
+          <ExerciseBlock
+            exercise={exerciseData[1]}
+            userId={userId}
+            onAddSet={(data) => onAddSet(exerciseData[1].name, data)}
+            onRemoveSet={(id, setData) => onRemoveSet(exerciseData[1].name, id, setData)}
+            onRemove={() => onRemove(exerciseData[1].name)}
+            onSwap={() => onSwap(exerciseData[1])}
+            onOpenPlateCalc={onOpenPlateCalc}
+            lastUsed={getLastUsed(exerciseData[1].name)}
+            compact
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Single exercise (not in superset)
+  return (
+    <ExerciseBlock
+      exercise={exerciseData[0]}
+      userId={userId}
+      onAddSet={(data) => onAddSet(exerciseData[0].name, data)}
+      onRemoveSet={(id, setData) => onRemoveSet(exerciseData[0].name, id, setData)}
+      onRemove={() => onRemove(exerciseData[0].name)}
+      onSwap={() => onSwap(exerciseData[0])}
+      onOpenPlateCalc={onOpenPlateCalc}
+      lastUsed={getLastUsed(exerciseData[0].name)}
+    />
   )
 }
 
