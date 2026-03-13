@@ -4,6 +4,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContai
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import FormDetective from '../components/FormDetective'
+import WeaknessHunter from '../components/WeaknessHunter'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -29,7 +30,7 @@ function getMuscleGroup(name) {
 export default function Progress() {
   const { user } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
-  const [tab, setTab] = useState('exercise') // exercise | muscle | analyse
+  const [tab, setTab] = useState('exercise') // exercise | muscle | analyse | balans
   const [query, setQuery] = useState('')
   const [selectedExercise, setSelectedExercise] = useState(null)
 
@@ -142,6 +143,12 @@ export default function Progress() {
           className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'analyse' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
           Analyse
+        </button>
+        <button
+          onClick={() => setTab('balans')}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'balans' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+        >
+          Balans
         </button>
       </div>
 
@@ -286,6 +293,10 @@ export default function Progress() {
 
       {tab === 'analyse' && (
         <FormDetective workouts={workouts} userId={user?.id} />
+      )}
+
+      {tab === 'balans' && (
+        <WeaknessHunter workouts={workouts} />
       )}
     </div>
   )
