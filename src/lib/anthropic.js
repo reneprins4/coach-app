@@ -1,34 +1,62 @@
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY
 
-export async function generateWorkout(history, preferences) {
+export async function generateScientificWorkout({ muscleStatus, recommendedSplit, recentHistory, preferences }) {
   if (!API_KEY) throw new Error('Anthropic API key not configured')
 
-  const historyText = history.length > 0
-    ? history.map(w => {
-        const date = new Date(w.created_at).toLocaleDateString()
-        const setsText = (w.workout_sets || []).map(s =>
+  const muscleStatusText = Object.entries(muscleStatus)
+    .map(([muscle, ms]) => {
+      return `${muscle}: ${ms.setsThisWeek} sets this week (target ${ms.target.min}-${ms.target.max}), ` +
+        `last trained ${ms.daysSinceLastTrained ?? 'never'} days ago, ` +
+        `avg RPE last session: ${ms.avgRpeLastSession ?? 'N/A'}, ` +
+        `status: ${ms.status}, ` +
+        `recent exercises: ${ms.recentExercises.join(', ') || 'none'}`
+    })
+    .join('\n')
+
+  const historyText = recentHistory.length > 0
+    ? recentHistory.map(session => {
+        const date = new Date(session.date).toLocaleDateString()
+        const sets = session.sets.map(s =>
           `  ${s.exercise}: ${s.weight_kg}kg x ${s.reps} ${s.rpe ? `@RPE${s.rpe}` : ''}`
         ).join('\n')
-        return `${date}:\n${setsText || '  (no sets recorded)'}`
+        return `${date}:\n${sets}`
       }).join('\n\n')
-    : 'No workout history available yet.'
+    : 'No recent history for this split.'
 
-  const userMessage = `## Training History (last 30 days)
+  const userMessage = `## Muscle Status
+${muscleStatusText}
+
+## Recommended Split: ${recommendedSplit}
+
+## Last 3 Relevant Sessions
 ${historyText}
 
-## Preferences
-- Focus: ${preferences.focus || 'full body'}
-- Available time: ${preferences.time || 60} minutes
+## User Preferences
 - Energy level: ${preferences.energy || 'medium'}
+- Available time: ${preferences.time || 60} minutes
 - Training goal: ${preferences.goal || 'hypertrophy'}
 - Training frequency: ${preferences.frequency || '4x per week'}
 
-Generate an optimal workout for today. Return valid JSON only with this structure:
+Generate an optimal ${recommendedSplit} workout. Return ONLY valid JSON:
 {
-  "exercises": [{"name": "string", "sets": number, "reps_target": "string like 8-10", "weight_kg": number, "notes": "string"}],
-  "reasoning": "string explaining the programming logic",
-  "focus": "string describing workout focus",
-  "estimated_duration": "string like 45 min"
+  "split": "string",
+  "reasoning": "string explaining programming logic, progressive overload decisions, and exercise selection rationale",
+  "exercises": [
+    {
+      "name": "string",
+      "muscle_group": "string",
+      "sets": number,
+      "reps_min": number,
+      "reps_max": number,
+      "weight_kg": number,
+      "rpe_target": number,
+      "rest_seconds": number,
+      "notes": "string with coaching cues",
+      "vs_last_session": "string: up/same/down/new with brief explanation"
+    }
+  ],
+  "estimated_duration_min": number,
+  "volume_notes": "string summarizing total volume and muscle group breakdown"
 }`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -41,8 +69,26 @@ Generate an optimal workout for today. Return valid JSON only with this structur
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5-20250514',
-      max_tokens: 2048,
-      system: 'You are an expert strength coach specializing in hypertrophy and strength training. Analyze the training history and generate an optimal workout. Be specific about weights based on the person\'s history, apply progressive overload principles. Output valid JSON only — no markdown, no code fences, just the JSON object.',
+      max_tokens: 3000,
+      system: `You are an elite hypertrophy and strength coach with deep knowledge of exercise science. Generate evidence-based workouts following these rules:
+
+PROGRESSIVE OVERLOAD:
+- If RPE was <8 last time: add 2.5kg to the weight
+- If RPE was 8-9: keep the same weight
+- If RPE was 9+: reduce weight by 5%
+- For new exercises with no history: pick a conservative starting weight
+
+EXERCISE SELECTION:
+- Rotate exercises if the same movement was used in the last session (e.g. swap barbell row for dumbbell row)
+- Start with heavy compounds, end with isolation
+- Include proper warm-up progression in notes
+
+REST PERIODS:
+- Compounds: 120-180 seconds
+- Isolation: 60-90 seconds
+- Adjusted for energy level (low = longer rest, high = shorter)
+
+Return ONLY valid JSON. No markdown, no code fences.`,
       messages: [{ role: 'user', content: userMessage }],
     }),
   })
@@ -55,7 +101,6 @@ Generate an optimal workout for today. Return valid JSON only with this structur
   const data = await response.json()
   const text = data.content?.[0]?.text || ''
 
-  // Parse JSON, handling potential markdown wrapping
   const cleaned = text.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
   try {
     return JSON.parse(cleaned)

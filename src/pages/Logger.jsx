@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check } from 'lucide-react'
+import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises, useFilteredExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
@@ -18,6 +18,30 @@ export default function Logger() {
   const [showFinish, setShowFinish] = useState(false)
   const [finishResult, setFinishResult] = useState(null)
   const [showDiscard, setShowDiscard] = useState(false)
+  const [pendingPlan, setPendingPlan] = useState(null)
+
+  // Check for AI-generated pending workout
+  useEffect(() => {
+    const raw = localStorage.getItem('coach-pending-workout')
+    if (raw) {
+      try {
+        const plan = JSON.parse(raw)
+        setPendingPlan(plan)
+      } catch {}
+    }
+  }, [])
+
+  function loadPendingWorkout() {
+    if (!pendingPlan) return
+    aw.startWorkout(pendingPlan)
+    localStorage.removeItem('coach-pending-workout')
+    setPendingPlan(null)
+  }
+
+  function dismissPending() {
+    localStorage.removeItem('coach-pending-workout')
+    setPendingPlan(null)
+  }
 
   async function handleFinish() {
     const result = await aw.finishWorkout()
@@ -36,6 +60,33 @@ export default function Logger() {
   if (!aw.isActive) {
     return (
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-6">
+        {/* AI Coach pending workout banner */}
+        {pendingPlan && (
+          <div className="mb-6 w-full max-w-sm rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <Sparkles size={16} className="text-orange-500" />
+              <span className="text-sm font-semibold text-white">AI workout ready</span>
+            </div>
+            <p className="mb-3 text-xs text-gray-400">
+              {pendingPlan.length} exercises from AI Coach
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={dismissPending}
+                className="h-10 flex-1 rounded-lg text-sm text-gray-400 ring-1 ring-gray-700 active:bg-gray-900"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={loadPendingWorkout}
+                className="h-10 flex-1 rounded-lg bg-orange-500 text-sm font-semibold text-white active:scale-[0.97] transition-transform"
+              >
+                Load & Start
+              </button>
+            </div>
+          </div>
+        )}
+
         <h1 className="mb-2 text-2xl font-bold">Ready to train</h1>
         <p className="mb-8 text-center text-gray-400">Start a workout to begin logging sets</p>
         <button
@@ -172,7 +223,9 @@ export default function Logger() {
 }
 
 function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, lastUsed }) {
-  const [weight, setWeight] = useState(lastUsed?.weight_kg?.toString() || '')
+  const [weight, setWeight] = useState(
+    exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
+  )
   const [reps, setReps] = useState('')
   const [rpe, setRpe] = useState(7)
   const [showRpe, setShowRpe] = useState(false)
@@ -217,6 +270,19 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, lastUsed }) 
           <X size={18} />
         </button>
       </div>
+
+      {/* AI plan targets */}
+      {exercise.plan && (
+        <div className="mb-2 flex items-center gap-3 rounded-lg bg-orange-500/10 px-3 py-1.5 text-xs text-orange-400">
+          <Sparkles size={12} />
+          <span>
+            Target: {exercise.plan.sets}x{exercise.plan.reps_min || exercise.plan.reps_target}
+            {exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''}
+            {' '}@ {exercise.plan.weight_kg}kg
+            {exercise.plan.rpe_target ? ` RPE ${exercise.plan.rpe_target}` : ''}
+          </span>
+        </div>
+      )}
 
       {/* Previous session hint */}
       {prevData && (
