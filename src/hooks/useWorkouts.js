@@ -7,20 +7,20 @@ export function useWorkouts(userId) {
   const [error, setError] = useState(null)
 
   const fetchWorkouts = useCallback(async () => {
-    if (!userId) {
-      setWorkouts([])
-      setLoading(false)
-      return
-    }
-
     setLoading(true)
     setError(null)
     try {
-      const { data, error: err } = await supabase
+      let query = supabase
         .from('workouts')
         .select('*')
-        .eq('user_id', userId)
         .order('created_at', { ascending: false })
+
+      // Filter op user_id alleen als er een ingelogde user is
+      if (userId) {
+        query = query.eq('user_id', userId)
+      }
+
+      const { data, error: err } = await query
 
       if (err) throw err
 
