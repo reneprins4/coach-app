@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Zap, TrendingUp, Calendar, Award, Sparkles, ChevronRight, Target, BarChart2 } from 'lucide-react'
+import { Sparkles, ChevronRight, Target } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
-import { analyzeTraining, SET_TARGETS } from '../lib/training-analysis'
+import { analyzeTraining } from '../lib/training-analysis'
 import { getCurrentBlock, getCurrentWeekTarget, getBlockProgress, PHASES } from '../lib/periodization'
 import { getSettings } from '../lib/settings'
 
@@ -13,10 +13,9 @@ function e1rm(weight, reps) {
 
 const MUSCLE_ORDER = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'quads', 'hamstrings', 'glutes', 'core']
 
-function RecoveryDot({ pct }) {
-  if (pct >= 90) return <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-  if (pct >= 50) return <div className="h-2.5 w-2.5 rounded-full bg-yellow-500" />
-  return <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
+const MUSCLE_NL = {
+  chest: 'Borst', back: 'Rug', shoulders: 'Schouders', biceps: 'Biceps',
+  triceps: 'Triceps', quads: 'Quadriceps', hamstrings: 'Hamstrings', glutes: 'Billen', core: 'Core'
 }
 
 export default function Dashboard() {
@@ -37,7 +36,6 @@ export default function Dashboard() {
       ? Math.floor((now.getTime() - new Date(lastWorkout.created_at).getTime()) / 86400000)
       : null
 
-    // Streak
     let streak = 0
     const dates = new Set(workouts.map(w => new Date(w.created_at).toISOString().split('T')[0]))
     const d = new Date()
@@ -47,7 +45,6 @@ export default function Dashboard() {
       streak++; d.setDate(d.getDate() - 1); check = d.toISOString().split('T')[0]
     }
 
-    // Recent PRs
     const prWindow = new Date(now); prWindow.setDate(now.getDate() - 7)
     const allSets = workouts.flatMap(w => (w.workout_sets || []).map(s => ({ ...s, workout_date: w.created_at })))
     const exerciseBest = {}
@@ -75,10 +72,10 @@ export default function Dashboard() {
   const phase = block ? PHASES[block.phase] : null
 
   const phaseColors = {
-    blue: { bg: 'bg-blue-500/15', text: 'text-blue-400', bar: 'bg-blue-500', border: 'border-blue-500/30' },
-    orange: { bg: 'bg-orange-500/15', text: 'text-orange-400', bar: 'bg-orange-500', border: 'border-orange-500/30' },
-    red: { bg: 'bg-red-500/15', text: 'text-red-400', bar: 'bg-red-500', border: 'border-red-500/30' },
-    gray: { bg: 'bg-gray-500/15', text: 'text-gray-400', bar: 'bg-gray-500', border: 'border-gray-500/30' },
+    blue:   { bg: 'bg-blue-500/10',   text: 'text-blue-400',   bar: 'bg-blue-500',   border: 'border-blue-500/20' },
+    orange: { bg: 'bg-orange-500/10', text: 'text-orange-400', bar: 'bg-orange-500', border: 'border-orange-500/20' },
+    red:    { bg: 'bg-red-500/10',    text: 'text-red-400',    bar: 'bg-red-500',    border: 'border-red-500/20' },
+    gray:   { bg: 'bg-gray-500/10',   text: 'text-gray-400',   bar: 'bg-gray-500',   border: 'border-gray-500/20' },
   }
   const phaseColor = phaseColors[phase?.color || 'orange']
 
@@ -91,37 +88,54 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24">
+    <div className="px-4 py-6 pb-28">
+
       {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold">
-          Goeie {getTimeOfDay()}{settings.name ? `, ${settings.name}` : ''}
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">{getDayName()}</p>
+        <h1 className="text-2xl font-bold text-white">
+          {getGreeting()}{settings.name ? `, ${settings.name}` : ''}
         </h1>
-        <p className="text-gray-400">{getDayName()} — laten we trainen</p>
       </div>
 
-      {/* Training Plan Block */}
+      {/* Stats row */}
+      <div className="mb-5 grid grid-cols-4 gap-2">
+        {[
+          { value: stats.thisWeekCount, label: 'Trainingen' },
+          { value: formatVolume(stats.weekVolume), label: 'Volume' },
+          { value: stats.streak, label: 'Reeks' },
+          { value: stats.daysSince ?? '--', label: 'Dagen terug' },
+        ].map(({ value, label }) => (
+          <div key={label} className="rounded-xl bg-gray-900 p-3 text-center">
+            <p className="text-xl font-bold text-white">{value}</p>
+            <p className="mt-0.5 text-[10px] uppercase tracking-wide text-gray-500">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Actief trainingsblok */}
       {block && phase ? (
         <div className={`mb-4 rounded-xl border ${phaseColor.border} ${phaseColor.bg} p-4`}>
           <div className="mb-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{phase.emoji}</span>
-              <div>
-                <p className={`text-xs font-semibold uppercase tracking-wider ${phaseColor.text}`}>Actief plan</p>
-                <p className="font-bold text-white">{phase.label}</p>
-              </div>
+            <div>
+              <p className={`text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>{phase.label}</p>
+              <p className="text-sm font-semibold text-white">
+                Week {progress?.currentWeek} van {progress?.totalWeeks}
+              </p>
             </div>
-            <Link to="/plan" className={`text-xs ${phaseColor.text}`}>
+            <Link to="/plan" className={`text-xs font-medium ${phaseColor.text}`}>
               Bekijk plan <ChevronRight size={12} className="inline" />
             </Link>
           </div>
           {weekTarget && (
-            <div className="mb-2 text-xs text-gray-400">
-              Week {progress?.currentWeek}/{progress?.totalWeeks} · {weekTarget.isDeload ? '🔄 Deload week' : `Doel RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
-            </div>
+            <p className="mb-2 text-xs text-gray-400">
+              {weekTarget.isDeload
+                ? 'Deload week'
+                : `Doel RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} herh.`}
+            </p>
           )}
-          <div className="relative h-1.5 overflow-hidden rounded-full bg-gray-800">
-            <div className={`absolute inset-y-0 left-0 rounded-full ${phaseColor.bar}`}
+          <div className="h-1 overflow-hidden rounded-full bg-gray-800">
+            <div className={`h-full rounded-full ${phaseColor.bar} transition-all`}
               style={{ width: `${progress?.pct || 0}%` }} />
           </div>
         </div>
@@ -130,42 +144,38 @@ export default function Dashboard() {
           to="/plan"
           className="mb-4 flex items-center gap-3 rounded-xl border border-dashed border-gray-700 bg-gray-900 p-4"
         >
-          <Target size={20} className="text-gray-500" />
+          <Target size={18} className="text-gray-500 shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-300">Geen trainingsplan actief</p>
-            <p className="text-xs text-gray-600">Start een 4-weekse blok voor gestructureerde periodisering</p>
+            <p className="text-sm font-semibold text-white">Geen trainingsplan actief</p>
+            <p className="text-xs text-gray-500">Start een 4-weekse blok voor gestructureerde periodisering</p>
           </div>
           <ChevronRight size={16} className="text-gray-600" />
         </Link>
       )}
 
-      {/* Muscle Recovery Map */}
+      {/* Spierherstel */}
       <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-300">Spierherstel</h2>
-          <Link to="/coach" className="text-xs text-orange-500">Nu trainen →</Link>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Spierherstel</p>
+          <Link to="/coach" className="text-xs font-medium text-orange-500">Nu trainen</Link>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {MUSCLE_ORDER.map(muscle => {
             const ms = muscleStatus[muscle]
             if (!ms) return null
             const pct = ms.recoveryPct || 0
             let barColor = 'bg-green-500'
-            if (pct < 50) barColor = 'bg-red-500'
-            else if (pct < 90) barColor = 'bg-yellow-500'
+            let textColor = 'text-green-400'
+            if (pct < 50) { barColor = 'bg-red-500'; textColor = 'text-red-400' }
+            else if (pct < 90) { barColor = 'bg-yellow-500'; textColor = 'text-yellow-400' }
 
             return (
               <div key={muscle}>
-                <div className="mb-0.5 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <RecoveryDot pct={pct} />
-                    <span className="text-xs font-medium capitalize text-gray-300">{muscle}</span>
-                  </div>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs text-gray-300">{MUSCLE_NL[muscle] || muscle}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-600">
-                      {ms.setsThisWeek}/{ms.target.min} sets
-                    </span>
-                    <span className="text-[10px] font-semibold text-gray-400">{pct}%</span>
+                    <span className="text-[10px] text-gray-600">{ms.setsThisWeek}/{ms.target.min} sets</span>
+                    <span className={`text-[10px] font-bold tabular-nums ${textColor}`}>{pct}%</span>
                   </div>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
@@ -175,18 +185,18 @@ export default function Dashboard() {
             )
           })}
         </div>
-        <div className="mt-3 flex gap-3 text-[10px] text-gray-600">
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-green-500" />Gereed</span>
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-yellow-500" />Herstellend</span>
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" />Vermoeid</span>
+        <div className="mt-3 flex gap-4 text-[10px] text-gray-600">
+          <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-green-500" />Gereed</span>
+          <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />Herstellend</span>
+          <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-500" />Vermoeid</span>
         </div>
       </div>
 
-      {/* Weekly Volume */}
+      {/* Wekelijks volume */}
       <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-300">Wekelijks volume</h2>
-          <span className="text-xs text-gray-600">sets / doel</span>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Wekelijks volume</p>
+          <span className="text-[10px] text-gray-600">sets / doel</span>
         </div>
         <div className="space-y-2">
           {MUSCLE_ORDER.map(muscle => {
@@ -197,14 +207,14 @@ export default function Dashboard() {
             const hit = ms.setsThisWeek >= ms.target.min
             return (
               <div key={muscle} className="flex items-center gap-2">
-                <span className="w-20 text-[11px] capitalize text-gray-400">{muscle}</span>
-                <div className="relative flex-1 h-2 overflow-hidden rounded-full bg-gray-800">
+                <span className="w-24 text-[11px] text-gray-400">{MUSCLE_NL[muscle] || muscle}</span>
+                <div className="relative flex-1 h-1.5 overflow-hidden rounded-full bg-gray-800">
                   <div
                     className={`h-full rounded-full ${over ? 'bg-orange-500' : hit ? 'bg-green-500' : 'bg-blue-500'}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className={`w-12 text-right text-[10px] ${over ? 'text-orange-400' : hit ? 'text-green-400' : 'text-gray-600'}`}>
+                <span className={`w-10 text-right text-[10px] tabular-nums ${over ? 'text-orange-400' : hit ? 'text-green-400' : 'text-gray-600'}`}>
                   {ms.setsThisWeek}/{ms.target.min}
                 </span>
               </div>
@@ -213,62 +223,42 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="mb-4 grid grid-cols-4 gap-2">
-        <div className="rounded-xl bg-gray-900 p-3 text-center">
-          <p className="text-xl font-bold text-white">{stats.thisWeekCount}</p>
-          <p className="text-[10px] text-gray-500">trainingen</p>
-        </div>
-        <div className="rounded-xl bg-gray-900 p-3 text-center">
-          <p className="text-xl font-bold text-white">{formatVolume(stats.weekVolume)}</p>
-          <p className="text-[10px] text-gray-500">volume</p>
-        </div>
-        <div className="rounded-xl bg-gray-900 p-3 text-center">
-          <p className="text-xl font-bold text-white">{stats.streak}</p>
-          <p className="text-[10px] text-gray-500">reeks</p>
-        </div>
-        <div className="rounded-xl bg-gray-900 p-3 text-center">
-          <p className="text-xl font-bold text-white">{stats.daysSince ?? '--'}</p>
-          <p className="text-[10px] text-gray-500">dagen terug</p>
-        </div>
-      </div>
-
-      {/* Recent PRs */}
+      {/* Persoonlijke records */}
       {stats.recentPRs.length > 0 && (
         <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
-          <h2 className="mb-3 text-sm font-semibold text-gray-300">Persoonlijke records deze week</h2>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Persoonlijke records</p>
           <div className="space-y-2">
             {stats.recentPRs.map(pr => (
               <div key={pr.name} className="flex items-center justify-between">
                 <span className="text-sm text-white">{pr.name}</span>
-                <span className="text-sm font-bold text-orange-500">{pr.weight}kg × {pr.reps}</span>
+                <span className="text-sm font-bold tabular-nums text-orange-500">{pr.weight}kg x {pr.reps}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Generate workout CTA */}
+      {/* CTA */}
       <button
         onClick={() => nav('/coach')}
-        className="flex h-16 w-full items-center gap-4 rounded-2xl bg-orange-500 px-5 text-left transition-colors active:bg-orange-600"
+        className="flex h-14 w-full items-center gap-4 rounded-xl bg-orange-500 px-5 text-left transition-colors active:bg-orange-600"
       >
-        <Sparkles size={26} className="text-white shrink-0" />
+        <Sparkles size={20} className="text-white shrink-0" />
         <div className="flex-1">
           <p className="font-bold text-white">Genereer training van vandaag</p>
-          <p className="text-sm text-orange-200">AI personaliseert op basis van jouw herstel</p>
+          <p className="text-xs text-orange-200">AI personaliseert op basis van jouw herstel</p>
         </div>
-        <ChevronRight size={20} className="text-orange-200 shrink-0" />
+        <ChevronRight size={18} className="text-orange-200 shrink-0" />
       </button>
     </div>
   )
 }
 
-function getTimeOfDay() {
+function getGreeting() {
   const h = new Date().getHours()
-  if (h < 12) return 'ochtend'
-  if (h < 17) return 'middag'
-  return 'avond'
+  if (h < 12) return 'Goedemorgen'
+  if (h < 17) return 'Goedemiddag'
+  return 'Goedenavond'
 }
 
 function getDayName() {

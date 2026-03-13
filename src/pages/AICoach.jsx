@@ -229,7 +229,7 @@ export default function AICoach() {
               className="flex w-full items-center justify-between"
               onClick={() => setShowRecovery(v => !v)}
             >
-              <h2 className="text-sm font-semibold text-gray-300">Spierherstel</h2>
+              <h2 className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Spierherstel</h2>
               {showRecovery ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
 
@@ -248,7 +248,7 @@ export default function AICoach() {
               className="flex w-full items-center justify-between"
               onClick={() => setShowWeekPlan(v => !v)}
             >
-              <h2 className="text-sm font-semibold text-gray-300">Weekstructuur</h2>
+              <h2 className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Weekstructuur</h2>
               {showWeekPlan ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
 
@@ -281,11 +281,11 @@ export default function AICoach() {
           {/* ── BLOCK CONTEXT ──────────────────────────────── */}
           {block && phase && weekTarget && (
             <div className={`mb-4 rounded-xl border border-${phase.color === 'gray' ? 'gray' : phase.color}-500/30 bg-${phase.color === 'gray' ? 'gray' : phase.color}-500/10 px-4 py-3`}>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                {phase.emoji} {phase.label} · Week {block.currentWeek}/{phase.weeks}
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+                {phase.label} · Week {block.currentWeek}/{phase.weeks}
               </p>
               <p className="mt-1 text-sm font-bold text-white">
-                {weekTarget.isDeload ? '🔄 Deload — rustige training vandaag' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
+                {weekTarget.isDeload ? 'Deload — rustige training vandaag' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
               </p>
               <p className="text-xs text-gray-500">{weekTarget.setNote}</p>
             </div>
@@ -319,7 +319,7 @@ export default function AICoach() {
           <div className="mb-5">
             <div className="mb-2 flex items-center gap-2">
               <Target size={14} className="text-orange-500" />
-              <h2 className="text-sm font-semibold text-gray-300">Extra focus <span className="font-normal text-gray-500">(optioneel)</span></h2>
+              <h2 className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Extra focus <span className="normal-case font-normal">(optioneel)</span></h2>
             </div>
             <p className="mb-2 text-xs text-gray-600">Tik op spieren om te benadrukken in de training</p>
             <div className="flex flex-wrap gap-2">
@@ -354,7 +354,7 @@ export default function AICoach() {
 
           {/* ── ENERGY ──────────────────────────────────────── */}
           <div className="mb-4">
-            <h2 className="mb-2 text-sm font-semibold text-gray-300">Energieniveau</h2>
+            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Energieniveau</h2>
             <div className="flex gap-2">
               {ENERGY_OPTIONS.map(opt => (
                 <button
@@ -374,7 +374,7 @@ export default function AICoach() {
 
           {/* ── TIME ────────────────────────────────────────── */}
           <div className="mb-6">
-            <h2 className="mb-2 text-sm font-semibold text-gray-300">Beschikbare tijd</h2>
+            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Beschikbare tijd</h2>
             <div className="flex gap-2">
               {TIME_OPTIONS.map(t => (
                 <button

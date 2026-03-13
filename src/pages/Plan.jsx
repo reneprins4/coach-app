@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, ChevronRight, RotateCcw, Sparkles, Info } from 'lucide-react'
+import { CheckCircle2, ChevronRight, RotateCcw, Sparkles, Info, Zap, TrendingUp, Target, Battery } from 'lucide-react'
 import {
   PHASES, getCurrentBlock, startBlock, clearBlock,
   getCurrentWeekTarget, getBlockProgress
@@ -12,6 +12,13 @@ const PHASE_COLORS = {
   orange: { bg: 'bg-orange-500/15', text: 'text-orange-400', bar: 'bg-orange-500', ring: 'ring-orange-500/50',activeBg: 'bg-orange-500/25' },
   red:    { bg: 'bg-red-500/15',    text: 'text-red-400',    bar: 'bg-red-500',    ring: 'ring-red-500/50',   activeBg: 'bg-red-500/25' },
   gray:   { bg: 'bg-gray-500/15',   text: 'text-gray-400',   bar: 'bg-gray-500',   ring: 'ring-gray-500/50',  activeBg: 'bg-gray-500/25' },
+}
+
+const PHASE_ICONS = {
+  accumulation: Zap,
+  intensification: TrendingUp,
+  strength: Target,
+  deload: Battery,
 }
 
 const SUGGESTED_ORDER = ['accumulation', 'intensification', 'strength', 'deload']
@@ -40,6 +47,8 @@ export default function Plan() {
     setConfirmClear(false)
   }
 
+  const PhaseIcon = block ? PHASE_ICONS[block.phase] : null
+
   return (
     <div className="px-4 py-6 pb-32">
       <h1 className="mb-1 text-2xl font-bold">Trainingsplan</h1>
@@ -65,7 +74,7 @@ export default function Plan() {
             PHASE_COLORS[phase.color].ring.replace('ring-', 'border-').replace('/50', '/40')
           } ${phaseColor.bg} p-5`}>
             <div className="mb-1 flex items-center justify-between">
-              <span className={`text-xs font-semibold uppercase tracking-wider ${phaseColor.text}`}>Actief blok</span>
+              <span className={`text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>Actief blok</span>
               <button
                 onClick={() => setConfirmClear(true)}
                 className="text-xs text-gray-600 active:text-red-400"
@@ -74,7 +83,7 @@ export default function Plan() {
               </button>
             </div>
             <div className="mb-4 flex items-center gap-3">
-              <span className="text-3xl">{phase.emoji}</span>
+              {PhaseIcon && <PhaseIcon size={28} className={phaseColor.text} />}
               <div>
                 <p className="text-xl font-black text-white">{phase.label}</p>
                 <p className="text-sm text-gray-400">{phase.description}</p>
@@ -98,7 +107,7 @@ export default function Plan() {
                         : 'bg-gray-800/50 ring-gray-800'
                     }`}
                   >
-                    <span className={`text-[10px] font-semibold uppercase tracking-wider ${
+                    <span className={`text-[10px] font-semibold uppercase tracking-widest ${
                       isCurrent ? phaseColor.text : isDone ? 'text-gray-400' : 'text-gray-600'
                     }`}>
                       Week {weekNum}
@@ -116,8 +125,8 @@ export default function Plan() {
             {/* Current week details */}
             {weekTarget && (
               <div className="rounded-xl bg-black/20 p-3">
-                <p className={`mb-2 text-xs font-semibold ${phaseColor.text}`}>
-                  {weekTarget.isDeload ? '🔄 Deload week' : `Week ${progress?.currentWeek} focus`}
+                <p className={`mb-2 text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>
+                  {weekTarget.isDeload ? 'Deload week' : `Week ${progress?.currentWeek} focus`}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
@@ -149,15 +158,16 @@ export default function Plan() {
 
           {/* Phase sequence suggestion */}
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <p className="mb-3 text-sm font-semibold text-gray-300">Aanbevolen volgorde</p>
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Aanbevolen volgorde</p>
             <div className="flex gap-1.5">
               {SUGGESTED_ORDER.map((key, i) => {
                 const p = PHASES[key]
                 const isCurrent = key === block.phase
                 const c = PHASE_COLORS[p.color]
+                const Icon = PHASE_ICONS[key]
                 return (
                   <div key={key} className={`flex flex-1 flex-col items-center rounded-xl py-2 text-center ${isCurrent ? c.bg + ' ring-1 ' + c.ring : 'bg-gray-800'}`}>
-                    <span className="text-base">{p.emoji}</span>
+                    <Icon size={16} className={isCurrent ? c.text : 'text-gray-500'} />
                     <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-gray-500'}`}>{p.label.split(' ')[0]}</span>
                     <span className={`text-[8px] ${isCurrent ? c.text : 'text-gray-700'}`}>{p.weeks}w</span>
                     {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-orange-400">actief</span>}
@@ -177,6 +187,7 @@ export default function Plan() {
           <div className="space-y-3">
             {Object.entries(PHASES).map(([key, p]) => {
               const c = PHASE_COLORS[p.color]
+              const Icon = PHASE_ICONS[key]
               return (
                 <button
                   key={key}
@@ -187,7 +198,7 @@ export default function Plan() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
-                      <span className="text-2xl">{p.emoji}</span>
+                      <Icon size={24} className={c.text} />
                       <div>
                         <p className="font-bold text-white">{p.label}</p>
                         <p className="mt-0.5 text-xs text-gray-400">{p.description}</p>

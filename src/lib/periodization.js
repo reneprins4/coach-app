@@ -8,7 +8,6 @@ const BLOCK_KEY = 'coach-training-block'
 export const PHASES = {
   accumulation: {
     label: 'Opbouw',
-    emoji: '📈',
     weeks: 4,
     description: 'Bouw wekelijks volume op, matige intensiteit. Basisfase.',
     color: 'blue',
@@ -21,7 +20,6 @@ export const PHASES = {
   },
   intensification: {
     label: 'Intensivering',
-    emoji: '💪',
     weeks: 4,
     description: 'Verhoog intensiteit en belasting. Minder herhalingen, zwaardere gewichten.',
     color: 'orange',
@@ -34,7 +32,6 @@ export const PHASES = {
   },
   strength: {
     label: 'Kracht Piek',
-    emoji: '🔥',
     weeks: 3,
     description: 'Maximale krachtexpressie. Test je grenzen.',
     color: 'red',
@@ -46,7 +43,6 @@ export const PHASES = {
   },
   deload: {
     label: 'Deload',
-    emoji: '🔄',
     weeks: 1,
     description: 'Volledige herstelweek. Zelfde bewegingen, veel minder volume.',
     color: 'gray',

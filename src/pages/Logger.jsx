@@ -269,10 +269,10 @@ export default function Logger() {
 
 // ── SWAP MODAL ───────────────────────────────────────────────────────────────
 const SWAP_REASONS = [
-  { value: 'machine_busy', label: '🔴 Machine bezet', desc: 'Apparaat bezet' },
-  { value: 'no_equipment', label: '⚠️ Geen apparaat', desc: 'Niet beschikbaar' },
-  { value: 'want_variety', label: '🔄 Wil variatie', desc: 'Iets anders' },
-  { value: 'feels_off', label: '💪 Voelt niet goed', desc: 'Niet in de stemming' },
+  { value: 'machine_busy', label: 'Machine bezet', desc: 'Apparaat bezet' },
+  { value: 'no_equipment', label: 'Geen apparaat', desc: 'Niet beschikbaar' },
+  { value: 'want_variety', label: 'Wil variatie', desc: 'Iets anders' },
+  { value: 'feels_off', label: 'Voelt niet goed', desc: 'Niet in de stemming' },
 ]
 
 function SwapModal({ exercise, settings, onAccept, onClose }) {

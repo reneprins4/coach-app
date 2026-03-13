@@ -59,7 +59,7 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
     : ''
 
   const periodizationNote = preferences.trainingPhase
-    ? `\n## Training Block\n- Phase: ${preferences.trainingPhase} (Week ${preferences.blockWeek}/${preferences.blockTotalWeeks})\n- ${preferences.isDeload ? '🔄 DELOAD WEEK: Reduce volume 40-50%, keep same weight, RPE max 6. No grinding.' : `Target RPE: ${preferences.targetRPE} | Rep range: ${preferences.targetRepRange?.[0]}-${preferences.targetRepRange?.[1]} reps`}\n- Volume note: ${preferences.weekTargetNote || 'standard'}`
+    ? `\n## Training Block\n- Phase: ${preferences.trainingPhase} (Week ${preferences.blockWeek}/${preferences.blockTotalWeeks})\n- ${preferences.isDeload ? 'DELOAD WEEK: Reduce volume 40-50%, keep same weight, RPE max 6. No grinding.' : `Target RPE: ${preferences.targetRPE} | Rep range: ${preferences.targetRepRange?.[0]}-${preferences.targetRepRange?.[1]} reps`}\n- Volume note: ${preferences.weekTargetNote || 'standard'}`
     : ''
 
   const prompt = `## Athlete Profile
