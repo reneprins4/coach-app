@@ -1,4 +1,4 @@
-const PROXY_URL = 'http://91.99.173.179/coach/generate'
+const PROXY_URL = '/api/generate'
 
 export async function generateScientificWorkout({ muscleStatus, recommendedSplit, recentHistory, preferences }) {
   const muscleStatusText = Object.entries(muscleStatus)
