@@ -1,4 +1,4 @@
-import { lazy, Suspense, createContext, useContext } from 'react'
+import { lazy, Suspense, createContext, useContext, useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { getSettings } from './lib/settings'
@@ -54,8 +54,16 @@ export default function App() {
     return <Login onSignIn={auth.signIn} />
   }
 
-  const settings = getSettings()
-  const needsOnboarding = !settings.onboardingCompleted
+  const [needsOnboarding, setNeedsOnboarding] = useState(!getSettings().onboardingCompleted)
+
+  // Luister naar localStorage changes (onboarding complete)
+  useEffect(() => {
+    function onStorage() {
+      setNeedsOnboarding(!getSettings().onboardingCompleted)
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
 
   return (
     <AuthContext.Provider value={auth}>

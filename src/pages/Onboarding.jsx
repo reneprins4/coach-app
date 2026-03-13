@@ -52,6 +52,7 @@ export default function Onboarding() {
       setStep(step + 1)
     } else {
       saveSettings({ ...newSelections, onboardingCompleted: true }, user?.id)
+      window.dispatchEvent(new Event('storage'))
       navigate('/', { replace: true })
     }
   }
