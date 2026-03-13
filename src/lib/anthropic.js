@@ -36,6 +36,10 @@ export async function generateScientificWorkout({ muscleStatus, recommendedSplit
 ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
     : 'WEIGHT ESTIMATION: User has not set bodyweight. Ask them to fill in their profile, but still estimate conservatively based on intermediate standards (bench ~60kg, squat ~80kg, deadlift ~100kg). NEVER suggest 0kg.'
 
+  const focusNote = preferences.focusedMuscles?.length > 0
+    ? `\nFOCUS MUSCLES (add extra sets/exercises): ${preferences.focusedMuscles.join(', ')}`
+    : ''
+
   const prompt = `## Athlete Profile
 - Name: ${preferences.name || 'athlete'}
 - Bodyweight: ${bw}
@@ -43,8 +47,9 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
 - Goal: ${preferences.goal || 'hypertrophy'}
 - Equipment: ${equipment}
 - Training frequency: ${preferences.frequency || '4x'}/week
-- Energy today: ${preferences.energy || 'medium'} (1-5 scale)
+- Energy today: ${preferences.energy || 'medium'}
 - Available time: ${preferences.time || 60} min
+${focusNote}
 
 ${weightGuidance}
 
@@ -56,32 +61,39 @@ ${muscleStatusText}
 ## Recent Training History
 ${historyText}
 
-PROGRESSIVE OVERLOAD:
-- RPE <8 last time: add 2.5-5kg
-- RPE 8-9: same weight
-- RPE 9+: reduce 5%
-- New exercise (no history): estimate from profile above
+VOLUME RULES (strict):
+- Include AT LEAST 2 exercises per muscle group in the split
+- For a ${preferences.time || 60}-minute session, target 6-8 exercises total
+- If energy=high and time>=75: aim for 8-10 exercises
+- Each compound exercise gets 3-5 sets; each isolation gets 3-4 sets
+- For focused muscles: add 1-2 extra exercises or sets vs normal
 
-Generate an optimal ${recommendedSplit} workout. Return ONLY this JSON (no markdown, no code fences):
+PROGRESSIVE OVERLOAD:
+- RPE <8 last time → add 2.5-5kg
+- RPE 8-9 → same weight
+- RPE 9+ → reduce 5%
+- New exercise → estimate from profile (NEVER use 0kg)
+
+Return ONLY valid JSON (no markdown, no code fences, no comments):
 {
   "split": "string",
-  "reasoning": "2-3 sentences: why this split today, key decisions, what you're trying to achieve",
+  "reasoning": "2-3 sentences: why this split, volume decisions, overload choices",
   "exercises": [
     {
       "name": "string",
-      "muscle_group": "string",
+      "muscle_group": "string (one of: chest/back/shoulders/quads/hamstrings/glutes/biceps/triceps/core)",
       "sets": number,
       "reps_min": number,
       "reps_max": number,
       "weight_kg": number,
       "rpe_target": number,
       "rest_seconds": number,
-      "notes": "specific coaching cue for this athlete",
+      "notes": "specific coaching cue",
       "vs_last_session": "up/same/down/new - brief explanation"
     }
   ],
   "estimated_duration_min": number,
-  "volume_notes": "total sets per muscle group this week after this workout"
+  "volume_notes": "total sets/muscle this week after this workout"
 }`
 
   const response = await fetch('/api/generate', {
