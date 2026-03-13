@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2 } from 'lucide-react'
+import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises, useFilteredExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
 import { getExerciseHistory } from '../hooks/useWorkouts'
 import { getExerciseSubstitute } from '../lib/anthropic'
 import { getSettings } from '../lib/settings'
+import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
 import FinishModal from '../components/FinishModal'
@@ -50,11 +51,63 @@ export default function Logger() {
   }
 
   if (!aw.isActive) {
+    const block = getCurrentBlock()
+    const weekTarget = block ? getCurrentWeekTarget(block) : null
+    const phase = block ? PHASES[block.phase] : null
+
     return (
-      <div className="flex min-h-[80vh] flex-col items-center justify-center px-6">
-        <h1 className="mb-2 text-2xl font-bold">Klaar voor training</h1>
-        <p className="mb-8 text-center text-gray-400">Start een training om sets te loggen</p>
-        <button
+      <div className="min-h-[80vh] px-5 py-8">
+        <h1 className="mb-1 text-2xl font-bold">Trainen</h1>
+        <p className="mb-7 text-sm text-gray-400">Kies hoe je wilt beginnen</p>
+
+        <div className="space-y-3">
+          {/* AI Workout optie */}
+          <button
+            onClick={() => nav('/coach')}
+            className="flex w-full items-center gap-4 rounded-2xl bg-orange-500 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+          >
+            <Sparkles size={24} className="text-white shrink-0" />
+            <div className="flex-1">
+              <p className="font-bold text-white">AI workout genereren</p>
+              <p className="text-sm text-orange-200">Gepersonaliseerd op basis van jouw herstel</p>
+            </div>
+            <ChevronRight size={18} className="text-orange-200 shrink-0" />
+          </button>
+
+          {/* Volgende uit programma (alleen als er een actief blok is) */}
+          {block && phase && weekTarget && (
+            <button
+              onClick={() => nav('/coach')}
+              className="flex w-full items-center gap-4 rounded-2xl border border-blue-500/30 bg-blue-500/10 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+            >
+              <CalendarDays size={24} className="text-blue-400 shrink-0" />
+              <div className="flex-1">
+                <p className="font-bold text-white">Volgende uit programma</p>
+                <p className="text-sm text-blue-300">
+                  {phase.label} · Week {block.currentWeek}/{phase.weeks} ·{' '}
+                  {weekTarget.isDeload ? 'Deload' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} herh.`}
+                </p>
+              </div>
+              <ChevronRight size={18} className="text-blue-400 shrink-0" />
+            </button>
+          )}
+
+          {/* Losse training */}
+          <button
+            onClick={() => aw.startWorkout()}
+            className="flex w-full items-center gap-4 rounded-2xl border border-gray-700 bg-gray-900 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+          >
+            <Dumbbell size={24} className="text-gray-400 shrink-0" />
+            <div className="flex-1">
+              <p className="font-bold text-white">Losse training</p>
+              <p className="text-sm text-gray-500">Zelf oefeningen kiezen en loggen</p>
+            </div>
+            <ChevronRight size={18} className="text-gray-600 shrink-0" />
+          </button>
+        </div>
+
+        {/* Verborgen knop placeholder — niet meer nodig, maar keep API intact */}
+        <button style={{ display: 'none' }}
           onClick={() => aw.startWorkout()}
           className="h-16 w-full max-w-sm rounded-2xl bg-orange-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
         >
