@@ -43,17 +43,6 @@ function AuthLoader() {
 
 export default function App() {
   const auth = useAuth()
-
-  // Show loader while checking auth
-  if (auth.loading) {
-    return <AuthLoader />
-  }
-
-  // Show login if not authenticated
-  if (!auth.user) {
-    return <Login onSignIn={auth.signIn} />
-  }
-
   const [needsOnboarding, setNeedsOnboarding] = useState(!getSettings().onboardingCompleted)
 
   // Luister naar localStorage changes (onboarding complete)
@@ -64,6 +53,16 @@ export default function App() {
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
   }, [])
+
+  // Show loader while checking auth
+  if (auth.loading) {
+    return <AuthLoader />
+  }
+
+  // Show login if not authenticated
+  if (!auth.user) {
+    return <Login onSignIn={auth.signIn} />
+  }
 
   return (
     <AuthContext.Provider value={auth}>
