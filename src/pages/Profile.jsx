@@ -9,19 +9,16 @@ const GOALS = [
     value: 'hypertrophy',
     label: 'Spieren opbouwen',
     sub: 'Meer spiermassa en een sterk lichaam',
-    icon: '💪',
   },
   {
     value: 'strength',
     label: 'Sterker worden',
     sub: 'Meer gewicht tillen, meer kracht',
-    icon: '🏋️',
   },
   {
     value: 'endurance',
     label: 'Conditie & uithoudingsvermogen',
     sub: 'Langer vol kunnen houden',
-    icon: '🏃',
   },
 ]
 
@@ -167,7 +164,6 @@ export default function Profile() {
                   : 'bg-gray-900 ring-1 ring-gray-800 active:bg-gray-800'
               }`}
             >
-              <span className="text-2xl">{g.icon}</span>
               <div className="flex-1">
                 <p className={`text-sm font-semibold ${settings.goal === g.value ? 'text-red-400' : 'text-white'}`}>
                   {g.label}
