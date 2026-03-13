@@ -1,18 +1,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
-export function useWorkouts() {
+export function useWorkouts(userId) {
   const [workouts, setWorkouts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   const fetchWorkouts = useCallback(async () => {
+    if (!userId) {
+      setWorkouts([])
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
       const { data, error: err } = await supabase
         .from('workouts')
         .select('*')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
       if (err) throw err
@@ -25,6 +32,7 @@ export function useWorkouts() {
           .from('sets')
           .select('*')
           .in('workout_id', ids)
+          .eq('user_id', userId)
           .order('created_at', { ascending: true })
 
         for (const s of (sets || [])) {
@@ -46,7 +54,7 @@ export function useWorkouts() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [userId])
 
   useEffect(() => { fetchWorkouts() }, [fetchWorkouts])
 
@@ -65,17 +73,27 @@ export function useWorkouts() {
   return { workouts, loading, error, refetch: fetchWorkouts, deleteWorkout }
 }
 
-export function useWorkoutDetail(id) {
+export function useWorkoutDetail(id, userId) {
   const [workout, setWorkout] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!id) return
+    if (!id || !userId) return
     let cancelled = false
     async function load() {
       setLoading(true)
-      const { data: w } = await supabase.from('workouts').select('*').eq('id', id).single()
-      const { data: sets } = await supabase.from('sets').select('*').eq('workout_id', id).order('created_at')
+      const { data: w } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', userId)
+        .single()
+      const { data: sets } = await supabase
+        .from('sets')
+        .select('*')
+        .eq('workout_id', id)
+        .eq('user_id', userId)
+        .order('created_at')
       if (!cancelled && w) {
         setWorkout({
           ...w,
@@ -88,19 +106,22 @@ export function useWorkoutDetail(id) {
     }
     load()
     return () => { cancelled = true }
-  }, [id])
+  }, [id, userId])
 
   return { workout, loading }
 }
 
 // Fetch recent history for AI coach
-export async function fetchRecentHistory(days = 30) {
+export async function fetchRecentHistory(userId, days = 30) {
+  if (!userId) return []
+  
   const since = new Date()
   since.setDate(since.getDate() - days)
 
   const { data: workouts } = await supabase
     .from('workouts')
     .select('*')
+    .eq('user_id', userId)
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: false })
 
@@ -111,6 +132,7 @@ export async function fetchRecentHistory(days = 30) {
     .from('sets')
     .select('*')
     .in('workout_id', ids)
+    .eq('user_id', userId)
 
   const setsMap = {}
   for (const s of (sets || [])) {
@@ -122,11 +144,14 @@ export async function fetchRecentHistory(days = 30) {
 }
 
 // Get previous session data for an exercise
-export async function getExerciseHistory(exerciseName) {
+export async function getExerciseHistory(exerciseName, userId) {
+  if (!userId) return []
+  
   const { data } = await supabase
     .from('sets')
     .select('weight_kg, reps, rpe, created_at, workout_id')
     .eq('exercise', exerciseName)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(50)
 

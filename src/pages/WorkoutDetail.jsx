@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Clock, Dumbbell, TrendingUp } from 'lucide-react'
 import { useWorkoutDetail } from '../hooks/useWorkouts'
+import { useAuthContext } from '../App'
 
 export default function WorkoutDetail() {
   const { id } = useParams()
   const nav = useNavigate()
-  const { workout, loading } = useWorkoutDetail(id)
+  const { user } = useAuthContext()
+  const { workout, loading } = useWorkoutDetail(id, user?.id)
 
   if (loading) {
     return (

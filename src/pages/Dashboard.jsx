@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, ChevronRight, Target } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
+import { useAuthContext } from '../App'
 import { analyzeTraining } from '../lib/training-analysis'
 import { getCurrentBlock, getCurrentWeekTarget, getBlockProgress, PHASES } from '../lib/periodization'
 import { getSettings } from '../lib/settings'
@@ -19,7 +20,8 @@ const MUSCLE_NL = {
 }
 
 export default function Dashboard() {
-  const { workouts, loading } = useWorkouts()
+  const { user } = useAuthContext()
+  const { workouts, loading } = useWorkouts(user?.id)
   const settings = getSettings()
   const nav = useNavigate()
 

@@ -9,6 +9,7 @@ import { fetchRecentHistory } from '../hooks/useWorkouts'
 import { analyzeTraining, scoreSplits, getRelevantHistory, calcMuscleRecovery } from '../lib/training-analysis'
 import { getSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
+import { useAuthContext } from '../App'
 
 const TIME_OPTIONS = [45, 60, 75, 90]
 
@@ -73,6 +74,7 @@ const WEEK_PLANS = {
 
 export default function AICoach() {
   const nav = useNavigate()
+  const { user } = useAuthContext()
   const settings = getSettings()
 
   const [analyzing, setAnalyzing] = useState(true)
@@ -100,7 +102,7 @@ export default function AICoach() {
     async function analyze() {
       setAnalyzing(true)
       try {
-        const history = await fetchRecentHistory(21)
+        const history = await fetchRecentHistory(user?.id, 21)
         setWorkoutHistory(history)
         const analysis = analyzeTraining(history)
         setMuscleStatus(analysis)
@@ -113,7 +115,7 @@ export default function AICoach() {
       setTimeout(() => setAnalyzing(false), 800)
     }
     analyze()
-  }, [])
+  }, [user?.id])
 
   function toggleFocus(muscle) {
     setFocusedMuscles(prev =>

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Search, Award, BarChart3, TrendingUp as TrendUp } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
+import { useAuthContext } from '../App'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -25,7 +26,8 @@ function getMuscleGroup(name) {
 }
 
 export default function Progress() {
-  const { workouts, loading } = useWorkouts()
+  const { user } = useAuthContext()
+  const { workouts, loading } = useWorkouts(user?.id)
   const [tab, setTab] = useState('exercise') // exercise | muscle
   const [query, setQuery] = useState('')
   const [selectedExercise, setSelectedExercise] = useState(null)

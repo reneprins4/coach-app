@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 const STORAGE_KEY = 'coach-active-workout'
@@ -12,7 +12,7 @@ function save(key, val) {
   else localStorage.removeItem(key)
 }
 
-export function useActiveWorkout() {
+export function useActiveWorkout(userId) {
   const [workout, setWorkout] = useState(() => load(STORAGE_KEY))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -109,13 +109,13 @@ export function useActiveWorkout() {
   }, [])
 
   const finishWorkout = useCallback(async () => {
-    if (!workout) return null
+    if (!workout || !userId) return null
     setSaving(true)
     setError(null)
     try {
       const { data: row, error: wErr } = await supabase
         .from('workouts')
-        .insert({ user_id: null, notes: workout.notes || null, created_at: workout.startedAt })
+        .insert({ user_id: userId, notes: workout.notes || null, created_at: workout.startedAt })
         .select()
         .single()
       if (wErr) throw wErr
@@ -123,6 +123,7 @@ export function useActiveWorkout() {
       const allSets = workout.exercises.flatMap(ex =>
         ex.sets.map(s => ({
           workout_id: row.id,
+          user_id: userId,
           exercise: ex.name,
           weight_kg: s.weight_kg,
           reps: s.reps,
@@ -140,6 +141,7 @@ export function useActiveWorkout() {
         totalVolume: allSets.reduce((s, x) => s + (x.weight_kg || 0) * (x.reps || 0), 0),
         exerciseNames: [...new Set(allSets.map(s => s.exercise))],
         duration: elapsed,
+        exercises: workout.exercises, // Include for template saving
       }
       setWorkout(null)
       return result
@@ -149,7 +151,7 @@ export function useActiveWorkout() {
     } finally {
       setSaving(false)
     }
-  }, [workout, elapsed])
+  }, [workout, elapsed, userId])
 
   const discardWorkout = useCallback(() => { setWorkout(null) }, [])
 

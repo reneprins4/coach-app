@@ -2,11 +2,13 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Trash2, ChevronRight, Calendar } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
+import { useAuthContext } from '../App'
 
 const DAY_NAMES = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
 
 export default function History() {
-  const { workouts, loading, deleteWorkout } = useWorkouts()
+  const { user } = useAuthContext()
+  const { workouts, loading, deleteWorkout } = useWorkouts(user?.id)
   const [query, setQuery] = useState('')
   const [deleteId, setDeleteId] = useState(null)
 

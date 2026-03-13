@@ -1,12 +1,28 @@
-import { useState, useMemo } from 'react'
-import { Save, Check } from 'lucide-react'
-import { getSettings, saveSettings } from '../lib/settings'
+import { useState, useMemo, useEffect } from 'react'
+import { Save, Check, LogOut } from 'lucide-react'
+import { getSettings, saveSettings, mergeSettingsOnLogin } from '../lib/settings'
 import { useWorkouts } from '../hooks/useWorkouts'
+import { useAuthContext } from '../App'
 
 const GOALS = [
-  { value: 'strength', label: 'Kracht' },
-  { value: 'hypertrophy', label: 'Hypertrofie' },
-  { value: 'endurance', label: 'Uithoudingsvermogen' },
+  {
+    value: 'hypertrophy',
+    label: 'Spieren opbouwen',
+    sub: 'Meer spiermassa en een sterk lichaam',
+    icon: '💪',
+  },
+  {
+    value: 'strength',
+    label: 'Sterker worden',
+    sub: 'Meer gewicht tillen, meer kracht',
+    icon: '🏋️',
+  },
+  {
+    value: 'endurance',
+    label: 'Conditie & uithoudingsvermogen',
+    sub: 'Langer vol kunnen houden',
+    icon: '🏃',
+  },
 ]
 
 const LEVELS = [
@@ -25,9 +41,20 @@ const FREQUENCIES = ['3x', '4x', '5x', '6x']
 const REST_TIMES = [60, 90, 120, 180]
 
 export default function Profile() {
+  const { user, signOut } = useAuthContext()
   const [settings, setSettings] = useState(getSettings)
   const [saved, setSaved] = useState(false)
-  const { workouts } = useWorkouts()
+  const [loggingOut, setLoggingOut] = useState(false)
+  const { workouts } = useWorkouts(user?.id)
+
+  // Load settings from cloud on mount
+  useEffect(() => {
+    if (user?.id) {
+      mergeSettingsOnLogin(user.id).then(merged => {
+        setSettings(merged)
+      })
+    }
+  }, [user?.id])
 
   function update(key, value) {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -35,9 +62,14 @@ export default function Profile() {
   }
 
   function handleSave() {
-    saveSettings(settings)
+    saveSettings(settings, user?.id)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function handleLogout() {
+    setLoggingOut(true)
+    await signOut()
   }
 
   const stats = useMemo(() => {
@@ -53,8 +85,20 @@ export default function Profile() {
 
   return (
     <div className="px-4 py-6 pb-24">
-      <h1 className="mb-1 text-2xl font-bold">Profiel</h1>
-      <p className="mb-6 text-sm text-gray-500">Je coach heeft dit nodig om trainingen te personaliseren</p>
+      <div className="mb-1 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Profiel</h1>
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-900 hover:text-white"
+        >
+          <LogOut size={16} />
+          {loggingOut ? 'Uitloggen...' : 'Uitloggen'}
+        </button>
+      </div>
+      <p className="mb-6 text-sm text-gray-500">
+        {user?.email && <span className="text-gray-400">{user.email}</span>}
+      </p>
 
       {!profileComplete && (
         <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -111,18 +155,32 @@ export default function Profile() {
       {/* Trainingsdoel */}
       <div className="mb-6">
         <label className="mb-2 block text-sm font-medium text-gray-300">Trainingsdoel</label>
-        <div className="flex gap-2">
+        <p className="mb-3 text-xs text-gray-500">Wat wil je bereiken? De AI past je trainingen hier op aan.</p>
+        <div className="flex flex-col gap-2">
           {GOALS.map(g => (
             <button
               key={g.value}
               onClick={() => update('goal', g.value)}
-              className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-4 rounded-2xl p-4 text-left transition-colors ${
                 settings.goal === g.value
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                  ? 'bg-red-500/15 ring-1 ring-red-500'
+                  : 'bg-gray-900 ring-1 ring-gray-800 active:bg-gray-800'
               }`}
             >
-              {g.label}
+              <span className="text-2xl">{g.icon}</span>
+              <div className="flex-1">
+                <p className={`text-sm font-semibold ${settings.goal === g.value ? 'text-red-400' : 'text-white'}`}>
+                  {g.label}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500">{g.sub}</p>
+              </div>
+              {settings.goal === g.value && (
+                <div className="h-5 w-5 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
             </button>
           ))}
         </div>

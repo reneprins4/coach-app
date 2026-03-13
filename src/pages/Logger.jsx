@@ -1,25 +1,30 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Info, Calculator } from 'lucide-react'
+import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Info, Calculator, BookOpen } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises, useFilteredExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
+import { useTemplates } from '../hooks/useTemplates'
 import { getExerciseHistory } from '../hooks/useWorkouts'
 import { getExerciseSubstitute } from '../lib/anthropic'
 import { getSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
+import { useAuthContext } from '../App'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
 import FinishModal from '../components/FinishModal'
 import ExerciseGuide from '../components/ExerciseGuide'
 import Toast from '../components/Toast'
 import PlateCalculator from '../components/PlateCalculator'
+import TemplateLibrary from '../components/TemplateLibrary'
 
 export default function Logger() {
   const nav = useNavigate()
-  const aw = useActiveWorkout()
+  const { user } = useAuthContext()
+  const aw = useActiveWorkout(user?.id)
   const { exercises } = useExercises()
   const rest = useRestTimer()
+  const templates = useTemplates(user?.id)
   const settings = getSettings()
   const [showPicker, setShowPicker] = useState(false)
   const [showFinish, setShowFinish] = useState(false)
@@ -29,6 +34,7 @@ export default function Logger() {
   const [swapTarget, setSwapTarget] = useState(null) // exercise being swapped
   const [toast, setToast] = useState(null) // { message, action, onAction }
   const [plateCalcWeight, setPlateCalcWeight] = useState(null)
+  const [showTemplates, setShowTemplates] = useState(false)
 
   // Auto-load AI-generated pending workout when navigating from Coach
   useEffect(() => {
@@ -72,6 +78,22 @@ export default function Logger() {
     nav('/')
   }
 
+  function handleLoadTemplate(template) {
+    const exercises = templates.loadTemplate(template)
+    aw.startWorkout(exercises)
+    setShowTemplates(false)
+    setToast({ message: `Template "${template.name}" geladen` })
+  }
+
+  async function handleDeleteTemplate(id) {
+    try {
+      await templates.deleteTemplate(id)
+      setToast({ message: 'Template verwijderd' })
+    } catch (err) {
+      setToast({ message: 'Kon template niet verwijderen' })
+    }
+  }
+
   if (!aw.isActive) {
     const block = getCurrentBlock()
     const weekTarget = block ? getCurrentWeekTarget(block) : null
@@ -94,6 +116,23 @@ export default function Logger() {
               <p className="text-sm text-red-200">Gepersonaliseerd op basis van jouw herstel</p>
             </div>
             <ChevronRight size={18} className="text-red-200 shrink-0" />
+          </button>
+
+          {/* Template optie */}
+          <button
+            onClick={() => setShowTemplates(true)}
+            className="flex w-full items-center gap-4 rounded-2xl border border-gray-700 bg-gray-900 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+          >
+            <BookOpen size={24} className="text-gray-400 shrink-0" />
+            <div className="flex-1">
+              <p className="font-bold text-white">Gebruik template</p>
+              <p className="text-sm text-gray-500">
+                {templates.templates.length > 0 
+                  ? `${templates.templates.length} opgeslagen templates`
+                  : 'Sla trainingen op voor hergebruik'}
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-gray-600 shrink-0" />
           </button>
 
           {/* Volgende uit programma (alleen als er een actief blok is) */}
@@ -128,13 +167,25 @@ export default function Logger() {
           </button>
         </div>
 
-        {/* Verborgen knop placeholder — niet meer nodig, maar keep API intact */}
-        <button style={{ display: 'none' }}
-          onClick={() => aw.startWorkout()}
-          className="h-16 w-full max-w-sm rounded-2xl bg-red-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
-        >
-          Start training
-        </button>
+        {/* Template Library Modal */}
+        {showTemplates && (
+          <TemplateLibrary
+            templates={templates.templates}
+            onLoad={handleLoadTemplate}
+            onDelete={handleDeleteTemplate}
+            onClose={() => setShowTemplates(false)}
+          />
+        )}
+
+        {/* Toast */}
+        {toast && (
+          <Toast
+            message={toast.message}
+            action={toast.action}
+            onAction={toast.onAction}
+            onDismiss={() => setToast(null)}
+          />
+        )}
       </div>
     )
   }
@@ -185,6 +236,7 @@ export default function Logger() {
           <ExerciseBlock
             key={exercise.name}
             exercise={exercise}
+            userId={user?.id}
             onAddSet={(data) => {
               aw.addSet(exercise.name, data)
               rest.start()
@@ -235,7 +287,13 @@ export default function Logger() {
       )}
 
       {showFinish && finishResult && (
-        <FinishModal result={finishResult} onClose={handleFinishClose} />
+        <FinishModal 
+          result={finishResult} 
+          onClose={handleFinishClose}
+          onSaveTemplate={async (name) => {
+            await templates.saveTemplate(name, finishResult.exercises)
+          }}
+        />
       )}
 
       {showDiscard && (
@@ -462,7 +520,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
 }
 
 // ── EXERCISE BLOCK ────────────────────────────────────────────────────────────
-function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed }) {
+function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed }) {
   const [weight, setWeight] = useState(
     exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
   )
@@ -476,7 +534,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, onOp
   // Load previous session data
   if (!prevLoaded) {
     setPrevLoaded(true)
-    getExerciseHistory(exercise.name).then(data => {
+    getExerciseHistory(exercise.name, userId).then(data => {
       if (data.length > 0) {
         // Group by workout, get the most recent workout's sets
         const latest = data[0]
