@@ -117,10 +117,29 @@ export default function Logger() {
     setToast({ message: 'Superset modus uitgeschakeld' })
   }
 
+  // Bereken adaptieve rusttijd op basis van RPE, oefening type en vermoeidheid
+  function calcAdaptiveRest(exerciseName, data) {
+    const base = getSettings().restTime || 90
+    let duration = base
+    const rpe = data.rpe || 7
+
+    // RPE-gebaseerde aanpassing
+    if (rpe >= 9)      duration = Math.max(base, 180) // zware set: min 3 min
+    else if (rpe >= 8) duration = Math.max(base, 150) // RPE 8: min 2.5 min
+    else if (rpe <= 6) duration = Math.min(base, 75)  // lichte set: max 75s
+
+    // Compound oefeningen hebben meer rust nodig
+    const compound = /squat|deadlift|press|row|pull.up|chin.up|bench|overhead/i.test(exerciseName)
+    if (compound && rpe >= 8) duration = Math.max(duration, 180)
+
+    return duration
+  }
+
   // Wrapper voor addSet die ook junk volume detecteert
   function handleAddSet(exerciseName, data) {
     aw.addSet(exerciseName, data)
-    rest.start()
+    const adaptiveRest = calcAdaptiveRest(exerciseName, data)
+    rest.start(adaptiveRest)
 
     // Check junk volume na het toevoegen van de set
     // We moeten de nieuwe set meenemen in de check

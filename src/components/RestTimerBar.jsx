@@ -1,7 +1,17 @@
 import { X } from 'lucide-react'
 
+// Label op basis van rusttijd
+function getRestLabel(total) {
+  if (total >= 180) return 'Zware set — lang rusten'
+  if (total >= 150) return 'Intensieve set — extra rust'
+  if (total <= 75)  return 'Lichte set — korte rust'
+  return 'Rust'
+}
+
 export default function RestTimerBar({ remaining, total, onStop }) {
   const progress = total > 0 ? (total - remaining) / total : 0
+  const label = getRestLabel(total)
+  const isAdaptive = total !== 90 // toon label alleen als het afwijkt van standaard
 
   return (
     <div className="border-b border-gray-800 bg-gray-900 px-4 py-3">
@@ -10,7 +20,12 @@ export default function RestTimerBar({ remaining, total, onStop }) {
           <span className="font-mono text-lg font-bold text-red-500">
             {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
           </span>
-          <span className="text-sm text-gray-500">rust</span>
+          <div>
+            <span className="text-sm text-gray-400">{isAdaptive ? label : 'Rust'}</span>
+            {isAdaptive && (
+              <span className="ml-2 text-[10px] text-gray-600">({total}s)</span>
+            )}
+          </div>
         </div>
         <button onClick={onStop} className="p-2 text-gray-500 active:text-white">
           <X size={18} />
