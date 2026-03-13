@@ -13,16 +13,16 @@ import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodizat
 const TIME_OPTIONS = [45, 60, 75, 90]
 
 const ENERGY_OPTIONS = [
-  { value: 'low', label: 'Low', color: 'text-blue-400 bg-blue-500/15' },
-  { value: 'medium', label: 'Medium', color: 'text-yellow-400 bg-yellow-500/15' },
-  { value: 'high', label: 'High', color: 'text-red-400 bg-red-500/15' },
+  { value: 'low', label: 'Laag', color: 'text-blue-400 bg-blue-500/15' },
+  { value: 'medium', label: 'Gemiddeld', color: 'text-yellow-400 bg-yellow-500/15' },
+  { value: 'high', label: 'Hoog', color: 'text-red-400 bg-red-500/15' },
 ]
 
 const VS_ICONS = {
-  up: { icon: ArrowUpRight, color: 'text-green-400', label: 'Up' },
-  same: { icon: Minus, color: 'text-gray-400', label: 'Same' },
-  down: { icon: ArrowDownRight, color: 'text-red-400', label: 'Down' },
-  new: { icon: Sparkles, color: 'text-orange-400', label: 'New' },
+  up: { icon: ArrowUpRight, color: 'text-green-400', label: 'Omhoog' },
+  same: { icon: Minus, color: 'text-gray-400', label: 'Zelfde' },
+  down: { icon: ArrowDownRight, color: 'text-red-400', label: 'Omlaag' },
+  new: { icon: Sparkles, color: 'text-orange-400', label: 'Nieuw' },
 }
 
 const ALL_MUSCLES = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
@@ -42,7 +42,7 @@ function RecoveryBar({ muscle, ms }) {
   if (effectiveRecovery < 50) { barColor = 'bg-red-500'; textColor = 'text-red-400' }
   else if (effectiveRecovery < 80) { barColor = 'bg-yellow-500'; textColor = 'text-yellow-400' }
 
-  const label = effectiveRecovery >= 90 ? 'Ready' : effectiveRecovery >= 50 ? 'Recovering' : 'Fatigued'
+  const label = effectiveRecovery >= 90 ? 'Gereed' : effectiveRecovery >= 50 ? 'Herstellend' : 'Vermoeid'
 
   return (
     <div className="mb-3">
@@ -197,8 +197,8 @@ export default function AICoach() {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center bg-gray-950 px-4">
         <div className="mb-4 h-10 w-10 animate-spin rounded-full border-2 border-gray-700 border-t-orange-500" />
-        <p className="text-lg font-semibold text-white">Analyzing your training...</p>
-        <p className="mt-1 text-sm text-gray-500">Reviewing last 3 weeks of data</p>
+        <p className="text-lg font-semibold text-white">Training analyseren...</p>
+        <p className="mt-1 text-sm text-gray-500">Laatste 3 weken data doornemen</p>
       </div>
     )
   }
@@ -213,7 +213,7 @@ export default function AICoach() {
         onClick={() => nav(-1)}
         className="mb-4 flex items-center gap-2 text-sm text-gray-400 active:text-white"
       >
-        <ArrowLeft size={18} /> Back
+        <ArrowLeft size={18} /> Terug
       </button>
 
       <div className="mb-6 flex items-center gap-3">
@@ -229,7 +229,7 @@ export default function AICoach() {
               className="flex w-full items-center justify-between"
               onClick={() => setShowRecovery(v => !v)}
             >
-              <h2 className="text-sm font-semibold text-gray-300">Muscle Recovery</h2>
+              <h2 className="text-sm font-semibold text-gray-300">Spierherstel</h2>
               {showRecovery ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
 
@@ -248,7 +248,7 @@ export default function AICoach() {
               className="flex w-full items-center justify-between"
               onClick={() => setShowWeekPlan(v => !v)}
             >
-              <h2 className="text-sm font-semibold text-gray-300">Weekly Structure</h2>
+              <h2 className="text-sm font-semibold text-gray-300">Weekstructuur</h2>
               {showWeekPlan ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
 
@@ -264,13 +264,13 @@ export default function AICoach() {
                     }`}
                   >
                     <span className={`text-[9px] font-medium uppercase tracking-wider ${i === planDayIndex ? 'text-orange-400' : 'text-gray-500'}`}>
-                      Day {i + 1}
+                      Dag {i + 1}
                     </span>
                     <span className={`text-[10px] font-bold mt-0.5 ${i === planDayIndex ? 'text-white' : 'text-gray-400'}`}>
                       {split}
                     </span>
                     {i === planDayIndex && (
-                      <span className="mt-1 text-[8px] text-orange-400">Today</span>
+                      <span className="mt-1 text-[8px] text-orange-400">Vandaag</span>
                     )}
                   </div>
                 ))}
@@ -285,7 +285,7 @@ export default function AICoach() {
                 {phase.emoji} {phase.label} · Week {block.currentWeek}/{phase.weeks}
               </p>
               <p className="mt-1 text-sm font-bold text-white">
-                {weekTarget.isDeload ? '🔄 Deload — easy session today' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
+                {weekTarget.isDeload ? '🔄 Deload — rustige training vandaag' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
               </p>
               <p className="text-xs text-gray-500">{weekTarget.setNote}</p>
             </div>
@@ -294,7 +294,7 @@ export default function AICoach() {
           {/* ── TODAY'S SPLIT ───────────────────────────────── */}
           {selectedSplit && (
             <div className="mb-5 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-orange-400">Recommended today</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-orange-400">Vandaag aanbevolen</p>
               <div className="mt-1 flex items-center justify-between">
                 <p className="text-xl font-black text-white">{selectedSplit}</p>
                 {splitScores.length > 1 && (
@@ -319,9 +319,9 @@ export default function AICoach() {
           <div className="mb-5">
             <div className="mb-2 flex items-center gap-2">
               <Target size={14} className="text-orange-500" />
-              <h2 className="text-sm font-semibold text-gray-300">Extra focus <span className="font-normal text-gray-500">(optional)</span></h2>
+              <h2 className="text-sm font-semibold text-gray-300">Extra focus <span className="font-normal text-gray-500">(optioneel)</span></h2>
             </div>
-            <p className="mb-2 text-xs text-gray-600">Tap muscles to emphasize in today's workout</p>
+            <p className="mb-2 text-xs text-gray-600">Tik op spieren om te benadrukken in de training</p>
             <div className="flex flex-wrap gap-2">
               {ALL_MUSCLES.map(m => {
                 const ms = muscleStatus?.[m]
@@ -347,14 +347,14 @@ export default function AICoach() {
             </div>
             {focusedMuscles.length > 0 && (
               <p className="mt-2 text-xs text-orange-400">
-                AI will add extra sets for: {focusedMuscles.join(', ')}
+                AI voegt extra sets toe voor: {focusedMuscles.join(', ')}
               </p>
             )}
           </div>
 
           {/* ── ENERGY ──────────────────────────────────────── */}
           <div className="mb-4">
-            <h2 className="mb-2 text-sm font-semibold text-gray-300">Energy Level</h2>
+            <h2 className="mb-2 text-sm font-semibold text-gray-300">Energieniveau</h2>
             <div className="flex gap-2">
               {ENERGY_OPTIONS.map(opt => (
                 <button
@@ -374,7 +374,7 @@ export default function AICoach() {
 
           {/* ── TIME ────────────────────────────────────────── */}
           <div className="mb-6">
-            <h2 className="mb-2 text-sm font-semibold text-gray-300">Available Time</h2>
+            <h2 className="mb-2 text-sm font-semibold text-gray-300">Beschikbare tijd</h2>
             <div className="flex gap-2">
               {TIME_OPTIONS.map(t => (
                 <button
@@ -397,7 +397,7 @@ export default function AICoach() {
               <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-400" />
               <div>
                 <p className="text-sm text-red-400">{error}</p>
-                <button onClick={handleGenerate} className="mt-2 text-sm font-medium text-orange-500">Try again</button>
+                <button onClick={handleGenerate} className="mt-2 text-sm font-medium text-orange-500">Probeer opnieuw</button>
               </div>
             </div>
           )}
@@ -408,9 +408,9 @@ export default function AICoach() {
             className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 text-lg font-bold text-white disabled:opacity-60 active:scale-[0.97] transition-transform"
           >
             {generating ? (
-              <><Loader2 size={20} className="animate-spin" />Generating workout...</>
+              <><Loader2 size={20} className="animate-spin" />Training genereren...</>
             ) : (
-              <><Sparkles size={20} />Generate my workout</>
+              <><Sparkles size={20} />Genereer mijn training</>
             )}
           </button>
         </>
@@ -442,7 +442,7 @@ export default function AICoach() {
                 onClick={() => setShowReasoning(!showReasoning)}
                 className="flex w-full items-center justify-between rounded-xl bg-gray-900 px-4 py-3 text-sm text-gray-400 ring-1 ring-gray-800"
               >
-                <span>Coach reasoning</span>
+                <span>Motivatie coach</span>
                 {showReasoning ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
               {showReasoning && (
@@ -484,22 +484,22 @@ export default function AICoach() {
                         </div>
                         <div className="rounded-lg bg-gray-800 py-2">
                           <p className="text-lg font-bold text-white">{ex.reps_min}-{ex.reps_max}</p>
-                          <p className="text-[10px] text-gray-500">reps</p>
+                          <p className="text-[10px] text-gray-500">herh.</p>
                         </div>
                         <div className="rounded-lg bg-orange-500/15 py-2">
                           <p className="text-lg font-bold text-orange-400">{ex.weight_kg}kg</p>
-                          <p className="text-[10px] text-gray-500">weight</p>
+                          <p className="text-[10px] text-gray-500">gewicht</p>
                         </div>
                         <div className="rounded-lg bg-gray-800 py-2">
                           <p className="text-lg font-bold text-white">RPE {ex.rpe_target}</p>
-                          <p className="text-[10px] text-gray-500">intensity</p>
+                          <p className="text-[10px] text-gray-500">intensiteit</p>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center gap-1">
                           <Clock size={12} />
-                          {ex.rest_seconds}s rest
+                          {ex.rest_seconds}s rust
                         </div>
                         {ex.vs_last_session && (
                           <span className="text-[10px] text-gray-600">{ex.vs_last_session}</span>
@@ -533,13 +533,13 @@ export default function AICoach() {
               className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-900"
             >
               <RefreshCw size={16} className={generating ? 'animate-spin' : ''} />
-              Regenerate
+              Opnieuw genereren
             </button>
             <button
               onClick={handleAccept}
               className="flex h-12 flex-1 items-center justify-center rounded-xl bg-orange-500 font-bold text-white active:scale-[0.97] transition-transform"
             >
-              Start Workout
+              Start training
             </button>
           </div>
         </>

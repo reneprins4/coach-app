@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Search, Trash2, ChevronRight, Calendar } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const DAY_NAMES = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
 
 export default function History() {
   const { workouts, loading, deleteWorkout } = useWorkouts()
@@ -36,7 +36,7 @@ export default function History() {
 
   return (
     <div className="px-4 py-6">
-      <h1 className="mb-4 text-2xl font-bold">History</h1>
+      <h1 className="mb-4 text-2xl font-bold">Geschiedenis</h1>
 
       {/* Search */}
       <div className="relative mb-4">
@@ -45,7 +45,7 @@ export default function History() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by exercise..."
+          placeholder="Zoek op oefening..."
           className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
       </div>
@@ -53,10 +53,10 @@ export default function History() {
       {filtered.length === 0 && (
         <div className="flex flex-col items-center py-16 text-center">
           <Calendar size={40} className="mb-4 text-gray-700" />
-          <p className="text-gray-500">{query ? 'No workouts match your search' : 'No workouts yet'}</p>
+          <p className="text-gray-500">{query ? 'Geen trainingen gevonden' : 'Nog geen trainingen'}</p>
           {!query && (
             <Link to="/log" className="mt-4 text-sm font-medium text-orange-500">
-              Start your first workout
+              Start je eerste training
             </Link>
           )}
         </div>
@@ -77,10 +77,10 @@ export default function History() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-white">
-                    {w.exerciseNames.join(', ') || 'Empty workout'}
+                    {w.exerciseNames.join(', ') || 'Lege training'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {formatVol(w.totalVolume)} total volume
+                    {formatVol(w.totalVolume)} totaal volume
                     {w.workout_sets.length > 0 && ` / ${w.workout_sets.length} sets`}
                   </p>
                 </div>
@@ -101,20 +101,20 @@ export default function History() {
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">Delete workout?</h3>
-            <p className="mb-6 text-sm text-gray-400">This cannot be undone.</p>
+            <h3 className="mb-2 text-lg font-bold text-white">Training verwijderen?</h3>
+            <p className="mb-6 text-sm text-gray-400">Dit kan niet ongedaan worden gemaakt.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
                 className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
               >
-                Cancel
+                Annuleer
               </button>
               <button
                 onClick={handleDelete}
                 className="h-12 flex-1 rounded-xl bg-red-600 font-semibold text-white active:bg-red-700"
               >
-                Delete
+                Verwijder
               </button>
             </div>
           </div>

@@ -117,7 +117,7 @@ export default function Progress() {
 
   return (
     <div className="px-4 py-6">
-      <h1 className="mb-4 text-2xl font-bold">Progress</h1>
+      <h1 className="mb-4 text-2xl font-bold">Voortgang</h1>
 
       {/* Tabs */}
       <div className="mb-4 flex gap-2">
@@ -125,13 +125,13 @@ export default function Progress() {
           onClick={() => setTab('exercise')}
           className={`rounded-full px-4 py-2 text-sm font-medium ${tab === 'exercise' ? 'bg-orange-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
-          By Exercise
+          Per oefening
         </button>
         <button
           onClick={() => setTab('muscle')}
           className={`rounded-full px-4 py-2 text-sm font-medium ${tab === 'muscle' ? 'bg-orange-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
-          Muscle Groups
+          Spiergroepen
         </button>
       </div>
 
@@ -144,7 +144,7 @@ export default function Progress() {
               type="text"
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedExercise(null) }}
-              placeholder="Search exercise..."
+              placeholder="Zoek oefening..."
               className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800"
             />
           </div>
@@ -161,7 +161,7 @@ export default function Progress() {
                 </button>
               ))}
               {filteredNames.length === 0 && (
-                <p className="py-8 text-center text-gray-500">No exercises found</p>
+                <p className="py-8 text-center text-gray-500">Geen oefeningen gevonden</p>
               )}
             </div>
           )}
@@ -172,7 +172,7 @@ export default function Progress() {
               <div className="flex items-center gap-3 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">
                 <Award size={24} className="text-orange-500" />
                 <div>
-                  <p className="text-sm text-gray-400">All-time estimated 1RM</p>
+                  <p className="text-sm text-gray-400">All-time geschat 1RM</p>
                   <p className="text-2xl font-bold text-white">{exerciseData.allTimeE1rm.toFixed(1)} kg</p>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function Progress() {
               {/* E1RM chart */}
               {exerciseData.sessions.length > 1 && (
                 <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-300">Estimated 1RM</h3>
+                  <h3 className="mb-3 text-sm font-semibold text-gray-300">Geschat 1RM</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={exerciseData.sessions}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -196,7 +196,7 @@ export default function Progress() {
               {/* Volume chart */}
               {exerciseData.sessions.length > 1 && (
                 <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-300">Volume per session</h3>
+                  <h3 className="mb-3 text-sm font-semibold text-gray-300">Volume per sessie</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={exerciseData.sessions}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -211,7 +211,7 @@ export default function Progress() {
 
               {/* Last 5 sessions table */}
               <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-                <h3 className="mb-3 text-sm font-semibold text-gray-300">Recent sessions</h3>
+                <h3 className="mb-3 text-sm font-semibold text-gray-300">Recente sessies</h3>
                 <div className="space-y-2">
                   {exerciseData.sessions.slice(-5).reverse().map((s, i) => (
                     <div key={i} className="flex items-center justify-between rounded-lg bg-gray-800/50 px-3 py-2">
@@ -234,7 +234,7 @@ export default function Progress() {
       {tab === 'muscle' && (
         <>
           <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <h3 className="mb-3 text-sm font-semibold text-gray-300">Volume by muscle group (last 4 weeks)</h3>
+            <h3 className="mb-3 text-sm font-semibold text-gray-300">Volume per spiergroep (laatste 4 weken)</h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={muscleData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -260,15 +260,15 @@ export default function Progress() {
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
               <p className="text-xl font-bold text-white">{totalStats.totalWorkouts}</p>
-              <p className="text-[10px] text-gray-500">total workouts</p>
+              <p className="text-[10px] text-gray-500">trainingen</p>
             </div>
             <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
               <p className="text-xl font-bold text-white">{(totalStats.totalVol / 1000).toFixed(1)}t</p>
-              <p className="text-[10px] text-gray-500">total volume</p>
+              <p className="text-[10px] text-gray-500">volume</p>
             </div>
             <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
               <p className="truncate text-sm font-bold text-white">{totalStats.favorite}</p>
-              <p className="text-[10px] text-gray-500">favorite</p>
+              <p className="text-[10px] text-gray-500">favoriet</p>
             </div>
           </div>
         </>

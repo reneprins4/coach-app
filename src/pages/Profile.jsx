@@ -4,20 +4,20 @@ import { getSettings, saveSettings } from '../lib/settings'
 import { useWorkouts } from '../hooks/useWorkouts'
 
 const GOALS = [
-  { value: 'strength', label: 'Strength' },
-  { value: 'hypertrophy', label: 'Hypertrophy' },
-  { value: 'endurance', label: 'Endurance' },
+  { value: 'strength', label: 'Kracht' },
+  { value: 'hypertrophy', label: 'Hypertrofie' },
+  { value: 'endurance', label: 'Uithoudingsvermogen' },
 ]
 
 const LEVELS = [
-  { value: 'beginner', label: 'Beginner', sub: '< 1 year' },
-  { value: 'intermediate', label: 'Intermediate', sub: '1-3 years' },
-  { value: 'advanced', label: 'Advanced', sub: '3+ years' },
+  { value: 'beginner', label: 'Beginner', sub: '< 1 jaar' },
+  { value: 'intermediate', label: 'Gemiddeld', sub: '1-3 jaar' },
+  { value: 'advanced', label: 'Gevorderd', sub: '3+ jaar' },
 ]
 
 const EQUIPMENT = [
-  { value: 'full_gym', label: 'Full gym' },
-  { value: 'home_gym', label: 'Home gym' },
+  { value: 'full_gym', label: 'Volledige gym' },
+  { value: 'home_gym', label: 'Thuisgym' },
   { value: 'dumbbells_only', label: 'Dumbbells' },
 ]
 
@@ -44,7 +44,7 @@ export default function Profile() {
     const totalWorkouts = workouts.length
     const totalVol = workouts.reduce((s, w) => s + (w.totalVolume || 0), 0)
     const memberSince = settings.memberSince
-      ? new Date(settings.memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      ? new Date(settings.memberSince).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
       : 'Today'
     return { totalWorkouts, totalVol, memberSince }
   }, [workouts, settings.memberSince])
@@ -53,30 +53,30 @@ export default function Profile() {
 
   return (
     <div className="px-4 py-6 pb-24">
-      <h1 className="mb-1 text-2xl font-bold">Profile</h1>
-      <p className="mb-6 text-sm text-gray-500">Your coach needs this to personalize workouts</p>
+      <h1 className="mb-1 text-2xl font-bold">Profiel</h1>
+      <p className="mb-6 text-sm text-gray-500">Je coach heeft dit nodig om trainingen te personaliseren</p>
 
       {!profileComplete && (
         <div className="mb-6 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm text-orange-400">
-          Fill in your details below so the AI coach can suggest accurate weights
+          Vul je gegevens in zodat de AI coach nauwkeurige gewichten kan voorstellen
         </div>
       )}
 
       {/* Name */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Name</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Naam</label>
         <input
           type="text"
           value={settings.name}
           onChange={(e) => update('name', e.target.value)}
-          placeholder="Your name"
+          placeholder="Jouw naam"
           className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
       </div>
 
       {/* Bodyweight */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Bodyweight (kg)</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Lichaamsgewicht (kg)</label>
         <input
           type="number"
           value={settings.bodyweight}
@@ -84,12 +84,12 @@ export default function Profile() {
           placeholder="e.g. 80"
           className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
-        <p className="mt-1 text-xs text-gray-600">Used to estimate starting weights for new exercises</p>
+        <p className="mt-1 text-xs text-gray-600">Gebruikt om startgewichten voor nieuwe oefeningen te schatten</p>
       </div>
 
-      {/* Experience level */}
+      {/* Ervaringsniveau */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Experience level</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Ervaringsniveau</label>
         <div className="flex gap-2">
           {LEVELS.map(l => (
             <button
@@ -108,9 +108,9 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Training goal */}
+      {/* Trainingsdoel */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Training goal</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Trainingsdoel</label>
         <div className="flex gap-2">
           {GOALS.map(g => (
             <button
@@ -130,7 +130,7 @@ export default function Profile() {
 
       {/* Equipment */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Equipment</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Uitrusting</label>
         <div className="flex gap-2">
           {EQUIPMENT.map(e => (
             <button
@@ -150,8 +150,8 @@ export default function Profile() {
 
       {/* Known maxes — optional but improves accuracy */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Known 1RM estimates <span className="text-gray-600 font-normal">(optional)</span></label>
-        <p className="mb-3 text-xs text-gray-600">Helps the AI start at the right weights. Leave blank if unknown.</p>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Bekende 1RM schattingen <span className="text-gray-600 font-normal">(optioneel)</span></label>
+        <p className="mb-3 text-xs text-gray-600">Helpt de AI met de juiste startgewichten. Leeg laten indien onbekend.</p>
         <div className="grid grid-cols-3 gap-2">
           {[
             { key: 'benchMax', label: 'Bench (kg)' },
@@ -174,7 +174,7 @@ export default function Profile() {
 
       {/* Frequency */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Training frequency</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Trainingsfrequentie</label>
         <div className="flex gap-2">
           {FREQUENCIES.map(f => (
             <button
@@ -194,7 +194,7 @@ export default function Profile() {
 
       {/* Rest time */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Default rest time</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Standaard rusttijd</label>
         <div className="flex gap-2">
           {REST_TIMES.map(t => (
             <button
@@ -217,23 +217,23 @@ export default function Profile() {
         onClick={handleSave}
         className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
       >
-        {saved ? <><Check size={20} /> Saved</> : <><Save size={20} /> Save Profile</>}
+        {saved ? <><Check size={20} />Opgeslagen</> : <><Save size={20} />Profiel opslaan</>}
       </button>
 
       {/* Stats summary */}
       <div className="mt-8 rounded-xl border border-gray-800 bg-gray-900 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-gray-300">Training Stats</h2>
+        <h2 className="mb-3 text-sm font-semibold text-gray-300">Trainingsstatistieken</h2>
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-sm text-gray-400">Member since</span>
+            <span className="text-sm text-gray-400">Lid sinds</span>
             <span className="text-sm font-medium text-white">{stats.memberSince}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-400">Total workouts</span>
+            <span className="text-sm text-gray-400">Totaal trainingen</span>
             <span className="text-sm font-medium text-white">{stats.totalWorkouts}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-400">Total volume</span>
+            <span className="text-sm text-gray-400">Totaal volume</span>
             <span className="text-sm font-medium text-white">{(stats.totalVol / 1000).toFixed(1)} tons</span>
           </div>
         </div>

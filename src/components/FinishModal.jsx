@@ -10,13 +10,13 @@ export default function FinishModal({ result, onClose }) {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/20">
           <Check size={32} className="text-orange-500" />
         </div>
-        <h2 className="mb-1 text-xl font-bold text-white">Workout Complete</h2>
-        <p className="mb-6 text-sm text-gray-400">Great session</p>
+        <h2 className="mb-1 text-xl font-bold text-white">Training voltooid</h2>
+        <p className="mb-6 text-sm text-gray-400">Geweldige sessie</p>
 
         <div className="mb-6 grid grid-cols-3 gap-3">
           <div className="rounded-lg bg-gray-800 p-3">
             <p className="text-lg font-bold text-white">{mins}</p>
-            <p className="text-[10px] text-gray-500">minutes</p>
+            <p className="text-[10px] text-gray-500">minuten</p>
           </div>
           <div className="rounded-lg bg-gray-800 p-3">
             <p className="text-lg font-bold text-white">{formatVol(result.totalVolume)}</p>
@@ -24,7 +24,7 @@ export default function FinishModal({ result, onClose }) {
           </div>
           <div className="rounded-lg bg-gray-800 p-3">
             <p className="text-lg font-bold text-white">{result.exerciseNames?.length || 0}</p>
-            <p className="text-[10px] text-gray-500">exercises</p>
+            <p className="text-[10px] text-gray-500">oefeningen</p>
           </div>
         </div>
 

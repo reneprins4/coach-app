@@ -4,9 +4,9 @@ import { LayoutDashboard, Dumbbell, CalendarDays, TrendingUp, User } from 'lucid
 const tabs = [
   { to: '/',        icon: LayoutDashboard, label: 'Home'    },
   { to: '/plan',    icon: CalendarDays,    label: 'Plan'    },
-  { to: '/log',     icon: Dumbbell,        label: 'Train'   },
-  { to: '/progress',icon: TrendingUp,      label: 'Progress'},
-  { to: '/profile', icon: User,            label: 'Profile' },
+  { to: '/log',     icon: Dumbbell,        label: 'Trainen'  },
+  { to: '/progress',icon: TrendingUp,      label: 'Voortgang'},
+  { to: '/profile', icon: User,            label: 'Profiel'  },
 ]
 
 export default function Layout() {

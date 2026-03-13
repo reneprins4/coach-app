@@ -42,17 +42,17 @@ export default function Plan() {
 
   return (
     <div className="px-4 py-6 pb-32">
-      <h1 className="mb-1 text-2xl font-bold">Training Plan</h1>
-      <p className="mb-6 text-sm text-gray-500">Structured periodization for consistent progress</p>
+      <h1 className="mb-1 text-2xl font-bold">Trainingsplan</h1>
+      <p className="mb-6 text-sm text-gray-500">Gestructureerde periodisering voor consistente voortgang</p>
 
       {/* What is periodization — info banner */}
       <div className="mb-5 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="flex items-start gap-3">
           <Info size={16} className="mt-0.5 shrink-0 text-gray-500" />
           <div>
-            <p className="text-sm font-medium text-gray-300">Why periodization?</p>
+            <p className="text-sm font-medium text-gray-300">Waarom periodisering?</p>
             <p className="mt-1 text-xs leading-relaxed text-gray-500">
-              Random workouts plateau fast. Training blocks cycle through accumulation (more volume), intensification (more weight), and deload (recovery). Each phase builds on the last — this is how serious lifters make consistent progress.
+              Willekeurige trainingen stagneren snel. Trainingsblokken wisselen door opbouw (meer volume), intensivering (meer gewicht) en deload (herstel). Elke fase bouwt voort op de vorige — zo boeken serieuze sporters consistente vooruitgang.
             </p>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function Plan() {
             PHASE_COLORS[phase.color].ring.replace('ring-', 'border-').replace('/50', '/40')
           } ${phaseColor.bg} p-5`}>
             <div className="mb-1 flex items-center justify-between">
-              <span className={`text-xs font-semibold uppercase tracking-wider ${phaseColor.text}`}>Active Block</span>
+              <span className={`text-xs font-semibold uppercase tracking-wider ${phaseColor.text}`}>Actief blok</span>
               <button
                 onClick={() => setConfirmClear(true)}
                 className="text-xs text-gray-600 active:text-red-400"
@@ -107,7 +107,7 @@ export default function Plan() {
                       {wt.isDeload ? 'Deload' : `RPE ${wt.rpe}`}
                     </span>
                     {isDone && <CheckCircle2 size={12} className="mt-1 text-green-500" />}
-                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-orange-400 font-bold">Now</span>}
+                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-orange-400 font-bold">Nu</span>}
                   </div>
                 )
               })}
@@ -117,19 +117,19 @@ export default function Plan() {
             {weekTarget && (
               <div className="rounded-xl bg-black/20 p-3">
                 <p className={`mb-2 text-xs font-semibold ${phaseColor.text}`}>
-                  {weekTarget.isDeload ? '🔄 Deload Week' : `Week ${progress?.currentWeek} Focus`}
+                  {weekTarget.isDeload ? '🔄 Deload week' : `Week ${progress?.currentWeek} focus`}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-gray-500">Rep range</span>
+                    <span className="text-gray-500">Herhalingsreeks</span>
                     <p className="font-semibold text-white">{weekTarget.repRange[0]}–{weekTarget.repRange[1]} reps</p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Target RPE</span>
+                    <span className="text-gray-500">Doel RPE</span>
                     <p className="font-semibold text-white">{weekTarget.rpe}</p>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-gray-500">Volume note</span>
+                    <span className="text-gray-500">Volumenotitie</span>
                     <p className="font-semibold text-white">{weekTarget.setNote}</p>
                   </div>
                 </div>
@@ -143,13 +143,13 @@ export default function Plan() {
             className="flex h-14 w-full items-center gap-3 rounded-2xl bg-orange-500 px-5 font-bold text-white active:scale-[0.97] transition-transform mb-4"
           >
             <Sparkles size={20} />
-            Generate today's workout
+            Genereer training van vandaag
             <ChevronRight size={18} className="ml-auto" />
           </button>
 
           {/* Phase sequence suggestion */}
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <p className="mb-3 text-sm font-semibold text-gray-300">Recommended sequence</p>
+            <p className="mb-3 text-sm font-semibold text-gray-300">Aanbevolen volgorde</p>
             <div className="flex gap-1.5">
               {SUGGESTED_ORDER.map((key, i) => {
                 const p = PHASES[key]
@@ -160,20 +160,20 @@ export default function Plan() {
                     <span className="text-base">{p.emoji}</span>
                     <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-gray-500'}`}>{p.label.split(' ')[0]}</span>
                     <span className={`text-[8px] ${isCurrent ? c.text : 'text-gray-700'}`}>{p.weeks}w</span>
-                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-orange-400">active</span>}
+                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-orange-400">actief</span>}
                   </div>
                 )
               })}
             </div>
             <p className="mt-3 text-[11px] text-gray-600">
-              After completing this block, move to the next phase for continuous progress.
+              Na dit blok, ga naar de volgende fase voor continue vooruitgang.
             </p>
           </div>
         </>
       ) : (
         /* Phase selector */
         <>
-          <p className="mb-4 text-sm text-gray-400">Choose your training phase:</p>
+          <p className="mb-4 text-sm text-gray-400">Kies je trainingsfase:</p>
           <div className="space-y-3">
             {Object.entries(PHASES).map(([key, p]) => {
               const c = PHASE_COLORS[p.color]
@@ -211,14 +211,14 @@ export default function Plan() {
               onClick={() => setSelecting(false)}
               className="mt-4 w-full rounded-xl py-3 text-sm text-gray-500 ring-1 ring-gray-800"
             >
-              Cancel
+              Annuleer
             </button>
           )}
 
           {!block && (
             <div className="mt-6 rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
-              <p className="text-sm text-gray-500">New to structured training?</p>
-              <p className="mt-1 text-xs text-gray-600">Start with Accumulation — it builds your work capacity and gets you used to tracking.</p>
+              <p className="text-sm text-gray-500">Nieuw met gestructureerde training?</p>
+              <p className="mt-1 text-xs text-gray-600">Begin met Opbouw — het bouwt je werkcapaciteit op en went je aan het bijhouden.</p>
             </div>
           )}
         </>
@@ -228,11 +228,11 @@ export default function Plan() {
       {confirmClear && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">End current block?</h3>
-            <p className="mb-6 text-sm text-gray-400">You can start a new one right after.</p>
+            <h3 className="mb-2 text-lg font-bold text-white">Huidig blok beëindigen?</h3>
+            <p className="mb-6 text-sm text-gray-400">Je kunt daarna direct een nieuw blok starten.</p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmClear(false)} className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700">Cancel</button>
-              <button onClick={handleClear} className="h-12 flex-1 rounded-xl bg-red-600 font-semibold text-white">End Block</button>
+              <button onClick={() => setConfirmClear(false)} className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700">Annuleer</button>
+              <button onClick={handleClear} className="h-12 flex-1 rounded-xl bg-red-600 font-semibold text-white">Blok beëindigen</button>
             </div>
           </div>
         </div>

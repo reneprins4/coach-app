@@ -52,13 +52,13 @@ export default function Logger() {
   if (!aw.isActive) {
     return (
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-6">
-        <h1 className="mb-2 text-2xl font-bold">Ready to train</h1>
-        <p className="mb-8 text-center text-gray-400">Start a workout to begin logging sets</p>
+        <h1 className="mb-2 text-2xl font-bold">Klaar voor training</h1>
+        <p className="mb-8 text-center text-gray-400">Start een training om sets te loggen</p>
         <button
           onClick={() => aw.startWorkout()}
           className="h-16 w-full max-w-sm rounded-2xl bg-orange-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
         >
-          Start Workout
+          Start training
         </button>
       </div>
     )
@@ -85,14 +85,14 @@ export default function Logger() {
               onClick={() => setShowDiscard(true)}
               className="h-10 rounded-xl px-3 text-sm text-gray-400 ring-1 ring-gray-800 active:bg-gray-900"
             >
-              Discard
+              Stoppen
             </button>
             <button
               onClick={handleFinish}
               disabled={aw.saving || aw.totalSets === 0}
               className="h-10 rounded-xl bg-orange-500 px-5 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
             >
-              {aw.saving ? 'Saving...' : 'Finish'}
+              {aw.saving ? 'Opslaan...' : 'Afronden'}
             </button>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function Logger() {
           <textarea
             value={aw.workout.notes}
             onChange={(e) => aw.updateNotes(e.target.value)}
-            placeholder="Workout notes..."
+            placeholder="Training notities..."
             rows={2}
             className="w-full resize-none bg-transparent text-sm text-white placeholder-gray-600 outline-none"
           />
@@ -144,7 +144,7 @@ export default function Logger() {
           className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-800 active:bg-gray-800"
         >
           <Plus size={20} />
-          Add Exercise
+          Oefening toevoegen
         </button>
       </div>
 
@@ -165,20 +165,20 @@ export default function Logger() {
       {showDiscard && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">Discard workout?</h3>
-            <p className="mb-6 text-sm text-gray-400">All logged sets will be lost.</p>
+            <h3 className="mb-2 text-lg font-bold text-white">Training stoppen?</h3>
+            <p className="mb-6 text-sm text-gray-400">Alle gelogde sets gaan verloren.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDiscard(false)}
                 className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
               >
-                Cancel
+                Annuleer
               </button>
               <button
                 onClick={() => { aw.discardWorkout(); setShowDiscard(false) }}
                 className="h-12 flex-1 rounded-xl bg-red-600 font-semibold text-white active:bg-red-700"
               >
-                Discard
+                Stoppen
               </button>
             </div>
           </div>
@@ -216,10 +216,10 @@ export default function Logger() {
 
 // ── SWAP MODAL ───────────────────────────────────────────────────────────────
 const SWAP_REASONS = [
-  { value: 'machine_busy', label: '🔴 Machine busy', desc: 'Equipment occupied' },
-  { value: 'no_equipment', label: '⚠️ No equipment', desc: 'Not available here' },
-  { value: 'want_variety', label: '🔄 Want variety', desc: 'Something different' },
-  { value: 'feels_off', label: '💪 Feels off', desc: 'Not feeling this one' },
+  { value: 'machine_busy', label: '🔴 Machine bezet', desc: 'Apparaat bezet' },
+  { value: 'no_equipment', label: '⚠️ Geen apparaat', desc: 'Niet beschikbaar' },
+  { value: 'want_variety', label: '🔄 Wil variatie', desc: 'Iets anders' },
+  { value: 'feels_off', label: '💪 Voelt niet goed', desc: 'Niet in de stemming' },
 ]
 
 function SwapModal({ exercise, settings, onAccept, onClose }) {
@@ -252,12 +252,12 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Swap Exercise</h3>
+          <h3 className="text-lg font-bold text-white">Oefening wisselen</h3>
           <button onClick={onClose} className="p-1 text-gray-500"><X size={20} /></button>
         </div>
 
         <div className="mb-4 rounded-xl bg-gray-800 px-3 py-2">
-          <p className="text-xs text-gray-500">Replacing</p>
+          <p className="text-xs text-gray-500">Vervangen</p>
           <p className="font-semibold text-white">{exercise.name}</p>
           {exercise.muscle_group && (
             <p className="text-xs capitalize text-orange-400">{exercise.muscle_group}</p>
@@ -266,7 +266,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
 
         {!suggestion ? (
           <>
-            <p className="mb-3 text-sm text-gray-400">Why are you swapping?</p>
+            <p className="mb-3 text-sm text-gray-400">Waarom wissel je?</p>
             <div className="mb-4 space-y-2">
               {SWAP_REASONS.map(r => (
                 <button
@@ -291,27 +291,27 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
               disabled={!reason || loading}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 font-bold text-white disabled:opacity-50"
             >
-              {loading ? <><Loader2 size={18} className="animate-spin" /> Finding alternative...</> : <><RefreshCw size={18} /> Find substitute</>}
+              {loading ? <><Loader2 size={18} className="animate-spin" /> Alternatief zoeken...</> : <><RefreshCw size={18} /> Zoek alternatief</>}
             </button>
           </>
         ) : (
           <>
             <div className="mb-4 rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-orange-400">Suggested substitute</p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-orange-400">Voorgesteld alternatief</p>
               <p className="text-xl font-black text-white">{suggestion.name}</p>
               <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-lg bg-gray-800 py-2">
                   <p className="font-bold text-white">{suggestion.sets}×{suggestion.reps_min}-{suggestion.reps_max}</p>
-                  <p className="text-[10px] text-gray-500">sets×reps</p>
+                  <p className="text-[10px] text-gray-500">sets×herh.</p>
                 </div>
                 <div className="rounded-lg bg-orange-500/20 py-2">
                   <p className="font-bold text-orange-400">{suggestion.weight_kg}kg</p>
-                  <p className="text-[10px] text-gray-500">weight</p>
+                  <p className="text-[10px] text-gray-500">gewicht</p>
                 </div>
                 <div className="rounded-lg bg-gray-800 py-2">
                   <p className="font-bold text-white">RPE {suggestion.rpe_target}</p>
-                  <p className="text-[10px] text-gray-500">intensity</p>
+                  <p className="text-[10px] text-gray-500">intensiteit</p>
                 </div>
               </div>
               {suggestion.why && (
@@ -327,13 +327,13 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                 onClick={() => { setSuggestion(null); setReason(null) }}
                 className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700"
               >
-                Try another
+                Probeer ander
               </button>
               <button
                 onClick={() => onAccept(suggestion)}
                 className="h-12 flex-1 rounded-xl bg-orange-500 font-bold text-white active:scale-[0.97] transition-transform"
               >
-                Use this
+                Gebruik dit
               </button>
             </div>
           </>
@@ -408,7 +408,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
         <div className="mb-2 flex items-center gap-3 rounded-lg bg-orange-500/10 px-3 py-1.5 text-xs text-orange-400">
           <Sparkles size={12} />
           <span>
-            Target: {exercise.plan.sets}x{exercise.plan.reps_min || exercise.plan.reps_target}
+            Doel: {exercise.plan.sets}x{exercise.plan.reps_min || exercise.plan.reps_target}
             {exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''}
             {' '}@ {exercise.plan.weight_kg}kg
             {exercise.plan.rpe_target ? ` RPE ${exercise.plan.rpe_target}` : ''}
@@ -419,7 +419,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
       {/* Previous session hint */}
       {prevData && (
         <p className="mb-3 text-xs text-gray-500">
-          Last time: {prevData.weight}kg x {prevData.reps}
+          Vorige keer: {prevData.weight}kg x {prevData.reps}
         </p>
       )}
 

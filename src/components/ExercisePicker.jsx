@@ -4,7 +4,7 @@ import { useFilteredExercises } from '../hooks/useExercises'
 
 const MUSCLE_FILTERS = ['all', 'chest', 'back', 'legs', 'shoulders', 'arms', 'core']
 const EQUIPMENT_FILTERS = [
-  { value: null, label: 'All' },
+  { value: null, label: 'Alles' },
   { value: 'barbell', label: 'Barbell' },
   { value: 'dumbbell', label: 'Dumbbell' },
   { value: 'cable', label: 'Cable' },
@@ -40,7 +40,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search exercises..."
+            placeholder="Zoek oefeningen..."
             autoFocus
             className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
           />
@@ -51,7 +51,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
       <div className="flex gap-2 overflow-x-auto px-4 pt-3 scrollbar-none">
         {MUSCLE_FILTERS.map(mg => (
           <button
-            key={mg}
+            key={mg === 'all' ? 'alles' : mg}
             onClick={() => setMuscleFilter(mg === 'all' ? null : mg)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
               (mg === 'all' && !muscleFilter) || mg === muscleFilter
@@ -59,7 +59,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
                 : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
             }`}
           >
-            {mg}
+            {mg === 'all' ? 'alles' : mg}
           </button>
         ))}
       </div>
@@ -84,7 +84,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
       {/* Results */}
       <div className="flex-1 overflow-y-auto">
         {available.length === 0 && (
-          <p className="px-4 py-12 text-center text-gray-500">No exercises found</p>
+          <p className="px-4 py-12 text-center text-gray-500">Geen oefeningen gevonden</p>
         )}
         {available.map(exercise => (
           <button

@@ -95,9 +95,9 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold">
-          Good {getTimeOfDay()}{settings.name ? `, ${settings.name}` : ''}
+          Goeie {getTimeOfDay()}{settings.name ? `, ${settings.name}` : ''}
         </h1>
-        <p className="text-gray-400">{getDayName()} — let's get after it</p>
+        <p className="text-gray-400">{getDayName()} — laten we trainen</p>
       </div>
 
       {/* Training Plan Block */}
@@ -107,17 +107,17 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <span className="text-xl">{phase.emoji}</span>
               <div>
-                <p className={`text-xs font-semibold uppercase tracking-wider ${phaseColor.text}`}>Active Plan</p>
+                <p className={`text-xs font-semibold uppercase tracking-wider ${phaseColor.text}`}>Actief plan</p>
                 <p className="font-bold text-white">{phase.label}</p>
               </div>
             </div>
             <Link to="/plan" className={`text-xs ${phaseColor.text}`}>
-              View plan <ChevronRight size={12} className="inline" />
+              Bekijk plan <ChevronRight size={12} className="inline" />
             </Link>
           </div>
           {weekTarget && (
             <div className="mb-2 text-xs text-gray-400">
-              Week {progress?.currentWeek}/{progress?.totalWeeks} · {weekTarget.isDeload ? '🔄 Deload week' : `Target RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
+              Week {progress?.currentWeek}/{progress?.totalWeeks} · {weekTarget.isDeload ? '🔄 Deload week' : `Doel RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
             </div>
           )}
           <div className="relative h-1.5 overflow-hidden rounded-full bg-gray-800">
@@ -132,8 +132,8 @@ export default function Dashboard() {
         >
           <Target size={20} className="text-gray-500" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-300">No training plan active</p>
-            <p className="text-xs text-gray-600">Start a 4-week block for structured periodization</p>
+            <p className="text-sm font-medium text-gray-300">Geen trainingsplan actief</p>
+            <p className="text-xs text-gray-600">Start een 4-weekse blok voor gestructureerde periodisering</p>
           </div>
           <ChevronRight size={16} className="text-gray-600" />
         </Link>
@@ -142,8 +142,8 @@ export default function Dashboard() {
       {/* Muscle Recovery Map */}
       <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-300">Muscle Recovery</h2>
-          <Link to="/coach" className="text-xs text-orange-500">Train now →</Link>
+          <h2 className="text-sm font-semibold text-gray-300">Spierherstel</h2>
+          <Link to="/coach" className="text-xs text-orange-500">Nu trainen →</Link>
         </div>
         <div className="space-y-2">
           {MUSCLE_ORDER.map(muscle => {
@@ -176,17 +176,17 @@ export default function Dashboard() {
           })}
         </div>
         <div className="mt-3 flex gap-3 text-[10px] text-gray-600">
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-green-500" />Ready</span>
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-yellow-500" />Recovering</span>
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" />Fatigued</span>
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-green-500" />Gereed</span>
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-yellow-500" />Herstellend</span>
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" />Vermoeid</span>
         </div>
       </div>
 
       {/* Weekly Volume */}
       <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-300">Weekly Volume</h2>
-          <span className="text-xs text-gray-600">sets / target</span>
+          <h2 className="text-sm font-semibold text-gray-300">Wekelijks volume</h2>
+          <span className="text-xs text-gray-600">sets / doel</span>
         </div>
         <div className="space-y-2">
           {MUSCLE_ORDER.map(muscle => {
@@ -217,7 +217,7 @@ export default function Dashboard() {
       <div className="mb-4 grid grid-cols-4 gap-2">
         <div className="rounded-xl bg-gray-900 p-3 text-center">
           <p className="text-xl font-bold text-white">{stats.thisWeekCount}</p>
-          <p className="text-[10px] text-gray-500">workouts</p>
+          <p className="text-[10px] text-gray-500">trainingen</p>
         </div>
         <div className="rounded-xl bg-gray-900 p-3 text-center">
           <p className="text-xl font-bold text-white">{formatVolume(stats.weekVolume)}</p>
@@ -225,18 +225,18 @@ export default function Dashboard() {
         </div>
         <div className="rounded-xl bg-gray-900 p-3 text-center">
           <p className="text-xl font-bold text-white">{stats.streak}</p>
-          <p className="text-[10px] text-gray-500">streak</p>
+          <p className="text-[10px] text-gray-500">reeks</p>
         </div>
         <div className="rounded-xl bg-gray-900 p-3 text-center">
           <p className="text-xl font-bold text-white">{stats.daysSince ?? '--'}</p>
-          <p className="text-[10px] text-gray-500">days ago</p>
+          <p className="text-[10px] text-gray-500">dagen terug</p>
         </div>
       </div>
 
       {/* Recent PRs */}
       {stats.recentPRs.length > 0 && (
         <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
-          <h2 className="mb-3 text-sm font-semibold text-gray-300">Personal Records This Week 🏆</h2>
+          <h2 className="mb-3 text-sm font-semibold text-gray-300">Persoonlijke records deze week</h2>
           <div className="space-y-2">
             {stats.recentPRs.map(pr => (
               <div key={pr.name} className="flex items-center justify-between">
@@ -255,8 +255,8 @@ export default function Dashboard() {
       >
         <Sparkles size={26} className="text-white shrink-0" />
         <div className="flex-1">
-          <p className="font-bold text-white">Generate today's workout</p>
-          <p className="text-sm text-orange-200">AI personalizes based on your recovery</p>
+          <p className="font-bold text-white">Genereer training van vandaag</p>
+          <p className="text-sm text-orange-200">AI personaliseert op basis van jouw herstel</p>
         </div>
         <ChevronRight size={20} className="text-orange-200 shrink-0" />
       </button>
@@ -266,13 +266,13 @@ export default function Dashboard() {
 
 function getTimeOfDay() {
   const h = new Date().getHours()
-  if (h < 12) return 'morning'
-  if (h < 17) return 'afternoon'
-  return 'evening'
+  if (h < 12) return 'ochtend'
+  if (h < 17) return 'middag'
+  return 'avond'
 }
 
 function getDayName() {
-  return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()]
+  return ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'][new Date().getDay()]
 }
 
 function formatVolume(kg) {
