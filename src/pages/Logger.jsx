@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Minus, Timer, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Calculator, BookOpen, MoreVertical, X } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
@@ -10,6 +10,7 @@ import { getExerciseSubstitute } from '../lib/anthropic'
 import { getSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
+import { calculateMomentum } from '../lib/momentumCalculator'
 import { useAuthContext } from '../App'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
@@ -20,6 +21,7 @@ import PlateCalculator from '../components/PlateCalculator'
 import TemplateLibrary from '../components/TemplateLibrary'
 import SupersetModal from '../components/SupersetModal'
 import JunkVolumeAlert from '../components/JunkVolumeAlert'
+import MomentumIndicator from '../components/MomentumIndicator'
 
 export default function Logger() {
   const nav = useNavigate()
@@ -41,6 +43,9 @@ export default function Logger() {
   const [showSupersetModal, setShowSupersetModal] = useState(false)
   const [supersetMode, setSupersetMode] = useState(null) // { supersets: [...], active: true }
   const [junkWarning, setJunkWarning] = useState(null) // { exercise, message, severity, ... }
+
+  // Bereken momentum real-time op basis van alle sets in de sessie
+  const momentum = useMemo(() => calculateMomentum(aw.workout), [aw.workout])
 
   useEffect(() => {
     const raw = localStorage.getItem('coach-pending-workout')
@@ -284,6 +289,11 @@ export default function Logger() {
         </div>
         {aw.error && (
           <p className="mx-4 mb-3 rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400">{aw.error}</p>
+        )}
+        {momentum && (
+          <div className="px-4 pb-3">
+            <MomentumIndicator momentum={momentum} />
+          </div>
         )}
       </header>
 
