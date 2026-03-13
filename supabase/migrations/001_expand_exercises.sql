@@ -62,7 +62,7 @@ ON CONFLICT (name) DO UPDATE SET
   category = EXCLUDED.category;
 
 -- ==========================================================================
--- SHOULDERS (9 exercises)
+-- SHOULDERS (12 exercises)
 -- ==========================================================================
 INSERT INTO exercises (name, muscle_group, category, equipment, primary_muscles, secondary_muscles, difficulty, subfocus)
 VALUES
@@ -74,7 +74,10 @@ VALUES
   ('Face Pull', 'shoulders', 'isolation', 'cable', '{rear_delts}', '{rhomboids,external_rotators}', 'beginner', 'rear delts'),
   ('Rear Delt Fly', 'shoulders', 'isolation', 'dumbbell', '{rear_delts}', '{rhomboids}', 'beginner', 'rear delts'),
   ('Upright Row', 'shoulders', 'compound', 'barbell', '{side_delts,traps}', '{biceps}', 'intermediate', 'side delts'),
-  ('Machine Shoulder Press', 'shoulders', 'compound', 'machine', '{front_delts,side_delts}', '{triceps}', 'beginner', 'front delts')
+  ('Machine Shoulder Press', 'shoulders', 'compound', 'machine', '{front_delts,side_delts}', '{triceps}', 'beginner', 'front delts'),
+  ('Machine Lateral Raise', 'shoulders', 'isolation', 'machine', '{side_delts}', '{}', 'beginner', 'side delts'),
+  ('Cable Rear Delt Fly', 'shoulders', 'isolation', 'cable', '{rear_delts}', '{rhomboids}', 'beginner', 'rear delts'),
+  ('Barbell Shrug', 'shoulders', 'isolation', 'barbell', '{traps}', '{side_delts}', 'beginner', 'traps')
 ON CONFLICT (name) DO UPDATE SET
   equipment = EXCLUDED.equipment,
   primary_muscles = EXCLUDED.primary_muscles,
@@ -144,7 +147,7 @@ ON CONFLICT (name) DO UPDATE SET
   category = EXCLUDED.category;
 
 -- ==========================================================================
--- CORE (8 exercises)
+-- CORE (11 exercises)
 -- ==========================================================================
 INSERT INTO exercises (name, muscle_group, category, equipment, primary_muscles, secondary_muscles, difficulty, subfocus)
 VALUES
@@ -155,7 +158,10 @@ VALUES
   ('Pallof Press', 'core', 'isolation', 'cable', '{core}', '{obliques}', 'beginner', 'anti-rotation'),
   ('Dead Bug', 'core', 'isolation', 'bodyweight', '{core}', '{hip_flexors}', 'beginner', 'stability'),
   ('Side Plank', 'core', 'isolation', 'bodyweight', '{obliques}', '{core}', 'beginner', 'obliques'),
-  ('Russian Twist', 'core', 'isolation', 'bodyweight', '{obliques,core}', '{}', 'beginner', 'rotation')
+  ('Russian Twist', 'core', 'isolation', 'bodyweight', '{obliques,core}', '{}', 'beginner', 'rotation'),
+  ('Bicycle Crunch', 'core', 'isolation', 'bodyweight', '{obliques,core}', '{}', 'beginner', 'obliques'),
+  ('Dragon Flag', 'core', 'isolation', 'bodyweight', '{core}', '{hip_flexors,lats}', 'advanced', 'rectus abdominis'),
+  ('V-Up', 'core', 'isolation', 'bodyweight', '{core,hip_flexors}', '{}', 'intermediate', 'lower abs')
 ON CONFLICT (name) DO UPDATE SET
   equipment = EXCLUDED.equipment,
   primary_muscles = EXCLUDED.primary_muscles,
