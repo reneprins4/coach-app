@@ -7,6 +7,12 @@ const DEFAULTS = {
   restTime: 90,
   units: 'kg',
   memberSince: new Date().toISOString(),
+  bodyweight: '',
+  experienceLevel: 'intermediate',
+  equipment: 'full_gym',
+  benchMax: '',
+  squatMax: '',
+  deadliftMax: '',
 }
 
 export function getSettings() {

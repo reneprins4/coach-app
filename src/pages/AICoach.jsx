@@ -84,6 +84,13 @@ export default function AICoach() {
           time,
           goal: settings.goal,
           frequency: settings.frequency,
+          name: settings.name || 'athlete',
+          bodyweight: settings.bodyweight || null,
+          experienceLevel: settings.experienceLevel || 'intermediate',
+          equipment: settings.equipment || 'full_gym',
+          benchMax: settings.benchMax || null,
+          squatMax: settings.squatMax || null,
+          deadliftMax: settings.deadliftMax || null,
         },
       })
       setResult(workout)

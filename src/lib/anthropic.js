@@ -15,24 +15,57 @@ export async function generateScientificWorkout({ muscleStatus, recommendedSplit
       }).join('\n\n')
     : 'No recent history for this split.'
 
-  const prompt = `## Muscle Status
+  // Build athlete profile section
+  const bw = preferences.bodyweight ? `${preferences.bodyweight}kg` : 'unknown'
+  const level = preferences.experienceLevel || 'intermediate'
+  const equipment = preferences.equipment || 'full_gym'
+  const knowns = []
+  if (preferences.benchMax) knowns.push(`bench 1RM ~${preferences.benchMax}kg`)
+  if (preferences.squatMax) knowns.push(`squat 1RM ~${preferences.squatMax}kg`)
+  if (preferences.deadliftMax) knowns.push(`deadlift 1RM ~${preferences.deadliftMax}kg`)
+
+  // Weight estimation rules based on experience and bodyweight
+  const weightGuidance = preferences.bodyweight
+    ? `WEIGHT ESTIMATION (when no history):
+- Bodyweight: ${bw}, Level: ${level}
+- Beginner bench ~0.5x BW, squat ~0.75x BW, deadlift ~1x BW
+- Intermediate bench ~0.8x BW, squat ~1.2x BW, deadlift ~1.5x BW  
+- Advanced bench ~1.2x BW, squat ~1.5x BW, deadlift ~2x BW
+- Isolation exercises: scale proportionally (e.g. curls ~20-30% bench)
+- NEVER suggest 0kg. Always estimate based on the above.
+${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
+    : 'WEIGHT ESTIMATION: User has not set bodyweight. Ask them to fill in their profile, but still estimate conservatively based on intermediate standards (bench ~60kg, squat ~80kg, deadlift ~100kg). NEVER suggest 0kg.'
+
+  const prompt = `## Athlete Profile
+- Name: ${preferences.name || 'athlete'}
+- Bodyweight: ${bw}
+- Experience: ${level}
+- Goal: ${preferences.goal || 'hypertrophy'}
+- Equipment: ${equipment}
+- Training frequency: ${preferences.frequency || '4x'}/week
+- Energy today: ${preferences.energy || 'medium'} (1-5 scale)
+- Available time: ${preferences.time || 60} min
+
+${weightGuidance}
+
+## Muscle Recovery Status
 ${muscleStatusText}
 
 ## Recommended Split: ${recommendedSplit}
 
-## Last 3 Relevant Sessions
+## Recent Training History
 ${historyText}
 
-## User Preferences
-- Energy: ${preferences.energy || 'medium'}
-- Available time: ${preferences.time || 60} min
-- Goal: ${preferences.goal || 'hypertrophy'}
-- Frequency: ${preferences.frequency || '4x/week'}
+PROGRESSIVE OVERLOAD:
+- RPE <8 last time: add 2.5-5kg
+- RPE 8-9: same weight
+- RPE 9+: reduce 5%
+- New exercise (no history): estimate from profile above
 
-Generate an optimal ${recommendedSplit} workout. Return ONLY this JSON (no markdown):
+Generate an optimal ${recommendedSplit} workout. Return ONLY this JSON (no markdown, no code fences):
 {
   "split": "string",
-  "reasoning": "why this workout today, progressive overload decisions, exercise selection",
+  "reasoning": "2-3 sentences: why this split today, key decisions, what you're trying to achieve",
   "exercises": [
     {
       "name": "string",
@@ -43,12 +76,12 @@ Generate an optimal ${recommendedSplit} workout. Return ONLY this JSON (no markd
       "weight_kg": number,
       "rpe_target": number,
       "rest_seconds": number,
-      "notes": "coaching cue",
-      "vs_last_session": "up/same/down/new with brief explanation"
+      "notes": "specific coaching cue for this athlete",
+      "vs_last_session": "up/same/down/new - brief explanation"
     }
   ],
   "estimated_duration_min": number,
-  "volume_notes": "volume summary"
+  "volume_notes": "total sets per muscle group this week after this workout"
 }`
 
   const response = await fetch('/api/generate', {
