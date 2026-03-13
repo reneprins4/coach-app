@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, ChevronRight, RotateCcw, Sparkles, Info, Zap, TrendingUp, Target, Battery } from 'lucide-react'
 import {
-  PHASES, getCurrentBlock, startBlock, clearBlock,
+  PHASES, loadBlock, startBlock, clearBlock,
   getCurrentWeekTarget, getBlockProgress
 } from '../lib/periodization'
 import { getSettings } from '../lib/settings'
+import { useAuthContext } from '../App'
 
 const PHASE_COLORS = {
   blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25', border: 'border-blue-500/40' },
@@ -25,24 +26,30 @@ const SUGGESTED_ORDER = ['accumulation', 'intensification', 'strength', 'deload'
 
 export default function Plan() {
   const nav = useNavigate()
+  const { user } = useAuthContext()
   const settings = getSettings()
-  const [block, setBlock] = useState(() => getCurrentBlock())
+  const [block, setBlock] = useState(null)
   const [selecting, setSelecting] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
+
+  // Laad blok van Supabase (of localStorage als fallback)
+  useEffect(() => {
+    loadBlock(user?.id).then(b => setBlock(b))
+  }, [user?.id])
 
   const weekTarget = block ? getCurrentWeekTarget(block) : null
   const progress = block ? getBlockProgress(block) : null
   const phase = block ? PHASES[block.phase] : null
   const phaseColor = PHASE_COLORS[phase?.color || 'orange']
 
-  function handleStart(phaseKey) {
-    const b = startBlock(phaseKey)
+  async function handleStart(phaseKey) {
+    const b = await startBlock(phaseKey, user?.id)
     setBlock({ ...b, currentWeek: 1, daysElapsed: 0 })
     setSelecting(false)
   }
 
-  function handleClear() {
-    clearBlock()
+  async function handleClear() {
+    await clearBlock(user?.id)
     setBlock(null)
     setConfirmClear(false)
   }

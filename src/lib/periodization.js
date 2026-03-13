@@ -3,6 +3,8 @@
  * Phases: accumulation → intensification → strength → deload (auto)
  */
 
+import { supabase } from './supabase'
+
 const BLOCK_KEY = 'coach-training-block'
 
 export const PHASES = {
@@ -52,7 +54,7 @@ export const PHASES = {
   },
 }
 
-export function getCurrentBlock() {
+export function getCurrentBlock(userId) {
   try {
     const raw = localStorage.getItem(BLOCK_KEY)
     if (!raw) return null
@@ -71,7 +73,26 @@ export function getCurrentBlock() {
   }
 }
 
-export function startBlock(phase) {
+// Laad trainingsblok van Supabase, val terug op localStorage
+export async function loadBlock(userId) {
+  if (userId) {
+    try {
+      const { data } = await supabase
+        .from('training_blocks')
+        .select('block')
+        .eq('user_id', userId)
+        .single()
+
+      if (data?.block) {
+        // Sync naar localStorage voor offline gebruik
+        localStorage.setItem(BLOCK_KEY, JSON.stringify(data.block))
+      }
+    } catch { /* val terug op localStorage */ }
+  }
+  return getCurrentBlock()
+}
+
+export async function startBlock(phase, userId) {
   const block = {
     id: crypto.randomUUID(),
     phase,
@@ -79,11 +100,29 @@ export function startBlock(phase) {
     createdAt: new Date().toISOString(),
   }
   localStorage.setItem(BLOCK_KEY, JSON.stringify(block))
+
+  if (userId) {
+    try {
+      await supabase
+        .from('training_blocks')
+        .upsert({ user_id: userId, block, updated_at: new Date().toISOString() })
+    } catch { /* localStorage is backup */ }
+  }
+
   return block
 }
 
-export function clearBlock() {
+export async function clearBlock(userId) {
   localStorage.removeItem(BLOCK_KEY)
+
+  if (userId) {
+    try {
+      await supabase
+        .from('training_blocks')
+        .delete()
+        .eq('user_id', userId)
+    } catch { /* ignore */ }
+  }
 }
 
 export function getCurrentWeekTarget(block) {
