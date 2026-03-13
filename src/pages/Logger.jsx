@@ -18,30 +18,18 @@ export default function Logger() {
   const [showFinish, setShowFinish] = useState(false)
   const [finishResult, setFinishResult] = useState(null)
   const [showDiscard, setShowDiscard] = useState(false)
-  const [pendingPlan, setPendingPlan] = useState(null)
 
-  // Check for AI-generated pending workout
+  // Auto-load AI-generated pending workout when navigating from Coach
   useEffect(() => {
     const raw = localStorage.getItem('coach-pending-workout')
-    if (raw) {
+    if (raw && !aw.isActive) {
       try {
         const plan = JSON.parse(raw)
-        setPendingPlan(plan)
+        aw.startWorkout(plan)
       } catch {}
+      localStorage.removeItem('coach-pending-workout')
     }
-  }, [])
-
-  function loadPendingWorkout() {
-    if (!pendingPlan) return
-    aw.startWorkout(pendingPlan)
-    localStorage.removeItem('coach-pending-workout')
-    setPendingPlan(null)
-  }
-
-  function dismissPending() {
-    localStorage.removeItem('coach-pending-workout')
-    setPendingPlan(null)
-  }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleFinish() {
     const result = await aw.finishWorkout()
@@ -60,33 +48,6 @@ export default function Logger() {
   if (!aw.isActive) {
     return (
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-6">
-        {/* AI Coach pending workout banner */}
-        {pendingPlan && (
-          <div className="mb-6 w-full max-w-sm rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
-            <div className="mb-2 flex items-center gap-2">
-              <Sparkles size={16} className="text-orange-500" />
-              <span className="text-sm font-semibold text-white">AI workout ready</span>
-            </div>
-            <p className="mb-3 text-xs text-gray-400">
-              {pendingPlan.length} exercises from AI Coach
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={dismissPending}
-                className="h-10 flex-1 rounded-lg text-sm text-gray-400 ring-1 ring-gray-700 active:bg-gray-900"
-              >
-                Dismiss
-              </button>
-              <button
-                onClick={loadPendingWorkout}
-                className="h-10 flex-1 rounded-lg bg-orange-500 text-sm font-semibold text-white active:scale-[0.97] transition-transform"
-              >
-                Load & Start
-              </button>
-            </div>
-          </div>
-        )}
-
         <h1 className="mb-2 text-2xl font-bold">Ready to train</h1>
         <p className="mb-8 text-center text-gray-400">Start a workout to begin logging sets</p>
         <button
