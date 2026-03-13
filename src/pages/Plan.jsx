@@ -7,6 +7,8 @@ import {
 } from '../lib/periodization'
 import { getSettings } from '../lib/settings'
 import { useAuthContext } from '../App'
+import { useWorkouts } from '../hooks/useWorkouts'
+import { detectFatigue } from '../lib/fatigueDetector'
 
 const PHASE_COLORS = {
   blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25', border: 'border-blue-500/40' },
@@ -28,9 +30,13 @@ export default function Plan() {
   const nav = useNavigate()
   const { user } = useAuthContext()
   const settings = getSettings()
+  const { workouts } = useWorkouts(user?.id)
   const [block, setBlock] = useState(null)
   const [selecting, setSelecting] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
+
+  // Detecteer vermoeidheid
+  const fatigue = workouts.length >= 4 ? detectFatigue(workouts) : null
 
   // Laad blok van Supabase (of localStorage als fallback)
   useEffect(() => {
@@ -94,6 +100,18 @@ export default function Plan() {
                 <p className="text-sm text-gray-400">{phase.description}</p>
               </div>
             </div>
+
+            {/* Vermoeidheid indicator */}
+            {fatigue?.fatigued && (
+              <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-500/10 px-3 py-2 text-xs">
+                <span className="h-2 w-2 rounded-full bg-red-500" />
+                <span className="text-red-400">
+                  {fatigue.recommendation === 'urgent'
+                    ? 'Vermoeidheid gedetecteerd — deload aanbevolen'
+                    : 'Signalen van vermoeidheid gedetecteerd'}
+                </span>
+              </div>
+            )}
 
             {/* Week timeline */}
             <div className="mb-4 flex gap-2">

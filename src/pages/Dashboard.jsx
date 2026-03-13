@@ -7,6 +7,7 @@ import { analyzeTraining } from '../lib/training-analysis'
 import { getCurrentBlock, getCurrentWeekTarget, getBlockProgress, PHASES } from '../lib/periodization'
 import { getSettings } from '../lib/settings'
 import PlateauAlert from '../components/PlateauAlert'
+import DeloadAlert from '../components/DeloadAlert'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -153,6 +154,9 @@ export default function Dashboard() {
 
       {/* Plateau alerts */}
       <PlateauAlert workouts={workouts} maxItems={3} />
+
+      {/* Deload alert — vermoeidheidsdetectie */}
+      {workouts.length >= 4 && <DeloadAlert workouts={workouts} />}
 
       {/* Actief trainingsblok */}
       {block && phase ? (
