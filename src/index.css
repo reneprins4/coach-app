@@ -79,3 +79,8 @@ input[type="range"]::-moz-range-thumb {
   background: #374151;
   border-radius: 2px;
 }
+
+/* Safe area support voor iPhone notch/home indicator */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

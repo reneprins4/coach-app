@@ -29,7 +29,7 @@ export default function Toast({ message, action, onAction, onDismiss, duration =
 
   return (
     <div
-      className={`fixed bottom-24 left-4 right-4 z-50 mx-auto max-w-sm transition-all duration-300 ease-out ${
+      className={`fixed bottom-28 left-4 right-4 z-50 mx-auto max-w-sm transition-all duration-300 ease-out ${
         visible && !exiting
           ? 'translate-y-0 opacity-100'
           : 'translate-y-4 opacity-0'
