@@ -6,6 +6,7 @@ import { useAuthContext } from '../App'
 import { analyzeTraining } from '../lib/training-analysis'
 import { getCurrentBlock, getCurrentWeekTarget, getBlockProgress, PHASES } from '../lib/periodization'
 import { getSettings } from '../lib/settings'
+import PlateauAlert from '../components/PlateauAlert'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -140,6 +141,9 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* Plateau alerts */}
+      <PlateauAlert workouts={workouts} maxItems={3} />
 
       {/* Actief trainingsblok */}
       {block && phase ? (

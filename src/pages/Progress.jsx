@@ -3,6 +3,7 @@ import { Search, Award, BarChart3, TrendingUp as TrendUp } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
+import FormDetective from '../components/FormDetective'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -28,7 +29,7 @@ function getMuscleGroup(name) {
 export default function Progress() {
   const { user } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
-  const [tab, setTab] = useState('exercise') // exercise | muscle
+  const [tab, setTab] = useState('exercise') // exercise | muscle | analyse
   const [query, setQuery] = useState('')
   const [selectedExercise, setSelectedExercise] = useState(null)
 
@@ -123,18 +124,24 @@ export default function Progress() {
       <h1 className="mb-4 text-2xl font-bold">Voortgang</h1>
 
       {/* Tabs */}
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex gap-2 overflow-x-auto">
         <button
           onClick={() => setTab('exercise')}
-          className={`rounded-full px-4 py-2 text-sm font-medium ${tab === 'exercise' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'exercise' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
           Per oefening
         </button>
         <button
           onClick={() => setTab('muscle')}
-          className={`rounded-full px-4 py-2 text-sm font-medium ${tab === 'muscle' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'muscle' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
           Spiergroepen
+        </button>
+        <button
+          onClick={() => setTab('analyse')}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'analyse' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+        >
+          Analyse
         </button>
       </div>
 
@@ -275,6 +282,10 @@ export default function Progress() {
             </div>
           </div>
         </>
+      )}
+
+      {tab === 'analyse' && (
+        <FormDetective workouts={workouts} />
       )}
     </div>
   )
