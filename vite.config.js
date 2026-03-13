@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico'],
       manifest: {
-        name: 'Ragnarok Fit',
-        short_name: 'Ragnarok Fit',
+        name: 'Kravex',
+        short_name: 'Kravex',
         description: 'Personal training coach',
         theme_color: '#030712',
         background_color: '#030712',
