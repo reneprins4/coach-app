@@ -1,3 +1,21 @@
+// Robust JSON extractor — handles markdown fences and surrounding text
+function extractJSON(raw) {
+  if (!raw || typeof raw !== 'string') throw new Error('Empty response from AI')
+  // Strip markdown fences
+  let text = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim()
+  // Direct parse first
+  try { return JSON.parse(text) } catch {}
+  // Find outermost { ... }
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start !== -1 && end > start) {
+    try { return JSON.parse(text.slice(start, end + 1)) } catch {}
+  }
+  // Give up
+  console.error('Raw AI response that failed to parse:', raw.slice(0, 500))
+  throw new Error('Failed to parse AI response. Please try again.')
+}
+
 export async function generateScientificWorkout({ muscleStatus, recommendedSplit, recentHistory, preferences }) {
   const muscleStatusText = Object.entries(muscleStatus)
     .map(([muscle, ms]) =>
@@ -110,11 +128,32 @@ Return ONLY valid JSON (no markdown, no code fences, no comments):
   const data = await response.json()
   if (data.error) throw new Error(data.error)
 
-  try {
-    return JSON.parse(data.content)
-  } catch {
-    throw new Error('Failed to parse AI response. Please try again.')
+  const result = extractJSON(data.content)
+
+  // Post-process: fix any 0kg weights using bodyweight estimates
+  const bwKg = parseFloat(preferences.bodyweight) || 80
+  const levelMult = preferences.experienceLevel === 'beginner' ? 0.5 : preferences.experienceLevel === 'advanced' ? 1.2 : 0.8
+  const fallbacks = {
+    chest: Math.round(bwKg * levelMult * 0.6 / 2.5) * 2.5,
+    back: Math.round(bwKg * levelMult * 0.7 / 2.5) * 2.5,
+    shoulders: Math.round(bwKg * levelMult * 0.4 / 2.5) * 2.5,
+    quads: Math.round(bwKg * levelMult * 0.9 / 2.5) * 2.5,
+    hamstrings: Math.round(bwKg * levelMult * 0.7 / 2.5) * 2.5,
+    glutes: Math.round(bwKg * levelMult * 0.8 / 2.5) * 2.5,
+    biceps: Math.round(bwKg * levelMult * 0.2 / 2.5) * 2.5,
+    triceps: Math.round(bwKg * levelMult * 0.2 / 2.5) * 2.5,
+    core: 0,
   }
+  if (result.exercises) {
+    result.exercises = result.exercises.map(ex => ({
+      ...ex,
+      weight_kg: (!ex.weight_kg || ex.weight_kg === 0)
+        ? (fallbacks[ex.muscle_group] ?? 20)
+        : ex.weight_kg,
+    }))
+  }
+
+  return result
 }
 
 
@@ -161,9 +200,5 @@ Return ONLY this JSON (no markdown):
   const data = await response.json()
   if (data.error) throw new Error(data.error)
 
-  try {
-    return JSON.parse(data.content)
-  } catch {
-    throw new Error('Failed to parse substitute response.')
-  }
+  return extractJSON(data.content)
 }
