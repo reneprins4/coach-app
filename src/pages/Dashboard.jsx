@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Sparkles, ChevronRight, Target } from 'lucide-react'
+import { Sparkles, ChevronRight, Target, CalendarDays } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { analyzeTraining } from '../lib/training-analysis'
@@ -141,6 +141,15 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* Kalender link */}
+      <Link to="/calendar" className="mb-4 flex items-center justify-between rounded-xl bg-gray-900 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <CalendarDays size={18} className="text-gray-400" />
+          <span className="text-sm font-medium text-white">Trainingskalender</span>
+        </div>
+        <ChevronRight size={16} className="text-gray-600" />
+      </Link>
 
       {/* Plateau alerts */}
       <PlateauAlert workouts={workouts} maxItems={3} />
