@@ -40,7 +40,7 @@ export default function Toast({ message, action, onAction, onDismiss, duration =
         {action && (
           <button
             onClick={handleAction}
-            className="shrink-0 rounded-lg bg-red-500/20 px-3 py-1.5 text-sm font-semibold text-red-400 active:bg-red-500/30"
+            className="shrink-0 rounded-lg bg-cyan-500/20 px-3 py-1.5 text-sm font-semibold text-cyan-400 active:bg-cyan-500/30"
           >
             {action}
           </button>

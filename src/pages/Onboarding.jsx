@@ -77,7 +77,7 @@ export default function Onboarding() {
             <button
               key={option.value}
               onClick={() => handleSelect(option.value)}
-              className="w-full rounded-2xl bg-gray-900 px-5 py-4 text-left ring-1 ring-gray-800 transition-all active:ring-red-500 active:bg-red-500/10"
+              className="w-full rounded-2xl bg-gray-900 px-5 py-4 text-left ring-1 ring-gray-800 transition-all active:ring-cyan-500 active:bg-cyan-500/10"
             >
               <p className="text-base font-semibold text-white">{option.label}</p>
               <p className="mt-0.5 text-sm text-gray-500">{option.sub}</p>

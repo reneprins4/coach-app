@@ -173,7 +173,7 @@ export default function Calendar() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
       </div>
     )
   }
@@ -191,7 +191,7 @@ export default function Calendar() {
           <span className="text-[10px] uppercase tracking-wider text-gray-600">deze maand</span>
         </div>
         <div className="flex flex-1 flex-col items-center rounded-xl bg-gray-900 py-3">
-          <Flame size={16} className="mb-1 text-red-500" />
+          <Flame size={16} className="mb-1 text-cyan-500" />
           <span className="text-xl font-bold text-white">{stats.streak}</span>
           <span className="text-[10px] uppercase tracking-wider text-gray-600">streak</span>
         </div>
@@ -247,7 +247,7 @@ export default function Calendar() {
               className={`relative flex aspect-square flex-col items-center justify-center rounded-lg transition-colors ${
                 !day.isCurrentMonth ? 'text-gray-800' :
                 isFuture ? 'text-gray-700' :
-                isSelected ? 'bg-red-500/20 text-white' :
+                isSelected ? 'bg-cyan-500/20 text-white' :
                 isToday ? 'ring-1 ring-white/30 text-white' :
                 hasWorkout ? 'text-white' :
                 'text-gray-500'
@@ -257,7 +257,7 @@ export default function Calendar() {
                 {day.date.getDate()}
               </span>
               {hasWorkout && day.isCurrentMonth && (
-                <span className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-red-400' : 'bg-red-500'}`} />
+                <span className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-cyan-400' : 'bg-cyan-500'}`} />
               )}
             </button>
           )
@@ -311,7 +311,7 @@ export default function Calendar() {
               {/* Link to detail */}
               <Link 
                 to={`/history/${workout.id}`}
-                className="mt-4 flex h-10 items-center justify-center rounded-lg text-sm font-medium text-red-500 ring-1 ring-red-500/30 active:bg-red-500/10"
+                className="mt-4 flex h-10 items-center justify-center rounded-lg text-sm font-medium text-cyan-500 ring-1 ring-cyan-500/30 active:bg-cyan-500/10"
               >
                 Bekijk volledige workout
               </Link>
@@ -333,7 +333,7 @@ export default function Calendar() {
           <p className="text-gray-500">Nog geen trainingen gelogd</p>
           <Link 
             to="/log"
-            className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-red-500 px-6 text-sm font-semibold text-white"
+            className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-cyan-500 px-6 text-sm font-semibold text-white"
           >
             Start je eerste training
           </Link>

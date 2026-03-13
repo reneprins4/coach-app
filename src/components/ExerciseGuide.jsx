@@ -36,7 +36,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
           <div>
             <h2 className="text-lg font-bold text-white">{exercise.name}</h2>
             {exercise.muscle_group && (
-              <p className="text-xs capitalize text-red-400 mt-0.5">{exercise.muscle_group}</p>
+              <p className="text-xs capitalize text-cyan-400 mt-0.5">{exercise.muscle_group}</p>
             )}
           </div>
           <button onClick={onClose} className="rounded-xl p-2 text-gray-500 active:bg-gray-800">
@@ -49,10 +49,10 @@ export default function ExerciseGuide({ exercise, onClose }) {
           href={youtubeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mb-5 flex w-full items-center justify-between rounded-2xl bg-red-500/10 border border-red-500/20 px-4 py-3 active:scale-[0.98] transition-transform"
+          className="mb-5 flex w-full items-center justify-between rounded-2xl bg-cyan-500/10 border border-cyan-500/20 px-4 py-3 active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-3">
-            <Youtube size={20} className="text-red-400" />
+            <Youtube size={20} className="text-cyan-400" />
             <span className="text-sm font-semibold text-white">Bekijk op YouTube</span>
           </div>
           <ChevronRight size={16} className="text-gray-500" />
@@ -61,14 +61,14 @@ export default function ExerciseGuide({ exercise, onClose }) {
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center gap-3 py-10">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
             <p className="text-sm text-gray-500">Uitleg laden...</p>
           </div>
         )}
 
         {/* Error */}
         {error && !loading && (
-          <p className="text-center text-sm text-red-400 py-6">{error}</p>
+          <p className="text-center text-sm text-cyan-400 py-6">{error}</p>
         )}
 
         {/* Guide content */}
@@ -80,7 +80,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
               <div className="space-y-2">
                 {guide.steps.map((step, i) => (
                   <div key={i} className="flex gap-3">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/20 text-[10px] font-bold text-red-400">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-[10px] font-bold text-cyan-400">
                       {i + 1}
                     </span>
                     <p className="text-sm text-gray-200 leading-snug">{step}</p>

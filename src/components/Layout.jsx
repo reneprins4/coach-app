@@ -40,13 +40,13 @@ export default function Layout() {
       {hasActiveWorkout && !isOnLogPage && (
         <button
           onClick={() => navigate('/log')}
-          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-red-500 px-4 py-3 active:bg-red-600"
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-cyan-500 px-4 py-3 active:bg-cyan-600"
         >
           <div className="flex items-center gap-3">
             <Timer size={16} className="text-white" />
             <span className="text-sm font-semibold text-white">Training actief</span>
           </div>
-          <span className="text-sm font-medium text-red-100">Ga terug</span>
+          <span className="text-sm font-medium text-cyan-100">Ga terug</span>
         </button>
       )}
       <main className={`flex-1 pb-20 ${hasActiveWorkout && !isOnLogPage ? 'pt-12' : ''}`}>
@@ -63,7 +63,7 @@ export default function Layout() {
                 end={to === '/'}
                 className={({ isActive }) =>
                   `flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium uppercase tracking-wide transition-colors ${
-                    isActive ? 'text-red-500' : 'text-gray-600'
+                    isActive ? 'text-cyan-500' : 'text-gray-600'
                   }`
                 }
               >

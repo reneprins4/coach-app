@@ -31,7 +31,7 @@ export default function History() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
       </div>
     )
   }
@@ -57,7 +57,7 @@ export default function History() {
           <Calendar size={40} className="mb-4 text-gray-700" />
           <p className="text-gray-500">{query ? 'Geen trainingen gevonden' : 'Nog geen trainingen'}</p>
           {!query && (
-            <Link to="/log" className="mt-4 text-sm font-medium text-red-500">
+            <Link to="/log" className="mt-4 text-sm font-medium text-cyan-500">
               Start je eerste training
             </Link>
           )}
@@ -90,7 +90,7 @@ export default function History() {
               </Link>
               <button
                 onClick={(e) => { e.preventDefault(); setDeleteId(w.id) }}
-                className="absolute right-12 top-1/2 -translate-y-1/2 p-2 text-gray-700 opacity-0 transition-opacity group-hover:opacity-100 active:text-red-400"
+                className="absolute right-12 top-1/2 -translate-y-1/2 p-2 text-gray-700 opacity-0 transition-opacity group-hover:opacity-100 active:text-cyan-400"
               >
                 <Trash2 size={16} />
               </button>
@@ -114,7 +114,7 @@ export default function History() {
               </button>
               <button
                 onClick={handleDelete}
-                className="h-12 flex-1 rounded-xl bg-red-600 font-semibold text-white active:bg-red-700"
+                className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white active:bg-cyan-700"
               >
                 Verwijder
               </button>

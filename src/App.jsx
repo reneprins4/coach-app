@@ -28,7 +28,7 @@ export function useAuthContext() {
 function PageLoader() {
   return (
     <div className="flex h-[60vh] items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
     </div>
   )
 }
@@ -36,7 +36,7 @@ function PageLoader() {
 function AuthLoader() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-gray-950">
-      <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
     </div>
   )
 }

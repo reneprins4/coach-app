@@ -115,7 +115,7 @@ export default function Progress() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
       </div>
     )
   }
@@ -128,25 +128,25 @@ export default function Progress() {
       <div className="mb-4 flex gap-2 overflow-x-auto">
         <button
           onClick={() => setTab('exercise')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'exercise' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'exercise' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
           Per oefening
         </button>
         <button
           onClick={() => setTab('muscle')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'muscle' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'muscle' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
           Spiergroepen
         </button>
         <button
           onClick={() => setTab('analyse')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'analyse' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'analyse' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
           Analyse
         </button>
         <button
           onClick={() => setTab('balans')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'balans' ? 'bg-red-500 text-white' : 'bg-gray-900 text-gray-400'}`}
+          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'balans' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
         >
           Balans
         </button>
@@ -186,8 +186,8 @@ export default function Progress() {
           {selectedExercise && exerciseData && (
             <div className="space-y-4">
               {/* PR box */}
-              <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4">
-                <Award size={24} className="text-red-500" />
+              <div className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-4">
+                <Award size={24} className="text-cyan-500" />
                 <div>
                   <p className="text-sm text-gray-400">All-time geschat 1RM</p>
                   <p className="text-2xl font-bold text-white">{exerciseData.allTimeE1rm.toFixed(1)} kg</p>

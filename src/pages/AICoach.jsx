@@ -16,14 +16,14 @@ const TIME_OPTIONS = [45, 60, 75, 90]
 const ENERGY_OPTIONS = [
   { value: 'low', label: 'Laag', color: 'text-blue-400 bg-blue-500/15' },
   { value: 'medium', label: 'Gemiddeld', color: 'text-yellow-400 bg-yellow-500/15' },
-  { value: 'high', label: 'Hoog', color: 'text-red-400 bg-red-500/15' },
+  { value: 'high', label: 'Hoog', color: 'text-cyan-400 bg-cyan-500/15' },
 ]
 
 const VS_ICONS = {
   up: { icon: ArrowUpRight, color: 'text-green-400', label: 'Omhoog' },
   same: { icon: Minus, color: 'text-gray-400', label: 'Zelfde' },
-  down: { icon: ArrowDownRight, color: 'text-red-400', label: 'Omlaag' },
-  new: { icon: Sparkles, color: 'text-red-400', label: 'Nieuw' },
+  down: { icon: ArrowDownRight, color: 'text-cyan-400', label: 'Omlaag' },
+  new: { icon: Sparkles, color: 'text-cyan-400', label: 'Nieuw' },
 }
 
 const ALL_MUSCLES = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
@@ -40,7 +40,7 @@ function RecoveryBar({ muscle, ms }) {
 
   let barColor = 'bg-green-500'
   let textColor = 'text-green-400'
-  if (effectiveRecovery < 50) { barColor = 'bg-red-500'; textColor = 'text-red-400' }
+  if (effectiveRecovery < 50) { barColor = 'bg-cyan-500'; textColor = 'text-cyan-400' }
   else if (effectiveRecovery < 80) { barColor = 'bg-yellow-500'; textColor = 'text-yellow-400' }
 
   const label = effectiveRecovery >= 90 ? 'Gereed' : effectiveRecovery >= 50 ? 'Herstellend' : 'Vermoeid'
@@ -198,7 +198,7 @@ export default function AICoach() {
   if (analyzing) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center bg-gray-950 px-4">
-        <div className="mb-4 h-10 w-10 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+        <div className="mb-4 h-10 w-10 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
         <p className="text-lg font-semibold text-white">Training analyseren...</p>
         <p className="mt-1 text-sm text-gray-500">Laatste 3 weken data doornemen</p>
       </div>
@@ -219,7 +219,7 @@ export default function AICoach() {
       </button>
 
       <div className="mb-6 flex items-center gap-3">
-        <Sparkles size={28} className="text-red-500" />
+        <Sparkles size={28} className="text-cyan-500" />
         <h1 className="text-2xl font-bold">AI Coach</h1>
       </div>
 
@@ -261,18 +261,18 @@ export default function AICoach() {
                     key={i}
                     className={`flex flex-1 flex-col items-center rounded-lg py-2 text-center ${
                       i === planDayIndex
-                        ? 'bg-red-500/20 ring-1 ring-red-500/50'
+                        ? 'bg-cyan-500/20 ring-1 ring-cyan-500/50'
                         : 'bg-gray-800'
                     }`}
                   >
-                    <span className={`text-[9px] font-medium uppercase tracking-wider ${i === planDayIndex ? 'text-red-400' : 'text-gray-500'}`}>
+                    <span className={`text-[9px] font-medium uppercase tracking-wider ${i === planDayIndex ? 'text-cyan-400' : 'text-gray-500'}`}>
                       Dag {i + 1}
                     </span>
                     <span className={`text-[10px] font-bold mt-0.5 ${i === planDayIndex ? 'text-white' : 'text-gray-400'}`}>
                       {split}
                     </span>
                     {i === planDayIndex && (
-                      <span className="mt-1 text-[8px] text-red-400">Vandaag</span>
+                      <span className="mt-1 text-[8px] text-cyan-400">Vandaag</span>
                     )}
                   </div>
                 ))}
@@ -285,7 +285,7 @@ export default function AICoach() {
             <div className={`mb-4 rounded-xl border px-4 py-3 ${
               phase.color === 'blue' ? 'border-blue-500/30 bg-blue-500/10' :
               phase.color === 'gray' ? 'border-gray-500/30 bg-gray-500/10' :
-              'border-red-500/30 bg-red-500/10'
+              'border-cyan-500/30 bg-cyan-500/10'
             }`}>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                 {phase.label} · Week {block.currentWeek}/{phase.weeks}
@@ -299,8 +299,8 @@ export default function AICoach() {
 
           {/* ── TODAY'S SPLIT ───────────────────────────────── */}
           {selectedSplit && (
-            <div className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-red-400">Vandaag aanbevolen</p>
+            <div className="mb-5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-cyan-400">Vandaag aanbevolen</p>
               <div className="mt-1 flex items-center justify-between">
                 <p className="text-xl font-black text-white">{selectedSplit}</p>
                 {splitScores.length > 1 && (
@@ -324,7 +324,7 @@ export default function AICoach() {
           {/* ── MUSCLE FOCUS ────────────────────────────────── */}
           <div className="mb-5">
             <div className="mb-2 flex items-center gap-2">
-              <Target size={14} className="text-red-500" />
+              <Target size={14} className="text-cyan-500" />
               <h2 className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Extra focus <span className="normal-case font-normal">(optioneel)</span></h2>
             </div>
             <p className="mb-2 text-xs text-gray-600">Tik op spieren om te benadrukken in de training</p>
@@ -339,20 +339,20 @@ export default function AICoach() {
                     onClick={() => toggleFocus(m)}
                     className={`rounded-xl px-3 py-2 text-sm font-medium capitalize transition-colors ${
                       focused
-                        ? 'bg-red-500 text-white'
+                        ? 'bg-cyan-500 text-white'
                         : recovery < 50
-                        ? 'bg-red-500/10 text-red-400 ring-1 ring-red-500/30'
+                        ? 'bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/30'
                         : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
                     }`}
                   >
                     {m}
-                    {focused && <span className="ml-1 text-red-200">★</span>}
+                    {focused && <span className="ml-1 text-cyan-200">★</span>}
                   </button>
                 )
               })}
             </div>
             {focusedMuscles.length > 0 && (
-              <p className="mt-2 text-xs text-red-400">
+              <p className="mt-2 text-xs text-cyan-400">
                 AI voegt extra sets toe voor: {focusedMuscles.join(', ')}
               </p>
             )}
@@ -388,7 +388,7 @@ export default function AICoach() {
                   onClick={() => setTime(t)}
                   className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
                     time === t
-                      ? 'bg-red-500 text-white'
+                      ? 'bg-cyan-500 text-white'
                       : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
                   }`}
                 >
@@ -399,11 +399,11 @@ export default function AICoach() {
           </div>
 
           {error && (
-            <div className="mb-4 flex items-start gap-2 rounded-xl bg-red-900/20 p-4">
-              <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-400" />
+            <div className="mb-4 flex items-start gap-2 rounded-xl bg-cyan-900/20 p-4">
+              <AlertCircle size={18} className="mt-0.5 shrink-0 text-cyan-400" />
               <div>
-                <p className="text-sm text-red-400">{error}</p>
-                <button onClick={handleGenerate} className="mt-2 text-sm font-medium text-red-500">Probeer opnieuw</button>
+                <p className="text-sm text-cyan-400">{error}</p>
+                <button onClick={handleGenerate} className="mt-2 text-sm font-medium text-cyan-500">Probeer opnieuw</button>
               </div>
             </div>
           )}
@@ -411,7 +411,7 @@ export default function AICoach() {
           <button
             onClick={handleGenerate}
             disabled={generating || !selectedSplit}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-red-500 text-lg font-bold text-white disabled:opacity-60 active:scale-[0.97] transition-transform"
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 text-lg font-bold text-white disabled:opacity-60 active:scale-[0.97] transition-transform"
           >
             {generating ? (
               <><Loader2 size={20} className="animate-spin" />Training genereren...</>
@@ -435,7 +435,7 @@ export default function AICoach() {
                 </div>
               )}
               <div className="inline-flex items-center gap-1.5 rounded-full bg-gray-900 px-3 py-1 text-sm text-gray-400">
-                <Flame size={14} className="text-red-500" />
+                <Flame size={14} className="text-cyan-500" />
                 {result.exercises?.length || 0} oefeningen
               </div>
             </div>
@@ -492,8 +492,8 @@ export default function AICoach() {
                           <p className="text-lg font-bold text-white">{ex.reps_min}-{ex.reps_max}</p>
                           <p className="text-[10px] text-gray-500">herh.</p>
                         </div>
-                        <div className="rounded-lg bg-red-500/15 py-2">
-                          <p className="text-lg font-bold text-red-400">{ex.weight_kg}kg</p>
+                        <div className="rounded-lg bg-cyan-500/15 py-2">
+                          <p className="text-lg font-bold text-cyan-400">{ex.weight_kg}kg</p>
                           <p className="text-[10px] text-gray-500">gewicht</p>
                         </div>
                         <div className="rounded-lg bg-gray-800 py-2">
@@ -526,7 +526,7 @@ export default function AICoach() {
           {result.volume_notes && (
             <div className="mb-4 rounded-xl bg-gray-900 px-4 py-3 text-sm text-gray-400 ring-1 ring-gray-800">
               <div className="flex items-start gap-2">
-                <Flame size={14} className="mt-0.5 text-red-500 shrink-0" />
+                <Flame size={14} className="mt-0.5 text-cyan-500 shrink-0" />
                 <span>{result.volume_notes}</span>
               </div>
             </div>
@@ -543,7 +543,7 @@ export default function AICoach() {
             </button>
             <button
               onClick={handleAccept}
-              className="flex h-12 flex-1 items-center justify-center rounded-xl bg-red-500 font-bold text-white active:scale-[0.97] transition-transform"
+              className="flex h-12 flex-1 items-center justify-center rounded-xl bg-cyan-500 font-bold text-white active:scale-[0.97] transition-transform"
             >
               Start training
             </button>

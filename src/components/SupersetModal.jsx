@@ -65,7 +65,7 @@ export default function SupersetModal({ exercises, onApply, onClose }) {
         <div className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Zap size={20} className="text-red-500" />
+              <Zap size={20} className="text-cyan-500" />
               <h3 className="text-lg font-bold text-white">Superset Architect</h3>
             </div>
             <button onClick={onClose} className="p-1 text-gray-500">
@@ -75,13 +75,13 @@ export default function SupersetModal({ exercises, onApply, onClose }) {
         </div>
         
         {/* Time savings banner */}
-        <div className="border-b border-gray-800 bg-red-500/10 px-5 py-4">
+        <div className="border-b border-gray-800 bg-cyan-500/10 px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Clock size={20} className="text-red-400" />
+              <Clock size={20} className="text-cyan-400" />
               <div>
                 <p className="text-sm text-gray-400">Geschatte tijdwinst</p>
-                <p className="text-xl font-bold text-red-400">-{savedMinutes} min ({savedPercent}%)</p>
+                <p className="text-xl font-bold text-cyan-400">-{savedMinutes} min ({savedPercent}%)</p>
               </div>
             </div>
             <div className="text-right text-sm">
@@ -109,7 +109,7 @@ export default function SupersetModal({ exercises, onApply, onClose }) {
           {!confirmed ? (
             <button
               onClick={() => setConfirmed(true)}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-red-500 text-lg font-bold text-white active:scale-[0.98] transition-transform"
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 text-lg font-bold text-white active:scale-[0.98] transition-transform"
             >
               <Zap size={20} />
               Activeer superset modus
@@ -129,7 +129,7 @@ export default function SupersetModal({ exercises, onApply, onClose }) {
                 </button>
                 <button
                   onClick={handleApply}
-                  className="h-12 flex-1 rounded-xl bg-red-500 font-bold text-white active:scale-[0.97] transition-transform"
+                  className="h-12 flex-1 rounded-xl bg-cyan-500 font-bold text-white active:scale-[0.97] transition-transform"
                 >
                   Bevestig
                 </button>
@@ -149,9 +149,9 @@ function SupersetGroup({ group, index }) {
     const setsB = b.plan?.sets || b.sets || 3
     
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+      <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4">
         <div className="mb-3 flex items-center gap-2">
-          <span className="rounded bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+          <span className="rounded bg-cyan-500 px-2 py-0.5 text-xs font-bold text-white">
             SUPERSET
           </span>
           <span className="text-xs text-gray-500">{group.pairReason}</span>
@@ -160,7 +160,7 @@ function SupersetGroup({ group, index }) {
         <div className="space-y-2">
           {/* Exercise A */}
           <div className="flex items-center gap-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20 text-xs font-bold text-red-400">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 text-xs font-bold text-cyan-400">
               A
             </span>
             <div className="flex-1">
@@ -177,7 +177,7 @@ function SupersetGroup({ group, index }) {
           
           {/* Exercise B */}
           <div className="flex items-center gap-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20 text-xs font-bold text-red-400">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 text-xs font-bold text-cyan-400">
               B
             </span>
             <div className="flex-1">

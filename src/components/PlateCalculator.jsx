@@ -73,7 +73,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
         {/* Header */}
         <div className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calculator size={20} className="text-red-500" />
+            <Calculator size={20} className="text-cyan-500" />
             <h2 className="text-lg font-bold text-white">Plate Calculator</h2>
           </div>
           <button onClick={onClose} className="rounded-xl p-2 text-gray-500 active:bg-gray-800">
@@ -92,7 +92,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
             value={customWeight}
             onChange={(e) => setCustomWeight(e.target.value)}
             placeholder="0"
-            className="h-14 w-full rounded-xl bg-gray-900 px-4 text-center text-2xl font-bold text-white outline-none ring-1 ring-gray-800 focus:ring-red-500"
+            className="h-14 w-full rounded-xl bg-gray-900 px-4 text-center text-2xl font-bold text-white outline-none ring-1 ring-gray-800 focus:ring-cyan-500"
           />
         </div>
         
@@ -108,7 +108,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
                 onClick={() => setBarWeight(w)}
                 className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
                   barWeight === w
-                    ? 'bg-red-500 text-white'
+                    ? 'bg-cyan-500 text-white'
                     : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
                 }`}
               >
@@ -138,9 +138,9 @@ export default function PlateCalculator({ targetWeight, onClose }) {
                   {groupedPlates.map(({ weight, count }) => (
                     <div
                       key={weight}
-                      className="flex items-center gap-1.5 rounded-xl bg-red-500/15 px-3 py-2"
+                      className="flex items-center gap-1.5 rounded-xl bg-cyan-500/15 px-3 py-2"
                     >
-                      <span className="text-lg font-bold text-red-400">{count}×</span>
+                      <span className="text-lg font-bold text-cyan-400">{count}×</span>
                       <span className="text-lg font-bold text-white">{weight}kg</span>
                     </div>
                   ))}

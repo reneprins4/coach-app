@@ -27,8 +27,8 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20">
-          <Check size={32} className="text-red-500" />
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/20">
+          <Check size={32} className="text-cyan-500" />
         </div>
         <h2 className="mb-1 text-xl font-bold text-white">Training voltooid</h2>
         <p className="mb-6 text-sm text-gray-400">Geweldige sessie</p>
@@ -72,7 +72,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
                   placeholder="Template naam (bijv. Push Day)"
-                  className="h-10 w-full rounded-xl bg-gray-800 px-4 text-sm text-white placeholder-gray-500 outline-none ring-1 ring-gray-700 focus:ring-red-500"
+                  className="h-10 w-full rounded-xl bg-gray-800 px-4 text-sm text-white placeholder-gray-500 outline-none ring-1 ring-gray-700 focus:ring-cyan-500"
                   autoFocus
                 />
                 <div className="flex gap-2">
@@ -104,7 +104,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
 
         <button
           onClick={onClose}
-          className="h-12 w-full rounded-xl bg-red-500 font-bold text-white active:scale-[0.97] transition-transform"
+          className="h-12 w-full rounded-xl bg-cyan-500 font-bold text-white active:scale-[0.97] transition-transform"
         >
           Klaar
         </button>

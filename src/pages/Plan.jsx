@@ -12,8 +12,8 @@ import { detectFatigue } from '../lib/fatigueDetector'
 
 const PHASE_COLORS = {
   blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25', border: 'border-blue-500/40' },
-  orange: { bg: 'bg-red-500/15', text: 'text-red-400', bar: 'bg-red-500', ring: 'ring-red-500/50',activeBg: 'bg-red-500/25', border: 'border-red-500/40' },
-  red:    { bg: 'bg-red-500/15',    text: 'text-red-400',    bar: 'bg-red-500',    ring: 'ring-red-500/50',   activeBg: 'bg-red-500/25', border: 'border-red-500/40' },
+  orange: { bg: 'bg-cyan-500/15', text: 'text-cyan-400', bar: 'bg-cyan-500', ring: 'ring-cyan-500/50',activeBg: 'bg-cyan-500/25', border: 'border-cyan-500/40' },
+  red:    { bg: 'bg-cyan-500/15',    text: 'text-cyan-400',    bar: 'bg-cyan-500',    ring: 'ring-cyan-500/50',   activeBg: 'bg-cyan-500/25', border: 'border-cyan-500/40' },
   gray:   { bg: 'bg-gray-500/15',   text: 'text-gray-400',   bar: 'bg-gray-500',   ring: 'ring-gray-500/50',  activeBg: 'bg-gray-500/25', border: 'border-gray-500/40' },
 }
 
@@ -88,7 +88,7 @@ export default function Plan() {
               <span className={`text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>Actief blok</span>
               <button
                 onClick={() => setConfirmClear(true)}
-                className="text-xs text-gray-600 active:text-red-400"
+                className="text-xs text-gray-600 active:text-cyan-400"
               >
                 <RotateCcw size={14} />
               </button>
@@ -103,9 +103,9 @@ export default function Plan() {
 
             {/* Vermoeidheid indicator */}
             {fatigue?.fatigued && (
-              <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-500/10 px-3 py-2 text-xs">
-                <span className="h-2 w-2 rounded-full bg-red-500" />
-                <span className="text-red-400">
+              <div className="mb-3 flex items-center gap-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-xs">
+                <span className="h-2 w-2 rounded-full bg-cyan-500" />
+                <span className="text-cyan-400">
                   {fatigue.recommendation === 'urgent'
                     ? 'Vermoeidheid gedetecteerd — deload aanbevolen'
                     : 'Signalen van vermoeidheid gedetecteerd'}
@@ -139,7 +139,7 @@ export default function Plan() {
                       {wt.isDeload ? 'Deload' : `RPE ${wt.rpe}`}
                     </span>
                     {isDone && <CheckCircle2 size={12} className="mt-1 text-green-500" />}
-                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-red-400 font-bold">Nu</span>}
+                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-cyan-400 font-bold">Nu</span>}
                   </div>
                 )
               })}
@@ -172,7 +172,7 @@ export default function Plan() {
           {/* Start workout CTA */}
           <button
             onClick={() => nav('/coach')}
-            className="flex h-14 w-full items-center gap-3 rounded-2xl bg-red-500 px-5 font-bold text-white active:scale-[0.97] transition-transform mb-4"
+            className="flex h-14 w-full items-center gap-3 rounded-2xl bg-cyan-500 px-5 font-bold text-white active:scale-[0.97] transition-transform mb-4"
           >
             <Sparkles size={20} />
             Genereer training van vandaag
@@ -193,7 +193,7 @@ export default function Plan() {
                     <Icon size={16} className={isCurrent ? c.text : 'text-gray-500'} />
                     <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-gray-500'}`}>{p.label.split(' ')[0]}</span>
                     <span className={`text-[8px] ${isCurrent ? c.text : 'text-gray-700'}`}>{p.weeks}w</span>
-                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-red-400">actief</span>}
+                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-cyan-400">actief</span>}
                   </div>
                 )
               })}
@@ -264,7 +264,7 @@ export default function Plan() {
             <p className="mb-6 text-sm text-gray-400">Je kunt daarna direct een nieuw blok starten.</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmClear(false)} className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700">Annuleer</button>
-              <button onClick={handleClear} className="h-12 flex-1 rounded-xl bg-red-600 font-semibold text-white">Blok beëindigen</button>
+              <button onClick={handleClear} className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white">Blok beëindigen</button>
             </div>
           </div>
         </div>

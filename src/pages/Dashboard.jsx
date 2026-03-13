@@ -77,8 +77,8 @@ export default function Dashboard() {
 
   const phaseColors = {
     blue:   { bg: 'bg-blue-500/10',   text: 'text-blue-400',   bar: 'bg-blue-500',   border: 'border-blue-500/20' },
-    orange: { bg: 'bg-red-500/10', text: 'text-red-400', bar: 'bg-red-500', border: 'border-red-500/20' },
-    red:    { bg: 'bg-red-500/10',    text: 'text-red-400',    bar: 'bg-red-500',    border: 'border-red-500/20' },
+    orange: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', bar: 'bg-cyan-500', border: 'border-cyan-500/20' },
+    red:    { bg: 'bg-cyan-500/10',    text: 'text-cyan-400',    bar: 'bg-cyan-500',    border: 'border-cyan-500/20' },
     gray:   { bg: 'bg-gray-500/10',   text: 'text-gray-400',   bar: 'bg-gray-500',   border: 'border-gray-500/20' },
   }
   const phaseColor = phaseColors[phase?.color || 'orange']
@@ -86,7 +86,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
       </div>
     )
   }
@@ -102,7 +102,7 @@ export default function Dashboard() {
         </p>
         <button
           onClick={() => nav('/log')}
-          className="mb-4 w-full max-w-xs rounded-xl bg-red-500 px-6 py-4 font-bold text-white transition-colors active:bg-red-600"
+          className="mb-4 w-full max-w-xs rounded-xl bg-cyan-500 px-6 py-4 font-bold text-white transition-colors active:bg-cyan-600"
         >
           Start eerste training
         </button>
@@ -202,7 +202,7 @@ export default function Dashboard() {
       <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Spierherstel</p>
-          <Link to="/coach" className="text-xs font-medium text-red-500">Nu trainen</Link>
+          <Link to="/coach" className="text-xs font-medium text-cyan-500">Nu trainen</Link>
         </div>
         <div className="space-y-2.5">
           {MUSCLE_ORDER.map(muscle => {
@@ -211,7 +211,7 @@ export default function Dashboard() {
             const pct = ms.recoveryPct || 0
             let barColor = 'bg-green-500'
             let textColor = 'text-green-400'
-            if (pct < 50) { barColor = 'bg-red-500'; textColor = 'text-red-400' }
+            if (pct < 50) { barColor = 'bg-cyan-500'; textColor = 'text-cyan-400' }
             else if (pct < 90) { barColor = 'bg-yellow-500'; textColor = 'text-yellow-400' }
 
             return (
@@ -233,7 +233,7 @@ export default function Dashboard() {
         <div className="mt-3 flex gap-4 text-[10px] text-gray-600">
           <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-green-500" />Gereed</span>
           <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />Herstellend</span>
-          <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-500" />Vermoeid</span>
+          <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-cyan-500" />Vermoeid</span>
         </div>
       </div>
 
@@ -255,11 +255,11 @@ export default function Dashboard() {
                 <span className="w-24 text-[11px] text-gray-400">{MUSCLE_NL[muscle] || muscle}</span>
                 <div className="relative flex-1 h-1.5 overflow-hidden rounded-full bg-gray-800">
                   <div
-                    className={`h-full rounded-full ${over ? 'bg-red-500' : hit ? 'bg-green-500' : 'bg-blue-500'}`}
+                    className={`h-full rounded-full ${over ? 'bg-cyan-500' : hit ? 'bg-green-500' : 'bg-blue-500'}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className={`w-10 text-right text-[10px] tabular-nums ${over ? 'text-red-400' : hit ? 'text-green-400' : 'text-gray-600'}`}>
+                <span className={`w-10 text-right text-[10px] tabular-nums ${over ? 'text-cyan-400' : hit ? 'text-green-400' : 'text-gray-600'}`}>
                   {ms.setsThisWeek}/{ms.target.min}
                 </span>
               </div>
@@ -276,7 +276,7 @@ export default function Dashboard() {
             {stats.recentPRs.map(pr => (
               <div key={pr.name} className="flex items-center justify-between">
                 <span className="text-sm text-white">{pr.name}</span>
-                <span className="text-sm font-bold tabular-nums text-red-500">{pr.weight}kg x {pr.reps}</span>
+                <span className="text-sm font-bold tabular-nums text-cyan-500">{pr.weight}kg x {pr.reps}</span>
               </div>
             ))}
           </div>
@@ -286,14 +286,14 @@ export default function Dashboard() {
       {/* CTA */}
       <button
         onClick={() => nav('/coach')}
-        className="flex h-14 w-full items-center gap-4 rounded-xl bg-red-500 px-5 text-left transition-colors active:bg-red-600"
+        className="flex h-14 w-full items-center gap-4 rounded-xl bg-cyan-500 px-5 text-left transition-colors active:bg-cyan-600"
       >
         <Sparkles size={20} className="text-white shrink-0" />
         <div className="flex-1">
           <p className="font-bold text-white">Genereer training van vandaag</p>
-          <p className="text-xs text-red-200">AI personaliseert op basis van jouw herstel</p>
+          <p className="text-xs text-cyan-200">AI personaliseert op basis van jouw herstel</p>
         </div>
-        <ChevronRight size={18} className="text-red-200 shrink-0" />
+        <ChevronRight size={18} className="text-cyan-200 shrink-0" />
       </button>
     </div>
   )

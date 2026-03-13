@@ -17,7 +17,7 @@ export default function RestTimerBar({ remaining, total, onStop }) {
     <div className="border-b border-gray-800 bg-gray-900 px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-lg font-bold text-red-500">
+          <span className="font-mono text-lg font-bold text-cyan-500">
             {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
           </span>
           <div>
@@ -33,7 +33,7 @@ export default function RestTimerBar({ remaining, total, onStop }) {
       </div>
       <div className="mt-2 h-1 overflow-hidden rounded-full bg-gray-800">
         <div
-          className="h-full rounded-full bg-red-500 transition-all duration-1000"
+          className="h-full rounded-full bg-cyan-500 transition-all duration-1000"
           style={{ width: `${progress * 100}%` }}
         />
       </div>

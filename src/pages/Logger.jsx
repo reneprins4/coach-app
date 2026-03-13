@@ -171,14 +171,14 @@ export default function Logger() {
         <div className="space-y-3">
           <button
             onClick={() => nav('/coach')}
-            className="flex w-full items-center gap-4 rounded-2xl bg-red-500 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+            className="flex w-full items-center gap-4 rounded-2xl bg-cyan-500 px-5 py-4 text-left active:scale-[0.97] transition-transform"
           >
             <Sparkles size={24} className="text-white shrink-0" />
             <div className="flex-1">
               <p className="font-bold text-white">AI workout genereren</p>
-              <p className="text-sm text-red-200">Gepersonaliseerd op basis van jouw herstel</p>
+              <p className="text-sm text-cyan-200">Gepersonaliseerd op basis van jouw herstel</p>
             </div>
-            <ChevronRight size={18} className="text-red-200 shrink-0" />
+            <ChevronRight size={18} className="text-cyan-200 shrink-0" />
           </button>
 
           <button
@@ -261,7 +261,7 @@ export default function Logger() {
               <h1 className="text-lg font-bold text-white">{workoutType}</h1>
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <div className="flex items-center gap-1">
-                  <Timer size={14} className="text-red-500" />
+                  <Timer size={14} className="text-cyan-500" />
                   <span className="font-mono">{formatTime(aw.elapsed)}</span>
                 </div>
                 <span>-</span>
@@ -274,7 +274,7 @@ export default function Logger() {
               {!supersetMode && aw.workout.exercises.length >= 2 && (
                 <button
                   onClick={() => setShowSupersetModal(true)}
-                  className="flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-red-400 ring-1 ring-red-500/30 active:bg-red-500/10"
+                  className="flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-cyan-400 ring-1 ring-cyan-500/30 active:bg-cyan-500/10"
                   title="Superset modus"
                 >
                   <Sparkles size={16} />
@@ -284,7 +284,7 @@ export default function Logger() {
               {supersetMode && (
                 <button
                   onClick={handleExitSupersetMode}
-                  className="flex h-10 items-center gap-1.5 rounded-xl bg-red-500/20 px-3 text-sm font-medium text-red-400 ring-1 ring-red-500/50 active:bg-red-500/30"
+                  className="flex h-10 items-center gap-1.5 rounded-xl bg-cyan-500/20 px-3 text-sm font-medium text-cyan-400 ring-1 ring-cyan-500/50 active:bg-cyan-500/30"
                 >
                   <Sparkles size={16} />
                   <span className="hidden sm:inline">Superset aan</span>
@@ -299,7 +299,7 @@ export default function Logger() {
               <button
                 onClick={handleFinishClick}
                 disabled={aw.saving || aw.totalSets === 0}
-                className="h-10 rounded-xl bg-red-500 px-4 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
+                className="h-10 rounded-xl bg-cyan-500 px-4 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
               >
                 {aw.saving ? 'Opslaan...' : 'Afronden'}
               </button>
@@ -307,7 +307,7 @@ export default function Logger() {
           </div>
         </div>
         {aw.error && (
-          <p className="mx-4 mb-3 rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400">{aw.error}</p>
+          <p className="mx-4 mb-3 rounded-lg bg-cyan-900/30 px-3 py-2 text-sm text-cyan-400">{aw.error}</p>
         )}
         {momentum && (
           <div className="px-4 pb-3">
@@ -438,7 +438,7 @@ export default function Logger() {
               </button>
               <button
                 onClick={() => { aw.discardWorkout(); setShowDiscard(false) }}
-                className="h-12 flex-1 rounded-xl bg-red-600 font-semibold text-white active:bg-red-700"
+                className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white active:bg-cyan-700"
               >
                 Stoppen
               </button>
@@ -486,7 +486,7 @@ export default function Logger() {
               </button>
               <button
                 onClick={handleFinish}
-                className="h-12 flex-1 rounded-xl bg-red-500 font-semibold text-white active:bg-red-600"
+                className="h-12 flex-1 rounded-xl bg-cyan-500 font-semibold text-white active:bg-cyan-600"
               >
                 Afronden
               </button>
@@ -593,7 +593,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
           <p className="text-xs text-gray-500">Vervangen</p>
           <p className="font-semibold text-white">{exercise.name}</p>
           {exercise.muscle_group && (
-            <p className="text-xs capitalize text-red-400">{exercise.muscle_group}</p>
+            <p className="text-xs capitalize text-cyan-400">{exercise.muscle_group}</p>
           )}
         </div>
 
@@ -607,7 +607,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                   onClick={() => setReason(r.value)}
                   className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
                     reason === r.value
-                      ? 'bg-red-500/20 ring-1 ring-red-500/50'
+                      ? 'bg-cyan-500/20 ring-1 ring-cyan-500/50'
                       : 'bg-gray-800 ring-1 ring-gray-700'
                   }`}
                 >
@@ -617,20 +617,20 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
               ))}
             </div>
 
-            {error && <p className="mb-3 text-sm text-red-400">{error}</p>}
+            {error && <p className="mb-3 text-sm text-cyan-400">{error}</p>}
 
             <button
               onClick={handleFetch}
               disabled={!reason || loading}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500 font-bold text-white disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-bold text-white disabled:opacity-50"
             >
               {loading ? <><Loader2 size={18} className="animate-spin" /> Alternatief zoeken...</> : <><RefreshCw size={18} /> Zoek alternatief</>}
             </button>
           </>
         ) : (
           <>
-            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-red-400">Voorgesteld alternatief</p>
+            <div className="mb-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">Voorgesteld alternatief</p>
               <p className="text-xl font-black text-white">{suggestion.name}</p>
               <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -638,8 +638,8 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                   <p className="font-bold text-white">{suggestion.sets}x{suggestion.reps_min}-{suggestion.reps_max}</p>
                   <p className="text-[10px] text-gray-500">sets x herh.</p>
                 </div>
-                <div className="rounded-lg bg-red-500/20 py-2">
-                  <p className="font-bold text-red-400">{suggestion.weight_kg}kg</p>
+                <div className="rounded-lg bg-cyan-500/20 py-2">
+                  <p className="font-bold text-cyan-400">{suggestion.weight_kg}kg</p>
                   <p className="text-[10px] text-gray-500">gewicht</p>
                 </div>
                 <div className="rounded-lg bg-gray-800 py-2">
@@ -651,7 +651,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                 <p className="mt-3 text-xs text-gray-400">{suggestion.why}</p>
               )}
               {suggestion.notes && (
-                <p className="mt-1 text-xs text-red-300">{suggestion.notes}</p>
+                <p className="mt-1 text-xs text-cyan-300">{suggestion.notes}</p>
               )}
             </div>
 
@@ -664,7 +664,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
               </button>
               <button
                 onClick={() => onAccept(suggestion)}
-                className="h-12 flex-1 rounded-xl bg-red-500 font-bold text-white active:scale-[0.97] transition-transform"
+                className="h-12 flex-1 rounded-xl bg-cyan-500 font-bold text-white active:scale-[0.97] transition-transform"
               >
                 Gebruik dit
               </button>
@@ -753,7 +753,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               {aiTarget && (
                 <>
                   <span className="text-gray-700">-</span>
-                  <span className="text-red-400">Doel: {aiTarget}</span>
+                  <span className="text-cyan-400">Doel: {aiTarget}</span>
                 </>
               )}
             </div>
@@ -784,7 +784,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
                 </button>
                 <button
                   onClick={() => { onRemove(); setShowMenu(false) }}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-red-400 active:bg-gray-700"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-cyan-400 active:bg-gray-700"
                 >
                   Verwijderen
                 </button>
@@ -831,7 +831,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
             <button
               type="button"
               onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
-              className="flex items-center gap-1 text-xs text-red-400 active:text-red-300"
+              className="flex items-center gap-1 text-xs text-cyan-400 active:text-cyan-300"
             >
               <Calculator size={12} />
               <span>Plates</span>
@@ -904,7 +904,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         <div className="mb-4 flex items-center justify-center gap-3">
           <button
             onClick={() => setShowRpe(!showRpe)}
-            className={`text-sm ${showRpe ? 'font-medium text-red-400' : 'text-gray-600'}`}
+            className={`text-sm ${showRpe ? 'font-medium text-cyan-400' : 'text-gray-600'}`}
           >
             {showRpe ? `RPE ${rpe}` : 'RPE toevoegen'}
           </button>
@@ -924,7 +924,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         {/* Add set button */}
         <button
           onClick={handleAdd}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-red-500 text-lg font-bold text-white active:scale-[0.98] transition-transform"
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 text-lg font-bold text-white active:scale-[0.98] transition-transform"
         >
           <Plus size={20} strokeWidth={3} />
           SET LOGGEN
@@ -946,11 +946,11 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
 
   if (group.type === 'superset') {
     return (
-      <div className="rounded-2xl border-2 border-red-500/30 bg-red-500/5 p-3">
+      <div className="rounded-2xl border-2 border-cyan-500/30 bg-cyan-500/5 p-3">
         {/* Superset header */}
         <div className="mb-3 flex items-center gap-2 px-1">
-          <Sparkles size={14} className="text-red-500" />
-          <span className="text-xs font-bold uppercase tracking-wider text-red-400">
+          <Sparkles size={14} className="text-cyan-500" />
+          <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
             Superset {groupIndex + 1}
           </span>
           <span className="text-xs text-gray-500">- {group.pairReason}</span>
@@ -959,7 +959,7 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
         {/* Exercise A */}
         <div className="mb-2">
           <div className="mb-1 flex items-center gap-2 px-1">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">A</span>
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-xs font-bold text-white">A</span>
             <span className="text-xs text-gray-400">Geen rust na deze</span>
           </div>
           <ExerciseBlock
@@ -982,13 +982,13 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
         
         {/* Arrow connector */}
         <div className="my-2 flex items-center justify-center">
-          <div className="h-6 w-px bg-red-500/30"></div>
+          <div className="h-6 w-px bg-cyan-500/30"></div>
         </div>
         
         {/* Exercise B */}
         <div>
           <div className="mb-1 flex items-center gap-2 px-1">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">B</span>
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-xs font-bold text-white">B</span>
             <span className="text-xs text-gray-400">{group.restAfter}s rust na deze</span>
           </div>
           <ExerciseBlock
