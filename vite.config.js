@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico'],
       manifest: {
-        name: 'Coach App',
-        short_name: 'Coach',
+        name: 'Ragnarok Fit',
+        short_name: 'Ragnarok Fit',
         description: 'Personal training coach',
         theme_color: '#030712',
         background_color: '#030712',

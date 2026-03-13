@@ -58,7 +58,7 @@ export default function Login({ onSignIn }) {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500">
             <Dumbbell size={32} className="text-white" />
           </div>
-          <h1 className="text-3xl font-black text-white">Coach App</h1>
+          <h1 className="text-3xl font-black text-white">Ragnarok Fit</h1>
           <p className="mt-1 text-gray-500">Jouw persoonlijke training coach</p>
         </div>
 
