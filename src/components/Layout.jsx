@@ -2,11 +2,11 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, Dumbbell, CalendarDays, TrendingUp, User } from 'lucide-react'
 
 const tabs = [
-  { to: '/',        icon: LayoutDashboard, label: 'Home'     },
-  { to: '/plan',    icon: CalendarDays,    label: 'Plan'     },
-  { to: '/log',     icon: Dumbbell,        label: 'Trainen'  },
-  { to: '/progress',icon: TrendingUp,      label: 'Voortgang'},
-  { to: '/profile', icon: User,            label: 'Profiel'  },
+  { to: '/',         icon: LayoutDashboard, label: 'Home'     },
+  { to: '/calendar', icon: CalendarDays,    label: 'Kalender' },
+  { to: '/log',      icon: Dumbbell,        label: 'Trainen'  },
+  { to: '/progress', icon: TrendingUp,      label: 'Voortgang'},
+  { to: '/profile',  icon: User,            label: 'Profiel'  },
 ]
 
 export default function Layout() {

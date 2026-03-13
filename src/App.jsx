@@ -12,6 +12,7 @@ const Progress = lazy(() => import('./pages/Progress'))
 const AICoach = lazy(() => import('./pages/AICoach'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Plan = lazy(() => import('./pages/Plan'))
+const Calendar = lazy(() => import('./pages/Calendar'))
 
 // Auth context
 const AuthContext = createContext(null)
@@ -58,6 +59,7 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/calendar" element={<Calendar />} />
               <Route path="/plan" element={<Plan />} />
               <Route path="/log" element={<Logger />} />
               <Route path="/history" element={<History />} />

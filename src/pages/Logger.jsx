@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Info, Calculator, BookOpen } from 'lucide-react'
+import { Plus, Minus, Timer, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Calculator, BookOpen, MoreVertical, X } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
-import { useExercises, useFilteredExercises } from '../hooks/useExercises'
+import { useExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
 import { useTemplates } from '../hooks/useTemplates'
 import { getExerciseHistory } from '../hooks/useWorkouts'
@@ -31,12 +31,11 @@ export default function Logger() {
   const [finishResult, setFinishResult] = useState(null)
   const [showDiscard, setShowDiscard] = useState(false)
   const [showConfirmFinish, setShowConfirmFinish] = useState(false)
-  const [swapTarget, setSwapTarget] = useState(null) // exercise being swapped
-  const [toast, setToast] = useState(null) // { message, action, onAction }
+  const [swapTarget, setSwapTarget] = useState(null)
+  const [toast, setToast] = useState(null)
   const [plateCalcWeight, setPlateCalcWeight] = useState(null)
   const [showTemplates, setShowTemplates] = useState(false)
 
-  // Auto-load AI-generated pending workout when navigating from Coach
   useEffect(() => {
     const raw = localStorage.getItem('coach-pending-workout')
     if (raw && !aw.isActive) {
@@ -46,7 +45,7 @@ export default function Logger() {
       } catch {}
       localStorage.removeItem('coach-pending-workout')
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   function handleFinishClick() {
     setShowConfirmFinish(true)
@@ -105,7 +104,6 @@ export default function Logger() {
         <p className="mb-7 text-sm text-gray-400">Kies hoe je wilt beginnen</p>
 
         <div className="space-y-3">
-          {/* AI Workout optie */}
           <button
             onClick={() => nav('/coach')}
             className="flex w-full items-center gap-4 rounded-2xl bg-red-500 px-5 py-4 text-left active:scale-[0.97] transition-transform"
@@ -118,7 +116,6 @@ export default function Logger() {
             <ChevronRight size={18} className="text-red-200 shrink-0" />
           </button>
 
-          {/* Template optie */}
           <button
             onClick={() => setShowTemplates(true)}
             className="flex w-full items-center gap-4 rounded-2xl border border-gray-700 bg-gray-900 px-5 py-4 text-left active:scale-[0.97] transition-transform"
@@ -135,7 +132,6 @@ export default function Logger() {
             <ChevronRight size={18} className="text-gray-600 shrink-0" />
           </button>
 
-          {/* Volgende uit programma (alleen als er een actief blok is) */}
           {block && phase && weekTarget && (
             <button
               onClick={() => nav('/coach')}
@@ -145,15 +141,14 @@ export default function Logger() {
               <div className="flex-1">
                 <p className="font-bold text-white">Volgende uit programma</p>
                 <p className="text-sm text-blue-300">
-                  {phase.label} · Week {block.currentWeek}/{phase.weeks} ·{' '}
-                  {weekTarget.isDeload ? 'Deload' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} herh.`}
+                  {phase.label} - Week {block.currentWeek}/{phase.weeks} -{' '}
+                  {weekTarget.isDeload ? 'Deload' : `RPE ${weekTarget.rpe} - ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} herh.`}
                 </p>
               </div>
               <ChevronRight size={18} className="text-blue-400 shrink-0" />
             </button>
           )}
 
-          {/* Losse training */}
           <button
             onClick={() => aw.startWorkout()}
             className="flex w-full items-center gap-4 rounded-2xl border border-gray-700 bg-gray-900 px-5 py-4 text-left active:scale-[0.97] transition-transform"
@@ -167,7 +162,6 @@ export default function Logger() {
           </button>
         </div>
 
-        {/* Template Library Modal */}
         {showTemplates && (
           <TemplateLibrary
             templates={templates.templates}
@@ -177,7 +171,6 @@ export default function Logger() {
           />
         )}
 
-        {/* Toast */}
         {toast && (
           <Toast
             message={toast.message}
@@ -190,40 +183,47 @@ export default function Logger() {
     )
   }
 
+  // Get workout type name from exercises
+  const workoutType = getWorkoutType(aw.workout.exercises)
+
   return (
-    <div className="flex min-h-dvh flex-col bg-gray-950 pb-24">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950/95 px-4 py-3 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <Timer size={16} className="text-red-500" />
-              <span className="font-mono text-lg font-bold text-white">
-                {formatTime(aw.elapsed)}
-              </span>
+    <div className="flex min-h-dvh flex-col bg-gray-950 pb-28">
+      {/* Sticky Workout Header */}
+      <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950/95 backdrop-blur-sm">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h1 className="text-lg font-bold text-white">{workoutType}</h1>
+              <div className="flex items-center gap-3 text-sm text-gray-400">
+                <div className="flex items-center gap-1">
+                  <Timer size={14} className="text-red-500" />
+                  <span className="font-mono">{formatTime(aw.elapsed)}</span>
+                </div>
+                <span>-</span>
+                <span>{aw.totalSets} sets</span>
+                <span>-</span>
+                <span>{formatVolume(aw.totalVolume)}</span>
+              </div>
             </div>
-            <p className="text-xs text-gray-500">
-              {aw.totalSets} sets / {formatVolume(aw.totalVolume)}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowDiscard(true)}
-              className="h-10 rounded-xl px-3 text-sm text-gray-400 ring-1 ring-gray-800 active:bg-gray-900"
-            >
-              Stoppen
-            </button>
-            <button
-              onClick={handleFinishClick}
-              disabled={aw.saving || aw.totalSets === 0}
-              className="h-10 rounded-xl bg-red-500 px-5 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
-            >
-              {aw.saving ? 'Opslaan...' : 'Afronden'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDiscard(true)}
+                className="h-10 rounded-xl px-3 text-sm text-gray-400 ring-1 ring-gray-700 active:bg-gray-900"
+              >
+                Stop
+              </button>
+              <button
+                onClick={handleFinishClick}
+                disabled={aw.saving || aw.totalSets === 0}
+                className="h-10 rounded-xl bg-red-500 px-4 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
+              >
+                {aw.saving ? 'Opslaan...' : 'Afronden'}
+              </button>
+            </div>
           </div>
         </div>
         {aw.error && (
-          <p className="mt-2 rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400">{aw.error}</p>
+          <p className="mx-4 mb-3 rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400">{aw.error}</p>
         )}
       </header>
 
@@ -250,11 +250,15 @@ export default function Logger() {
         ))}
 
         {aw.workout.exercises.length === 0 && (
-          <p className="py-16 text-center text-gray-600">Voeg een oefening toe om te beginnen</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <Dumbbell size={48} className="mb-4 text-gray-700" />
+            <p className="text-gray-500">Voeg een oefening toe om te beginnen</p>
+          </div>
         )}
 
         {/* Notes */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
+          <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">Notities</label>
           <textarea
             value={aw.workout.notes}
             onChange={(e) => aw.updateNotes(e.target.value)}
@@ -269,7 +273,7 @@ export default function Logger() {
       <div className="fixed bottom-20 left-0 right-0 z-30 px-4 pb-2">
         <button
           onClick={() => setShowPicker(true)}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-800 active:bg-gray-800"
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-700 active:bg-gray-800"
         >
           <Plus size={20} />
           Oefening toevoegen
@@ -319,7 +323,6 @@ export default function Logger() {
         </div>
       )}
 
-      {/* Swap exercise modal */}
       {swapTarget && (
         <SwapModal
           exercise={swapTarget}
@@ -345,7 +348,6 @@ export default function Logger() {
         />
       )}
 
-      {/* Confirm finish modal */}
       {showConfirmFinish && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
@@ -369,7 +371,6 @@ export default function Logger() {
         </div>
       )}
 
-      {/* Plate calculator */}
       {plateCalcWeight !== null && (
         <PlateCalculator
           targetWeight={plateCalcWeight}
@@ -377,7 +378,6 @@ export default function Logger() {
         />
       )}
 
-      {/* Toast notification */}
       {toast && (
         <Toast
           message={toast.message}
@@ -388,6 +388,31 @@ export default function Logger() {
       )}
     </div>
   )
+}
+
+// Helper to determine workout type from exercises
+function getWorkoutType(exercises) {
+  if (!exercises || exercises.length === 0) return 'Workout'
+  
+  const muscles = exercises.map(e => e.muscle_group?.toLowerCase()).filter(Boolean)
+  const uniqueMuscles = [...new Set(muscles)]
+  
+  if (uniqueMuscles.length === 0) return 'Workout'
+  
+  // Check for common splits
+  const hasChest = uniqueMuscles.some(m => m.includes('chest') || m.includes('borst'))
+  const hasBack = uniqueMuscles.some(m => m.includes('back') || m.includes('rug'))
+  const hasShoulders = uniqueMuscles.some(m => m.includes('shoulder') || m.includes('schouder'))
+  const hasLegs = uniqueMuscles.some(m => m.includes('leg') || m.includes('quad') || m.includes('hamstring') || m.includes('glute') || m.includes('been'))
+  const hasArms = uniqueMuscles.some(m => m.includes('bicep') || m.includes('tricep') || m.includes('arm'))
+  
+  if (hasChest && (hasShoulders || hasArms) && !hasBack && !hasLegs) return 'Push Day'
+  if (hasBack && !hasChest && !hasLegs) return 'Pull Day'
+  if (hasLegs && !hasChest && !hasBack) return 'Leg Day'
+  if (hasChest && hasBack) return 'Upper Body'
+  if (uniqueMuscles.length === 1) return uniqueMuscles[0].charAt(0).toUpperCase() + uniqueMuscles[0].slice(1)
+  
+  return 'Full Body'
 }
 
 // ── SWAP MODAL ───────────────────────────────────────────────────────────────
@@ -478,8 +503,8 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
               <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-lg bg-gray-800 py-2">
-                  <p className="font-bold text-white">{suggestion.sets}×{suggestion.reps_min}-{suggestion.reps_max}</p>
-                  <p className="text-[10px] text-gray-500">sets×herh.</p>
+                  <p className="font-bold text-white">{suggestion.sets}x{suggestion.reps_min}-{suggestion.reps_max}</p>
+                  <p className="text-[10px] text-gray-500">sets x herh.</p>
                 </div>
                 <div className="rounded-lg bg-red-500/20 py-2">
                   <p className="font-bold text-red-400">{suggestion.weight_kg}kg</p>
@@ -519,7 +544,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
   )
 }
 
-// ── EXERCISE BLOCK ────────────────────────────────────────────────────────────
+// ── EXERCISE BLOCK (REDESIGNED) ──────────────────────────────────────────────
 function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed }) {
   const [weight, setWeight] = useState(
     exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
@@ -530,13 +555,27 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
   const [prevData, setPrevData] = useState(null)
   const [prevLoaded, setPrevLoaded] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false)
+      }
+    }
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showMenu])
 
   // Load previous session data
   if (!prevLoaded) {
     setPrevLoaded(true)
     getExerciseHistory(exercise.name, userId).then(data => {
       if (data.length > 0) {
-        // Group by workout, get the most recent workout's sets
         const latest = data[0]
         setPrevData({ weight: latest.weight_kg, reps: latest.reps })
       }
@@ -561,162 +600,179 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
     setReps(String(Math.max(0, current + delta)))
   }
 
+  // Build AI target string
+  const aiTarget = exercise.plan ? (
+    `${exercise.plan.sets}x${exercise.plan.reps_min || exercise.plan.reps_target}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${exercise.plan.weight_kg}kg`
+  ) : null
+
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-      <div className="mb-1 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-base font-bold text-white">{exercise.name}</h3>
-          <button onClick={() => setShowGuide(true)} className="text-gray-600 active:text-red-400">
-            <Info size={15} />
-          </button>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={onSwap}
-            className="flex items-center gap-1 rounded-lg bg-gray-800 px-2 py-1.5 text-xs text-gray-400 active:text-red-400"
-            title="Wissel oefening"
-          >
-            <RefreshCw size={13} />
-            <span>Wissel</span>
-          </button>
-          <button onClick={onRemove} className="p-2 text-gray-600 active:text-red-400">
-            <X size={18} />
-          </button>
+    <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900">
+      {/* Header */}
+      <div className="border-b border-gray-800 px-4 py-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-white truncate">{exercise.name}</h3>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              {exercise.muscle_group && (
+                <span className="capitalize">{exercise.muscle_group}</span>
+              )}
+              {aiTarget && (
+                <>
+                  <span className="text-gray-700">-</span>
+                  <span className="text-red-400">Doel: {aiTarget}</span>
+                </>
+              )}
+            </div>
+          </div>
+          
+          {/* 3-dot menu */}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 active:bg-gray-800"
+            >
+              <MoreVertical size={20} />
+            </button>
+            
+            {showMenu && (
+              <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-gray-700 bg-gray-800 shadow-xl">
+                <button
+                  onClick={() => { setShowGuide(true); setShowMenu(false) }}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white active:bg-gray-700"
+                >
+                  Uitleg
+                </button>
+                <button
+                  onClick={() => { onSwap(); setShowMenu(false) }}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white active:bg-gray-700"
+                >
+                  Wissel oefening
+                </button>
+                <button
+                  onClick={() => { onRemove(); setShowMenu(false) }}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-red-400 active:bg-gray-700"
+                >
+                  Verwijderen
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
       {showGuide && <ExerciseGuide exercise={exercise} onClose={() => setShowGuide(false)} />}
 
-      {/* AI plan targets */}
-      {exercise.plan && (
-        <div className="mb-2 flex items-center gap-3 rounded-lg bg-red-500/10 px-3 py-1.5 text-xs text-red-400">
-          <Sparkles size={12} />
-          <span>
-            Doel: {exercise.plan.sets}x{exercise.plan.reps_min || exercise.plan.reps_target}
-            {exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''}
-            {' '}@ {exercise.plan.weight_kg}kg
-            {exercise.plan.rpe_target ? ` RPE ${exercise.plan.rpe_target}` : ''}
-          </span>
-        </div>
-      )}
-
-      {/* Previous session hint */}
-      {prevData && (
-        <p className="mb-3 text-xs text-gray-500">
-          Vorige keer: {prevData.weight}kg x {prevData.reps}
-        </p>
-      )}
-
-      {/* Set list */}
+      {/* Logged sets - compact display */}
       {exercise.sets.length > 0 && (
-        <div className="mb-3">
-          <div className="grid grid-cols-[1.5rem_1fr_1fr_3rem_2rem] gap-1 px-1 text-[10px] font-medium uppercase tracking-wider text-gray-600">
-            <span>#</span><span>Kg</span><span>Reps</span><span>RPE</span><span />
-          </div>
-          {exercise.sets.map((s, i) => (
-            <div key={s.id} className="grid grid-cols-[1.5rem_1fr_1fr_3rem_2rem] items-center gap-1 rounded-lg px-1 py-2 text-sm">
-              <span className="text-gray-600">{i + 1}</span>
-              <span className="font-medium text-white">{s.weight_kg}</span>
-              <span className="font-medium text-white">{s.reps}</span>
-              <span className="text-gray-400">{s.rpe || '-'}</span>
-              <button
+        <div className="border-b border-gray-800 px-4 py-3">
+          <div className="space-y-2">
+            {exercise.sets.map((s, i) => (
+              <div
+                key={s.id}
                 onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-                className="p-1 text-gray-700 active:text-red-400"
+                className="flex items-center justify-between rounded-xl bg-gray-800 px-4 py-3 active:bg-gray-700"
               >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center gap-4">
+                  <span className="w-12 text-sm font-medium text-gray-500">Set {i + 1}</span>
+                  <span className="text-base font-bold text-white">{s.weight_kg}kg x {s.reps}</span>
+                  {s.rpe && (
+                    <span className="text-sm text-gray-500">RPE {s.rpe}</span>
+                  )}
+                </div>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/20">
+                  <Check size={14} className="text-green-400" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Input row */}
-      <div className="space-y-2">
-        <div className="flex items-end gap-2">
-          {/* Weight with +/- */}
-          <div className="flex-1">
-            <div className="mb-1 flex items-center justify-between">
-              <label className="block text-[10px] uppercase tracking-wider text-gray-500">Gewicht (kg)</label>
-              <button
-                type="button"
-                onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
-                className="flex items-center gap-1 text-[10px] text-red-400 active:text-red-300"
-              >
-                <Calculator size={12} />
-                <span>Plates</span>
-              </button>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => adjustWeight(-2.5)}
-                className="flex h-12 w-10 items-center justify-center rounded-l-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-              >
-                <Minus size={16} />
-              </button>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.5"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                placeholder="0"
-                className="h-12 w-full bg-gray-800 px-2 text-center text-lg font-bold text-white outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => adjustWeight(2.5)}
-                className="flex h-12 w-10 items-center justify-center rounded-r-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
+      {/* Input section */}
+      <div className="px-4 py-4">
+        {/* Weight input */}
+        <div className="mb-4">
+          <div className="mb-2 flex items-center justify-between">
+            <label className="text-xs font-medium uppercase tracking-wider text-gray-500">Gewicht (kg)</label>
+            <button
+              type="button"
+              onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
+              className="flex items-center gap-1 text-xs text-red-400 active:text-red-300"
+            >
+              <Calculator size={12} />
+              <span>Plates</span>
+            </button>
           </div>
-
-          {/* Reps with +/- */}
-          <div className="flex-1">
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-gray-500">Herhalingen</label>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => adjustReps(-1)}
-                className="flex h-12 w-10 items-center justify-center rounded-l-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-              >
-                <Minus size={16} />
-              </button>
-              <input
-                type="number"
-                inputMode="numeric"
-                value={reps}
-                onChange={(e) => setReps(e.target.value)}
-                placeholder="0"
-                className="h-12 w-full bg-gray-800 px-2 text-center text-lg font-bold text-white outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => adjustReps(1)}
-                className="flex h-12 w-10 items-center justify-center rounded-r-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => adjustWeight(-2.5)}
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+            >
+              <Minus size={20} />
+            </button>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.5"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              placeholder="0"
+              className="h-14 flex-1 rounded-xl bg-gray-800 px-4 text-center text-2xl font-bold text-white outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => adjustWeight(2.5)}
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+            >
+              <Plus size={20} />
+            </button>
           </div>
-
-          {/* Add button */}
-          <button
-            onClick={handleAdd}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white active:scale-95 transition-transform"
-          >
-            <Check size={20} strokeWidth={3} />
-          </button>
         </div>
 
-        {/* RPE toggle + slider */}
-        <div className="flex items-center gap-2">
+        {/* Reps input */}
+        <div className="mb-4">
+          <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">Herhalingen</label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => adjustReps(-1)}
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+            >
+              <Minus size={20} />
+            </button>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={reps}
+              onChange={(e) => setReps(e.target.value)}
+              placeholder="0"
+              className="h-14 flex-1 rounded-xl bg-gray-800 px-4 text-center text-2xl font-bold text-white outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => adjustReps(1)}
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Previous session hint */}
+        {prevData && (
+          <p className="mb-4 text-center text-sm text-gray-500">
+            Vorige keer: {prevData.weight}kg x {prevData.reps}
+          </p>
+        )}
+
+        {/* RPE toggle */}
+        <div className="mb-4 flex items-center justify-center gap-3">
           <button
             onClick={() => setShowRpe(!showRpe)}
-            className={`text-xs font-medium ${showRpe ? 'text-red-500' : 'text-gray-600'}`}
+            className={`text-sm ${showRpe ? 'font-medium text-red-400' : 'text-gray-600'}`}
           >
-            RPE {showRpe ? rpe : '(tik om toe te voegen)'}
+            {showRpe ? `RPE ${rpe}` : 'RPE toevoegen'}
           </button>
           {showRpe && (
             <input
@@ -726,10 +782,19 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               step="0.5"
               value={rpe}
               onChange={(e) => setRpe(parseFloat(e.target.value))}
-              className="flex-1"
+              className="w-32"
             />
           )}
         </div>
+
+        {/* Add set button */}
+        <button
+          onClick={handleAdd}
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-red-500 text-lg font-bold text-white active:scale-[0.98] transition-transform"
+        >
+          <Plus size={20} strokeWidth={3} />
+          SET LOGGEN
+        </button>
       </div>
     </div>
   )
