@@ -15,6 +15,7 @@ const DEFAULTS = {
   benchMax: '',
   squatMax: '',
   deadliftMax: '',
+  onboardingCompleted: false,
 }
 
 // Get settings from localStorage (fallback/cache)

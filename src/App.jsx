@@ -1,8 +1,10 @@
 import { lazy, Suspense, createContext, useContext } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { getSettings } from './lib/settings'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import Onboarding from './pages/Onboarding'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Logger = lazy(() => import('./pages/Logger'))
@@ -52,13 +54,17 @@ export default function App() {
     return <Login onSignIn={auth.signIn} />
   }
 
+  const settings = getSettings()
+  const needsOnboarding = !settings.onboardingCompleted
+
   return (
     <AuthContext.Provider value={auth}>
       <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
           <Routes>
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route element={<Layout />}>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={needsOnboarding ? <Navigate to="/onboarding" replace /> : <Dashboard />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/plan" element={<Plan />} />
               <Route path="/log" element={<Logger />} />

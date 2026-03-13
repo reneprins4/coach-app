@@ -89,6 +89,32 @@ export default function Dashboard() {
     )
   }
 
+  // Empty state for new users
+  if (workouts.length === 0) {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+        <h1 className="mb-3 text-2xl font-bold text-white">{getGreeting()}</h1>
+        <p className="mb-8 text-sm text-gray-500">
+          Je hebt nog geen trainingen.<br />
+          Laten we beginnen.
+        </p>
+        <button
+          onClick={() => nav('/log')}
+          className="mb-4 w-full max-w-xs rounded-xl bg-red-500 px-6 py-4 font-bold text-white transition-colors active:bg-red-600"
+        >
+          Start eerste training
+        </button>
+        <p className="mb-3 text-xs text-gray-600">Of laat de AI een plan maken</p>
+        <button
+          onClick={() => nav('/coach')}
+          className="w-full max-w-xs rounded-xl bg-gray-900 px-6 py-4 font-semibold text-white ring-1 ring-gray-800 transition-colors active:bg-gray-800"
+        >
+          Maak trainingsplan
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="px-4 py-6 pb-28">
 
