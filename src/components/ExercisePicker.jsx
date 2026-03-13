@@ -55,7 +55,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             onClick={() => setMuscleFilter(mg === 'all' ? null : mg)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
               (mg === 'all' && !muscleFilter) || mg === muscleFilter
-                ? 'bg-orange-500 text-white'
+                ? 'bg-red-500 text-white'
                 : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
             }`}
           >
@@ -72,7 +72,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             onClick={() => setEquipmentFilter(eq.value)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               equipmentFilter === eq.value
-                ? 'bg-orange-500 text-white'
+                ? 'bg-red-500 text-white'
                 : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
             }`}
           >
@@ -113,7 +113,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
                   {exercise.muscle_group}
                 </span>
                 {exercise.category === 'compound' && (
-                  <span className="rounded bg-orange-500/15 px-1.5 py-0.5 text-[10px] text-orange-400">
+                  <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] text-red-400">
                     compound
                   </span>
                 )}

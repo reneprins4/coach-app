@@ -64,14 +64,14 @@ export default function Logger() {
           {/* AI Workout optie */}
           <button
             onClick={() => nav('/coach')}
-            className="flex w-full items-center gap-4 rounded-2xl bg-orange-500 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+            className="flex w-full items-center gap-4 rounded-2xl bg-red-500 px-5 py-4 text-left active:scale-[0.97] transition-transform"
           >
             <Sparkles size={24} className="text-white shrink-0" />
             <div className="flex-1">
               <p className="font-bold text-white">AI workout genereren</p>
-              <p className="text-sm text-orange-200">Gepersonaliseerd op basis van jouw herstel</p>
+              <p className="text-sm text-red-200">Gepersonaliseerd op basis van jouw herstel</p>
             </div>
-            <ChevronRight size={18} className="text-orange-200 shrink-0" />
+            <ChevronRight size={18} className="text-red-200 shrink-0" />
           </button>
 
           {/* Volgende uit programma (alleen als er een actief blok is) */}
@@ -109,7 +109,7 @@ export default function Logger() {
         {/* Verborgen knop placeholder — niet meer nodig, maar keep API intact */}
         <button style={{ display: 'none' }}
           onClick={() => aw.startWorkout()}
-          className="h-16 w-full max-w-sm rounded-2xl bg-orange-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
+          className="h-16 w-full max-w-sm rounded-2xl bg-red-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
         >
           Start training
         </button>
@@ -124,7 +124,7 @@ export default function Logger() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Timer size={16} className="text-orange-500" />
+              <Timer size={16} className="text-red-500" />
               <span className="font-mono text-lg font-bold text-white">
                 {formatTime(aw.elapsed)}
               </span>
@@ -143,7 +143,7 @@ export default function Logger() {
             <button
               onClick={handleFinish}
               disabled={aw.saving || aw.totalSets === 0}
-              className="h-10 rounded-xl bg-orange-500 px-5 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
+              className="h-10 rounded-xl bg-red-500 px-5 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
             >
               {aw.saving ? 'Opslaan...' : 'Afronden'}
             </button>
@@ -313,7 +313,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
           <p className="text-xs text-gray-500">Vervangen</p>
           <p className="font-semibold text-white">{exercise.name}</p>
           {exercise.muscle_group && (
-            <p className="text-xs capitalize text-orange-400">{exercise.muscle_group}</p>
+            <p className="text-xs capitalize text-red-400">{exercise.muscle_group}</p>
           )}
         </div>
 
@@ -327,7 +327,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                   onClick={() => setReason(r.value)}
                   className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
                     reason === r.value
-                      ? 'bg-orange-500/20 ring-1 ring-orange-500/50'
+                      ? 'bg-red-500/20 ring-1 ring-red-500/50'
                       : 'bg-gray-800 ring-1 ring-gray-700'
                   }`}
                 >
@@ -342,15 +342,15 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
             <button
               onClick={handleFetch}
               disabled={!reason || loading}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 font-bold text-white disabled:opacity-50"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500 font-bold text-white disabled:opacity-50"
             >
               {loading ? <><Loader2 size={18} className="animate-spin" /> Alternatief zoeken...</> : <><RefreshCw size={18} /> Zoek alternatief</>}
             </button>
           </>
         ) : (
           <>
-            <div className="mb-4 rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-orange-400">Voorgesteld alternatief</p>
+            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-red-400">Voorgesteld alternatief</p>
               <p className="text-xl font-black text-white">{suggestion.name}</p>
               <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -358,8 +358,8 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                   <p className="font-bold text-white">{suggestion.sets}×{suggestion.reps_min}-{suggestion.reps_max}</p>
                   <p className="text-[10px] text-gray-500">sets×herh.</p>
                 </div>
-                <div className="rounded-lg bg-orange-500/20 py-2">
-                  <p className="font-bold text-orange-400">{suggestion.weight_kg}kg</p>
+                <div className="rounded-lg bg-red-500/20 py-2">
+                  <p className="font-bold text-red-400">{suggestion.weight_kg}kg</p>
                   <p className="text-[10px] text-gray-500">gewicht</p>
                 </div>
                 <div className="rounded-lg bg-gray-800 py-2">
@@ -371,7 +371,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                 <p className="mt-3 text-xs text-gray-400">{suggestion.why}</p>
               )}
               {suggestion.notes && (
-                <p className="mt-1 text-xs text-orange-300">{suggestion.notes}</p>
+                <p className="mt-1 text-xs text-red-300">{suggestion.notes}</p>
               )}
             </div>
 
@@ -384,7 +384,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
               </button>
               <button
                 onClick={() => onAccept(suggestion)}
-                className="h-12 flex-1 rounded-xl bg-orange-500 font-bold text-white active:scale-[0.97] transition-transform"
+                className="h-12 flex-1 rounded-xl bg-red-500 font-bold text-white active:scale-[0.97] transition-transform"
               >
                 Gebruik dit
               </button>
@@ -444,7 +444,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
         <div className="flex items-center gap-1">
           <button
             onClick={onSwap}
-            className="flex items-center gap-1 rounded-lg bg-gray-800 px-2 py-1.5 text-xs text-gray-400 active:text-orange-400"
+            className="flex items-center gap-1 rounded-lg bg-gray-800 px-2 py-1.5 text-xs text-gray-400 active:text-red-400"
             title="Swap exercise"
           >
             <RefreshCw size={13} />
@@ -458,7 +458,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
 
       {/* AI plan targets */}
       {exercise.plan && (
-        <div className="mb-2 flex items-center gap-3 rounded-lg bg-orange-500/10 px-3 py-1.5 text-xs text-orange-400">
+        <div className="mb-2 flex items-center gap-3 rounded-lg bg-red-500/10 px-3 py-1.5 text-xs text-red-400">
           <Sparkles size={12} />
           <span>
             Doel: {exercise.plan.sets}x{exercise.plan.reps_min || exercise.plan.reps_target}
@@ -564,7 +564,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
           {/* Add button */}
           <button
             onClick={handleAdd}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white active:scale-95 transition-transform"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white active:scale-95 transition-transform"
           >
             <Check size={20} strokeWidth={3} />
           </button>
@@ -574,7 +574,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowRpe(!showRpe)}
-            className={`text-xs font-medium ${showRpe ? 'text-orange-500' : 'text-gray-600'}`}
+            className={`text-xs font-medium ${showRpe ? 'text-red-500' : 'text-gray-600'}`}
           >
             RPE {showRpe ? rpe : '(tap to add)'}
           </button>

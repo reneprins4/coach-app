@@ -7,8 +7,8 @@ export default function FinishModal({ result, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/20">
-          <Check size={32} className="text-orange-500" />
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20">
+          <Check size={32} className="text-red-500" />
         </div>
         <h2 className="mb-1 text-xl font-bold text-white">Training voltooid</h2>
         <p className="mb-6 text-sm text-gray-400">Geweldige sessie</p>
@@ -36,7 +36,7 @@ export default function FinishModal({ result, onClose }) {
 
         <button
           onClick={onClose}
-          className="h-12 w-full rounded-xl bg-orange-500 font-bold text-white active:scale-[0.97] transition-transform"
+          className="h-12 w-full rounded-xl bg-red-500 font-bold text-white active:scale-[0.97] transition-transform"
         >
           Done
         </button>

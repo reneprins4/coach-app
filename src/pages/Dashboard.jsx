@@ -73,7 +73,7 @@ export default function Dashboard() {
 
   const phaseColors = {
     blue:   { bg: 'bg-blue-500/10',   text: 'text-blue-400',   bar: 'bg-blue-500',   border: 'border-blue-500/20' },
-    orange: { bg: 'bg-orange-500/10', text: 'text-orange-400', bar: 'bg-orange-500', border: 'border-orange-500/20' },
+    orange: { bg: 'bg-red-500/10', text: 'text-red-400', bar: 'bg-red-500', border: 'border-red-500/20' },
     red:    { bg: 'bg-red-500/10',    text: 'text-red-400',    bar: 'bg-red-500',    border: 'border-red-500/20' },
     gray:   { bg: 'bg-gray-500/10',   text: 'text-gray-400',   bar: 'bg-gray-500',   border: 'border-gray-500/20' },
   }
@@ -82,7 +82,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-orange-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
       </div>
     )
   }
@@ -157,7 +157,7 @@ export default function Dashboard() {
       <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Spierherstel</p>
-          <Link to="/coach" className="text-xs font-medium text-orange-500">Nu trainen</Link>
+          <Link to="/coach" className="text-xs font-medium text-red-500">Nu trainen</Link>
         </div>
         <div className="space-y-2.5">
           {MUSCLE_ORDER.map(muscle => {
@@ -210,11 +210,11 @@ export default function Dashboard() {
                 <span className="w-24 text-[11px] text-gray-400">{MUSCLE_NL[muscle] || muscle}</span>
                 <div className="relative flex-1 h-1.5 overflow-hidden rounded-full bg-gray-800">
                   <div
-                    className={`h-full rounded-full ${over ? 'bg-orange-500' : hit ? 'bg-green-500' : 'bg-blue-500'}`}
+                    className={`h-full rounded-full ${over ? 'bg-red-500' : hit ? 'bg-green-500' : 'bg-blue-500'}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className={`w-10 text-right text-[10px] tabular-nums ${over ? 'text-orange-400' : hit ? 'text-green-400' : 'text-gray-600'}`}>
+                <span className={`w-10 text-right text-[10px] tabular-nums ${over ? 'text-red-400' : hit ? 'text-green-400' : 'text-gray-600'}`}>
                   {ms.setsThisWeek}/{ms.target.min}
                 </span>
               </div>
@@ -231,7 +231,7 @@ export default function Dashboard() {
             {stats.recentPRs.map(pr => (
               <div key={pr.name} className="flex items-center justify-between">
                 <span className="text-sm text-white">{pr.name}</span>
-                <span className="text-sm font-bold tabular-nums text-orange-500">{pr.weight}kg x {pr.reps}</span>
+                <span className="text-sm font-bold tabular-nums text-red-500">{pr.weight}kg x {pr.reps}</span>
               </div>
             ))}
           </div>
@@ -241,14 +241,14 @@ export default function Dashboard() {
       {/* CTA */}
       <button
         onClick={() => nav('/coach')}
-        className="flex h-14 w-full items-center gap-4 rounded-xl bg-orange-500 px-5 text-left transition-colors active:bg-orange-600"
+        className="flex h-14 w-full items-center gap-4 rounded-xl bg-red-500 px-5 text-left transition-colors active:bg-red-600"
       >
         <Sparkles size={20} className="text-white shrink-0" />
         <div className="flex-1">
           <p className="font-bold text-white">Genereer training van vandaag</p>
-          <p className="text-xs text-orange-200">AI personaliseert op basis van jouw herstel</p>
+          <p className="text-xs text-red-200">AI personaliseert op basis van jouw herstel</p>
         </div>
-        <ChevronRight size={18} className="text-orange-200 shrink-0" />
+        <ChevronRight size={18} className="text-red-200 shrink-0" />
       </button>
     </div>
   )

@@ -57,7 +57,7 @@ export default function Profile() {
       <p className="mb-6 text-sm text-gray-500">Je coach heeft dit nodig om trainingen te personaliseren</p>
 
       {!profileComplete && (
-        <div className="mb-6 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm text-orange-400">
+        <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           Vul je gegevens in zodat de AI coach nauwkeurige gewichten kan voorstellen
         </div>
       )}
@@ -97,12 +97,12 @@ export default function Profile() {
               onClick={() => update('experienceLevel', l.value)}
               className={`flex flex-1 flex-col items-center rounded-xl py-3 text-sm font-medium transition-colors ${
                 settings.experienceLevel === l.value
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-red-500 text-white'
                   : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
               }`}
             >
               <span>{l.label}</span>
-              <span className={`text-[10px] ${settings.experienceLevel === l.value ? 'text-orange-200' : 'text-gray-600'}`}>{l.sub}</span>
+              <span className={`text-[10px] ${settings.experienceLevel === l.value ? 'text-red-200' : 'text-gray-600'}`}>{l.sub}</span>
             </button>
           ))}
         </div>
@@ -118,7 +118,7 @@ export default function Profile() {
               onClick={() => update('goal', g.value)}
               className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
                 settings.goal === g.value
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-red-500 text-white'
                   : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
               }`}
             >
@@ -138,7 +138,7 @@ export default function Profile() {
               onClick={() => update('equipment', e.value)}
               className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
                 settings.equipment === e.value
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-red-500 text-white'
                   : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
               }`}
             >
@@ -182,7 +182,7 @@ export default function Profile() {
               onClick={() => update('frequency', f)}
               className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
                 settings.frequency === f
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-red-500 text-white'
                   : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
               }`}
             >
@@ -202,7 +202,7 @@ export default function Profile() {
               onClick={() => update('restTime', t)}
               className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
                 settings.restTime === t
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-red-500 text-white'
                   : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
               }`}
             >
@@ -215,7 +215,7 @@ export default function Profile() {
       {/* Save */}
       <button
         onClick={handleSave}
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-red-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
       >
         {saved ? <><Check size={20} />Opgeslagen</> : <><Save size={20} />Profiel opslaan</>}
       </button>

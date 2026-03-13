@@ -29,7 +29,7 @@ export default function History() {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-orange-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-red-500" />
       </div>
     )
   }
@@ -55,7 +55,7 @@ export default function History() {
           <Calendar size={40} className="mb-4 text-gray-700" />
           <p className="text-gray-500">{query ? 'Geen trainingen gevonden' : 'Nog geen trainingen'}</p>
           {!query && (
-            <Link to="/log" className="mt-4 text-sm font-medium text-orange-500">
+            <Link to="/log" className="mt-4 text-sm font-medium text-red-500">
               Start je eerste training
             </Link>
           )}

@@ -32,7 +32,7 @@ export default function Layout() {
                 end={to === '/'}
                 className={({ isActive }) =>
                   `flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium uppercase tracking-wide transition-colors ${
-                    isActive ? 'text-orange-500' : 'text-gray-600'
+                    isActive ? 'text-red-500' : 'text-gray-600'
                   }`
                 }
               >

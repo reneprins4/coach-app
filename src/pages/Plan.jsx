@@ -9,7 +9,7 @@ import { getSettings } from '../lib/settings'
 
 const PHASE_COLORS = {
   blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25' },
-  orange: { bg: 'bg-orange-500/15', text: 'text-orange-400', bar: 'bg-orange-500', ring: 'ring-orange-500/50',activeBg: 'bg-orange-500/25' },
+  orange: { bg: 'bg-red-500/15', text: 'text-red-400', bar: 'bg-red-500', ring: 'ring-red-500/50',activeBg: 'bg-red-500/25' },
   red:    { bg: 'bg-red-500/15',    text: 'text-red-400',    bar: 'bg-red-500',    ring: 'ring-red-500/50',   activeBg: 'bg-red-500/25' },
   gray:   { bg: 'bg-gray-500/15',   text: 'text-gray-400',   bar: 'bg-gray-500',   ring: 'ring-gray-500/50',  activeBg: 'bg-gray-500/25' },
 }
@@ -116,7 +116,7 @@ export default function Plan() {
                       {wt.isDeload ? 'Deload' : `RPE ${wt.rpe}`}
                     </span>
                     {isDone && <CheckCircle2 size={12} className="mt-1 text-green-500" />}
-                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-orange-400 font-bold">Nu</span>}
+                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-red-400 font-bold">Nu</span>}
                   </div>
                 )
               })}
@@ -149,7 +149,7 @@ export default function Plan() {
           {/* Start workout CTA */}
           <button
             onClick={() => nav('/coach')}
-            className="flex h-14 w-full items-center gap-3 rounded-2xl bg-orange-500 px-5 font-bold text-white active:scale-[0.97] transition-transform mb-4"
+            className="flex h-14 w-full items-center gap-3 rounded-2xl bg-red-500 px-5 font-bold text-white active:scale-[0.97] transition-transform mb-4"
           >
             <Sparkles size={20} />
             Genereer training van vandaag
@@ -170,7 +170,7 @@ export default function Plan() {
                     <Icon size={16} className={isCurrent ? c.text : 'text-gray-500'} />
                     <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-gray-500'}`}>{p.label.split(' ')[0]}</span>
                     <span className={`text-[8px] ${isCurrent ? c.text : 'text-gray-700'}`}>{p.weeks}w</span>
-                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-orange-400">actief</span>}
+                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-red-400">actief</span>}
                   </div>
                 )
               })}
