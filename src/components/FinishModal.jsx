@@ -38,7 +38,7 @@ export default function FinishModal({ result, onClose }) {
           onClick={onClose}
           className="h-12 w-full rounded-xl bg-red-500 font-bold text-white active:scale-[0.97] transition-transform"
         >
-          Done
+          Klaar
         </button>
       </div>
     </div>

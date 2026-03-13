@@ -10,7 +10,7 @@ export default function RestTimerBar({ remaining, total, onStop }) {
           <span className="font-mono text-lg font-bold text-red-500">
             {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
           </span>
-          <span className="text-sm text-gray-500">rest</span>
+          <span className="text-sm text-gray-500">rust</span>
         </div>
         <button onClick={onStop} className="p-2 text-gray-500 active:text-white">
           <X size={18} />

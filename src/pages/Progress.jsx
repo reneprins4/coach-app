@@ -11,6 +11,7 @@ function e1rm(weight, reps) {
 
 const MUSCLE_GROUPS = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core']
 const MG_COLORS = { chest: '#ef4444', back: '#3b82f6', legs: '#22c55e', shoulders: '#eab308', arms: '#a855f7', core: '#06b6d4' }
+const MG_NL = { chest: 'Borst', back: 'Rug', legs: 'Benen', shoulders: 'Schouders', arms: 'Armen', core: 'Core' }
 
 function getMuscleGroup(name) {
   const l = name.toLowerCase()
@@ -52,7 +53,7 @@ export default function Progress() {
       const bestE1rm = Math.max(...sets.map(s => e1rm(s.weight_kg || 0, s.reps || 0)))
       const bestWeight = Math.max(...sets.map(s => s.weight_kg || 0))
       const volume = sets.reduce((s, x) => s + (x.weight_kg || 0) * (x.reps || 0), 0)
-      const date = new Date(w.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      const date = new Date(w.created_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })
       sessions.push({ date, e1rm: bestE1rm, bestWeight, volume, sets, fullDate: w.created_at })
     }
     const allTimeE1rm = sessions.length > 0 ? Math.max(...sessions.map(s => s.e1rm)) : 0
@@ -250,7 +251,7 @@ export default function Progress() {
               {MUSCLE_GROUPS.map(mg => (
                 <div key={mg} className="flex items-center gap-1.5">
                   <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: MG_COLORS[mg] }} />
-                  <span className="text-[10px] capitalize text-gray-400">{mg}</span>
+                  <span className="text-[10px] text-gray-400">{MG_NL[mg] || mg}</span>
                 </div>
               ))}
             </div>

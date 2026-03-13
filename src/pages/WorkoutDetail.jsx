@@ -19,15 +19,15 @@ export default function WorkoutDetail() {
     return (
       <div className="px-4 py-6">
         <button onClick={() => nav('/history')} className="flex items-center gap-2 text-gray-400">
-          <ArrowLeft size={20} /> Back
+          <ArrowLeft size={20} /> Terug
         </button>
-        <p className="mt-8 text-center text-gray-500">Workout not found</p>
+        <p className="mt-8 text-center text-gray-500">Training niet gevonden</p>
       </div>
     )
   }
 
   const d = new Date(workout.created_at)
-  const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  const dateStr = d.toLocaleDateString('nl-NL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
   // Group sets by exercise
   const grouped = {}
@@ -42,7 +42,7 @@ export default function WorkoutDetail() {
         onClick={() => nav('/history')}
         className="mb-4 flex items-center gap-2 text-sm text-gray-400 active:text-white"
       >
-        <ArrowLeft size={18} /> History
+        <ArrowLeft size={18} /> Geschiedenis
       </button>
 
       <h1 className="mb-1 text-xl font-bold text-white">{dateStr}</h1>
@@ -52,7 +52,7 @@ export default function WorkoutDetail() {
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
           <Dumbbell size={16} className="mx-auto mb-1 text-gray-500" />
           <p className="text-lg font-bold text-white">{Object.keys(grouped).length}</p>
-          <p className="text-[10px] text-gray-500">exercises</p>
+          <p className="text-[10px] text-gray-500">oefeningen</p>
         </div>
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
           <TrendingUp size={16} className="mx-auto mb-1 text-gray-500" />
@@ -62,7 +62,7 @@ export default function WorkoutDetail() {
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
           <Clock size={16} className="mx-auto mb-1 text-gray-500" />
           <p className="text-lg font-bold text-white">{workout.workout_sets.length}</p>
-          <p className="text-[10px] text-gray-500">total sets</p>
+          <p className="text-[10px] text-gray-500">totaal sets</p>
         </div>
       </div>
 
@@ -90,7 +90,7 @@ export default function WorkoutDetail() {
               </div>
             ))}
             <div className="mt-2 border-t border-gray-800 pt-2 text-xs text-gray-500">
-              Volume: {formatVol(sets.reduce((s, x) => s + (x.weight_kg || 0) * (x.reps || 0), 0))}
+              Volume: {formatVol(sets.reduce((sum, x) => sum + (x.weight_kg || 0) * (x.reps || 0), 0))}
             </div>
           </div>
         ))}

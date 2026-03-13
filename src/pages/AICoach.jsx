@@ -430,7 +430,7 @@ export default function AICoach() {
               )}
               <div className="inline-flex items-center gap-1.5 rounded-full bg-gray-900 px-3 py-1 text-sm text-gray-400">
                 <Flame size={14} className="text-red-500" />
-                {result.exercises?.length || 0} exercises
+                {result.exercises?.length || 0} oefeningen
               </div>
             </div>
           </div>

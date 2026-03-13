@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Info } from 'lucide-react'
+import { Plus, X, Minus, ChevronDown, Timer, Trash2, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Info, Calculator } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises, useFilteredExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
@@ -12,6 +12,8 @@ import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
 import FinishModal from '../components/FinishModal'
 import ExerciseGuide from '../components/ExerciseGuide'
+import Toast from '../components/Toast'
+import PlateCalculator from '../components/PlateCalculator'
 
 export default function Logger() {
   const nav = useNavigate()
@@ -23,7 +25,10 @@ export default function Logger() {
   const [showFinish, setShowFinish] = useState(false)
   const [finishResult, setFinishResult] = useState(null)
   const [showDiscard, setShowDiscard] = useState(false)
+  const [showConfirmFinish, setShowConfirmFinish] = useState(false)
   const [swapTarget, setSwapTarget] = useState(null) // exercise being swapped
+  const [toast, setToast] = useState(null) // { message, action, onAction }
+  const [plateCalcWeight, setPlateCalcWeight] = useState(null)
 
   // Auto-load AI-generated pending workout when navigating from Coach
   useEffect(() => {
@@ -37,12 +42,28 @@ export default function Logger() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  function handleFinishClick() {
+    setShowConfirmFinish(true)
+  }
+
   async function handleFinish() {
+    setShowConfirmFinish(false)
     const result = await aw.finishWorkout()
     if (result) {
       setFinishResult(result)
       setShowFinish(true)
     }
+  }
+
+  function handleRemoveSet(exerciseName, setId, setData) {
+    aw.removeSet(exerciseName, setId)
+    setToast({
+      message: 'Set verwijderd',
+      action: 'Ongedaan maken',
+      onAction: () => {
+        aw.addSet(exerciseName, setData)
+      },
+    })
   }
 
   function handleFinishClose() {
@@ -142,7 +163,7 @@ export default function Logger() {
               Stoppen
             </button>
             <button
-              onClick={handleFinish}
+              onClick={handleFinishClick}
               disabled={aw.saving || aw.totalSets === 0}
               className="h-10 rounded-xl bg-red-500 px-5 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
             >
@@ -168,15 +189,16 @@ export default function Logger() {
               aw.addSet(exercise.name, data)
               rest.start()
             }}
-            onRemoveSet={(id) => aw.removeSet(exercise.name, id)}
+            onRemoveSet={(id, setData) => handleRemoveSet(exercise.name, id, setData)}
             onRemove={() => aw.removeExercise(exercise.name)}
             onSwap={() => setSwapTarget(exercise)}
+            onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
             lastUsed={aw.getLastUsed(exercise.name)}
           />
         ))}
 
         {aw.workout.exercises.length === 0 && (
-          <p className="py-16 text-center text-gray-600">Add an exercise to get started</p>
+          <p className="py-16 text-center text-gray-600">Voeg een oefening toe om te beginnen</p>
         )}
 
         {/* Notes */}
@@ -262,6 +284,48 @@ export default function Logger() {
             setSwapTarget(null)
           }}
           onClose={() => setSwapTarget(null)}
+        />
+      )}
+
+      {/* Confirm finish modal */}
+      {showConfirmFinish && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
+            <h3 className="mb-2 text-lg font-bold text-white">Training afronden?</h3>
+            <p className="mb-6 text-sm text-gray-400">Weet je zeker dat je deze training wilt opslaan?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmFinish(false)}
+                className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
+              >
+                Annuleer
+              </button>
+              <button
+                onClick={handleFinish}
+                className="h-12 flex-1 rounded-xl bg-red-500 font-semibold text-white active:bg-red-600"
+              >
+                Afronden
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Plate calculator */}
+      {plateCalcWeight !== null && (
+        <PlateCalculator
+          targetWeight={plateCalcWeight}
+          onClose={() => setPlateCalcWeight(null)}
+        />
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          action={toast.action}
+          onAction={toast.onAction}
+          onDismiss={() => setToast(null)}
         />
       )}
     </div>
@@ -398,7 +462,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
 }
 
 // ── EXERCISE BLOCK ────────────────────────────────────────────────────────────
-function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, lastUsed }) {
+function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed }) {
   const [weight, setWeight] = useState(
     exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
   )
@@ -452,10 +516,10 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
           <button
             onClick={onSwap}
             className="flex items-center gap-1 rounded-lg bg-gray-800 px-2 py-1.5 text-xs text-gray-400 active:text-red-400"
-            title="Swap exercise"
+            title="Wissel oefening"
           >
             <RefreshCw size={13} />
-            <span>Swap</span>
+            <span>Wissel</span>
           </button>
           <button onClick={onRemove} className="p-2 text-gray-600 active:text-red-400">
             <X size={18} />
@@ -497,7 +561,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
               <span className="font-medium text-white">{s.reps}</span>
               <span className="text-gray-400">{s.rpe || '-'}</span>
               <button
-                onClick={() => onRemoveSet(s.id)}
+                onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
                 className="p-1 text-gray-700 active:text-red-400"
               >
                 <Trash2 size={14} />
@@ -512,7 +576,17 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
         <div className="flex items-end gap-2">
           {/* Weight with +/- */}
           <div className="flex-1">
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-gray-500">Weight (kg)</label>
+            <div className="mb-1 flex items-center justify-between">
+              <label className="block text-[10px] uppercase tracking-wider text-gray-500">Gewicht (kg)</label>
+              <button
+                type="button"
+                onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
+                className="flex items-center gap-1 text-[10px] text-red-400 active:text-red-300"
+              >
+                <Calculator size={12} />
+                <span>Plates</span>
+              </button>
+            </div>
             <div className="flex items-center gap-1">
               <button
                 type="button"
@@ -542,7 +616,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
 
           {/* Reps with +/- */}
           <div className="flex-1">
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-gray-500">Reps</label>
+            <label className="mb-1 block text-[10px] uppercase tracking-wider text-gray-500">Herhalingen</label>
             <div className="flex items-center gap-1">
               <button
                 type="button"
@@ -584,7 +658,7 @@ function ExerciseBlock({ exercise, onAddSet, onRemoveSet, onRemove, onSwap, last
             onClick={() => setShowRpe(!showRpe)}
             className={`text-xs font-medium ${showRpe ? 'text-red-500' : 'text-gray-600'}`}
           >
-            RPE {showRpe ? rpe : '(tap to add)'}
+            RPE {showRpe ? rpe : '(tik om toe te voegen)'}
           </button>
           {showRpe && (
             <input

@@ -3,6 +3,15 @@ import { X, Search } from 'lucide-react'
 import { useFilteredExercises } from '../hooks/useExercises'
 
 const MUSCLE_FILTERS = ['all', 'chest', 'back', 'legs', 'shoulders', 'arms', 'core']
+const MUSCLE_NL = {
+  all: 'Alles',
+  chest: 'Borst',
+  back: 'Rug',
+  legs: 'Benen',
+  shoulders: 'Schouders',
+  arms: 'Armen',
+  core: 'Core',
+}
 const EQUIPMENT_FILTERS = [
   { value: null, label: 'Alles' },
   { value: 'barbell', label: 'Barbell' },
@@ -51,15 +60,15 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
       <div className="flex gap-2 overflow-x-auto px-4 pt-3 scrollbar-none">
         {MUSCLE_FILTERS.map(mg => (
           <button
-            key={mg === 'all' ? 'alles' : mg}
+            key={mg}
             onClick={() => setMuscleFilter(mg === 'all' ? null : mg)}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               (mg === 'all' && !muscleFilter) || mg === muscleFilter
                 ? 'bg-red-500 text-white'
                 : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
             }`}
           >
-            {mg === 'all' ? 'alles' : mg}
+            {MUSCLE_NL[mg] || mg}
           </button>
         ))}
       </div>

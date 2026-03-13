@@ -203,7 +203,7 @@ export default function Plan() {
                         <p className="font-bold text-white">{p.label}</p>
                         <p className="mt-0.5 text-xs text-gray-400">{p.description}</p>
                         <div className="mt-2 flex gap-3 text-xs">
-                          <span className={c.text}>{p.weeks} weeks</span>
+                          <span className={c.text}>{p.weeks} weken</span>
                           <span className="text-gray-600">
                             RPE {p.weekTargets[0].rpe}–{p.weekTargets[p.weekTargets.length - 2]?.rpe || p.weekTargets[0].rpe}
                           </span>

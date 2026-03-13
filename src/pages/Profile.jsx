@@ -45,7 +45,7 @@ export default function Profile() {
     const totalVol = workouts.reduce((s, w) => s + (w.totalVolume || 0), 0)
     const memberSince = settings.memberSince
       ? new Date(settings.memberSince).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
-      : 'Today'
+      : 'Vandaag'
     return { totalWorkouts, totalVol, memberSince }
   }, [workouts, settings.memberSince])
 
@@ -234,7 +234,7 @@ export default function Profile() {
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-gray-400">Totaal volume</span>
-            <span className="text-sm font-medium text-white">{(stats.totalVol / 1000).toFixed(1)} tons</span>
+            <span className="text-sm font-medium text-white">{(stats.totalVol / 1000).toFixed(1)} ton</span>
           </div>
         </div>
       </div>
