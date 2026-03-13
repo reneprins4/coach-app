@@ -3,11 +3,12 @@ import { LayoutDashboard, Dumbbell, CalendarDays, TrendingUp, User, Timer, Clipb
 import { useState, useEffect } from 'react'
 
 const tabs = [
-  { to: '/',         icon: LayoutDashboard, label: 'Home'     },
-  { to: '/plan',     icon: ClipboardList,   label: 'Plan'     },
-  { to: '/log',      icon: Dumbbell,        label: 'Trainen'  },
-  { to: '/calendar', icon: CalendarDays,    label: 'Kalender' },
-  { to: '/profile',  icon: User,            label: 'Profiel'  },
+  { to: '/',          icon: LayoutDashboard, label: 'Home'      },
+  { to: '/plan',      icon: ClipboardList,   label: 'Plan'      },
+  { to: '/log',       icon: Dumbbell,        label: 'Trainen'   },
+  { to: '/progress',  icon: TrendingUp,      label: 'Voortgang' },
+  { to: '/calendar',  icon: CalendarDays,    label: 'Kalender'  },
+  { to: '/profile',   icon: User,            label: 'Profiel'   },
 ]
 
 export default function Layout() {
@@ -55,14 +56,14 @@ export default function Layout() {
 
       {!hideNav && (
         <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800/60 bg-gray-950/98 backdrop-blur-md pb-safe">
-          <div className="mx-auto flex max-w-lg">
+          <div className="flex overflow-x-auto scrollbar-none">
             {tabs.map(({ to, icon: Icon, label }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium uppercase tracking-wide transition-colors ${
+                  `flex shrink-0 flex-col items-center gap-1 px-4 py-3 text-[10px] font-medium uppercase tracking-wide transition-colors ${
                     isActive ? 'text-red-500' : 'text-gray-600'
                   }`
                 }
