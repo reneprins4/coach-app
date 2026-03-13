@@ -8,10 +8,10 @@ import {
 import { getSettings } from '../lib/settings'
 
 const PHASE_COLORS = {
-  blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25' },
-  orange: { bg: 'bg-red-500/15', text: 'text-red-400', bar: 'bg-red-500', ring: 'ring-red-500/50',activeBg: 'bg-red-500/25' },
-  red:    { bg: 'bg-red-500/15',    text: 'text-red-400',    bar: 'bg-red-500',    ring: 'ring-red-500/50',   activeBg: 'bg-red-500/25' },
-  gray:   { bg: 'bg-gray-500/15',   text: 'text-gray-400',   bar: 'bg-gray-500',   ring: 'ring-gray-500/50',  activeBg: 'bg-gray-500/25' },
+  blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25', border: 'border-blue-500/40' },
+  orange: { bg: 'bg-red-500/15', text: 'text-red-400', bar: 'bg-red-500', ring: 'ring-red-500/50',activeBg: 'bg-red-500/25', border: 'border-red-500/40' },
+  red:    { bg: 'bg-red-500/15',    text: 'text-red-400',    bar: 'bg-red-500',    ring: 'ring-red-500/50',   activeBg: 'bg-red-500/25', border: 'border-red-500/40' },
+  gray:   { bg: 'bg-gray-500/15',   text: 'text-gray-400',   bar: 'bg-gray-500',   ring: 'ring-gray-500/50',  activeBg: 'bg-gray-500/25', border: 'border-gray-500/40' },
 }
 
 const PHASE_ICONS = {
@@ -70,9 +70,7 @@ export default function Plan() {
       {/* Current block */}
       {block && phase && !selecting ? (
         <>
-          <div className={`mb-5 rounded-xl border ${
-            PHASE_COLORS[phase.color].ring.replace('ring-', 'border-').replace('/50', '/40')
-          } ${phaseColor.bg} p-5`}>
+          <div className={`mb-5 rounded-xl border ${phaseColor.border} ${phaseColor.bg} p-5`}>
             <div className="mb-1 flex items-center justify-between">
               <span className={`text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>Actief blok</span>
               <button
@@ -192,9 +190,7 @@ export default function Plan() {
                 <button
                   key={key}
                   onClick={() => handleStart(key)}
-                  className={`w-full rounded-xl border p-4 text-left transition-colors ${
-                    c.bg
-                  } border-${p.color === 'gray' ? 'gray' : p.color}-500/30 active:scale-[0.98]`}
+                  className={`w-full rounded-xl border p-4 text-left transition-colors ${c.bg} ${c.border} active:scale-[0.98]`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">

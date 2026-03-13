@@ -149,7 +149,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
                 {!result.exact && (
                   <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
                     <p className="text-xs text-yellow-400">
-                      ⚠️ Exacte gewicht niet haalbaar. Dichtsbijzijnde: {result.achievable}kg
+                      Exacte gewicht niet haalbaar. Dichtstbijzijnde: {result.achievable}kg
                       {result.difference > 0 && ` (${result.difference}kg verschil)`}
                     </p>
                   </div>

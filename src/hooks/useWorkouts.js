@@ -27,7 +27,7 @@ export function useWorkouts(userId) {
       // Fetch sets for each workout
       const ids = (data || []).map(w => w.id)
       let setsMap = {}
-      if (ids.length > 0) {
+      if (ids.length > 0 && userId) {
         const { data: sets } = await supabase
           .from('sets')
           .select('*')

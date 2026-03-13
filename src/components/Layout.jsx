@@ -29,10 +29,10 @@ export default function Layout() {
   }, [])
 
   const isOnLogPage = location.pathname === '/log'
+  // Only hide nav for workout detail pages and AI coach (full-screen experiences)
   const hideNav =
     location.pathname.startsWith('/history/') ||
-    location.pathname === '/coach' ||
-    location.pathname === '/history'
+    location.pathname === '/coach'
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-950">

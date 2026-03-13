@@ -553,7 +553,6 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
   const [rpe, setRpe] = useState(7)
   const [showRpe, setShowRpe] = useState(false)
   const [prevData, setPrevData] = useState(null)
-  const [prevLoaded, setPrevLoaded] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef(null)
@@ -572,15 +571,18 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
   }, [showMenu])
 
   // Load previous session data
-  if (!prevLoaded) {
-    setPrevLoaded(true)
-    getExerciseHistory(exercise.name, userId).then(data => {
-      if (data.length > 0) {
-        const latest = data[0]
-        setPrevData({ weight: latest.weight_kg, reps: latest.reps })
-      }
-    })
-  }
+  useEffect(() => {
+    let cancelled = false
+    if (userId && exercise.name) {
+      getExerciseHistory(exercise.name, userId).then(data => {
+        if (!cancelled && data.length > 0) {
+          const latest = data[0]
+          setPrevData({ weight: latest.weight_kg, reps: latest.reps })
+        }
+      })
+    }
+    return () => { cancelled = true }
+  }, [exercise.name, userId])
 
   function handleAdd() {
     const w = parseFloat(weight) || 0

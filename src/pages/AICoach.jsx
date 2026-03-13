@@ -282,7 +282,11 @@ export default function AICoach() {
 
           {/* ── BLOCK CONTEXT ──────────────────────────────── */}
           {block && phase && weekTarget && (
-            <div className={`mb-4 rounded-xl border border-${phase.color === 'gray' ? 'gray' : phase.color}-500/30 bg-${phase.color === 'gray' ? 'gray' : phase.color}-500/10 px-4 py-3`}>
+            <div className={`mb-4 rounded-xl border px-4 py-3 ${
+              phase.color === 'blue' ? 'border-blue-500/30 bg-blue-500/10' :
+              phase.color === 'gray' ? 'border-gray-500/30 bg-gray-500/10' :
+              'border-red-500/30 bg-red-500/10'
+            }`}>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                 {phase.label} · Week {block.currentWeek}/{phase.weeks}
               </p>

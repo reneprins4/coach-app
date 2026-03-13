@@ -98,7 +98,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
 
         {saved && (
           <div className="mb-4 rounded-xl bg-green-500/10 px-4 py-2 text-sm text-green-400">
-            ✓ Template opgeslagen
+            Template opgeslagen
           </div>
         )}
 

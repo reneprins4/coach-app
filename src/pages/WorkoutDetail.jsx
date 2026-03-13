@@ -39,7 +39,7 @@ export default function WorkoutDetail() {
   }
 
   return (
-    <div className="px-4 py-6">
+    <div className="px-4 py-6 pb-8">
       <button
         onClick={() => nav('/history')}
         className="mb-4 flex items-center gap-2 text-sm text-gray-400 active:text-white"
