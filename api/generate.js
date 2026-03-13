@@ -21,22 +21,33 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Use gemini-2.0-flash — faster, no thinking overhead, reliable JSON output
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system_instruction: {
             parts: [{
-              text: `You are an elite hypertrophy and strength coach. Generate evidence-based workouts.
-PROGRESSIVE OVERLOAD: RPE <8 → add 2.5kg. RPE 8-9 → same weight. RPE 9+ → reduce 5%. No history → conservative start.
-EXERCISE RULES: Rotate if same movement used last session. Compounds first, isolation last.
-CRITICAL: Return ONLY valid JSON. No markdown. No code fences. No extra text.`
+              text: `You are an elite strength and hypertrophy coach AI.
+OUTPUT RULES (STRICTLY ENFORCED):
+- Return ONLY valid JSON. No markdown. No code fences. No explanations. No preamble.
+- Start your response with { and end with }
+- Do not include any text before or after the JSON object
+COACHING RULES:
+- Progressive overload: RPE <8 last time → add 2.5kg; RPE 8-9 → same weight; RPE 9+ → reduce 5%
+- No history → estimate conservatively from athlete profile (NEVER 0kg)
+- Compounds first, isolation last
+- Vary exercises from last session`
             }]
           },
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 4096, temperature: 0.3 }
+          generationConfig: {
+            maxOutputTokens: 8192,
+            temperature: 0.3,
+            responseMimeType: 'application/json',
+          }
         })
       }
     )
@@ -47,8 +58,27 @@ CRITICAL: Return ONLY valid JSON. No markdown. No code fences. No extra text.`
     }
 
     const data = await geminiRes.json()
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-    const cleaned = text.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
+
+    // Extract text — handle both standard and thinking model responses
+    // Gemini 2.5 Flash returns thinking in parts[0], actual output in a later part
+    const parts = data.candidates?.[0]?.content?.parts || []
+    // Find the last non-thought text part (actual output)
+    let text = ''
+    for (const part of parts) {
+      if (!part.thought && part.text) {
+        text = part.text
+      }
+    }
+    if (!text && parts.length > 0) {
+      text = parts[parts.length - 1]?.text || ''
+    }
+
+    // Strip any markdown fences just in case
+    const cleaned = text
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```\s*$/i, '')
+      .trim()
 
     res.status(200).json({ content: cleaned })
   } catch (err) {

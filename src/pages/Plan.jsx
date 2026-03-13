@@ -41,7 +41,7 @@ export default function Plan() {
   }
 
   return (
-    <div className="px-4 py-6 pb-24">
+    <div className="px-4 py-6 pb-32">
       <h1 className="mb-1 text-2xl font-bold">Training Plan</h1>
       <p className="mb-6 text-sm text-gray-500">Structured periodization for consistent progress</p>
 
