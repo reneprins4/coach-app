@@ -606,7 +606,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
   ) : null
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 min-w-0 w-full">
+    <div className="rounded-2xl border border-gray-800 bg-gray-900 min-w-0 w-full">
       {/* Header */}
       <div className="border-b border-gray-800 px-4 py-3">
         <div className="flex items-start justify-between">
