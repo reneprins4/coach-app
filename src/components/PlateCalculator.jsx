@@ -58,7 +58,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
   }, [result.plates])
   
   return (
-    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       

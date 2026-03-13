@@ -301,7 +301,7 @@ export default function Logger() {
       )}
 
       {showDiscard && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
             <h3 className="mb-2 text-lg font-bold text-white">Training stoppen?</h3>
             <p className="mb-6 text-sm text-gray-400">Alle gelogde sets gaan verloren.</p>
@@ -349,7 +349,7 @@ export default function Logger() {
       )}
 
       {showConfirmFinish && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
             <h3 className="mb-2 text-lg font-bold text-white">Training afronden?</h3>
             <p className="mb-6 text-sm text-gray-400">Weet je zeker dat je deze training wilt opslaan?</p>
@@ -450,7 +450,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-white">Oefening wisselen</h3>

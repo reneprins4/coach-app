@@ -2,7 +2,7 @@ import { X, Trash2, Play, Dumbbell } from 'lucide-react'
 
 export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70">
       <div className="w-full max-w-lg animate-slide-up rounded-t-3xl bg-gray-900 pb-8">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between border-b border-gray-800 bg-gray-900 px-5 py-4">

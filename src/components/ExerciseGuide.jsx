@@ -19,7 +19,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
   const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name + ' uitvoering techniek')}`
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
