@@ -285,7 +285,7 @@ export default function Progress() {
       )}
 
       {tab === 'analyse' && (
-        <FormDetective workouts={workouts} />
+        <FormDetective workouts={workouts} userId={user?.id} />
       )}
     </div>
   )

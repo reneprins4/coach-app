@@ -1,3 +1,7 @@
+import { supabase } from './supabase'
+
+const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 uur
+
 export async function analyzeFormPatterns(workouts) {
   const exerciseData = {}
 
@@ -61,7 +65,6 @@ Max 5 inzichten, meest impactvol eerst.`
       return JSON.parse(match[0])
     }
 
-    // Fallback: probeer hele response als JSON
     return JSON.parse(text)
   } catch (err) {
     console.error('Form analysis error:', err)
@@ -69,38 +72,80 @@ Max 5 inzichten, meest impactvol eerst.`
   }
 }
 
-// Cache helpers
-const CACHE_KEY = 'ragnarok_form_analysis'
-const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 uur
+// Cache in Supabase per gebruiker
+export async function getCachedAnalysis(userId) {
+  if (!userId) {
+    // Fallback: localStorage voor niet-ingelogde gebruikers
+    return getLocalCache()
+  }
 
-export function getCachedAnalysis() {
   try {
-    const cached = localStorage.getItem(CACHE_KEY)
-    if (!cached) return null
+    const { data, error } = await supabase
+      .from('form_analysis_cache')
+      .select('insights, created_at')
+      .eq('user_id', userId)
+      .single()
 
+    if (error || !data) return null
+
+    const age = Date.now() - new Date(data.created_at).getTime()
+    if (age > CACHE_DURATION) return null
+
+    return data.insights
+  } catch {
+    return getLocalCache()
+  }
+}
+
+export async function setCachedAnalysis(userId, insights) {
+  if (!userId) {
+    setLocalCache(insights)
+    return
+  }
+
+  try {
+    await supabase
+      .from('form_analysis_cache')
+      .upsert({ user_id: userId, insights, created_at: new Date().toISOString() })
+  } catch {
+    setLocalCache(insights)
+  }
+}
+
+export async function clearAnalysisCache(userId) {
+  if (!userId) {
+    localStorage.removeItem('ragnarok_form_analysis')
+    return
+  }
+
+  try {
+    await supabase
+      .from('form_analysis_cache')
+      .delete()
+      .eq('user_id', userId)
+  } catch {
+    localStorage.removeItem('ragnarok_form_analysis')
+  }
+}
+
+// localStorage fallback
+function getLocalCache() {
+  try {
+    const cached = localStorage.getItem('ragnarok_form_analysis')
+    if (!cached) return null
     const { timestamp, data } = JSON.parse(cached)
     if (Date.now() - timestamp > CACHE_DURATION) {
-      localStorage.removeItem(CACHE_KEY)
+      localStorage.removeItem('ragnarok_form_analysis')
       return null
     }
-
     return data
   } catch {
     return null
   }
 }
 
-export function setCachedAnalysis(data) {
+function setLocalCache(data) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      timestamp: Date.now(),
-      data
-    }))
-  } catch {
-    // localStorage full of niet beschikbaar
-  }
-}
-
-export function clearAnalysisCache() {
-  localStorage.removeItem(CACHE_KEY)
+    localStorage.setItem('ragnarok_form_analysis', JSON.stringify({ timestamp: Date.now(), data }))
+  } catch { /* ignore */ }
 }

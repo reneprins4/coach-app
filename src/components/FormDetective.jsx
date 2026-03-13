@@ -26,23 +26,22 @@ const SEVERITY_CONFIG = {
   }
 }
 
-export default function FormDetective({ workouts }) {
+export default function FormDetective({ workouts, userId }) {
   const [insights, setInsights] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const cached = getCachedAnalysis()
-    if (cached && cached.length > 0) {
-      setInsights(cached)
-    }
-  }, [])
+    getCachedAnalysis(userId).then(cached => {
+      if (cached && cached.length > 0) setInsights(cached)
+    })
+  }, [userId])
 
   async function runAnalysis(force = false) {
     if (loading) return
 
     if (!force) {
-      const cached = getCachedAnalysis()
+      const cached = await getCachedAnalysis(userId)
       if (cached) {
         setInsights(cached)
         return
@@ -60,7 +59,7 @@ export default function FormDetective({ workouts }) {
     try {
       const result = await analyzeFormPatterns(workouts)
       setInsights(result)
-      setCachedAnalysis(result)
+      await setCachedAnalysis(userId, result)
     } catch (err) {
       setError('Analyse mislukt. Probeer het later opnieuw.')
       console.error(err)
@@ -69,8 +68,8 @@ export default function FormDetective({ workouts }) {
     }
   }
 
-  function handleRefresh() {
-    clearAnalysisCache()
+  async function handleRefresh() {
+    await clearAnalysisCache(userId)
     runAnalysis(true)
   }
 
