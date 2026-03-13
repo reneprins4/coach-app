@@ -9,6 +9,7 @@ import { getExerciseHistory } from '../hooks/useWorkouts'
 import { getExerciseSubstitute } from '../lib/anthropic'
 import { getSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
+import { detectJunkVolume } from '../lib/junkVolumeDetector'
 import { useAuthContext } from '../App'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
@@ -18,6 +19,7 @@ import Toast from '../components/Toast'
 import PlateCalculator from '../components/PlateCalculator'
 import TemplateLibrary from '../components/TemplateLibrary'
 import SupersetModal from '../components/SupersetModal'
+import JunkVolumeAlert from '../components/JunkVolumeAlert'
 
 export default function Logger() {
   const nav = useNavigate()
@@ -38,6 +40,7 @@ export default function Logger() {
   const [showTemplates, setShowTemplates] = useState(false)
   const [showSupersetModal, setShowSupersetModal] = useState(false)
   const [supersetMode, setSupersetMode] = useState(null) // { supersets: [...], active: true }
+  const [junkWarning, setJunkWarning] = useState(null) // { exercise, message, severity, ... }
 
   useEffect(() => {
     const raw = localStorage.getItem('coach-pending-workout')
@@ -107,6 +110,28 @@ export default function Logger() {
   function handleExitSupersetMode() {
     setSupersetMode(null)
     setToast({ message: 'Superset modus uitgeschakeld' })
+  }
+
+  // Wrapper voor addSet die ook junk volume detecteert
+  function handleAddSet(exerciseName, data) {
+    aw.addSet(exerciseName, data)
+    rest.start()
+
+    // Check junk volume na het toevoegen van de set
+    // We moeten de nieuwe set meenemen in de check
+    const exercise = aw.workout?.exercises.find(e => e.name === exerciseName)
+    if (exercise) {
+      const updatedSets = [...exercise.sets, { ...data, id: 'temp' }]
+      const warning = detectJunkVolume(exerciseName, updatedSets)
+      if (warning) {
+        setJunkWarning(warning)
+      }
+    }
+  }
+
+  // Clear junk warning wanneer exercise wisselt
+  function handleClearJunkWarning() {
+    setJunkWarning(null)
   }
 
   if (!aw.isActive) {
@@ -276,34 +301,46 @@ export default function Logger() {
               groupIndex={groupIdx}
               allExercises={aw.workout.exercises}
               userId={user?.id}
-              onAddSet={(exerciseName, data) => {
-                aw.addSet(exerciseName, data)
-                rest.start()
-              }}
+              onAddSet={(exerciseName, data) => handleAddSet(exerciseName, data)}
               onRemoveSet={(exerciseName, id, setData) => handleRemoveSet(exerciseName, id, setData)}
-              onRemove={(exerciseName) => aw.removeExercise(exerciseName)}
+              onRemove={(exerciseName) => {
+                aw.removeExercise(exerciseName)
+                if (junkWarning?.exercise === exerciseName) setJunkWarning(null)
+              }}
               onSwap={(exercise) => setSwapTarget(exercise)}
               onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
               getLastUsed={aw.getLastUsed}
+              junkWarning={junkWarning}
+              onClearJunkWarning={handleClearJunkWarning}
             />
           ))
         ) : (
           // Normal rendering
           aw.workout.exercises.map(exercise => (
-            <ExerciseBlock
-              key={exercise.name}
-              exercise={exercise}
-              userId={user?.id}
-              onAddSet={(data) => {
-                aw.addSet(exercise.name, data)
-                rest.start()
-              }}
-              onRemoveSet={(id, setData) => handleRemoveSet(exercise.name, id, setData)}
-              onRemove={() => aw.removeExercise(exercise.name)}
-              onSwap={() => setSwapTarget(exercise)}
-              onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
-              lastUsed={aw.getLastUsed(exercise.name)}
-            />
+            <div key={exercise.name}>
+              <ExerciseBlock
+                exercise={exercise}
+                userId={user?.id}
+                onAddSet={(data) => handleAddSet(exercise.name, data)}
+                onRemoveSet={(id, setData) => handleRemoveSet(exercise.name, id, setData)}
+                onRemove={() => {
+                  aw.removeExercise(exercise.name)
+                  if (junkWarning?.exercise === exercise.name) setJunkWarning(null)
+                }}
+                onSwap={() => setSwapTarget(exercise)}
+                onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
+                lastUsed={aw.getLastUsed(exercise.name)}
+              />
+              {/* Junk Volume Alert voor deze oefening */}
+              {junkWarning && junkWarning.exercise === exercise.name && (
+                <div className="mt-2">
+                  <JunkVolumeAlert
+                    warning={junkWarning}
+                    onDismiss={handleClearJunkWarning}
+                  />
+                </div>
+              )}
+            </div>
           ))
         )}
 
@@ -869,11 +906,14 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
 }
 
 // ── SUPERSET GROUP BLOCK ─────────────────────────────────────────────────────
-function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, getLastUsed }) {
+function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, getLastUsed, junkWarning, onClearJunkWarning }) {
   // Find actual exercise data from workout
   const exerciseData = group.exercises.map(ex => 
     allExercises.find(e => e.name === ex.name) || ex
   )
+
+  // Check if any exercise in this group has a junk warning
+  const hasWarning = (exerciseName) => junkWarning && junkWarning.exercise === exerciseName
 
   if (group.type === 'superset') {
     return (
@@ -904,6 +944,11 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
             lastUsed={getLastUsed(exerciseData[0].name)}
             compact
           />
+          {hasWarning(exerciseData[0].name) && (
+            <div className="mt-2">
+              <JunkVolumeAlert warning={junkWarning} onDismiss={onClearJunkWarning} />
+            </div>
+          )}
         </div>
         
         {/* Arrow connector */}
@@ -928,6 +973,11 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
             lastUsed={getLastUsed(exerciseData[1].name)}
             compact
           />
+          {hasWarning(exerciseData[1].name) && (
+            <div className="mt-2">
+              <JunkVolumeAlert warning={junkWarning} onDismiss={onClearJunkWarning} />
+            </div>
+          )}
         </div>
       </div>
     )
@@ -935,16 +985,23 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
 
   // Single exercise (not in superset)
   return (
-    <ExerciseBlock
-      exercise={exerciseData[0]}
-      userId={userId}
-      onAddSet={(data) => onAddSet(exerciseData[0].name, data)}
-      onRemoveSet={(id, setData) => onRemoveSet(exerciseData[0].name, id, setData)}
-      onRemove={() => onRemove(exerciseData[0].name)}
-      onSwap={() => onSwap(exerciseData[0])}
-      onOpenPlateCalc={onOpenPlateCalc}
-      lastUsed={getLastUsed(exerciseData[0].name)}
-    />
+    <div>
+      <ExerciseBlock
+        exercise={exerciseData[0]}
+        userId={userId}
+        onAddSet={(data) => onAddSet(exerciseData[0].name, data)}
+        onRemoveSet={(id, setData) => onRemoveSet(exerciseData[0].name, id, setData)}
+        onRemove={() => onRemove(exerciseData[0].name)}
+        onSwap={() => onSwap(exerciseData[0])}
+        onOpenPlateCalc={onOpenPlateCalc}
+        lastUsed={getLastUsed(exerciseData[0].name)}
+      />
+      {hasWarning(exerciseData[0].name) && (
+        <div className="mt-2">
+          <JunkVolumeAlert warning={junkWarning} onDismiss={onClearJunkWarning} />
+        </div>
+      )}
+    </div>
   )
 }
 
