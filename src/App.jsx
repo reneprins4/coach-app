@@ -1,7 +1,7 @@
 import { lazy, Suspense, createContext, useContext, useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
-import { getSettings } from './lib/settings'
+import { getSettings, saveSettings, mergeSettingsOnLogin } from './lib/settings'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
@@ -44,11 +44,37 @@ function AuthLoader() {
 export default function App() {
   const auth = useAuth()
   const [needsOnboarding, setNeedsOnboarding] = useState(!getSettings().onboardingCompleted)
+  const [settings, setSettings] = useState(getSettings)
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
+
+  // Laad settings van Supabase zodra gebruiker ingelogd is
+  useEffect(() => {
+    if (auth.user?.id) {
+      mergeSettingsOnLogin(auth.user.id).then(merged => {
+        if (merged) {
+          setSettings(merged)
+          setNeedsOnboarding(!merged.onboardingCompleted)
+        }
+        setSettingsLoaded(true)
+      }).catch(() => setSettingsLoaded(true))
+    } else if (!auth.loading) {
+      setSettingsLoaded(true)
+    }
+  }, [auth.user?.id, auth.loading])
+
+  // Settings opslaan helper (update context + cloud)
+  function updateSettings(newSettings) {
+    const merged = saveSettings(newSettings, auth.user?.id)
+    setSettings(merged)
+    return merged
+  }
 
   // Luister naar localStorage changes (onboarding complete)
   useEffect(() => {
     function onStorage() {
-      setNeedsOnboarding(!getSettings().onboardingCompleted)
+      const s = getSettings()
+      setNeedsOnboarding(!s.onboardingCompleted)
+      setSettings(s)
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
@@ -65,7 +91,7 @@ export default function App() {
   }
 
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={{ ...auth, settings, updateSettings, settingsLoaded }}>
       <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
           <Routes>

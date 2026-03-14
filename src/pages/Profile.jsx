@@ -1,6 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Save, Check, LogOut } from 'lucide-react'
-import { getSettings, saveSettings, mergeSettingsOnLogin } from '../lib/settings'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 
@@ -38,28 +37,22 @@ const FREQUENCIES = ['3x', '4x', '5x', '6x']
 const REST_TIMES = [60, 90, 120, 180]
 
 export default function Profile() {
-  const { user, signOut } = useAuthContext()
-  const [settings, setSettings] = useState(getSettings)
+  const { user, signOut, settings: globalSettings, updateSettings } = useAuthContext()
+  const [localSettings, setLocalSettings] = useState(globalSettings)
   const [saved, setSaved] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const { workouts } = useWorkouts(user?.id)
 
-  // Load settings from cloud on mount
-  useEffect(() => {
-    if (user?.id) {
-      mergeSettingsOnLogin(user.id).then(merged => {
-        setSettings(merged)
-      })
-    }
-  }, [user?.id])
+  // Sync local form state wanneer global settings bijgewerkt worden
+  const settings = localSettings
 
   function update(key, value) {
-    setSettings(prev => ({ ...prev, [key]: value }))
+    setLocalSettings(prev => ({ ...prev, [key]: value }))
     setSaved(false)
   }
 
   function handleSave() {
-    saveSettings(settings, user?.id)
+    updateSettings(localSettings)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
