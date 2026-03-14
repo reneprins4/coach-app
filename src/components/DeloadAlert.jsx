@@ -3,25 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, TrendingDown, Activity, Calendar, X, ChevronRight } from 'lucide-react'
 import { detectFatigue } from '../lib/fatigueDetector'
 
-const DISMISS_KEY = 'deload-alert-dismissed'
 const DISMISS_DAYS = 7
-
-function isDismissed() {
-  try {
-    const dismissed = localStorage.getItem(DISMISS_KEY)
-    if (!dismissed) return false
-    const until = new Date(dismissed)
-    return until > new Date()
-  } catch {
-    return false
-  }
-}
-
-function dismissAlert() {
-  const until = new Date()
-  until.setDate(until.getDate() + DISMISS_DAYS)
-  localStorage.setItem(DISMISS_KEY, until.toISOString())
-}
 
 const SIGNAL_CONFIG = {
   rpe_drift: {
@@ -38,13 +20,23 @@ const SIGNAL_CONFIG = {
   },
 }
 
-export default function DeloadAlert({ workouts }) {
+export default function DeloadAlert({ workouts, settings, updateSettings }) {
   const nav = useNavigate()
-  const [dismissed, setDismissed] = useState(isDismissed())
 
-  useEffect(() => {
-    setDismissed(isDismissed())
-  }, [])
+  // Dismiss staat in settings (Supabase), fallback naar localStorage
+  const dismissed = useMemo(() => {
+    const until = settings?.deload_dismissed_until
+    if (!until) return false
+    return new Date(until) > new Date()
+  }, [settings?.deload_dismissed_until])
+
+  function handleDismiss() {
+    const until = new Date()
+    until.setDate(until.getDate() + DISMISS_DAYS)
+    if (updateSettings) {
+      updateSettings({ deload_dismissed_until: until.toISOString() })
+    }
+  }
 
   const fatigue = useMemo(() => {
     if (!workouts || workouts.length < 4) return null
@@ -54,11 +46,6 @@ export default function DeloadAlert({ workouts }) {
   if (dismissed || !fatigue || !fatigue.fatigued) return null
 
   const isUrgent = fatigue.recommendation === 'urgent'
-
-  const handleDismiss = () => {
-    dismissAlert()
-    setDismissed(true)
-  }
 
   const handleStartDeload = () => {
     nav('/plan')

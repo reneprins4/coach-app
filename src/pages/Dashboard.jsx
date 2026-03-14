@@ -5,7 +5,7 @@ import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { analyzeTraining } from '../lib/training-analysis'
 import { getCurrentBlock, getCurrentWeekTarget, getBlockProgress, PHASES } from '../lib/periodization'
-import { getSettings } from '../lib/settings'
+
 import PlateauAlert from '../components/PlateauAlert'
 import DeloadAlert from '../components/DeloadAlert'
 
@@ -22,9 +22,8 @@ const MUSCLE_NL = {
 }
 
 export default function Dashboard() {
-  const { user } = useAuthContext()
+  const { user, settings, updateSettings } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
-  const settings = getSettings()
   const nav = useNavigate()
 
   const { stats, muscleStatus } = useMemo(() => {
@@ -156,7 +155,7 @@ export default function Dashboard() {
       <PlateauAlert workouts={workouts} maxItems={3} />
 
       {/* Deload alert — vermoeidheidsdetectie */}
-      {workouts.length >= 4 && <DeloadAlert workouts={workouts} />}
+      {workouts.length >= 4 && <DeloadAlert workouts={workouts} settings={settings} updateSettings={updateSettings} />}
 
       {/* Actief trainingsblok */}
       {block && phase ? (
