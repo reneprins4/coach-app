@@ -48,7 +48,7 @@ export default function History() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Zoek op oefening..."
-          className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+          className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
       </div>
 
@@ -87,9 +87,9 @@ export default function History() {
               </Link>
               <button
                 onClick={(e) => { e.preventDefault(); setDeleteId(w.id) }}
-                className="absolute right-4 top-4 p-2 text-slate-600 opacity-0 transition-opacity group-hover:opacity-100 active:text-cyan-400"
+                className="absolute right-3 top-3 p-2 text-gray-700 active:text-red-400"
               >
-                <Trash2 size={16} />
+                <Trash2 size={15} />
               </button>
             </div>
           )

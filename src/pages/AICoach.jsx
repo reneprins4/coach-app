@@ -263,7 +263,7 @@ export default function AICoach() {
       {showProfileBanner && !result && (
         <Link
           to="/profile"
-          className="mb-5 flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-400 hover:bg-amber-500/15 transition-colors"
+          className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-400 active:bg-amber-500/20 transition-colors"
         >
           <User size={18} className="shrink-0" />
           <span>Vul je profiel aan voor betere trainingssuggesties</span>
@@ -403,7 +403,7 @@ export default function AICoach() {
                       <button 
                         onClick={handleGenerate}
                         disabled={generating}
-                        className="mt-3 flex items-center gap-2 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                        className="mt-3 flex items-center gap-2 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 active:bg-red-500/30 transition-colors disabled:opacity-50"
                       >
                         <RefreshCw size={14} className={generating ? 'animate-spin' : ''} />
                         Probeer opnieuw

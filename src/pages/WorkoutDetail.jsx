@@ -39,60 +39,70 @@ export default function WorkoutDetail() {
   }
 
   return (
-    <div className="px-4 py-6 pb-8">
+    <div className="px-4 py-6 pb-28">
       <button
         onClick={() => nav('/history')}
-        className="mb-4 flex items-center gap-2 text-sm text-gray-400 active:text-white"
+        className="mb-5 flex items-center gap-1.5 text-sm text-gray-500 active:text-white"
       >
-        <ArrowLeft size={18} /> Geschiedenis
+        <ArrowLeft size={16} /> Geschiedenis
       </button>
 
-      <h1 className="mb-1 text-xl font-bold text-white">{dateStr}</h1>
+      <div className="mb-5">
+        <p className="label-caps mb-1">{dateStr}</p>
+        <h1 className="text-2xl font-black tracking-tight text-white">
+          {workout.exerciseNames?.slice(0, 2).join(' + ') || 'Training'}
+          {(workout.exerciseNames?.length ?? 0) > 2 && ` +${workout.exerciseNames.length - 2}`}
+        </h1>
+      </div>
 
       {/* Stats */}
-      <div className="mb-6 mt-4 grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
-          <Dumbbell size={16} className="mx-auto mb-1 text-gray-500" />
-          <p className="text-lg font-bold text-white">{Object.keys(grouped).length}</p>
-          <p className="text-[10px] text-gray-500">oefeningen</p>
-        </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
-          <TrendingUp size={16} className="mx-auto mb-1 text-gray-500" />
-          <p className="text-lg font-bold text-white">{formatVol(workout.totalVolume)}</p>
-          <p className="text-[10px] text-gray-500">volume</p>
-        </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
-          <Clock size={16} className="mx-auto mb-1 text-gray-500" />
-          <p className="text-lg font-bold text-white">{workout.workout_sets.length}</p>
-          <p className="text-[10px] text-gray-500">totaal sets</p>
-        </div>
+      <div className="mb-5 grid grid-cols-3 gap-3">
+        {[
+          { icon: Dumbbell, value: Object.keys(grouped).length, label: 'oefeningen' },
+          { icon: TrendingUp, value: formatVol(workout.totalVolume), label: 'volume' },
+          { icon: Clock, value: workout.workout_sets.length, label: 'sets' },
+        ].map(({ icon: Icon, value, label }) => (
+          <div
+            key={label}
+            className="rounded-2xl p-3 text-center"
+            style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <p className="text-xl font-black text-white tabular-nums">{value}</p>
+            <p className="label-caps mt-1">{label}</p>
+          </div>
+        ))}
       </div>
 
       {/* Notes */}
       {workout.notes && (
-        <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-3">
-          <p className="text-sm text-gray-300">{workout.notes}</p>
+        <div className="mb-4 rounded-2xl bg-gray-900 px-4 py-3">
+          <p className="text-sm text-gray-400">{workout.notes}</p>
         </div>
       )}
 
       {/* Exercise breakdown */}
-      <div className="space-y-4">
+      <p className="label-caps mb-3">Oefeningen</p>
+      <div className="space-y-3">
         {Object.entries(grouped).map(([exercise, sets]) => (
-          <div key={exercise} className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <h3 className="mb-3 text-base font-bold text-white">{exercise}</h3>
-            <div className="grid grid-cols-[1.5rem_1fr_1fr_3rem] gap-2 px-1 label-caps">
-              <span>#</span><span>Kg</span><span>Reps</span><span>RPE</span>
+          <div key={exercise} className="rounded-2xl bg-gray-900 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-800/60">
+              <h3 className="text-sm font-bold text-white">{exercise}</h3>
             </div>
-            {sets.map((s, i) => (
-              <div key={s.id} className="grid grid-cols-[1.5rem_1fr_1fr_3rem] items-center gap-2 px-1 py-2 text-sm">
-                <span className="text-gray-600">{i + 1}</span>
-                <span className="font-medium text-white">{s.weight_kg}</span>
-                <span className="font-medium text-white">{s.reps}</span>
-                <span className="text-gray-400">{s.rpe || '-'}</span>
+            <div className="px-4 pt-2 pb-3">
+              <div className="grid grid-cols-[1.5rem_1fr_1fr_3rem] gap-2 px-1 pb-1 label-caps">
+                <span>#</span><span>Kg</span><span>Reps</span><span>RPE</span>
               </div>
-            ))}
-            <div className="mt-2 border-t border-gray-800 pt-2 text-xs text-gray-500">
-              Volume: {formatVol(sets.reduce((sum, x) => sum + (x.weight_kg || 0) * (x.reps || 0), 0))}
+              {sets.map((s, i) => (
+                <div key={s.id} className="grid grid-cols-[1.5rem_1fr_1fr_3rem] items-center gap-2 px-1 py-2 text-sm border-t border-gray-800/40">
+                  <span className="text-gray-600">{i + 1}</span>
+                  <span className="font-semibold text-white">{s.weight_kg}</span>
+                  <span className="font-semibold text-white">{s.reps}</span>
+                  <span className="text-gray-500">{s.rpe || '—'}</span>
+                </div>
+              ))}
+              <p className="mt-2 text-right text-xs text-gray-600">
+                {formatVol(sets.reduce((sum, x) => sum + (x.weight_kg || 0) * (x.reps || 0), 0))} volume
+              </p>
             </div>
           </div>
         ))}

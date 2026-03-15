@@ -180,25 +180,27 @@ export default function Calendar() {
   
   return (
     <div className="px-4 py-6 pb-32">
-      <h1 className="mb-1 text-2xl font-bold">Kalender</h1>
-      <p className="mb-6 text-sm text-gray-500">Je trainingsgeschiedenis in een oogopslag</p>
-      
+      <div className="mb-6">
+        <p className="label-caps mb-1">Overzicht</p>
+        <h1 className="text-3xl font-black tracking-tight text-white">Kalender</h1>
+      </div>
+
       {/* Stats strip */}
       <div className="mb-5 flex gap-2">
-        <div className="flex flex-1 flex-col items-center rounded-xl bg-gray-900 py-3">
-          <CalendarIcon size={16} className="mb-1 text-gray-500" />
-          <span className="text-xl font-bold text-white">{stats.thisMonth}</span>
-          <span className="label-caps">deze maand</span>
+        <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
+          <CalendarIcon size={15} className="mb-1.5 text-gray-500" />
+          <span className="text-xl font-black text-white tabular-nums">{stats.thisMonth}</span>
+          <span className="label-caps mt-0.5">deze maand</span>
         </div>
-        <div className="flex flex-1 flex-col items-center rounded-xl bg-gray-900 py-3">
-          <Flame size={16} className="mb-1 text-cyan-500" />
-          <span className="text-xl font-bold text-white">{stats.streak}</span>
-          <span className="label-caps">streak</span>
+        <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
+          <Flame size={15} className="mb-1.5 text-cyan-500" />
+          <span className="text-xl font-black text-white tabular-nums">{stats.streak}</span>
+          <span className="label-caps mt-0.5">streak</span>
         </div>
-        <div className="flex flex-1 flex-col items-center rounded-xl bg-gray-900 py-3">
-          <Trophy size={16} className="mb-1 text-yellow-500" />
-          <span className="text-xl font-bold text-white">{stats.thisYear}</span>
-          <span className="label-caps">dit jaar</span>
+        <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
+          <Trophy size={15} className="mb-1.5 text-yellow-500" />
+          <span className="text-xl font-black text-white tabular-nums">{stats.thisYear}</span>
+          <span className="label-caps mt-0.5">dit jaar</span>
         </div>
       </div>
       
@@ -206,18 +208,18 @@ export default function Calendar() {
       <div className="mb-4 flex items-center justify-between">
         <button 
           onClick={prevMonth}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 active:bg-gray-800"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-gray-800"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={22} />
         </button>
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-base font-bold text-white">
           {MONTHS_NL[currentMonth]} {currentYear}
         </h2>
         <button 
           onClick={nextMonth}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 active:bg-gray-800"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-gray-800"
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={22} />
         </button>
       </div>
       
@@ -266,7 +268,7 @@ export default function Calendar() {
       
       {/* Selected workout detail */}
       {selectedDate && selectedWorkouts.length > 0 && (
-        <div className="mt-6 rounded-xl border border-gray-800 bg-gray-900 p-4">
+        <div className="mt-6 rounded-2xl bg-gray-900 p-4">
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
             {formatDate(selectedDate)}
           </p>
