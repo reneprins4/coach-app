@@ -279,7 +279,10 @@ export default function AICoach() {
             <h1 className="text-3xl font-black tracking-tight">
               {selectedSplit || 'Vandaag'}
             </h1>
-            {splitScores[0] && (
+            {workoutHistory.length === 0 && (
+              <p className="text-sm text-slate-400 mt-1">Je eerste training. Full Body is ideaal om te starten — alle spieren komen aan bod.</p>
+            )}
+            {workoutHistory.length > 0 && splitScores[0] && (
               <p className="text-sm text-slate-400 mt-1">{splitScores[0].reasoning}</p>
             )}
             {/* Warning for consecutive training <20h ago */}
