@@ -100,6 +100,9 @@ export function calculateForecast(sessions) {
     y: s.bestE1rm || s.e1rm || 0
   }))
 
+  // Guard against empty array (Math.max returns -Infinity on empty spread)
+  if (points.length === 0) return { status: 'insufficient' }
+
   // Calculate weighted linear regression
   const { slope, intercept } = weightedLinearRegression(points)
 

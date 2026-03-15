@@ -51,7 +51,7 @@ export default function WorkoutDetail() {
         <p className="label-caps mb-1">{dateStr}</p>
         <h1 className="text-2xl font-black tracking-tight text-white">
           {workout.exerciseNames?.slice(0, 2).join(' + ') || 'Training'}
-          {(workout.exerciseNames?.length ?? 0) > 2 && ` +${workout.exerciseNames.length - 2}`}
+          {(workout.exerciseNames?.length ?? 0) > 2 && ` +${(workout.exerciseNames?.length ?? 0) - 2}`}
         </h1>
       </div>
 

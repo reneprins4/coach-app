@@ -23,7 +23,7 @@ export function useActiveWorkout(userId) {
 
   // Elapsed timer
   useEffect(() => {
-    if (!workout) { setElapsed(0); return }
+    if (!workout?.startedAt) { setElapsed(0); return }
     const tick = () => setElapsed(Math.floor((Date.now() - new Date(workout.startedAt).getTime()) / 1000))
     tick()
     const id = setInterval(tick, 1000)
@@ -132,7 +132,11 @@ export function useActiveWorkout(userId) {
       )
       if (allSets.length > 0) {
         const { error: sErr } = await supabase.from('sets').insert(allSets)
-        if (sErr) throw sErr
+        if (sErr) {
+          // Cleanup orphan workout row to prevent partial save
+          await supabase.from('workouts').delete().eq('id', row.id)
+          throw sErr
+        }
       }
 
       const result = {

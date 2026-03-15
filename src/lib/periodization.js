@@ -69,6 +69,7 @@ export function getCurrentBlock(userId) {
     )
     return { ...block, currentWeek, daysElapsed }
   } catch {
+    localStorage.removeItem(BLOCK_KEY)  // clear corrupted data
     return null
   }
 }
