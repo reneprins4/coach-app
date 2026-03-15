@@ -9,6 +9,8 @@ import { getSettings } from '../lib/settings'
 import { useAuthContext } from '../App'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { detectFatigue } from '../lib/fatigueDetector'
+import InjuryRadar from '../components/InjuryRadar'
+import BlockWizard from '../components/BlockWizard'
 
 const PHASE_COLORS = {
   blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25', border: 'border-blue-500/40' },
@@ -34,6 +36,7 @@ export default function Plan() {
   const [block, setBlock] = useState(null)
   const [selecting, setSelecting] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
+  const [wizardOpen, setWizardOpen] = useState(false)
 
   // Detecteer vermoeidheid
   const fatigue = workouts.length >= 4 ? detectFatigue(workouts) : null
@@ -62,10 +65,26 @@ export default function Plan() {
 
   const PhaseIcon = block ? PHASE_ICONS[block.phase] : null
 
+  async function handleWizardStart(phaseKey, userId) {
+    const b = await startBlock(phaseKey, userId)
+    setBlock({ ...b, currentWeek: 1, daysElapsed: 0 })
+  }
+
   return (
     <div className="px-4 py-6 pb-32">
       <h1 className="mb-1 text-2xl font-bold">Trainingsplan</h1>
       <p className="mb-6 text-sm text-gray-500">Gestructureerde periodisering voor consistente voortgang</p>
+
+      {/* Injury Prevention Radar */}
+      <InjuryRadar workouts={workouts} />
+
+      {/* Block Wizard Modal */}
+      <BlockWizard
+        isOpen={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onStart={handleWizardStart}
+        userId={user?.id}
+      />
 
       {/* What is periodization — info banner */}
       <div className="mb-5 rounded-xl border border-gray-800 bg-gray-900 p-4">
@@ -248,10 +267,20 @@ export default function Plan() {
           )}
 
           {!block && (
-            <div className="mt-6 rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
-              <p className="text-sm text-gray-500">Nieuw met gestructureerde training?</p>
-              <p className="mt-1 text-xs text-gray-600">Begin met Opbouw — het bouwt je werkcapaciteit op en went je aan het bijhouden.</p>
-            </div>
+            <>
+              <div className="mt-6 rounded-xl border border-gray-800 bg-gray-900 p-4 text-center">
+                <p className="text-sm text-gray-500">Nieuw met gestructureerde training?</p>
+                <p className="mt-1 text-xs text-gray-600">Begin met Opbouw — het bouwt je werkcapaciteit op en went je aan het bijhouden.</p>
+              </div>
+              <button
+                onClick={() => setWizardOpen(true)}
+                className="mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-cyan-500 px-5 font-bold text-white active:scale-[0.97] transition-transform"
+              >
+                <Sparkles size={20} />
+                Start trainingsblok
+                <ChevronRight size={18} className="ml-auto" />
+              </button>
+            </>
           )}
         </>
       )}
