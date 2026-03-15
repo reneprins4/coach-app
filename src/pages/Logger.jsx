@@ -359,7 +359,7 @@ export default function Logger() {
       </div>
 
       {/* Add exercise button */}
-      <div className="fixed bottom-[72px] left-0 right-0 z-30 px-4 pb-3 pt-2 bg-gradient-to-t from-gray-950 via-gray-950/95 to-transparent">
+      <div className="fixed bottom-16 left-0 right-0 z-30 px-4 pb-4 pt-3 bg-gradient-to-t from-gray-950 via-gray-950/80 to-transparent">
         <button
           onClick={() => setShowPicker(true)}
           className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-700 active:bg-gray-800"
@@ -844,7 +844,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         <div className="grid grid-cols-2 gap-3">
           {/* Weight */}
           <div>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex h-5 items-center justify-between">
               <span className="label-caps">Gewicht</span>
               <button
                 type="button"
@@ -883,7 +883,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
 
           {/* Reps */}
           <div>
-            <div className="mb-2">
+            <div className="mb-2 flex h-5 items-center">
               <span className="label-caps">Herhalingen</span>
             </div>
             <div className="flex items-center gap-1.5">
