@@ -126,7 +126,6 @@ export default function Dashboard() {
         onClick={() => nav('/coach')}
         className="btn-primary mb-3"
       >
-        <Sparkles size={22} />
         Start training
       </button>
 
@@ -135,7 +134,6 @@ export default function Dashboard() {
         onClick={() => nav('/log')}
         className="btn-secondary mb-6"
       >
-        <Dumbbell size={18} />
         Vrije training
       </button>
 
