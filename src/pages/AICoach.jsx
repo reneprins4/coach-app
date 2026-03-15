@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { generateScientificWorkout } from '../lib/anthropic'
 import { fetchRecentHistory } from '../hooks/useWorkouts'
-import { analyzeTraining, scoreSplits, getRelevantHistory, calcMuscleRecovery } from '../lib/training-analysis'
+import { analyzeTraining, scoreSplits, getRelevantHistory, calcMuscleRecovery, classifyExercise } from '../lib/training-analysis'
 import { getSettings } from '../lib/settings'
 import { supabase } from '../lib/supabase'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
@@ -27,7 +27,19 @@ const VS_ICONS = {
   new: { icon: Sparkles, color: 'text-cyan-400', label: 'Nieuw' },
 }
 
-const ALL_MUSCLES = ['borst', 'rug', 'schouders', 'bovenbenen', 'hamstrings', 'billen', 'biceps', 'triceps', 'core']
+// English keys (matching muscleStatus from training-analysis) with Dutch display labels
+const MUSCLE_DISPLAY = {
+  chest: 'Borst',
+  back: 'Rug',
+  shoulders: 'Schouders',
+  quads: 'Bovenbenen',
+  hamstrings: 'Hamstrings',
+  glutes: 'Billen',
+  biceps: 'Biceps',
+  triceps: 'Triceps',
+  core: 'Core',
+}
+const ALL_MUSCLES = Object.keys(MUSCLE_DISPLAY)
 
 // Use imported calcMuscleRecovery from training-analysis
 function calcRecovery(muscle, ms) {
@@ -49,7 +61,7 @@ function RecoveryBar({ muscle, ms }) {
   return (
     <div className="mb-3">
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-xs font-medium capitalize text-gray-300">{muscle}</span>
+        <span className="text-xs font-medium text-gray-300">{MUSCLE_DISPLAY[muscle] || muscle}</span>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-gray-500">{ms.setsThisWeek}/{ms.target.min}-{ms.target.max} sets</span>
           <span className={`text-[10px] font-semibold ${textColor}`}>{label}</span>
@@ -103,7 +115,7 @@ export default function AICoach() {
       try {
         const history = await fetchRecentHistory(user?.id, 21)
         setWorkoutHistory(history)
-        const analysis = analyzeTraining(history)
+        const analysis = analyzeTraining(history, settings.goal || 'hypertrophy')
         setMuscleStatus(analysis)
         
         // Calculate last workout info for consecutive training detection
@@ -129,26 +141,18 @@ export default function AICoach() {
     analyze()
   }, [user?.id])
 
-  // Helper to detect split type from workout exercises
+  // Helper to detect split type from workout exercises using unified classifier
   function detectSplitFromWorkout(workout) {
     const muscles = new Set()
     for (const set of (workout.workout_sets || [])) {
-      const exercise = set.exercise?.toLowerCase() || ''
-      // Simple muscle detection
-      if (/bench|chest|fly|push.?up|pec/i.test(exercise)) muscles.add('chest')
-      if (/row|pull|lat|back/i.test(exercise)) muscles.add('back')
-      if (/shoulder|overhead|lateral|face.?pull/i.test(exercise)) muscles.add('shoulders')
-      if (/squat|leg.?press|lunge|quad|extension/i.test(exercise)) muscles.add('quads')
-      if (/deadlift|rdl|romanian|hamstring|curl/i.test(exercise)) muscles.add('hamstrings')
-      if (/hip.?thrust|glute|bridge/i.test(exercise)) muscles.add('glutes')
-      if (/curl|bicep|hammer/i.test(exercise)) muscles.add('biceps')
-      if (/tricep|pushdown|skull|dip/i.test(exercise)) muscles.add('triceps')
+      const muscle = classifyExercise(set.exercise)
+      if (muscle) muscles.add(muscle)
     }
     
     const hasUpper = muscles.has('chest') || muscles.has('back') || muscles.has('shoulders')
     const hasLower = muscles.has('quads') || muscles.has('hamstrings') || muscles.has('glutes')
     
-    if (hasUpper && hasLower && muscles.size >= 5) return 'Full Body'
+    if (hasUpper && hasLower && muscles.size >= 4) return 'Full Body'
     if (hasUpper && !hasLower) {
       if (muscles.has('chest') && !muscles.has('back')) return 'Push'
       if (muscles.has('back') && !muscles.has('chest')) return 'Pull'
@@ -366,8 +370,8 @@ export default function AICoach() {
                 <div className="flex flex-wrap gap-2">
                   {ALL_MUSCLES.map(m => (
                     <button key={m} onClick={() => toggleFocus(m)}
-                      className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize ${focusedMuscles.includes(m) ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
-                      {m}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium ${focusedMuscles.includes(m) ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                      {MUSCLE_DISPLAY[m] || m}
                     </button>
                   ))}
                 </div>

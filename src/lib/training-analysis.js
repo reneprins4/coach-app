@@ -3,18 +3,45 @@
  * Uses evidence-based recovery rates per muscle group.
  */
 
-// Weekly set targets (Israetel MEV/MAV ranges for hypertrophy)
-export const SET_TARGETS = {
-  chest:      { min: 10, max: 20, mev: 8 },
-  back:       { min: 14, max: 22, mev: 10 },
-  shoulders:  { min: 8,  max: 16, mev: 6 },
-  quads:      { min: 12, max: 20, mev: 8 },
-  hamstrings: { min: 10, max: 16, mev: 6 },
-  glutes:     { min: 10, max: 20, mev: 8 },
-  biceps:     { min: 8,  max: 14, mev: 6 },
-  triceps:    { min: 8,  max: 14, mev: 6 },
-  core:       { min: 6,  max: 12, mev: 4 },
+// Weekly set targets by goal (Israetel MEV/MAV ranges)
+export const SET_TARGETS_BY_GOAL = {
+  hypertrophy: {
+    chest:      { min: 10, max: 20, mev: 8 },
+    back:       { min: 14, max: 22, mev: 10 },
+    shoulders:  { min: 8,  max: 16, mev: 6 },
+    quads:      { min: 12, max: 20, mev: 8 },
+    hamstrings: { min: 10, max: 16, mev: 6 },
+    glutes:     { min: 10, max: 20, mev: 8 },
+    biceps:     { min: 8,  max: 14, mev: 6 },
+    triceps:    { min: 8,  max: 14, mev: 6 },
+    core:       { min: 6,  max: 12, mev: 4 },
+  },
+  strength: {
+    chest:      { min: 6,  max: 12, mev: 4 },
+    back:       { min: 8,  max: 14, mev: 5 },
+    shoulders:  { min: 4,  max: 10, mev: 3 },
+    quads:      { min: 6,  max: 12, mev: 4 },
+    hamstrings: { min: 6,  max: 10, mev: 3 },
+    glutes:     { min: 6,  max: 10, mev: 3 },
+    biceps:     { min: 4,  max: 8,  mev: 3 },
+    triceps:    { min: 4,  max: 8,  mev: 3 },
+    core:       { min: 4,  max: 8,  mev: 2 },
+  },
+  endurance: {
+    chest:      { min: 8,  max: 16, mev: 6 },
+    back:       { min: 10, max: 18, mev: 7 },
+    shoulders:  { min: 6,  max: 12, mev: 4 },
+    quads:      { min: 10, max: 18, mev: 6 },
+    hamstrings: { min: 8,  max: 14, mev: 5 },
+    glutes:     { min: 8,  max: 16, mev: 5 },
+    biceps:     { min: 6,  max: 12, mev: 4 },
+    triceps:    { min: 6,  max: 12, mev: 4 },
+    core:       { min: 8,  max: 14, mev: 5 },
+  },
 }
+
+// Keep SET_TARGETS as hypertrophy default for backward compatibility
+export const SET_TARGETS = SET_TARGETS_BY_GOAL.hypertrophy
 
 // Muscle-specific recovery hours (evidence-based)
 // Large/compound-heavy = slower recovery; small/single-joint = faster
@@ -109,14 +136,17 @@ export function recoveryStatus(pct) {
 
 /**
  * Analyze recent workout history to determine per-muscle status.
+ * @param {Array} workouts - Recent workout history
+ * @param {string} goal - Training goal: 'hypertrophy', 'strength', or 'endurance'
  */
-export function analyzeTraining(workouts) {
+export function analyzeTraining(workouts, goal = 'hypertrophy') {
+  const targets = SET_TARGETS_BY_GOAL[goal] || SET_TARGETS_BY_GOAL.hypertrophy
   const now = new Date()
   const weekStart = new Date(now)
   weekStart.setDate(now.getDate() - 7)
 
   const muscleStatus = {}
-  for (const muscle of Object.keys(SET_TARGETS)) {
+  for (const muscle of Object.keys(targets)) {
     muscleStatus[muscle] = {
       setsThisWeek: 0,
       daysSinceLastTrained: null,
@@ -126,7 +156,7 @@ export function analyzeTraining(workouts) {
       recoveryPct: 100,
       recentExercises: [],
       lastSessionSets: [],
-      target: SET_TARGETS[muscle],
+      target: targets[muscle],
       status: 'needs_work',
     }
   }
@@ -182,6 +212,17 @@ export function analyzeTraining(workouts) {
   return muscleStatus
 }
 
+// Dutch muscle name mapping for user-facing text
+const MUSCLE_NL = {
+  chest: 'Borst', back: 'Rug', shoulders: 'Schouders',
+  quads: 'Bovenbenen', hamstrings: 'Hamstrings', glutes: 'Billen',
+  biceps: 'Biceps', triceps: 'Triceps', core: 'Core',
+}
+
+function toNL(muscles) {
+  return muscles.map(m => MUSCLE_NL[m] || m).join(', ')
+}
+
 /**
  * Score each split based on current training state.
  * @param {Object} muscleStatus - Per-muscle analysis data
@@ -223,10 +264,10 @@ export function scoreSplits(muscleStatus, lastWorkoutInfo = null, experienceLeve
     const needsWork = muscles.filter(m => muscleStatus[m]?.status === 'needs_work')
 
     let reasoning = ''
-    if (needsWork.length > 0) reasoning += `${needsWork.join(', ')} need volume. `
-    if (ready.length > 0) reasoning += `${ready.join(', ')} fully recovered. `
-    if (fatigued.length > 0) reasoning += `${fatigued.join(', ')} still recovering — intensity reduced.`
-    if (!reasoning) reasoning = 'Well-balanced based on your training history.'
+    if (needsWork.length > 0) reasoning += `${toNL(needsWork)} heeft extra volume nodig. `
+    if (ready.length > 0) reasoning += `${toNL(ready)} volledig hersteld. `
+    if (fatigued.length > 0) reasoning += `${toNL(fatigued)} nog aan het herstellen — intensiteit verlaagd.`
+    if (!reasoning) reasoning = 'Goed uitgebalanceerd op basis van je trainingshistorie.'
 
     return { name, score, reasoning }
   })
