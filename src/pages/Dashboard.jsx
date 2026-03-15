@@ -140,7 +140,10 @@ export default function Dashboard() {
       {/* Recent workouts - clean list style */}
       {recentWorkouts.length > 0 && (
         <div>
-          <p className="label-caps mb-3">Recent</p>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="label-caps">Recent</p>
+            <button onClick={() => nav('/history')} className="text-xs font-medium text-gray-500 active:text-white">Bekijk alles</button>
+          </div>
           <div className="divide-y divide-gray-800/50">
             {recentWorkouts.map(w => {
               const date = new Date(w.created_at)

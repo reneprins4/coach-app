@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { Search, Trash2, ChevronRight, Calendar } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Search, Trash2, Calendar, CalendarDays } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 
@@ -8,6 +8,7 @@ const DAY_NAMES = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
 
 export default function History() {
   const { user } = useAuthContext()
+  const nav = useNavigate()
   const { workouts, loading, deleteWorkout } = useWorkouts(user?.id)
   const [query, setQuery] = useState('')
   const [deleteId, setDeleteId] = useState(null)
@@ -38,7 +39,16 @@ export default function History() {
 
   return (
     <div className="px-4 py-6 pb-28">
-      <h1 className="mb-4 text-3xl font-black tracking-tight">Geschiedenis</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-3xl font-black tracking-tight text-white">Geschiedenis</h1>
+        <button
+          onClick={() => nav('/calendar')}
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 active:bg-gray-800 active:text-white"
+          aria-label="Kalender"
+        >
+          <CalendarDays size={20} />
+        </button>
+      </div>
 
       {/* Search */}
       <div className="relative mb-4">
