@@ -313,7 +313,8 @@ export default function Profile() {
 
       {/* Rest time */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Rustpauze</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Standaard rusttijd</label>
+        <p className="mb-3 text-xs text-gray-600">De app past dit automatisch aan op basis van jouw inspanning — dit is je startwaarde.</p>
         <div className="flex gap-2">
           {REST_TIMES.map(t => (
             <button
