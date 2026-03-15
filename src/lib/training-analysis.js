@@ -187,7 +187,7 @@ export function analyzeTraining(workouts) {
  * @param {Object} muscleStatus - Per-muscle analysis data
  * @param {Object} lastWorkoutInfo - Optional: { split: string, hoursSince: number }
  */
-export function scoreSplits(muscleStatus, lastWorkoutInfo = null) {
+export function scoreSplits(muscleStatus, lastWorkoutInfo = null, experienceLevel = 'intermediate') {
   const scores = {}
   for (const [splitName, muscles] of Object.entries(SPLIT_MUSCLES)) {
     let score = 0
@@ -204,9 +204,12 @@ export function scoreSplits(muscleStatus, lastWorkoutInfo = null) {
     }
     
     // Penalty for Full Body if last workout was also Full Body and <24h ago
-    // Full Body needs more recovery time between sessions
     if (splitName === 'Full Body' && lastWorkoutInfo?.split === 'Full Body' && lastWorkoutInfo.hoursSince < 24) {
-      score -= 30  // Strong penalty - Full Body back-to-back is suboptimal
+      score -= 30
+    }
+    // Advanced athletes: penalize Full Body (they benefit more from split training)
+    if (splitName === 'Full Body' && experienceLevel === 'advanced') {
+      score -= 40
     }
     
     scores[splitName] = Math.round(score * 10) / 10
