@@ -1,17 +1,22 @@
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, Trash2, Calendar, CalendarDays } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 
-const DAY_NAMES = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
+const DAY_NAMES_NL = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
+const DAY_NAMES_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function History() {
+  const { t, i18n } = useTranslation()
   const { user } = useAuthContext()
   const nav = useNavigate()
   const { workouts, loading, deleteWorkout } = useWorkouts(user?.id)
   const [query, setQuery] = useState('')
   const [deleteId, setDeleteId] = useState(null)
+
+  const DAY_NAMES = i18n.language === 'nl' ? DAY_NAMES_NL : DAY_NAMES_EN
 
   const filtered = useMemo(() => {
     if (!query.trim()) return workouts
@@ -40,7 +45,7 @@ export default function History() {
   return (
     <div className="px-4 py-6 pb-28">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tight text-white">Geschiedenis</h1>
+        <h1 className="text-3xl font-black tracking-tight text-white">{t('history.title')}</h1>
         <button
           onClick={() => nav('/calendar')}
           className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 active:bg-gray-800 active:text-white"
@@ -57,7 +62,7 @@ export default function History() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Zoek op oefening..."
+          placeholder={t('history.search_placeholder')}
           className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
       </div>
@@ -65,10 +70,10 @@ export default function History() {
       {filtered.length === 0 && (
         <div className="flex flex-col items-center py-16 text-center">
           <Calendar size={40} className="mb-4 text-gray-700" />
-          <p className="text-gray-500">{query ? 'Geen trainingen gevonden' : 'Nog geen trainingen'}</p>
+          <p className="text-gray-500">{query ? t('history.no_results') : t('history.no_workouts')}</p>
           {!query && (
             <Link to="/log" className="mt-4 text-sm font-medium text-cyan-500">
-              Start je eerste training
+              {t('history.start_first')}
             </Link>
           )}
         </div>
@@ -89,10 +94,10 @@ export default function History() {
                   <span className="text-sm font-bold text-cyan-400 tabular-nums">{formatVol(w.totalVolume)}</span>
                 </div>
                 <p className="text-sm font-semibold text-white truncate">
-                  {w.exerciseNames.join(', ') || 'Lege training'}
+                  {w.exerciseNames.join(', ') || t('history.empty_workout')}
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
-                  {w.workout_sets.length} sets
+                  {w.workout_sets.length} {t('common.sets')}
                 </p>
               </Link>
               <button
@@ -110,20 +115,20 @@ export default function History() {
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">Training verwijderen?</h3>
-            <p className="mb-6 text-sm text-gray-400">Dit kan niet ongedaan worden gemaakt.</p>
+            <h3 className="mb-2 text-lg font-bold text-white">{t('history.delete_confirm')}</h3>
+            <p className="mb-6 text-sm text-gray-400">{t('history.delete_confirm_sub')}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
                 className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
               >
-                Annuleer
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleDelete}
                 className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white active:bg-cyan-700"
               >
-                Verwijder
+                {t('common.delete')}
               </button>
             </div>
           </div>

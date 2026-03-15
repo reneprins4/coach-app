@@ -1,18 +1,20 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Home, Dumbbell, TrendingUp, User, Timer } from 'lucide-react'
 import { useState, useEffect } from 'react'
-
-const tabs = [
-  { to: '/',          icon: Home,       label: 'Vandaag'   },
-  { to: '/log',       icon: Dumbbell,   label: 'Trainen'   },
-  { to: '/progress',  icon: TrendingUp, label: 'Voortgang' },
-  { to: '/profile',   icon: User,       label: 'Profiel'   },
-]
+import { useTranslation } from 'react-i18next'
 
 export default function Layout() {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const [hasActiveWorkout, setHasActiveWorkout] = useState(false)
+
+  const tabs = [
+    { to: '/',          icon: Home,       label: t('nav.today')   },
+    { to: '/log',       icon: Dumbbell,   label: t('nav.train')   },
+    { to: '/progress',  icon: TrendingUp, label: t('nav.progress') },
+    { to: '/profile',   icon: User,       label: t('nav.profile')   },
+  ]
 
   useEffect(() => {
     function check() {

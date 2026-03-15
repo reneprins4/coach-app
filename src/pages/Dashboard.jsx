@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkles, Dumbbell, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
@@ -8,6 +9,7 @@ import { analyzeTraining } from '../lib/training-analysis'
 import MuscleMap from '../components/MuscleMap'
 
 export default function Dashboard() {
+  const { t, i18n } = useTranslation()
   const { user, settings } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
   const nav = useNavigate()
@@ -51,21 +53,21 @@ export default function Dashboard() {
   if (workouts.length === 0) {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
-        <h1 className="mb-3 text-3xl font-black tracking-tight text-white">{getGreeting()}</h1>
+        <h1 className="mb-3 text-3xl font-black tracking-tight text-white">{getGreeting(i18n.language)}</h1>
         <p className="mb-8 text-sm text-gray-500">
-          Tijd om te beginnen.
+          {i18n.language === 'nl' ? 'Tijd om te beginnen.' : 'Time to get started.'}
         </p>
         <button
           onClick={() => nav('/coach')}
           className="btn-primary mb-4 max-w-xs"
         >
-          Start training
+          {i18n.language === 'nl' ? 'Start training' : 'Start training'}
         </button>
         <button
           onClick={() => nav('/log')}
           className="btn-secondary max-w-xs"
         >
-          Vrije training
+          {i18n.language === 'nl' ? 'Vrije training' : 'Free training'}
         </button>
       </div>
     )
@@ -76,9 +78,9 @@ export default function Dashboard() {
 
       {/* Header */}
       <div className="mb-6">
-        <p className="label-caps">{getDayName()}</p>
+        <p className="label-caps">{getDayName(i18n.language)}</p>
         <h1 className="text-3xl font-black tracking-tight text-white">
-          {getGreeting()}{settings.name ? `, ${settings.name}` : ''}
+          {getGreeting(i18n.language)}{settings.name ? `, ${settings.name}` : ''}
         </h1>
       </div>
 
@@ -86,11 +88,11 @@ export default function Dashboard() {
       <div className="mb-5 grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-gray-900 p-4 text-center">
           <p className="text-3xl font-bold tabular text-white">{stats.thisWeekCount}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Trainingen</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">{t('dashboard.workouts')}</p>
         </div>
         <div className="rounded-xl bg-gray-900 p-4 text-center">
           <p className="text-3xl font-bold tabular text-white">{stats.streak}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Streak</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">{t('dashboard.streak')}</p>
         </div>
       </div>
 
@@ -116,7 +118,7 @@ export default function Dashboard() {
           background: 'linear-gradient(135deg, #0f1624 0%, #0a0f1a 100%)',
           border: '1px solid rgba(255,255,255,0.05)'
         }}>
-          <p className="label-caps mb-4">Herstel</p>
+          <p className="label-caps mb-4">{i18n.language === 'nl' ? 'Herstel' : 'Recovery'}</p>
           <MuscleMap muscleStatus={muscleStatus} />
         </div>
       )}
@@ -126,7 +128,7 @@ export default function Dashboard() {
         onClick={() => nav('/coach')}
         className="btn-primary mb-3"
       >
-        Start training
+        {i18n.language === 'nl' ? 'Start training' : 'Start training'}
       </button>
 
       {/* Secondary CTA */}
@@ -134,15 +136,15 @@ export default function Dashboard() {
         onClick={() => nav('/log')}
         className="btn-secondary mb-6"
       >
-        Vrije training
+        {i18n.language === 'nl' ? 'Vrije training' : 'Free training'}
       </button>
 
       {/* Recent workouts - clean list style */}
       {recentWorkouts.length > 0 && (
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <p className="label-caps">Recent</p>
-            <button onClick={() => nav('/history')} className="text-xs font-medium text-gray-500 active:text-white">Bekijk alles</button>
+            <p className="label-caps">{t('dashboard.recent')}</p>
+            <button onClick={() => nav('/history')} className="text-xs font-medium text-gray-500 active:text-white">{t('dashboard.view_all')}</button>
           </div>
           <div className="divide-y divide-gray-800/50">
             {recentWorkouts.map(w => {
@@ -156,10 +158,10 @@ export default function Dashboard() {
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-gray-400">
-                      {date.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' })}
+                      {date.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
                     </p>
                     <p className="truncate text-sm text-white">
-                      {exercises.length > 0 ? exercises.join(', ') : 'Geen oefeningen'}
+                      {exercises.length > 0 ? exercises.join(', ') : (i18n.language === 'nl' ? 'Geen oefeningen' : 'No exercises')}
                     </p>
                   </div>
                   <ChevronRight size={16} className="ml-2 shrink-0 text-gray-600" />
@@ -173,13 +175,22 @@ export default function Dashboard() {
   )
 }
 
-function getGreeting() {
+function getGreeting(lang = 'nl') {
   const h = new Date().getHours()
+  if (lang === 'en') {
+    if (h < 12) return 'Good morning'
+    if (h < 17) return 'Good afternoon'
+    return 'Good evening'
+  }
   if (h < 12) return 'Goedemorgen'
   if (h < 17) return 'Goedemiddag'
   return 'Goedenavond'
 }
 
-function getDayName() {
-  return ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'][new Date().getDay()]
+function getDayName(lang = 'nl') {
+  const day = new Date().getDay()
+  if (lang === 'en') {
+    return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][day]
+  }
+  return ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'][day]
 }

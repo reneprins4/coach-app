@@ -1,44 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Check, LogOut, Trash2, AlertTriangle, Download } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
 
-const GOALS = [
-  {
-    value: 'hypertrophy',
-    label: 'Spieren opbouwen',
-    sub: 'Meer spiermassa en een sterk lichaam',
-  },
-  {
-    value: 'strength',
-    label: 'Sterker worden',
-    sub: 'Meer gewicht tillen, meer kracht',
-  },
-  {
-    value: 'endurance',
-    label: 'Conditie & uithoudingsvermogen',
-    sub: 'Langer vol kunnen houden',
-  },
-]
-
-const LEVELS = [
-  { value: 'beginner', label: 'Beginner', sub: '< 1 jaar' },
-  { value: 'intermediate', label: 'Gemiddeld', sub: '1-3 jaar' },
-  { value: 'advanced', label: 'Gevorderd', sub: '3+ jaar' },
-]
-
-const EQUIPMENT = [
-  { value: 'full_gym', label: 'Volledige gym' },
-  { value: 'home_gym', label: 'Thuisgym' },
-  { value: 'dumbbells_only', label: 'Dumbbells' },
-]
-
-const FREQUENCIES = ['2x', '3x', '4x', '5x', '6x']
-const REST_TIMES = [60, 90, 120, 180]
-
 export default function Profile() {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { user, signOut, settings: globalSettings, updateSettings } = useAuthContext()
   const [localSettings, setLocalSettings] = useState(globalSettings)
@@ -50,6 +19,40 @@ export default function Profile() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
+
+  // Goals array with translations
+  const GOALS = [
+    {
+      value: 'hypertrophy',
+      label: t('profile.goal_hypertrophy'),
+      sub: i18n.language === 'nl' ? 'Meer spiermassa en een sterk lichaam' : 'More muscle mass and a strong body',
+    },
+    {
+      value: 'strength',
+      label: t('profile.goal_strength'),
+      sub: i18n.language === 'nl' ? 'Meer gewicht tillen, meer kracht' : 'Lift heavier, gain strength',
+    },
+    {
+      value: 'endurance',
+      label: t('profile.goal_endurance'),
+      sub: i18n.language === 'nl' ? 'Langer vol kunnen houden' : 'Build endurance and stamina',
+    },
+  ]
+
+  const LEVELS = [
+    { value: 'beginner', label: t('profile.experience_beginner'), sub: '< 1 year' },
+    { value: 'intermediate', label: t('profile.experience_intermediate'), sub: '1-3 years' },
+    { value: 'advanced', label: t('profile.experience_advanced'), sub: '3+ years' },
+  ]
+
+  const EQUIPMENT = [
+    { value: 'full_gym', label: t('profile.equipment_full_gym') },
+    { value: 'home_gym', label: i18n.language === 'nl' ? 'Thuisgym' : 'Home gym' },
+    { value: 'dumbbells_only', label: t('profile.equipment_dumbbells') },
+  ]
+
+  const FREQUENCIES = ['2x', '3x', '4x', '5x', '6x']
+  const REST_TIMES = [60, 90, 120, 180]
 
   // Sync local form state wanneer global settings bijgewerkt worden
   const settings = localSettings
@@ -78,7 +81,7 @@ export default function Profile() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session?.access_token) {
-        throw new Error('Geen geldige sessie gevonden')
+        throw new Error(i18n.language === 'nl' ? 'Geen geldige sessie gevonden' : 'No valid session found')
       }
       
       const res = await fetch('/api/delete-account', {
@@ -91,7 +94,7 @@ export default function Profile() {
       
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Account verwijderen mislukt')
+        throw new Error(data.error || (i18n.language === 'nl' ? 'Account verwijderen mislukt' : 'Failed to delete account'))
       }
       
       // Clear local storage
@@ -111,18 +114,26 @@ export default function Profile() {
     const totalWorkouts = workouts.length
     const totalVol = workouts.reduce((s, w) => s + (w.totalVolume || 0), 0)
     const memberSince = settings.memberSince
-      ? new Date(settings.memberSince).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
-      : 'Vandaag'
+      ? new Date(settings.memberSince).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { month: 'long', year: 'numeric' })
+      : (i18n.language === 'nl' ? 'Vandaag' : 'Today')
     return { totalWorkouts, totalVol, memberSince }
-  }, [workouts, settings.memberSince])
+  }, [workouts, settings.memberSince, i18n.language])
 
   const profileComplete = settings.name && settings.bodyweight && settings.experienceLevel
 
   function exportWorkoutsCSV() {
-    const rows = [['Datum', 'Training ID', 'Oefening', 'Gewicht (kg)', 'Herhalingen', 'RPE', 'Volume (kg)']]
+    const rows = [[
+      i18n.language === 'nl' ? 'Datum' : 'Date', 
+      'Training ID', 
+      i18n.language === 'nl' ? 'Oefening' : 'Exercise', 
+      i18n.language === 'nl' ? 'Gewicht (kg)' : 'Weight (kg)', 
+      i18n.language === 'nl' ? 'Herhalingen' : 'Reps', 
+      'RPE', 
+      'Volume (kg)'
+    ]]
     
     for (const w of workouts) {
-      const date = new Date(w.created_at).toLocaleDateString('nl-NL')
+      const date = new Date(w.created_at).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB')
       for (const s of (w.workout_sets || [])) {
         const volume = ((s.weight_kg || 0) * (s.reps || 0)).toFixed(1)
         rows.push([
@@ -150,14 +161,14 @@ export default function Profile() {
   return (
     <div className="px-4 py-6 pb-24">
       <div className="mb-1 flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tight">Profiel</h1>
+        <h1 className="text-3xl font-black tracking-tight">{t('profile.title')}</h1>
         <button
           onClick={handleLogout}
           disabled={loggingOut}
           className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-400 active:bg-gray-900 active:text-white"
         >
           <LogOut size={16} />
-          {loggingOut ? 'Uitloggen...' : 'Uitloggen'}
+          {loggingOut ? (i18n.language === 'nl' ? 'Uitloggen...' : 'Logging out...') : t('profile.logout')}
         </button>
       </div>
       <p className="mb-6 text-sm text-slate-500">
@@ -166,25 +177,41 @@ export default function Profile() {
 
       {!profileComplete && (
         <div className="mb-6 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-400">
-          Vul je gegevens in voor nauwkeurigere gewichten
+          {i18n.language === 'nl' ? 'Vul je gegevens in voor nauwkeurigere gewichten' : 'Fill in your details for more accurate weights'}
         </div>
       )}
 
+      {/* Language switcher */}
+      <div className="mb-6">
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.language_label')}</label>
+        <div className="flex gap-2">
+          {[{ value: 'nl', label: '🇳🇱 Nederlands' }, { value: 'en', label: '🇬🇧 English' }].map(lang => (
+            <button 
+              key={lang.value}
+              onClick={() => { i18n.changeLanguage(lang.value); localStorage.setItem('coach-lang', lang.value) }}
+              className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${i18n.language === lang.value ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'}`}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Name */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Naam</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{i18n.language === 'nl' ? 'Naam' : 'Name'}</label>
         <input
           type="text"
           value={settings.name}
           onChange={(e) => update('name', e.target.value)}
-          placeholder="Jouw naam"
+          placeholder={i18n.language === 'nl' ? 'Jouw naam' : 'Your name'}
           className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
       </div>
 
       {/* Bodyweight */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Gewicht (kg)</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{i18n.language === 'nl' ? 'Gewicht (kg)' : 'Weight (kg)'}</label>
         <input
           type="number"
           value={settings.bodyweight}
@@ -192,12 +219,12 @@ export default function Profile() {
           placeholder="80"
           className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
-        <p className="mt-1 text-xs text-gray-600">Helpt bij het schatten van startgewichten</p>
+        <p className="mt-1 text-xs text-gray-600">{i18n.language === 'nl' ? 'Helpt bij het schatten van startgewichten' : 'Helps estimate starting weights'}</p>
       </div>
 
       {/* Ervaringsniveau */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Niveau</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.experience_label')}</label>
         <div className="flex gap-2">
           {LEVELS.map(l => (
             <button
@@ -218,8 +245,8 @@ export default function Profile() {
 
       {/* Trainingsdoel */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Doel</label>
-        <p className="mb-3 text-xs text-gray-500">Wat wil je bereiken? De coach past je trainingen hierop aan.</p>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.goal_label')}</label>
+        <p className="mb-3 text-xs text-gray-500">{i18n.language === 'nl' ? 'Wat wil je bereiken? De coach past je trainingen hierop aan.' : 'What do you want to achieve? The coach adapts your workouts accordingly.'}</p>
         <div className="flex flex-col gap-2">
           {GOALS.map(g => (
             <button
@@ -249,7 +276,7 @@ export default function Profile() {
 
       {/* Equipment */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Uitrusting</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.equipment_label')}</label>
         <div className="flex gap-2">
           {EQUIPMENT.map(e => (
             <button
@@ -269,8 +296,8 @@ export default function Profile() {
 
       {/* Known maxes — optional but improves accuracy */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Bekende 1RM schattingen <span className="text-gray-600 font-normal">(optioneel)</span></label>
-        <p className="mb-3 text-xs text-gray-600">Helpt de AI met startgewichten. De app gebruikt je trainingshistorie als dat nauwkeuriger is.</p>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.maxes_label')} <span className="text-gray-600 font-normal">({i18n.language === 'nl' ? 'optioneel' : 'optional'})</span></label>
+        <p className="mb-3 text-xs text-gray-600">{t('profile.maxes_hint')}</p>
         <div className="grid grid-cols-3 gap-2">
           {[
             { key: 'benchMax', label: 'Bench (kg)' },
@@ -293,8 +320,8 @@ export default function Profile() {
 
       {/* Frequency */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Trainingsvoorkeur</label>
-        <p className="mb-3 text-xs text-gray-600">Wordt als context gebruikt voor je AI trainingsschema — geen automatische planning.</p>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.frequency_label')}</label>
+        <p className="mb-3 text-xs text-gray-600">{t('profile.frequency_hint')}</p>
         <div className="flex gap-2">
           {FREQUENCIES.map(f => (
             <button
@@ -306,7 +333,7 @@ export default function Profile() {
                   : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
               }`}
             >
-              {f}/wk
+              {f}/{i18n.language === 'nl' ? 'wk' : 'wk'}
             </button>
           ))}
         </div>
@@ -314,20 +341,20 @@ export default function Profile() {
 
       {/* Rest time */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Standaard rusttijd</label>
-        <p className="mb-3 text-xs text-gray-600">De app past dit automatisch aan op basis van jouw inspanning — dit is je startwaarde.</p>
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.rest_label')}</label>
+        <p className="mb-3 text-xs text-gray-600">{t('profile.rest_hint')}</p>
         <div className="flex gap-2">
-          {REST_TIMES.map(t => (
+          {REST_TIMES.map(time => (
             <button
-              key={t}
-              onClick={() => update('restTime', t)}
+              key={time}
+              onClick={() => update('restTime', time)}
               className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
-                settings.restTime === t
+                settings.restTime === time
                   ? 'bg-cyan-500 text-white'
                   : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
               }`}
             >
-              {t}s
+              {time}s
             </button>
           ))}
         </div>
@@ -336,9 +363,9 @@ export default function Profile() {
       {/* Stats summary */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[
-          { label: 'Trainingen', value: stats.totalWorkouts },
-          { label: 'Volume', value: stats.totalVol >= 1000 ? `${(stats.totalVol/1000).toFixed(1)}t` : `${stats.totalVol.toFixed(0)}kg` },
-          { label: 'Lid sinds', value: stats.memberSince },
+          { label: t('profile.stats_workouts'), value: stats.totalWorkouts },
+          { label: t('profile.stats_volume'), value: stats.totalVol >= 1000 ? `${(stats.totalVol/1000).toFixed(1)}t` : `${stats.totalVol.toFixed(0)}kg` },
+          { label: i18n.language === 'nl' ? 'Lid sinds' : 'Member since', value: stats.memberSince },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-2xl p-4 text-center" style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)'}}>
             <p className="text-xl font-black text-white tabular-nums">{value}</p>
@@ -355,10 +382,10 @@ export default function Profile() {
         {saved ? (
           <>
             <Check size={16} />
-            Opgeslagen
+            {t('common.saved')}
           </>
         ) : (
-          'Opslaan'
+          t('common.save')
         )}
       </button>
 
@@ -371,9 +398,11 @@ export default function Profile() {
         >
           <Download size={18} className="text-gray-500" />
           <div className="flex-1">
-            <div>Exporteer trainingsdata</div>
+            <div>{t('profile.export_data')}</div>
             <div className="text-xs text-gray-500">
-              {workouts.length === 0 ? 'Nog geen trainingsdata' : `${workouts.length} trainingen beschikbaar`}
+              {workouts.length === 0 
+                ? (i18n.language === 'nl' ? 'Nog geen trainingsdata' : 'No training data yet') 
+                : `${workouts.length} ${i18n.language === 'nl' ? 'trainingen beschikbaar' : 'workouts available'}`}
             </div>
           </div>
         </button>
@@ -381,13 +410,13 @@ export default function Profile() {
 
       {/* Privacy & Terms links */}
       <div className="mt-6 flex justify-center gap-4">
-        <Link to="/privacy" className="text-xs text-gray-500 active:text-gray-400">Privacybeleid</Link>
-        <Link to="/terms" className="text-xs text-gray-500 active:text-gray-400">Gebruiksvoorwaarden</Link>
+        <Link to="/privacy" className="text-xs text-gray-500 active:text-gray-400">{i18n.language === 'nl' ? 'Privacybeleid' : 'Privacy Policy'}</Link>
+        <Link to="/terms" className="text-xs text-gray-500 active:text-gray-400">{i18n.language === 'nl' ? 'Gebruiksvoorwaarden' : 'Terms of Use'}</Link>
       </div>
 
       {/* Account verwijderen */}
       <div className="mt-8 rounded-2xl p-4" style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(239,68,68,0.10)'}}>
-        <h2 className="mb-2 text-sm font-semibold text-red-400">Gevarenzone</h2>
+        <h2 className="mb-2 text-sm font-semibold text-red-400">{i18n.language === 'nl' ? 'Gevarenzone' : 'Danger zone'}</h2>
         
         {!showDeleteConfirm ? (
           <button
@@ -395,14 +424,16 @@ export default function Profile() {
             className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 text-sm font-medium text-red-400 ring-1 ring-red-500/30 active:bg-red-500/20 transition-colors"
           >
             <Trash2 size={16} />
-            Verwijder mijn account
+            {t('profile.delete_account')}
           </button>
         ) : (
           <div className="space-y-4">
             <div className="flex items-start gap-3 rounded-lg bg-red-500/10 p-3">
               <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-400" />
               <p className="text-sm text-red-300">
-                Dit verwijdert al je trainingsdata, instellingen en je account. Dit kan niet ongedaan worden gemaakt.
+                {i18n.language === 'nl' 
+                  ? 'Dit verwijdert al je trainingsdata, instellingen en je account. Dit kan niet ongedaan worden gemaakt.'
+                  : 'This will delete all your training data, settings and account. This cannot be undone.'}
               </p>
             </div>
             
@@ -419,14 +450,16 @@ export default function Profile() {
                 disabled={deleting}
                 className="flex-1 rounded-xl bg-gray-800 py-3 text-sm font-medium text-gray-300 active:bg-gray-700 transition-colors disabled:opacity-50"
               >
-                Annuleer
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting}
                 className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white active:bg-red-600 transition-colors disabled:opacity-50"
               >
-                {deleting ? 'Verwijderen...' : 'Ja, verwijder alles'}
+                {deleting 
+                  ? (i18n.language === 'nl' ? 'Verwijderen...' : 'Deleting...') 
+                  : (i18n.language === 'nl' ? 'Ja, verwijder alles' : 'Yes, delete everything')}
               </button>
             </div>
           </div>
