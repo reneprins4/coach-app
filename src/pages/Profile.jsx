@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Save, Check, LogOut, Trash2, AlertTriangle } from 'lucide-react'
+import { Save, Check, LogOut, Trash2, AlertTriangle, Download } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
@@ -117,6 +117,35 @@ export default function Profile() {
   }, [workouts, settings.memberSince])
 
   const profileComplete = settings.name && settings.bodyweight && settings.experienceLevel
+
+  function exportWorkoutsCSV() {
+    const rows = [['Datum', 'Training ID', 'Oefening', 'Gewicht (kg)', 'Herhalingen', 'RPE', 'Volume (kg)']]
+    
+    for (const w of workouts) {
+      const date = new Date(w.created_at).toLocaleDateString('nl-NL')
+      for (const s of (w.workout_sets || [])) {
+        const volume = ((s.weight_kg || 0) * (s.reps || 0)).toFixed(1)
+        rows.push([
+          date,
+          w.id.slice(0, 8),
+          s.exercise,
+          s.weight_kg || 0,
+          s.reps || 0,
+          s.rpe || '',
+          volume
+        ])
+      }
+    }
+    
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `kravex-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="px-4 py-6 pb-24">
@@ -331,9 +360,27 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Privacy link */}
-      <div className="mt-6 text-center">
+      {/* Data export */}
+      <div className="mt-6">
+        <button
+          onClick={exportWorkoutsCSV}
+          disabled={workouts.length === 0}
+          className="w-full rounded-xl bg-gray-900 px-4 py-3 text-left text-sm text-gray-300 ring-1 ring-gray-800 hover:ring-gray-700 transition-colors flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:ring-gray-800"
+        >
+          <Download size={18} className="text-gray-500" />
+          <div className="flex-1">
+            <div>Exporteer trainingsdata</div>
+            <div className="text-xs text-gray-500">
+              {workouts.length === 0 ? 'Nog geen trainingsdata' : `${workouts.length} trainingen beschikbaar`}
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Privacy & Terms links */}
+      <div className="mt-6 flex justify-center gap-4">
         <Link to="/privacy" className="text-xs text-gray-500 hover:text-gray-400">Privacybeleid</Link>
+        <Link to="/terms" className="text-xs text-gray-500 hover:text-gray-400">Gebruiksvoorwaarden</Link>
       </div>
 
       {/* Account verwijderen */}

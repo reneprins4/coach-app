@@ -16,6 +16,7 @@ const Profile = lazy(() => import('./pages/Profile'))
 const Plan = lazy(() => import('./pages/Plan'))
 const Calendar = lazy(() => import('./pages/Calendar'))
 const Privacy = lazy(() => import('./pages/Privacy'))
+const Terms = lazy(() => import('./pages/Terms'))
 
 // Auth context
 const AuthContext = createContext(null)
@@ -98,6 +99,7 @@ export default function App() {
           <Routes>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route element={<Layout />}>
               <Route path="/" element={needsOnboarding ? <Navigate to="/onboarding" replace /> : <Dashboard />} />
               <Route path="/calendar" element={<Calendar />} />
