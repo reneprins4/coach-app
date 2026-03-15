@@ -158,6 +158,48 @@ export default function Logger() {
     setJunkWarning(null)
   }
 
+  // ── Quick Setup state (vrije training configurator) ─────────────────────────
+  const [quickSetup, setQuickSetup] = useState({ show: false, muscles: [], duration: 45 })
+
+  const MUSCLE_LABELS = {
+    chest: 'Borst', back: 'Rug', shoulders: 'Schouders',
+    legs: 'Benen', arms: 'Armen', core: 'Core',
+  }
+  const ALL_MUSCLES = Object.keys(MUSCLE_LABELS)
+  const DURATIONS = [30, 45, 60, 90]
+
+  function toggleMuscle(m) {
+    setQuickSetup(prev => ({
+      ...prev,
+      muscles: prev.muscles.includes(m) ? prev.muscles.filter(x => x !== m) : [...prev.muscles, m],
+    }))
+  }
+
+  function buildQuickWorkout(selectedMuscles, durationMin) {
+    const exPerMuscle   = durationMin <= 30 ? 1 : durationMin <= 60 ? 2 : 3
+    const setsPerEx     = durationMin <= 30 ? 3 : durationMin <= 60 ? 3 : 4
+    const targetMuscles = selectedMuscles.length > 0 ? selectedMuscles : ALL_MUSCLES.slice(0, 2)
+    const result = []
+
+    for (const muscle of targetMuscles) {
+      const pool = exercises.filter(e => e.muscle_group === muscle)
+      const compounds  = pool.filter(e => e.category === 'compound')
+      const isolations = pool.filter(e => e.category === 'isolation')
+      const picked = [...compounds.slice(0, Math.ceil(exPerMuscle / 2)), ...isolations.slice(0, Math.floor(exPerMuscle / 2))]
+        .slice(0, exPerMuscle)
+
+      for (const ex of picked) {
+        result.push({
+          name: ex.name,
+          muscle_group: ex.muscle_group,
+          sets: [],
+          plan: { sets: setsPerEx, reps_min: 8, reps_max: 12, weight_kg: null },
+        })
+      }
+    }
+    return result
+  }
+
   if (!aw.isActive) {
     const block = getCurrentBlock()
     const phase = block ? PHASES[block.phase] : null
@@ -187,14 +229,86 @@ export default function Logger() {
             <p className="mt-1 text-sm font-medium text-cyan-900/70">Persoonlijk, op basis van herstel</p>
           </button>
 
-          {/* Vrije Training - Secondary Card */}
-          <button
-            onClick={() => aw.startWorkout()}
-            className="w-full rounded-2xl bg-gray-800/60 border border-gray-700/50 p-6 text-left active:scale-[0.98] transition-transform"
-          >
-            <p className="text-xl font-bold text-white">Vrije training</p>
-            <p className="mt-1 text-sm text-gray-500">Jij bepaalt</p>
-          </button>
+          {/* Vrije Training Card */}
+          <div className="rounded-2xl bg-gray-800/60 border border-gray-700/50 overflow-hidden">
+            {/* Card header — altijd zichtbaar */}
+            <button
+              onClick={() => setQuickSetup(prev => ({ ...prev, show: !prev.show, muscles: [], duration: 45 }))}
+              className="w-full p-6 text-left flex items-center justify-between active:bg-gray-800/80 transition-colors"
+            >
+              <div>
+                <p className="text-xl font-bold text-white">Vrije training</p>
+                <p className="mt-1 text-sm text-gray-500">Jij bepaalt</p>
+              </div>
+              <ChevronRight
+                size={18}
+                className={`text-gray-600 transition-transform duration-200 ${quickSetup.show ? 'rotate-90' : ''}`}
+              />
+            </button>
+
+            {/* Expanded quick setup */}
+            {quickSetup.show && (
+              <div className="border-t border-gray-700/50 px-5 pb-5 pt-4 space-y-5">
+                {/* Duration */}
+                <div>
+                  <p className="label-caps mb-2.5">Beschikbare tijd</p>
+                  <div className="flex gap-2">
+                    {DURATIONS.map(d => (
+                      <button
+                        key={d}
+                        onClick={() => setQuickSetup(prev => ({ ...prev, duration: d }))}
+                        className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition-colors ${
+                          quickSetup.duration === d
+                            ? 'bg-cyan-500 text-white'
+                            : 'bg-gray-900 text-gray-400 ring-1 ring-gray-700'
+                        }`}
+                      >
+                        {d}m
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Muscle groups */}
+                <div>
+                  <p className="label-caps mb-2.5">Spiergroepen <span className="text-gray-600 font-normal normal-case">(optioneel)</span></p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {ALL_MUSCLES.map(m => (
+                      <button
+                        key={m}
+                        onClick={() => toggleMuscle(m)}
+                        className={`rounded-xl py-2.5 text-sm font-medium transition-colors ${
+                          quickSetup.muscles.includes(m)
+                            ? 'bg-cyan-500/20 ring-1 ring-cyan-500 text-cyan-400'
+                            : 'bg-gray-900 text-gray-400 ring-1 ring-gray-700'
+                        }`}
+                      >
+                        {MUSCLE_LABELS[m]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-1">
+                  <button
+                    onClick={() => aw.startWorkout()}
+                    className="flex-1 rounded-xl py-3 text-sm font-medium text-gray-400 ring-1 ring-gray-700 active:bg-gray-800"
+                  >
+                    Start leeg
+                  </button>
+                  <button
+                    onClick={() => aw.startWorkout(buildQuickWorkout(quickSetup.muscles, quickSetup.duration))}
+                    className="flex-[2] rounded-xl bg-white py-3 text-sm font-bold text-black active:bg-gray-100"
+                  >
+                    {quickSetup.muscles.length > 0
+                      ? `Start ${quickSetup.muscles.map(m => MUSCLE_LABELS[m]).join(' + ')}`
+                      : `Start training`}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Templates link - compact */}
