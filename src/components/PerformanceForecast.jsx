@@ -1,9 +1,12 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TrendingUp } from 'lucide-react'
 import { LineChart, Line, ResponsiveContainer } from 'recharts'
 import { calculateForecast } from '../lib/performanceForecast'
 
 export default function PerformanceForecast({ sessions, exerciseName }) {
+  const { t } = useTranslation()
+  
   const forecast = useMemo(() => {
     if (!sessions || sessions.length === 0) return null
     return calculateForecast(sessions)
@@ -17,7 +20,7 @@ export default function PerformanceForecast({ sessions, exerciseName }) {
       <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="flex items-center gap-2 text-gray-400">
           <TrendingUp size={16} />
-          <span className="text-sm">Meer trainingen nodig voor een voorspelling</span>
+          <span className="text-sm">{t('forecast.insufficient')}</span>
         </div>
       </div>
     )
@@ -29,7 +32,7 @@ export default function PerformanceForecast({ sessions, exerciseName }) {
       <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
         <div className="flex items-center gap-2 text-gray-400">
           <TrendingUp size={16} />
-          <span className="text-sm">Houdt het niveau, focus op consistentie</span>
+          <span className="text-sm">{t('forecast.plateau')}</span>
         </div>
       </div>
     )
@@ -40,24 +43,24 @@ export default function PerformanceForecast({ sessions, exerciseName }) {
     <div className="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
       <div className="mb-3 flex items-center gap-2">
         <TrendingUp size={16} className="text-cyan-500" />
-        <span className="text-sm font-medium text-cyan-400">Performance Forecast</span>
+        <span className="text-sm font-medium text-cyan-400">{t('forecast.title')}</span>
       </div>
       
       {forecast.stale && (
-        <p className="mb-2 text-xs text-yellow-500">Laatste training meer dan 2 weken geleden — prognose mogelijk niet actueel.</p>
+        <p className="mb-2 text-xs text-yellow-500">{t('forecast.stale')}</p>
       )}
       
       <p className="mb-2 text-sm text-white">
-        Verwacht nieuw PR: <span className="font-semibold text-cyan-400">{forecast.forecastDate}</span>
+        {t('forecast.expected_pr')}: <span className="font-semibold text-cyan-400">{forecast.forecastDate}</span>
       </p>
       
       <div className="mb-3 flex gap-6 text-xs text-gray-400">
         <div>
-          <span className="text-gray-500">Huidig e1RM:</span>{' '}
+          <span className="text-gray-500">{t('forecast.current')}:</span>{' '}
           <span className="text-white">{forecast.currentPR.toFixed(1)} kg</span>
         </div>
         <div>
-          <span className="text-gray-500">Target:</span>{' '}
+          <span className="text-gray-500">{t('forecast.target')}:</span>{' '}
           <span className="text-cyan-400">{forecast.targetPR.toFixed(1)} kg</span>
         </div>
       </div>

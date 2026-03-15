@@ -1,51 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { saveSettings } from '../lib/settings'
 import { useAuthContext } from '../App'
 
-const CARD_STEPS = [
-  {
-    title: 'Wat wil je bereiken?',
-    sub: 'We passen je trainingen hierop aan',
-    key: 'goal',
-    options: [
-      { value: 'hypertrophy', label: 'Spieren opbouwen', sub: 'Meer spiermassa en kracht' },
-      { value: 'strength', label: 'Sterker worden', sub: 'Meer gewicht tillen' },
-      { value: 'endurance', label: 'Fitter worden', sub: 'Conditie en uithoudingsvermogen' },
-    ],
-  },
-  {
-    title: 'Hoe lang train je al?',
-    sub: 'Dit helpt ons het juiste niveau kiezen',
-    key: 'experienceLevel',
-    options: [
-      { value: 'beginner', label: 'Nieuw', sub: 'Minder dan 1 jaar' },
-      { value: 'intermediate', label: 'Gevorderd', sub: '1 tot 3 jaar' },
-      { value: 'advanced', label: 'Ervaren', sub: 'Meer dan 3 jaar' },
-    ],
-  },
-  {
-    title: 'Waar train je?',
-    sub: 'Zo kiezen we de juiste oefeningen',
-    key: 'equipment',
-    options: [
-      { value: 'full_gym', label: 'Volledige gym', sub: 'Alle machines en gewichten' },
-      { value: 'dumbbells', label: 'Thuis met dumbbells', sub: 'Vrije gewichten thuis' },
-      { value: 'bodyweight', label: 'Eigen lichaam', sub: 'Geen apparatuur nodig' },
-    ],
-  },
-]
-
-const FREQUENCY_OPTIONS = [
-  { value: '2x', label: '2x per week', sub: 'Minimaal, maar effectief' },
-  { value: '3x', label: '3x per week', sub: 'De gouden standaard' },
-  { value: '4x', label: '4x per week', sub: 'Serieus bezig' },
-  { value: '5x', label: '5x of meer', sub: 'Topsport niveau' },
-]
-
-const TOTAL_STEPS = CARD_STEPS.length + 3 // +3 for profile, frequency, and completion
+const TOTAL_STEPS = 6 // goal, experience, equipment, profile, frequency, completion
 
 export default function Onboarding() {
+  const { t } = useTranslation()
   const [step, setStep] = useState(0)
   const [selections, setSelections] = useState({})
   const [name, setName] = useState('')
@@ -54,6 +16,46 @@ export default function Onboarding() {
   const [fadeIn, setFadeIn] = useState(false)
   const navigate = useNavigate()
   const { user } = useAuthContext()
+
+  const CARD_STEPS = [
+    {
+      title: t('onboarding.goal_question'),
+      sub: t('onboarding.goal_sub'),
+      key: 'goal',
+      options: [
+        { value: 'hypertrophy', label: t('onboarding.goal_muscle'), sub: t('onboarding.goal_muscle_sub') },
+        { value: 'strength', label: t('onboarding.goal_strength'), sub: t('onboarding.goal_strength_sub') },
+        { value: 'endurance', label: t('onboarding.goal_endurance'), sub: t('onboarding.goal_endurance_sub') },
+      ],
+    },
+    {
+      title: t('onboarding.experience_question'),
+      sub: t('onboarding.experience_sub'),
+      key: 'experienceLevel',
+      options: [
+        { value: 'beginner', label: t('onboarding.exp_beginner'), sub: t('onboarding.exp_beginner_sub') },
+        { value: 'intermediate', label: t('onboarding.exp_intermediate'), sub: t('onboarding.exp_intermediate_sub') },
+        { value: 'advanced', label: t('onboarding.exp_advanced'), sub: t('onboarding.exp_advanced_sub') },
+      ],
+    },
+    {
+      title: t('onboarding.equipment_question'),
+      sub: t('onboarding.equipment_sub'),
+      key: 'equipment',
+      options: [
+        { value: 'full_gym', label: t('onboarding.equip_full'), sub: t('onboarding.equip_full_sub') },
+        { value: 'dumbbells', label: t('onboarding.equip_dumbbells'), sub: t('onboarding.equip_dumbbells_sub') },
+        { value: 'bodyweight', label: t('onboarding.equip_bodyweight'), sub: t('onboarding.equip_bodyweight_sub') },
+      ],
+    },
+  ]
+
+  const FREQUENCY_OPTIONS = [
+    { value: '2x', label: t('onboarding.freq_2x'), sub: t('onboarding.freq_2x_sub') },
+    { value: '3x', label: t('onboarding.freq_3x'), sub: t('onboarding.freq_3x_sub') },
+    { value: '4x', label: t('onboarding.freq_4x'), sub: t('onboarding.freq_4x_sub') },
+    { value: '5x', label: t('onboarding.freq_5x'), sub: t('onboarding.freq_5x_sub') },
+  ]
 
   const isCardStep = step < CARD_STEPS.length
   const isProfileStep = step === CARD_STEPS.length
@@ -95,14 +97,14 @@ export default function Onboarding() {
         <div 
           className={`text-center transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
         >
-          <h1 className="mb-3 text-3xl font-bold text-white">Je bent klaar</h1>
-          <p className="mb-10 text-gray-500">Je eerste training staat voor je klaar</p>
+          <h1 className="mb-3 text-3xl font-bold text-white">{t('onboarding.ready')}</h1>
+          <p className="mb-10 text-gray-500">{t('onboarding.ready_sub')}</p>
           
           <button
             onClick={handleStartTraining}
             className="btn-primary"
           >
-            Start je eerste training
+            {t('onboarding.start_first')}
           </button>
         </div>
       </div>
@@ -123,24 +125,24 @@ export default function Onboarding() {
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Vertel iets over jezelf</h1>
-          <p className="mb-8 text-sm text-gray-500">Dit helpt ons je training personaliseren</p>
+          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">{t('onboarding.profile_title')}</h1>
+          <p className="mb-8 text-sm text-gray-500">{t('onboarding.profile_sub')}</p>
 
           <div className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">Naam</label>
+              <label className="mb-2 block text-sm font-medium text-gray-300">{t('onboarding.name_label')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value.slice(0, 30))}
-                placeholder="Je naam"
+                placeholder={t('onboarding.name_placeholder')}
                 maxLength={30}
                 className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">Gewicht (kg)</label>
+              <label className="mb-2 block text-sm font-medium text-gray-300">{t('onboarding.weight_label')}</label>
               <input
                 type="number"
                 value={bodyweight}
@@ -156,7 +158,7 @@ export default function Onboarding() {
                 max={250}
                 className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
               />
-              <p className="mt-1 text-xs text-gray-600">Helpt bij het schatten van startgewichten</p>
+              <p className="mt-1 text-xs text-gray-600">{t('onboarding.weight_hint')}</p>
             </div>
           </div>
         </div>
@@ -167,20 +169,20 @@ export default function Onboarding() {
             onClick={() => setStep(step + 1)}
             className="text-sm text-gray-500 hover:text-gray-400"
           >
-            Overslaan
+            {t('onboarding.skip')}
           </button>
           <button
             onClick={handleProfileContinue}
             className="btn-primary w-auto px-6 h-12"
           >
-            Doorgaan
+            {t('onboarding.continue')}
           </button>
         </div>
 
         {/* Step indicator */}
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-600">
-            Stap {step + 1} van {TOTAL_STEPS - 1}
+            {t('onboarding.step_of', { current: step + 1, total: TOTAL_STEPS - 1 })}
           </p>
         </div>
       </div>
@@ -201,8 +203,8 @@ export default function Onboarding() {
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Hoe vaak?</h1>
-          <p className="mb-8 text-sm text-gray-500">Dit helpt de AI coach met het samenstellen van je trainingen</p>
+          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">{t('onboarding.frequency_question')}</h1>
+          <p className="mb-8 text-sm text-gray-500">{t('onboarding.frequency_sub')}</p>
 
           <div className="space-y-3">
             {FREQUENCY_OPTIONS.map((option) => (
@@ -221,7 +223,7 @@ export default function Onboarding() {
         {/* Step indicator */}
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-600">
-            Stap {step + 1} van {TOTAL_STEPS - 1}
+            {t('onboarding.step_of', { current: step + 1, total: TOTAL_STEPS - 1 })}
           </p>
         </div>
       </div>
@@ -261,7 +263,7 @@ export default function Onboarding() {
       {/* Step indicator */}
       <div className="mt-8 text-center">
         <p className="text-xs text-gray-600">
-          Stap {step + 1} van {TOTAL_STEPS - 1}
+          {t('onboarding.step_of', { current: step + 1, total: TOTAL_STEPS - 1 })}
         </p>
       </div>
     </div>

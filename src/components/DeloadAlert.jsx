@@ -1,26 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, TrendingDown, Activity, Calendar, X, ChevronRight } from 'lucide-react'
 import { detectFatigue } from '../lib/fatigueDetector'
 
 const DISMISS_DAYS = 7
 
-const SIGNAL_CONFIG = {
-  rpe_drift: {
-    Icon: TrendingDown,
-    label: (s) => `RPE stijgt bij ${s.exercise} (+${s.delta})`,
-  },
-  volume_drop: {
-    Icon: Activity,
-    label: (s) => `${s.dropPct}% minder volume per training`,
-  },
-  frequency_drop: {
-    Icon: Calendar,
-    label: (s) => `Slechts ${s.perWeek} trainingen per week`,
-  },
-}
-
 export default function DeloadAlert({ workouts, settings, updateSettings }) {
+  const { t } = useTranslation()
   const nav = useNavigate()
 
   // Dismiss staat in settings (Supabase), fallback naar localStorage
@@ -51,6 +38,28 @@ export default function DeloadAlert({ workouts, settings, updateSettings }) {
     nav('/plan')
   }
 
+  const getSignalLabel = (signal) => {
+    switch (signal.type) {
+      case 'rpe_drift':
+        return t('deload.signal_rpe', { exercise: signal.exercise, delta: signal.delta })
+      case 'volume_drop':
+        return t('deload.signal_volume', { pct: signal.dropPct })
+      case 'frequency_drop':
+        return t('deload.signal_frequency', { count: signal.perWeek })
+      default:
+        return null
+    }
+  }
+
+  const getSignalIcon = (type) => {
+    switch (type) {
+      case 'rpe_drift': return TrendingDown
+      case 'volume_drop': return Activity
+      case 'frequency_drop': return Calendar
+      default: return null
+    }
+  }
+
   return (
     <div
       className={`mb-4 rounded-xl border p-4 ${
@@ -67,19 +76,17 @@ export default function DeloadAlert({ workouts, settings, updateSettings }) {
           />
           <div>
             <p className={`text-sm font-semibold ${isUrgent ? 'text-red-400' : 'text-orange-400'}`}>
-              {isUrgent ? 'Vermoeidheid gedetecteerd' : 'Herstel aanbevolen'}
+              {isUrgent ? t('deload.urgent_title') : t('deload.recovery_title')}
             </p>
             <p className="mt-1 text-xs text-gray-400">
-              {isUrgent
-                ? 'Je lichaam geeft meerdere signalen van vermoeidheid. Een deload week wordt sterk aangeraden.'
-                : 'Signalen van opbouwende vermoeidheid gedetecteerd. Overweeg een deload.'}
+              {isUrgent ? t('deload.urgent_desc') : t('deload.recovery_desc')}
             </p>
           </div>
         </div>
         <button
           onClick={handleDismiss}
           className="shrink-0 p-1 text-gray-600 active:text-gray-400"
-          aria-label="Sluit melding"
+          aria-label={t('common.close')}
         >
           <X size={16} />
         </button>
@@ -89,13 +96,13 @@ export default function DeloadAlert({ workouts, settings, updateSettings }) {
       {fatigue.signals.length > 0 && (
         <div className="mb-3 space-y-1.5">
           {fatigue.signals.slice(0, 3).map((signal, i) => {
-            const config = SIGNAL_CONFIG[signal.type]
-            if (!config) return null
-            const { Icon, label } = config
+            const Icon = getSignalIcon(signal.type)
+            const label = getSignalLabel(signal)
+            if (!Icon || !label) return null
             return (
               <div key={i} className="flex items-center gap-2 text-xs text-gray-400">
                 <Icon size={12} className="shrink-0 text-gray-500" />
-                <span>{label(signal)}</span>
+                <span>{label}</span>
               </div>
             )
           })}
@@ -110,17 +117,17 @@ export default function DeloadAlert({ workouts, settings, updateSettings }) {
             isUrgent ? 'bg-red-500 active:bg-red-600' : 'bg-orange-500 active:bg-orange-600'
           }`}
         >
-          Ga naar trainingsplan
+          {t('deload.action')}
           <ChevronRight size={14} />
         </button>
         <button
           onClick={handleDismiss}
           className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-400 ring-1 ring-gray-700 active:bg-gray-800"
         >
-          Later
+          {t('deload.later')}
         </button>
       </div>
-      <p className="text-center text-xs text-gray-600 mt-2">Kies 'Deload' in je trainingsplan om een herstelweek te starten.</p>
+      <p className="text-center text-xs text-gray-600 mt-2">{t('deload.deload_hint')}</p>
     </div>
   )
 }

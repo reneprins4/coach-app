@@ -1,47 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, ChevronLeft, ChevronRight, Zap, TrendingUp, Target, Battery, Check } from 'lucide-react'
 import { startBlock, PHASES } from '../lib/periodization'
 import { saveSettings, getSettings } from '../lib/settings'
-
-const GOALS = [
-  {
-    id: 'muscle',
-    title: 'Spiermassa opbouwen',
-    description: 'Focus op volume en hypertrofie. Ideaal voor spieropbouw.',
-    icon: Zap,
-    phases: [
-      { type: 'accumulation', weeks: 4 },
-      { type: 'accumulation', weeks: 4 },
-      { type: 'intensification', weeks: 4 },
-      { type: 'deload', weeks: 1 },
-    ],
-  },
-  {
-    id: 'strength',
-    title: 'Kracht verbeteren',
-    description: 'Progressieve overload naar maximale kracht.',
-    icon: Target,
-    phases: [
-      { type: 'accumulation', weeks: 4 },
-      { type: 'intensification', weeks: 4 },
-      { type: 'intensification', weeks: 4 },
-      { type: 'strength', weeks: 3 },
-      { type: 'deload', weeks: 1 },
-    ],
-  },
-  {
-    id: 'both',
-    title: 'Beide tegelijk',
-    description: 'Gebalanceerd programma voor spier en kracht.',
-    icon: TrendingUp,
-    phases: [
-      { type: 'accumulation', weeks: 4 },
-      { type: 'intensification', weeks: 4 },
-      { type: 'strength', weeks: 3 },
-      { type: 'deload', weeks: 1 },
-    ],
-  },
-]
 
 const PHASE_COLORS = {
   accumulation: { bg: 'bg-blue-500/20', text: 'text-blue-400', bar: 'bg-blue-500' },
@@ -56,6 +17,46 @@ const PHASE_ICONS = {
   strength: Target,
   deload: Battery,
 }
+
+const GOALS = [
+  {
+    id: 'muscle',
+    titleKey: 'block_wizard.goal_muscle',
+    descKey: 'block_wizard.goal_muscle_desc',
+    icon: Zap,
+    phases: [
+      { type: 'accumulation', weeks: 4 },
+      { type: 'accumulation', weeks: 4 },
+      { type: 'intensification', weeks: 4 },
+      { type: 'deload', weeks: 1 },
+    ],
+  },
+  {
+    id: 'strength',
+    titleKey: 'block_wizard.goal_strength',
+    descKey: 'block_wizard.goal_strength_desc',
+    icon: Target,
+    phases: [
+      { type: 'accumulation', weeks: 4 },
+      { type: 'intensification', weeks: 4 },
+      { type: 'intensification', weeks: 4 },
+      { type: 'strength', weeks: 3 },
+      { type: 'deload', weeks: 1 },
+    ],
+  },
+  {
+    id: 'both',
+    titleKey: 'block_wizard.goal_both',
+    descKey: 'block_wizard.goal_both_desc',
+    icon: TrendingUp,
+    phases: [
+      { type: 'accumulation', weeks: 4 },
+      { type: 'intensification', weeks: 4 },
+      { type: 'strength', weeks: 3 },
+      { type: 'deload', weeks: 1 },
+    ],
+  },
+]
 
 /**
  * Generate the block configuration for a goal
@@ -98,6 +99,7 @@ export function getTotalWeeks(goalId) {
 }
 
 export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
+  const { t, i18n } = useTranslation()
   const [step, setStep] = useState(1)
   const [selectedGoal, setSelectedGoal] = useState(null)
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
@@ -149,7 +151,8 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
 
   function formatDate(dateStr) {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })
+    const locale = i18n.language === 'nl' ? 'nl-NL' : 'en-US'
+    return date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
   return (
@@ -161,7 +164,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
             {step === 1 ? <X size={20} /> : <ChevronLeft size={20} />}
           </button>
           <span className="text-sm font-semibold text-white">
-            Trainingsblok starten
+            {t('block_wizard.title')}
           </span>
           <div className="flex gap-1">
             {[1, 2, 3].map(s => (
@@ -177,9 +180,9 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
           {/* Step 1: Goal Selection */}
           {step === 1 && (
             <div>
-              <h2 className="mb-2 text-xl font-bold text-white">Wat is je doel?</h2>
+              <h2 className="mb-2 text-xl font-bold text-white">{t('block_wizard.goal_question')}</h2>
               <p className="mb-5 text-sm text-gray-500">
-                Kies je primaire focus. Het programma wordt hierop afgestemd.
+                {t('block_wizard.goal_sub')}
               </p>
               
               <div className="space-y-3">
@@ -201,10 +204,10 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
                           <Icon size={20} className={isSelected ? 'text-cyan-400' : 'text-gray-500'} />
                         </div>
                         <div className="flex-1">
-                          <p className="font-semibold text-white">{goal.title}</p>
-                          <p className="mt-0.5 text-xs text-gray-500">{goal.description}</p>
+                          <p className="font-semibold text-white">{t(goal.titleKey)}</p>
+                          <p className="mt-0.5 text-xs text-gray-500">{t(goal.descKey)}</p>
                           <p className="mt-2 text-xs text-gray-600">
-                            {getTotalWeeks(goal.id)} weken programma
+                            {getTotalWeeks(goal.id)} {t('block_wizard.weeks_program')}
                           </p>
                         </div>
                         {isSelected && (
@@ -225,7 +228,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
                     : 'bg-gray-800 text-gray-600'
                 }`}
               >
-                Volgende
+                {t('common.next')}
                 <ChevronRight size={18} />
               </button>
             </div>
@@ -234,13 +237,13 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
           {/* Step 2: Start Date */}
           {step === 2 && (
             <div>
-              <h2 className="mb-2 text-xl font-bold text-white">Wanneer beginnen?</h2>
+              <h2 className="mb-2 text-xl font-bold text-white">{t('block_wizard.when_start')}</h2>
               <p className="mb-5 text-sm text-gray-500">
-                Kies de startdatum van je trainingsblok.
+                {t('block_wizard.when_sub')}
               </p>
 
               <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4">
-                <label className="mb-2 block text-xs text-gray-500">Startdatum</label>
+                <label className="mb-2 block text-xs text-gray-500">{t('block_wizard.start_date')}</label>
                 <input
                   type="date"
                   value={startDate}
@@ -252,12 +255,12 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
 
               <div className="mt-4 rounded-xl bg-gray-800/50 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Programma duur</span>
-                  <span className="font-semibold text-white">{totalWeeks} weken</span>
+                  <span className="text-sm text-gray-400">{t('block_wizard.program_duration')}</span>
+                  <span className="font-semibold text-white">{totalWeeks} {t('plan.weeks')}</span>
                 </div>
                 {config && (
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Einddatum</span>
+                    <span className="text-sm text-gray-400">{t('block_wizard.end_date')}</span>
                     <span className="text-sm text-cyan-400">{formatDate(config.endDate)}</span>
                   </div>
                 )}
@@ -267,7 +270,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
                 onClick={handleNext}
                 className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-semibold text-white active:bg-cyan-600"
               >
-                Bekijk programma
+                {t('block_wizard.view_program')}
                 <ChevronRight size={18} />
               </button>
             </div>
@@ -276,9 +279,9 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
           {/* Step 3: Preview & Confirm */}
           {step === 3 && config && (
             <div>
-              <h2 className="mb-2 text-xl font-bold text-white">Je programma</h2>
+              <h2 className="mb-2 text-xl font-bold text-white">{t('block_wizard.your_program')}</h2>
               <p className="mb-5 text-sm text-gray-500">
-                {totalWeeks} weken periodisering op basis van je doel.
+                {totalWeeks} {t('block_wizard.program_sub')}
               </p>
 
               {/* Timeline */}
@@ -302,7 +305,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-white">{phase.label}</span>
-                          <span className={`text-xs ${colors.text}`}>{phase.weeks} weken</span>
+                          <span className={`text-xs ${colors.text}`}>{phase.weeks} {t('plan.weeks')}</span>
                         </div>
                         <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">
                           {phase.description}
@@ -316,11 +319,11 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
               {/* Summary */}
               <div className="mb-5 rounded-xl border border-gray-800 bg-gray-800/50 p-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Start</span>
+                  <span className="text-gray-400">{t('block_wizard.start')}</span>
                   <span className="text-white">{formatDate(config.startDate)}</span>
                 </div>
                 <div className="mt-2 flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Einde</span>
+                  <span className="text-gray-400">{t('block_wizard.end')}</span>
                   <span className="text-cyan-400">{formatDate(config.endDate)}</span>
                 </div>
               </div>
@@ -334,7 +337,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                 ) : (
                   <>
-                    Start dit programma
+                    {t('block_wizard.start_program')}
                     <ChevronRight size={18} />
                   </>
                 )}

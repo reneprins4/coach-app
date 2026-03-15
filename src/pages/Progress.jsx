@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, Award, TrendingUp } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
@@ -15,7 +16,6 @@ function e1rm(weight, reps) {
 
 const MUSCLE_GROUPS = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core']
 const MG_COLORS = { chest: '#ef4444', back: '#3b82f6', legs: '#22c55e', shoulders: '#eab308', arms: '#a855f7', core: '#06b6d4' }
-const MG_NL = { chest: 'Borst', back: 'Rug', legs: 'Benen', shoulders: 'Schouders', arms: 'Armen', core: 'Core' }
 
 function getMuscleGroup(name) {
   const l = name.toLowerCase()
@@ -28,13 +28,6 @@ function getMuscleGroup(name) {
   return null
 }
 
-const TABS = [
-  { id: 'exercise', label: 'Oefening' },
-  { id: 'muscle',   label: 'Spiergroepen' },
-  { id: 'analyse',  label: 'Analyse' },
-  { id: 'balans',   label: 'Balans' },
-]
-
 const CHART_TOOLTIP_STYLE = {
   contentStyle: { background: '#111827', border: '1px solid #1f2937', borderRadius: 12, fontSize: 12 },
   labelStyle: { color: '#6b7280' },
@@ -42,11 +35,19 @@ const CHART_TOOLTIP_STYLE = {
 }
 
 export default function Progress() {
+  const { t, i18n } = useTranslation()
   const { user } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
   const [tab, setTab] = useState('exercise')
   const [query, setQuery] = useState('')
   const [selectedExercise, setSelectedExercise] = useState(null)
+
+  const TABS = [
+    { id: 'exercise', label: t('progress.tab_exercise') },
+    { id: 'muscle',   label: t('progress.tab_muscle') },
+    { id: 'analyse',  label: t('progress.tab_analyse') },
+    { id: 'balans',   label: t('progress.tab_balance') },
+  ]
 
   const exerciseNames = useMemo(() => {
     const names = new Set()
@@ -63,18 +64,19 @@ export default function Progress() {
   const exerciseData = useMemo(() => {
     if (!selectedExercise) return null
     const sessions = []
+    const locale = i18n.language === 'nl' ? 'nl-NL' : 'en-US'
     for (const w of [...workouts].reverse()) {
       const sets = (w.workout_sets || []).filter(s => s.exercise === selectedExercise)
       if (sets.length === 0) continue
       const bestE1rm = Math.max(...sets.map(s => e1rm(s.weight_kg || 0, s.reps || 0)))
       const bestWeight = Math.max(...sets.map(s => s.weight_kg || 0))
       const volume = sets.reduce((s, x) => s + (x.weight_kg || 0) * (x.reps || 0), 0)
-      const date = new Date(w.created_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })
+      const date = new Date(w.created_at).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
       sessions.push({ date, e1rm: bestE1rm, bestWeight, volume, sets, fullDate: w.created_at })
     }
     const allTimeE1rm = sessions.length > 0 ? Math.max(...sessions.map(s => s.e1rm)) : 0
     return { sessions, allTimeE1rm }
-  }, [workouts, selectedExercise])
+  }, [workouts, selectedExercise, i18n.language])
 
   const muscleData = useMemo(() => {
     const now = new Date()
@@ -124,23 +126,23 @@ export default function Progress() {
     <div className="px-4 py-6 pb-28">
       {/* Header */}
       <div className="mb-6">
-        <p className="label-caps mb-1">Statistieken</p>
-        <h1 className="text-3xl font-black tracking-tight text-white">Voortgang</h1>
+        <p className="label-caps mb-1">{t('progress.stats')}</p>
+        <h1 className="text-3xl font-black tracking-tight text-white">{t('progress.title')}</h1>
       </div>
 
       {/* Tab bar */}
       <div className="mb-6 flex gap-1 rounded-2xl bg-gray-900 p-1">
-        {TABS.map(t => (
+        {TABS.map(tabItem => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tabItem.id}
+            onClick={() => setTab(tabItem.id)}
             className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-colors ${
-              tab === t.id
+              tab === tabItem.id
                 ? 'bg-white text-black shadow-sm'
                 : 'text-gray-500 active:text-gray-300'
             }`}
           >
-            {t.label}
+            {tabItem.label}
           </button>
         ))}
       </div>
@@ -155,7 +157,7 @@ export default function Progress() {
               type="text"
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedExercise(null) }}
-              placeholder="Zoek oefening..."
+              placeholder={t('progress.search_exercise')}
               className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-sm text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
             />
           </div>
@@ -163,7 +165,7 @@ export default function Progress() {
           {!selectedExercise && (
             <div className="divide-y divide-gray-800/60 rounded-2xl bg-gray-900 overflow-hidden">
               {filteredNames.length === 0 ? (
-                <p className="py-10 text-center text-sm text-gray-600">Geen oefeningen gevonden</p>
+                <p className="py-10 text-center text-sm text-gray-600">{t('progress.no_exercises')}</p>
               ) : (
                 filteredNames.map(name => {
                   const mg = getMuscleGroup(name)
@@ -175,7 +177,7 @@ export default function Progress() {
                     >
                       <span className="text-sm text-white">{name}</span>
                       {mg && (
-                        <span className="label-caps">{MG_NL[mg] || mg}</span>
+                        <span className="label-caps">{t(`muscles.${mg}`)}</span>
                       )}
                     </button>
                   )
@@ -192,7 +194,7 @@ export default function Progress() {
                   <Award size={22} className="text-cyan-400" />
                 </div>
                 <div>
-                  <p className="label-caps text-cyan-600">All-time geschat 1RM</p>
+                  <p className="label-caps text-cyan-600">{t('progress.all_time_e1rm')}</p>
                   <p className="text-3xl font-black tracking-tight text-white">
                     {exerciseData.allTimeE1rm.toFixed(1)}
                     <span className="ml-1 text-lg font-semibold text-gray-400">kg</span>
@@ -206,7 +208,7 @@ export default function Progress() {
                   <div className="rounded-2xl bg-gray-900 p-4">
                     <div className="mb-4 flex items-center gap-2">
                       <TrendingUp size={15} className="text-orange-400" />
-                      <p className="label-caps">Geschat 1RM</p>
+                      <p className="label-caps">{t('progress.estimated_1rm')}</p>
                     </div>
                     <ResponsiveContainer width="100%" height={180}>
                       <LineChart data={exerciseData.sessions}>
@@ -221,7 +223,7 @@ export default function Progress() {
 
                   {/* Volume */}
                   <div className="rounded-2xl bg-gray-900 p-4">
-                    <p className="label-caps mb-4">Volume per sessie</p>
+                    <p className="label-caps mb-4">{t('progress.volume_per_session')}</p>
                     <ResponsiveContainer width="100%" height={160}>
                       <BarChart data={exerciseData.sessions}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -240,7 +242,7 @@ export default function Progress() {
 
               {/* Recent sessions */}
               <div className="rounded-2xl bg-gray-900 overflow-hidden">
-                <p className="label-caps px-4 pt-4 pb-3">Recente sessies</p>
+                <p className="label-caps px-4 pt-4 pb-3">{t('progress.recent_sessions')}</p>
                 <div className="divide-y divide-gray-800/60">
                   {exerciseData.sessions.slice(-5).reverse().map((s, i) => (
                     <div key={i} className="flex items-center justify-between px-4 py-3">
@@ -265,7 +267,7 @@ export default function Progress() {
         <div className="space-y-4">
           {/* Volume chart */}
           <div className="rounded-2xl bg-gray-900 p-4">
-            <p className="label-caps mb-4">Volume per spiergroep — laatste 4 weken</p>
+            <p className="label-caps mb-4">{t('progress.volume_per_muscle')}</p>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={muscleData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -281,7 +283,7 @@ export default function Progress() {
               {MUSCLE_GROUPS.map(mg => (
                 <div key={mg} className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full" style={{ backgroundColor: MG_COLORS[mg] }} />
-                  <span className="text-xs text-gray-500">{MG_NL[mg]}</span>
+                  <span className="text-xs text-gray-500">{t(`muscles.${mg}`)}</span>
                 </div>
               ))}
             </div>
@@ -290,9 +292,9 @@ export default function Progress() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: 'Trainingen', value: totalStats.totalWorkouts },
-              { label: 'Volume',     value: totalStats.totalVol >= 1000 ? `${(totalStats.totalVol / 1000).toFixed(1)}t` : `${totalStats.totalVol.toFixed(0)}kg` },
-              { label: 'Favoriet',   value: null, name: totalStats.favorite },
+              { label: t('progress.workouts_stat'), value: totalStats.totalWorkouts },
+              { label: t('progress.volume_stat'),     value: totalStats.totalVol >= 1000 ? `${(totalStats.totalVol / 1000).toFixed(1)}t` : `${totalStats.totalVol.toFixed(0)}kg` },
+              { label: t('progress.favorite_stat'),   value: null, name: totalStats.favorite },
             ].map(({ label, value, name }) => (
               <div
                 key={label}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { CheckCircle2, ChevronRight, RotateCcw, Sparkles, Info, Zap, TrendingUp, Target, Battery } from 'lucide-react'
 import {
   PHASES, loadBlock, startBlock, clearBlock,
@@ -29,6 +30,7 @@ const PHASE_ICONS = {
 const SUGGESTED_ORDER = ['accumulation', 'intensification', 'strength', 'deload']
 
 export default function Plan() {
+  const { t } = useTranslation()
   const nav = useNavigate()
   const { user } = useAuthContext()
   const settings = getSettings()
@@ -73,8 +75,8 @@ export default function Plan() {
   return (
     <div className="px-4 py-6 pb-32">
       <div className="mb-6">
-        <p className="label-caps mb-1">Periodisering</p>
-        <h1 className="text-3xl font-black tracking-tight text-white">Trainingsplan</h1>
+        <p className="label-caps mb-1">{t('plan.periodization')}</p>
+        <h1 className="text-3xl font-black tracking-tight text-white">{t('plan.title')}</h1>
       </div>
 
       {/* Injury Prevention Radar */}
@@ -93,9 +95,9 @@ export default function Plan() {
         <div className="flex items-start gap-3">
           <Info size={16} className="mt-0.5 shrink-0 text-gray-500" />
           <div>
-            <p className="text-sm font-medium text-gray-300">Waarom periodisering?</p>
+            <p className="text-sm font-medium text-gray-300">{t('plan.why_periodization')}</p>
             <p className="mt-1 text-xs leading-relaxed text-gray-500">
-              Willekeurige trainingen stagneren snel. Trainingsblokken wisselen door opbouw (meer volume), intensivering (meer gewicht) en deload (herstel). Elke fase bouwt voort op de vorige — zo boeken serieuze sporters consistente vooruitgang.
+              {t('plan.why_periodization_desc')}
             </p>
           </div>
         </div>
@@ -106,7 +108,7 @@ export default function Plan() {
         <>
           <div className={`mb-5 rounded-2xl border ${phaseColor.border} ${phaseColor.bg} p-5`}>
             <div className="mb-1 flex items-center justify-between">
-              <span className={`text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>Actief blok</span>
+              <span className={`text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>{t('plan.active_block')}</span>
               <button
                 onClick={() => setConfirmClear(true)}
                 className="text-xs text-gray-600 active:text-cyan-400"
@@ -128,8 +130,8 @@ export default function Plan() {
                 <span className="h-2 w-2 rounded-full bg-cyan-500" />
                 <span className="text-cyan-400">
                   {fatigue.recommendation === 'urgent'
-                    ? 'Vermoeidheid gedetecteerd — deload aanbevolen'
-                    : 'Signalen van vermoeidheid gedetecteerd'}
+                    ? t('plan.fatigue_urgent')
+                    : t('plan.fatigue_signals')}
                 </span>
               </div>
             )}
@@ -154,36 +156,36 @@ export default function Plan() {
                     <span className={`text-[10px] font-semibold uppercase tracking-widest ${
                       isCurrent ? phaseColor.text : isDone ? 'text-gray-400' : 'text-gray-600'
                     }`}>
-                      Week {weekNum}
+                      {t('plan.week')} {weekNum}
                     </span>
                     <span className={`mt-1 text-[10px] ${isCurrent ? 'text-white font-medium' : isDone ? 'text-gray-500' : 'text-gray-700'}`}>
                       {wt.isDeload ? 'Deload' : `RPE ${wt.rpe}`}
                     </span>
                     {isDone && <CheckCircle2 size={12} className="mt-1 text-green-500" />}
-                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-cyan-400 font-bold">Nu</span>}
+                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-cyan-400 font-bold">{t('plan.now')}</span>}
                   </div>
                 )
               })}
             </div>
-            <p className="mt-2 text-[10px] text-gray-600 text-center">Weeknummer is gebaseerd op startdatum van het blok</p>
+            <p className="mt-2 text-[10px] text-gray-600 text-center">{t('plan.week_based_on_start')}</p>
 
             {/* Current week details */}
             {weekTarget && (
               <div className="rounded-xl bg-black/20 p-3">
                 <p className={`mb-2 text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>
-                  {weekTarget.isDeload ? 'Deload week' : `Week ${progress?.currentWeek} focus`}
+                  {weekTarget.isDeload ? t('plan.deload_week') : `${t('plan.week')} ${progress?.currentWeek} ${t('plan.week_focus')}`}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-gray-500">Herhalingsreeks</span>
+                    <span className="text-gray-500">{t('plan.rep_range')}</span>
                     <p className="font-semibold text-white">{weekTarget.repRange[0]}–{weekTarget.repRange[1]} reps</p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Doel RPE</span>
+                    <span className="text-gray-500">{t('plan.target_rpe')}</span>
                     <p className="font-semibold text-white">{weekTarget.rpe}</p>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-gray-500">Volumenotitie</span>
+                    <span className="text-gray-500">{t('plan.volume_note')}</span>
                     <p className="font-semibold text-white">{weekTarget.setNote}</p>
                   </div>
                 </div>
@@ -197,13 +199,13 @@ export default function Plan() {
             className="flex h-14 w-full items-center gap-3 rounded-2xl bg-cyan-500 px-5 font-bold text-white active:scale-[0.97] transition-transform mb-4"
           >
             <Sparkles size={20} />
-            Genereer training van vandaag
+            {t('plan.generate_today')}
             <ChevronRight size={18} className="ml-auto" />
           </button>
 
           {/* Phase sequence suggestion */}
           <div className="rounded-2xl bg-gray-900 p-4">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Aanbevolen volgorde</p>
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('plan.recommended_order')}</p>
             <div className="flex gap-1.5">
               {SUGGESTED_ORDER.map((key, i) => {
                 const p = PHASES[key]
@@ -215,21 +217,21 @@ export default function Plan() {
                     <Icon size={16} className={isCurrent ? c.text : 'text-gray-500'} />
                     <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-gray-500'}`}>{p.label.split(' ')[0]}</span>
                     <span className={`text-[8px] ${isCurrent ? c.text : 'text-gray-700'}`}>{p.weeks}w</span>
-                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-cyan-400">actief</span>}
+                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-cyan-400">{t('plan.active_block').toLowerCase()}</span>}
                   </div>
                 )
               })}
             </div>
             <p className="mt-3 text-[11px] text-gray-600">
-              Na dit blok, ga naar de volgende fase voor continue vooruitgang.
+              {t('plan.after_block_hint')}
             </p>
             {block.fullPlan && block.fullPlan.length > 1 && (
               <div className="mt-3 rounded-xl bg-gray-800/50 px-3 py-2">
                 <p className="text-[10px] text-gray-500">
-                  Programma: {block.fullPlan.map(p => PHASES[p]?.label || p).join(' → ')}
+                  {t('plan.program')}: {block.fullPlan.map(p => PHASES[p]?.label || p).join(' → ')}
                 </p>
                 <p className="text-[10px] text-gray-600 mt-0.5">
-                  Volgende fase start automatisch na dit blok.
+                  {t('plan.next_phase_auto')}
                 </p>
               </div>
             )}
@@ -238,7 +240,7 @@ export default function Plan() {
       ) : (
         /* Phase selector */
         <>
-          <p className="mb-4 text-sm text-gray-400">Kies je trainingsfase:</p>
+          <p className="mb-4 text-sm text-gray-400">{t('plan.choose_phase')}</p>
           <div className="space-y-3">
             {Object.entries(PHASES).map(([key, p]) => {
               const c = PHASE_COLORS[p.color]
@@ -256,7 +258,7 @@ export default function Plan() {
                         <p className="font-bold text-white">{p.label}</p>
                         <p className="mt-0.5 text-xs text-gray-400">{p.description}</p>
                         <div className="mt-2 flex gap-3 text-xs">
-                          <span className={c.text}>{p.weeks} weken</span>
+                          <span className={c.text}>{p.weeks} {t('plan.weeks')}</span>
                           <span className="text-gray-600">
                             RPE {p.weekTargets[0].rpe}–{p.weekTargets[p.weekTargets.length - 2]?.rpe || p.weekTargets[0].rpe}
                           </span>
@@ -275,22 +277,22 @@ export default function Plan() {
               onClick={() => setSelecting(false)}
               className="mt-4 w-full rounded-2xl py-3 text-sm text-gray-500 ring-1 ring-gray-800"
             >
-              Annuleer
+              {t('common.cancel')}
             </button>
           )}
 
           {!block && (
             <>
               <div className="mt-6 rounded-2xl bg-gray-900 p-4 text-center">
-                <p className="text-sm text-gray-500">Nieuw met gestructureerde training?</p>
-                <p className="mt-1 text-xs text-gray-600">Begin met Opbouw — het bouwt je werkcapaciteit op en went je aan het bijhouden.</p>
+                <p className="text-sm text-gray-500">{t('plan.new_hint')}</p>
+                <p className="mt-1 text-xs text-gray-600">{t('plan.new_hint_sub')}</p>
               </div>
               <button
                 onClick={() => setWizardOpen(true)}
                 className="mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-cyan-500 px-5 font-bold text-white active:scale-[0.97] transition-transform"
               >
                 <Sparkles size={20} />
-                Start trainingsblok
+                {t('plan.start_block')}
                 <ChevronRight size={18} className="ml-auto" />
               </button>
             </>
@@ -302,11 +304,11 @@ export default function Plan() {
       {confirmClear && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">Huidig blok beëindigen?</h3>
-            <p className="mb-6 text-sm text-gray-400">Je kunt daarna direct een nieuw blok starten.</p>
+            <h3 className="mb-2 text-lg font-bold text-white">{t('plan.end_block_confirm')}</h3>
+            <p className="mb-6 text-sm text-gray-400">{t('plan.end_block_hint')}</p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmClear(false)} className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700">Annuleer</button>
-              <button onClick={handleClear} className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white">Blok beëindigen</button>
+              <button onClick={() => setConfirmClear(false)} className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700">{t('common.cancel')}</button>
+              <button onClick={handleClear} className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white">{t('plan.end_block')}</button>
             </div>
           </div>
         </div>
