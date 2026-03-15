@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Search, Award, BarChart3, TrendingUp as TrendUp } from 'lucide-react'
+import { Search, Award, TrendingUp } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
@@ -25,17 +25,29 @@ function getMuscleGroup(name) {
   if (/press(?!.*bench)|shoulder|lateral|raise|face|shrug/.test(l)) return 'shoulders'
   if (/curl|bicep|tricep|hammer|skull|pushdown/.test(l)) return 'arms'
   if (/plank|ab|crunch|core/.test(l)) return 'core'
-  return 'chest'
+  return null
+}
+
+const TABS = [
+  { id: 'exercise', label: 'Oefening' },
+  { id: 'muscle',   label: 'Spiergroepen' },
+  { id: 'analyse',  label: 'Analyse' },
+  { id: 'balans',   label: 'Balans' },
+]
+
+const CHART_TOOLTIP_STYLE = {
+  contentStyle: { background: '#111827', border: '1px solid #1f2937', borderRadius: 12, fontSize: 12 },
+  labelStyle: { color: '#6b7280' },
+  itemStyle: { color: '#e5e7eb' },
 }
 
 export default function Progress() {
   const { user } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
-  const [tab, setTab] = useState('exercise') // exercise | muscle | analyse | balans
+  const [tab, setTab] = useState('exercise')
   const [query, setQuery] = useState('')
   const [selectedExercise, setSelectedExercise] = useState(null)
 
-  // All unique exercises
   const exerciseNames = useMemo(() => {
     const names = new Set()
     workouts.forEach(w => (w.workout_sets || []).forEach(s => names.add(s.exercise)))
@@ -48,7 +60,6 @@ export default function Progress() {
     return exerciseNames.filter(n => n.toLowerCase().includes(lower))
   }, [exerciseNames, query])
 
-  // Exercise data
   const exerciseData = useMemo(() => {
     if (!selectedExercise) return null
     const sessions = []
@@ -65,52 +76,40 @@ export default function Progress() {
     return { sessions, allTimeE1rm }
   }, [workouts, selectedExercise])
 
-  // Muscle volume data (last 4 weeks)
   const muscleData = useMemo(() => {
-    const weeks = []
     const now = new Date()
-    for (let i = 3; i >= 0; i--) {
+    return Array.from({ length: 4 }, (_, i) => {
       const weekStart = new Date(now)
-      weekStart.setDate(now.getDate() - now.getDay() - i * 7)
+      weekStart.setDate(now.getDate() - now.getDay() - (3 - i) * 7)
       weekStart.setHours(0, 0, 0, 0)
       const weekEnd = new Date(weekStart)
       weekEnd.setDate(weekStart.getDate() + 7)
-
-      const label = `W${4 - i}`
-      const entry = { week: label }
-
+      const entry = { week: `W${i + 1}` }
       const weekWorkouts = workouts.filter(w => {
         const d = new Date(w.created_at)
         return d >= weekStart && d < weekEnd
       })
-
       for (const mg of MUSCLE_GROUPS) {
         let vol = 0
-        for (const w of weekWorkouts) {
-          for (const s of (w.workout_sets || [])) {
-            if (getMuscleGroup(s.exercise) === mg) {
+        for (const w of weekWorkouts)
+          for (const s of (w.workout_sets || []))
+            if (getMuscleGroup(s.exercise) === mg)
               vol += (s.weight_kg || 0) * (s.reps || 0)
-            }
-          }
-        }
         entry[mg] = Math.round(vol)
       }
-      weeks.push(entry)
-    }
-    return weeks
+      return entry
+    })
   }, [workouts])
 
-  // Overall stats
   const totalStats = useMemo(() => {
     const totalWorkouts = workouts.length
     const totalVol = workouts.reduce((s, w) => s + (w.totalVolume || 0), 0)
-    // Favorite exercise
     const counts = {}
     workouts.forEach(w => (w.workout_sets || []).forEach(s => {
       counts[s.exercise] = (counts[s.exercise] || 0) + 1
     }))
     const favorite = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
-    return { totalWorkouts, totalVol, favorite: favorite?.[0] || '-' }
+    return { totalWorkouts, totalVol, favorite: favorite?.[0] || '—' }
   }, [workouts])
 
   if (loading) {
@@ -123,125 +122,134 @@ export default function Progress() {
 
   return (
     <div className="px-4 py-6 pb-28">
-      <h1 className="mb-4 text-2xl font-bold">Voortgang</h1>
-
-      {/* Tabs */}
-      <div className="mb-4 flex gap-2 overflow-x-auto">
-        <button
-          onClick={() => setTab('exercise')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'exercise' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
-        >
-          Per oefening
-        </button>
-        <button
-          onClick={() => setTab('muscle')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'muscle' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
-        >
-          Spiergroepen
-        </button>
-        <button
-          onClick={() => setTab('analyse')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'analyse' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
-        >
-          Analyse
-        </button>
-        <button
-          onClick={() => setTab('balans')}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${tab === 'balans' ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400'}`}
-        >
-          Balans
-        </button>
+      {/* Header */}
+      <div className="mb-6">
+        <p className="label-caps mb-1">Statistieken</p>
+        <h1 className="text-3xl font-black tracking-tight text-white">Voortgang</h1>
       </div>
 
+      {/* Tab bar */}
+      <div className="mb-6 flex gap-1 rounded-2xl bg-gray-900 p-1">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-colors ${
+              tab === t.id
+                ? 'bg-white text-black shadow-sm'
+                : 'text-gray-500 active:text-gray-300'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Per oefening ──────────────────────────────────────────── */}
       {tab === 'exercise' && (
-        <>
-          {/* Exercise selector */}
-          <div className="relative mb-4">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <div className="space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedExercise(null) }}
               placeholder="Zoek oefening..."
-              className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800"
+              className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-sm text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
             />
           </div>
 
           {!selectedExercise && (
-            <div className="space-y-1">
-              {filteredNames.map(name => (
-                <button
-                  key={name}
-                  onClick={() => { setSelectedExercise(name); setQuery(name) }}
-                  className="w-full rounded-lg px-3 py-3 text-left text-sm text-white active:bg-gray-900"
-                >
-                  {name}
-                </button>
-              ))}
-              {filteredNames.length === 0 && (
-                <p className="py-8 text-center text-gray-500">Geen oefeningen gevonden</p>
+            <div className="divide-y divide-gray-800/60 rounded-2xl bg-gray-900 overflow-hidden">
+              {filteredNames.length === 0 ? (
+                <p className="py-10 text-center text-sm text-gray-600">Geen oefeningen gevonden</p>
+              ) : (
+                filteredNames.map(name => {
+                  const mg = getMuscleGroup(name)
+                  return (
+                    <button
+                      key={name}
+                      onClick={() => { setSelectedExercise(name); setQuery(name) }}
+                      className="flex w-full items-center justify-between px-4 py-3.5 active:bg-gray-800/80"
+                    >
+                      <span className="text-sm text-white">{name}</span>
+                      {mg && (
+                        <span className="label-caps">{MG_NL[mg] || mg}</span>
+                      )}
+                    </button>
+                  )
+                })
               )}
             </div>
           )}
 
           {selectedExercise && exerciseData && (
             <div className="space-y-4">
-              {/* PR box */}
-              <div className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-4">
-                <Award size={24} className="text-cyan-500" />
+              {/* All-time PR */}
+              <div className="flex items-center gap-4 rounded-2xl border border-cyan-500/20 bg-cyan-500/8 p-5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15">
+                  <Award size={22} className="text-cyan-400" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-400">All-time geschat 1RM</p>
-                  <p className="text-2xl font-bold text-white">{exerciseData.allTimeE1rm.toFixed(1)} kg</p>
+                  <p className="label-caps text-cyan-600">All-time geschat 1RM</p>
+                  <p className="text-3xl font-black tracking-tight text-white">
+                    {exerciseData.allTimeE1rm.toFixed(1)}
+                    <span className="ml-1 text-lg font-semibold text-gray-400">kg</span>
+                  </p>
                 </div>
               </div>
 
-              {/* E1RM chart */}
               {exerciseData.sessions.length > 1 && (
-                <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-300">Geschat 1RM</h3>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={exerciseData.sessions}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#6b7280' }} />
-                      <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} />
-                      <Tooltip contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8 }} labelStyle={{ color: '#9ca3af' }} />
-                      <Line type="monotone" dataKey="e1rm" stroke="#F97316" strokeWidth={2} dot={{ r: 3, fill: '#F97316' }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                <>
+                  {/* E1RM trend */}
+                  <div className="rounded-2xl bg-gray-900 p-4">
+                    <div className="mb-4 flex items-center gap-2">
+                      <TrendingUp size={15} className="text-orange-400" />
+                      <p className="label-caps">Geschat 1RM</p>
+                    </div>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <LineChart data={exerciseData.sessions}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} width={32} />
+                        <Tooltip {...CHART_TOOLTIP_STYLE} />
+                        <Line type="monotone" dataKey="e1rm" stroke="#f97316" strokeWidth={2.5} dot={{ r: 3, fill: '#f97316', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Volume */}
+                  <div className="rounded-2xl bg-gray-900 p-4">
+                    <p className="label-caps mb-4">Volume per sessie</p>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <BarChart data={exerciseData.sessions}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} width={32} />
+                        <Tooltip {...CHART_TOOLTIP_STYLE} />
+                        <Bar dataKey="volume" fill="#f97316" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
               )}
 
-              {/* Volume chart */}
-              {exerciseData.sessions.length > 1 && (
-                <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-                  <h3 className="mb-3 text-sm font-semibold text-gray-300">Volume per sessie</h3>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={exerciseData.sessions}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#6b7280' }} />
-                      <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} />
-                      <Tooltip contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8 }} />
-                      <Bar dataKey="volume" fill="#F97316" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* Performance Forecast */}
+              {/* Performance forecast */}
               <PerformanceForecast sessions={exerciseData.sessions} exerciseName={selectedExercise} />
 
-              {/* Last 5 sessions table */}
-              <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-                <h3 className="mb-3 text-sm font-semibold text-gray-300">Recente sessies</h3>
-                <div className="space-y-2">
+              {/* Recent sessions */}
+              <div className="rounded-2xl bg-gray-900 overflow-hidden">
+                <p className="label-caps px-4 pt-4 pb-3">Recente sessies</p>
+                <div className="divide-y divide-gray-800/60">
                   {exerciseData.sessions.slice(-5).reverse().map((s, i) => (
-                    <div key={i} className="flex items-center justify-between rounded-lg bg-gray-800/50 px-3 py-2">
-                      <span className="text-xs text-gray-400">{s.date}</span>
+                    <div key={i} className="flex items-center justify-between px-4 py-3">
+                      <span className="text-xs text-gray-500">{s.date}</span>
                       <div className="text-right">
-                        <span className="text-sm font-medium text-white">
-                          {s.sets.map(x => `${x.weight_kg}x${x.reps}`).join(', ')}
-                        </span>
-                        <p className="text-[10px] text-gray-500">e1RM: {s.e1rm}kg</p>
+                        <p className="text-sm font-semibold text-white">
+                          {s.sets.map(x => `${x.weight_kg}×${x.reps}`).join('  ')}
+                        </p>
+                        <p className="text-[10px] text-gray-600">e1RM {s.e1rm} kg</p>
                       </div>
                     </div>
                   ))}
@@ -249,56 +257,63 @@ export default function Progress() {
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
 
+      {/* ── Spiergroepen ──────────────────────────────────────────── */}
       {tab === 'muscle' && (
-        <>
-          <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <h3 className="mb-3 text-sm font-semibold text-gray-300">Volume per spiergroep (laatste 4 weken)</h3>
-            <ResponsiveContainer width="100%" height={250}>
+        <div className="space-y-4">
+          {/* Volume chart */}
+          <div className="rounded-2xl bg-gray-900 p-4">
+            <p className="label-caps mb-4">Volume per spiergroep — laatste 4 weken</p>
+            <ResponsiveContainer width="100%" height={220}>
               <BarChart data={muscleData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#6b7280' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} />
-                <Tooltip contentStyle={{ background: '#111827', border: '1px solid #374151', borderRadius: 8 }} />
+                <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} width={32} />
+                <Tooltip {...CHART_TOOLTIP_STYLE} />
                 {MUSCLE_GROUPS.map(mg => (
                   <Bar key={mg} dataKey={mg} fill={MG_COLORS[mg]} stackId="a" radius={mg === 'core' ? [4, 4, 0, 0] : undefined} />
                 ))}
               </BarChart>
             </ResponsiveContainer>
-            <div className="mt-3 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
               {MUSCLE_GROUPS.map(mg => (
                 <div key={mg} className="flex items-center gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: MG_COLORS[mg] }} />
-                  <span className="text-[10px] text-gray-400">{MG_NL[mg] || mg}</span>
+                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: MG_COLORS[mg] }} />
+                  <span className="text-xs text-gray-500">{MG_NL[mg]}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Overall stats */}
+          {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
-              <p className="text-xl font-bold text-white">{totalStats.totalWorkouts}</p>
-              <p className="text-[10px] text-gray-500">trainingen</p>
-            </div>
-            <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
-              <p className="text-xl font-bold text-white">{(totalStats.totalVol / 1000).toFixed(1)}t</p>
-              <p className="text-[10px] text-gray-500">volume</p>
-            </div>
-            <div className="rounded-xl border border-gray-800 bg-gray-900 p-3 text-center">
-              <p className="truncate text-sm font-bold text-white">{totalStats.favorite}</p>
-              <p className="text-[10px] text-gray-500">favoriet</p>
-            </div>
+            {[
+              { label: 'Trainingen', value: totalStats.totalWorkouts },
+              { label: 'Volume',     value: totalStats.totalVol >= 1000 ? `${(totalStats.totalVol / 1000).toFixed(1)}t` : `${totalStats.totalVol.toFixed(0)}kg` },
+              { label: 'Favoriet',   value: null, name: totalStats.favorite },
+            ].map(({ label, value, name }) => (
+              <div
+                key={label}
+                className="rounded-2xl p-4 text-center"
+                style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+              >
+                <p className="text-xl font-black text-white tabular-nums">{value ?? ''}</p>
+                {name && <p className="truncate text-xs font-bold text-white">{name}</p>}
+                <p className="label-caps mt-1">{label}</p>
+              </div>
+            ))}
           </div>
-        </>
+        </div>
       )}
 
+      {/* ── Analyse ───────────────────────────────────────────────── */}
       {tab === 'analyse' && (
         <FormDetective workouts={workouts} userId={user?.id} />
       )}
 
+      {/* ── Balans ────────────────────────────────────────────────── */}
       {tab === 'balans' && (
         <WeaknessHunter workouts={workouts} />
       )}
