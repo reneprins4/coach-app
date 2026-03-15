@@ -68,7 +68,7 @@ Max 5 inzichten, meest impactvol eerst.`
     return JSON.parse(text)
   } catch (err) {
     console.error('Form analysis error:', err)
-    return []
+    throw err
   }
 }
 

@@ -86,7 +86,7 @@ export default function FormDetective({ workouts, userId }) {
           <button
             onClick={() => runAnalysis(false)}
             disabled={loading || workouts.length < 3}
-            className="rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50 active:bg-red-600"
+            className="rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50 active:bg-cyan-600"
           >
             {workouts.length < 3 ? 'Minimaal 3 trainingen nodig' : 'Analyseer mijn training'}
           </button>

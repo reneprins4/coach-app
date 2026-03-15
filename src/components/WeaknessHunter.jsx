@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Target, TrendingDown } from 'lucide-react'
 import { analyzeWeaknesses } from '../lib/weaknessHunter'
 
@@ -12,13 +13,14 @@ const MG_COLORS = {
 }
 
 export default function WeaknessHunter({ workouts }) {
+  const { t } = useTranslation()
   const [weeksBack, setWeeksBack] = useState(4)
   
   const analysis = useMemo(() => {
     return analyzeWeaknesses(workouts, weeksBack)
   }, [workouts, weeksBack])
   
-  const maxSets = Math.max(...analysis.sortedGroups.map(g => g.sets), 1)
+  const maxSets = Math.max(...(analysis.sortedGroups || []).map(g => g.sets), 1)
   
   // Bepaal bar kleur op basis van volume (relative to max)
   function getBarColor(sets, key) {
@@ -32,9 +34,9 @@ export default function WeaknessHunter({ workouts }) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Target size={48} className="mb-4 text-gray-600" />
-        <h3 className="mb-2 text-lg font-semibold text-gray-300">Te weinig data</h3>
+        <h3 className="mb-2 text-lg font-semibold text-gray-300">{t('weakness.insufficient_data')}</h3>
         <p className="text-sm text-gray-500">
-          Train minimaal 2 keer in de laatste {weeksBack} weken voor balans analyse.
+          {t('weakness.insufficient_sub', { weeks: weeksBack })}
         </p>
       </div>
     )
@@ -45,9 +47,9 @@ export default function WeaknessHunter({ workouts }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Spiergroep Balans</h2>
+          <h2 className="text-lg font-semibold text-white">{t('weakness.title')}</h2>
           <p className="text-xs text-gray-500">
-            {analysis.workoutCount} workouts, {analysis.totalSets} sets
+            {analysis.workoutCount} workouts, {analysis.totalSets} {t('common.sets')}
           </p>
         </div>
       </div>
@@ -61,23 +63,23 @@ export default function WeaknessHunter({ workouts }) {
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
               weeksBack === w
                 ? 'bg-red-500 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                : 'bg-gray-800 text-gray-400 active:bg-gray-700'
             }`}
           >
-            {w} weken
+            {w} {t('weakness.weeks')}
           </button>
         ))}
       </div>
       
       {/* Volume bars */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-        <h3 className="mb-4 text-sm font-semibold text-gray-300">Volume per spiergroep</h3>
+        <h3 className="mb-4 text-sm font-semibold text-gray-300">{t('weakness.volume_per_group')}</h3>
         <div className="space-y-3">
           {analysis.sortedGroups.map(group => (
             <div key={group.key}>
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-sm text-gray-300">{group.name}</span>
-                <span className="text-sm font-medium text-white">{group.sets} sets</span>
+                <span className="text-sm font-medium text-white">{group.sets} {t('common.sets')}</span>
               </div>
               <div className="h-3 w-full overflow-hidden rounded-full bg-gray-800">
                 <div
@@ -90,7 +92,7 @@ export default function WeaknessHunter({ workouts }) {
                 />
               </div>
               <div className="mt-0.5 text-right text-[10px] text-gray-600">
-                {group.percentage}% van totaal
+                {group.percentage}{t('weakness.of_total')}
               </div>
             </div>
           ))}
@@ -115,7 +117,7 @@ export default function WeaknessHunter({ workouts }) {
         <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
           <div className="mb-3 flex items-center gap-2">
             <AlertTriangle size={18} className="text-red-500" />
-            <h3 className="text-sm font-semibold text-red-400">Aandacht nodig</h3>
+            <h3 className="text-sm font-semibold text-red-400">{t('weakness.needs_attention')}</h3>
           </div>
           <div className="space-y-3">
             {analysis.imbalances.map((imb, idx) => (
@@ -136,12 +138,12 @@ export default function WeaknessHunter({ workouts }) {
                     <p className="text-sm text-gray-200">
                       Je <span className="font-semibold text-white">{imb.weakNL}</span> krijgt{' '}
                       <span className={imb.severity === 'high' ? 'font-bold text-red-400' : 'font-bold text-yellow-400'}>
-                        {imb.deficit}% minder
+                        {imb.deficit}% {t('weakness.less_volume')}
                       </span>{' '}
-                      volume dan je {imb.dominantNL}.
+                      {imb.dominantNL}.
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
-                      {imb.dominantNL}: {imb.dominantSets} sets vs {imb.weakNL}: {imb.weakSets} sets
+                      {imb.dominantNL}: {imb.dominantSets} {t('common.sets')} vs {imb.weakNL}: {imb.weakSets} {t('common.sets')}
                     </p>
                     <p className="mt-2 text-xs text-gray-400">
                       {imb.advice}
@@ -160,9 +162,9 @@ export default function WeaknessHunter({ workouts }) {
           <div className="flex items-center gap-2">
             <Target size={18} className="text-green-500" />
             <div>
-              <h3 className="text-sm font-semibold text-green-400">Goede balans</h3>
+              <h3 className="text-sm font-semibold text-green-400">{t('weakness.good_balance')}</h3>
               <p className="text-xs text-gray-500">
-                Geen significante imbalances gedetecteerd in de laatste {weeksBack} weken.
+                {t('weakness.no_imbalances', { weeks: weeksBack })}
               </p>
             </div>
           </div>

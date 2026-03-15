@@ -68,8 +68,8 @@ export default function Progress() {
     for (const w of [...workouts].reverse()) {
       const sets = (w.workout_sets || []).filter(s => s.exercise === selectedExercise)
       if (sets.length === 0) continue
-      const bestE1rm = Math.max(...sets.map(s => e1rm(s.weight_kg || 0, s.reps || 0)))
-      const bestWeight = Math.max(...sets.map(s => s.weight_kg || 0))
+      const bestE1rm = sets.length > 0 ? Math.max(...sets.map(s => e1rm(s.weight_kg || 0, s.reps || 0))) : 0
+      const bestWeight = sets.length > 0 ? Math.max(...sets.map(s => s.weight_kg || 0)) : 0
       const volume = sets.reduce((s, x) => s + (x.weight_kg || 0) * (x.reps || 0), 0)
       const date = new Date(w.created_at).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
       sessions.push({ date, e1rm: bestE1rm, bestWeight, volume, sets, fullDate: w.created_at })
