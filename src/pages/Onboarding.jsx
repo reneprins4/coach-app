@@ -144,10 +144,11 @@ export default function Onboarding() {
               <input
                 type="number"
                 value={bodyweight}
-                onChange={(e) => {
-                  const val = e.target.value
-                  if (val === '' || (Number(val) >= 30 && Number(val) <= 250)) {
-                    setBodyweight(val)
+                onChange={(e) => setBodyweight(e.target.value)}
+                onBlur={(e) => {
+                  const val = Number(e.target.value)
+                  if (e.target.value !== '' && (val < 30 || val > 250)) {
+                    setBodyweight('')
                   }
                 }}
                 placeholder="75"
