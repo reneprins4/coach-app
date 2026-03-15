@@ -38,7 +38,7 @@ export default function History() {
 
   return (
     <div className="px-4 py-6 pb-28">
-      <h1 className="mb-4 text-2xl font-bold">Geschiedenis</h1>
+      <h1 className="mb-4 text-3xl font-black tracking-tight">Geschiedenis</h1>
 
       {/* Search */}
       <div className="relative mb-4">
@@ -64,33 +64,30 @@ export default function History() {
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {filtered.map(w => {
           const d = new Date(w.created_at)
           return (
             <div key={w.id} className="group relative">
               <Link
                 to={`/history/${w.id}`}
-                className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 p-4 active:bg-gray-800"
+                className="block rounded-2xl p-4 active:opacity-80 transition-opacity"
+                style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)'}}
               >
-                <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-gray-800">
-                  <span className="text-xs text-gray-500">{DAY_NAMES[d.getDay()]}</span>
-                  <span className="text-lg font-bold text-white">{d.getDate()}</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-slate-500">{DAY_NAMES[d.getDay()]} {d.getDate()}/{d.getMonth()+1}</span>
+                  <span className="text-sm font-bold text-cyan-400 tabular-nums">{formatVol(w.totalVolume)}</span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">
-                    {w.exerciseNames.join(', ') || 'Lege training'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatVol(w.totalVolume)} totaal volume
-                    {w.workout_sets.length > 0 && ` / ${w.workout_sets.length} sets`}
-                  </p>
-                </div>
-                <ChevronRight size={18} className="text-gray-700" />
+                <p className="text-sm font-semibold text-white truncate">
+                  {w.exerciseNames.join(', ') || 'Lege training'}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {w.workout_sets.length} sets
+                </p>
               </Link>
               <button
                 onClick={(e) => { e.preventDefault(); setDeleteId(w.id) }}
-                className="absolute right-12 top-1/2 -translate-y-1/2 p-2 text-gray-700 opacity-0 transition-opacity group-hover:opacity-100 active:text-cyan-400"
+                className="absolute right-4 top-4 p-2 text-slate-600 opacity-0 transition-opacity group-hover:opacity-100 active:text-cyan-400"
               >
                 <Trash2 size={16} />
               </button>

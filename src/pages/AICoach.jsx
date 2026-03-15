@@ -229,7 +229,7 @@ export default function AICoach() {
 
       <div className="mb-6 flex items-center gap-3">
         <Sparkles size={28} className="text-cyan-500" />
-        <h1 className="text-2xl font-bold">AI Coach</h1>
+        <h1 className="text-3xl font-black tracking-tight">AI Coach</h1>
       </div>
 
       {/* Profile completion banner */}
@@ -358,16 +358,16 @@ export default function AICoach() {
                   <button
                     key={m}
                     onClick={() => toggleFocus(m)}
-                    className={`rounded-xl px-3 py-2 text-sm font-medium capitalize transition-colors ${
+                    className={`rounded-full px-4 py-2 text-sm font-medium capitalize transition-all ${
                       focused
                         ? 'bg-cyan-500 text-white'
                         : recovery < 50
                         ? 'bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/30'
-                        : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                        : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'
                     }`}
                   >
                     {m}
-                    {focused && <span className="ml-1 text-cyan-200">★</span>}
+                    {focused && <span className="ml-1 text-cyan-200">*</span>}
                   </button>
                 )
               })}
@@ -381,16 +381,16 @@ export default function AICoach() {
 
           {/* ── ENERGY ──────────────────────────────────────── */}
           <div className="mb-4">
-            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Energieniveau</h2>
+            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Energieniveau</h2>
             <div className="flex gap-2">
               {ENERGY_OPTIONS.map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => setEnergy(opt.value)}
-                  className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
+                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                     energy === opt.value
-                      ? opt.color + ' ring-1 ring-current'
-                      : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                      ? 'bg-cyan-500 text-white'
+                      : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'
                   }`}
                 >
                   {opt.label}
@@ -401,16 +401,16 @@ export default function AICoach() {
 
           {/* ── TIME ────────────────────────────────────────── */}
           <div className="mb-6">
-            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Beschikbare tijd</h2>
+            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Beschikbare tijd</h2>
             <div className="flex gap-2">
               {TIME_OPTIONS.map(t => (
                 <button
                   key={t}
                   onClick={() => setTime(t)}
-                  className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
+                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                     time === t
                       ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                      : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'
                   }`}
                 >
                   {t}m

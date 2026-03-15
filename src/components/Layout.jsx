@@ -51,7 +51,7 @@ export default function Layout() {
       </main>
 
       {!hideNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800/60 bg-gray-950/98 backdrop-blur-md pb-safe">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#030712]/95 backdrop-blur-xl border-t border-white/[0.06] pb-safe">
           <div className="mx-auto flex max-w-lg w-full">
             {tabs.map(({ to, icon: Icon, label }) => (
               <NavLink
@@ -59,8 +59,8 @@ export default function Layout() {
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium uppercase tracking-wide transition-colors ${
-                    isActive ? 'text-cyan-500' : 'text-gray-600'
+                  `relative flex flex-1 flex-col items-center gap-1 py-4 text-[10px] font-medium uppercase tracking-wide transition-colors ${
+                    isActive ? 'text-cyan-400' : 'text-slate-600'
                   }`
                 }
               >
@@ -68,6 +68,9 @@ export default function Layout() {
                   <>
                     <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
                     <span>{label}</span>
+                    {isActive && (
+                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-cyan-500" />
+                    )}
                   </>
                 )}
               </NavLink>

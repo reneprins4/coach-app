@@ -150,18 +150,18 @@ export default function Profile() {
   return (
     <div className="px-4 py-6 pb-24">
       <div className="mb-1 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Profiel</h1>
+        <h1 className="text-3xl font-black tracking-tight">Profiel</h1>
         <button
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-900 hover:text-white"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-gray-900 hover:text-white"
         >
           <LogOut size={16} />
           {loggingOut ? 'Uitloggen...' : 'Uitloggen'}
         </button>
       </div>
-      <p className="mb-6 text-sm text-gray-500">
-        {user?.email && <span className="text-gray-400">{user.email}</span>}
+      <p className="mb-6 text-sm text-slate-500">
+        {user?.email && <span>{user.email}</span>}
       </p>
 
       {!profileComplete && (
@@ -333,32 +333,27 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Stats summary */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {[
+          { label: 'Trainingen', value: stats.totalWorkouts },
+          { label: 'Volume', value: `${(stats.totalVol/1000).toFixed(1)}t` },
+          { label: 'Lid sinds', value: stats.memberSince },
+        ].map(({ label, value }) => (
+          <div key={label} className="rounded-2xl p-4 text-center" style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)'}}>
+            <p className="text-xl font-black text-white tabular-nums">{value}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mt-1">{label}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Save */}
       <button
         onClick={handleSave}
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 text-lg font-bold text-white active:scale-[0.97] transition-transform"
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-cyan-400 text-base font-bold text-white shadow-[0_4px_20px_rgba(6,182,212,0.35)] active:scale-[0.97] transition-all"
       >
         {saved ? <><Check size={20} />Opgeslagen</> : <><Save size={20} />Profiel opslaan</>}
       </button>
-
-      {/* Stats summary */}
-      <div className="mt-8 rounded-xl border border-gray-800 bg-gray-900 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-gray-300">Trainingsstatistieken</h2>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-400">Lid sinds</span>
-            <span className="text-sm font-medium text-white">{stats.memberSince}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-400">Totaal trainingen</span>
-            <span className="text-sm font-medium text-white">{stats.totalWorkouts}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-400">Totaal volume</span>
-            <span className="text-sm font-medium text-white">{(stats.totalVol / 1000).toFixed(1)} ton</span>
-          </div>
-        </div>
-      </div>
 
       {/* Data export */}
       <div className="mt-6">
@@ -384,7 +379,7 @@ export default function Profile() {
       </div>
 
       {/* Account verwijderen */}
-      <div className="mt-8 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+      <div className="mt-8 rounded-2xl p-4" style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(239,68,68,0.10)'}}>
         <h2 className="mb-2 text-sm font-semibold text-red-400">Gevarenzone</h2>
         
         {!showDeleteConfirm ? (
