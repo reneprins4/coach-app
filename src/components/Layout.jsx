@@ -1,13 +1,12 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Dumbbell, CalendarDays, TrendingUp, User, Timer, ClipboardList } from 'lucide-react'
+import { Home, Dumbbell, TrendingUp, User, Timer } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const tabs = [
-  { to: '/',         icon: LayoutDashboard, label: 'Home'      },
-  { to: '/plan',     icon: ClipboardList,   label: 'Plan'      },
-  { to: '/log',      icon: Dumbbell,        label: 'Trainen'   },
-  { to: '/progress', icon: TrendingUp,      label: 'Voortgang' },
-  { to: '/profile',  icon: User,            label: 'Profiel'   },
+  { to: '/',         icon: Home,       label: 'Vandaag'    },
+  { to: '/log',      icon: Dumbbell,   label: 'Trainen'    },
+  { to: '/progress', icon: TrendingUp, label: 'Voortgang'  },
+  { to: '/profile',  icon: User,       label: 'Profiel'    },
 ]
 
 export default function Layout() {
@@ -23,13 +22,11 @@ export default function Layout() {
       } catch { setHasActiveWorkout(false) }
     }
     check()
-    // Check elke seconde of er een actieve workout is
     const interval = setInterval(check, 2000)
     return () => clearInterval(interval)
   }, [])
 
   const isOnLogPage = location.pathname === '/log'
-  // Only hide nav for workout detail pages and AI coach (full-screen experiences)
   const hideNav =
     location.pathname.startsWith('/history/') ||
     location.pathname === '/coach'
