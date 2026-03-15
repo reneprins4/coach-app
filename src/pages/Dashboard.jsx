@@ -53,8 +53,7 @@ export default function Dashboard() {
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
         <h1 className="mb-3 text-3xl font-black tracking-tight text-white">{getGreeting()}</h1>
         <p className="mb-8 text-sm text-gray-500">
-          Je hebt nog geen trainingen.<br />
-          Laten we beginnen.
+          Tijd om te beginnen.
         </p>
         <button
           onClick={() => nav('/coach')}
@@ -87,11 +86,11 @@ export default function Dashboard() {
       <div className="mb-5 grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-gray-900 p-4 text-center">
           <p className="text-3xl font-bold tabular text-white">{stats.thisWeekCount}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Deze week</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Trainingen</p>
         </div>
         <div className="rounded-xl bg-gray-900 p-4 text-center">
           <p className="text-3xl font-bold tabular text-white">{stats.streak}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Dagen streak</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Streak</p>
         </div>
       </div>
 
@@ -117,7 +116,7 @@ export default function Dashboard() {
           background: 'linear-gradient(135deg, #0f1624 0%, #0a0f1a 100%)',
           border: '1px solid rgba(255,255,255,0.05)'
         }}>
-          <p className="label-caps mb-4">Spierstatus</p>
+          <p className="label-caps mb-4">Herstel</p>
           <MuscleMap muscleStatus={muscleStatus} />
         </div>
       )}
@@ -143,7 +142,7 @@ export default function Dashboard() {
       {/* Recent workouts - clean list style */}
       {recentWorkouts.length > 0 && (
         <div>
-          <p className="label-caps mb-3">Laatste trainingen</p>
+          <p className="label-caps mb-3">Recent</p>
           <div className="divide-y divide-gray-800/50">
             {recentWorkouts.map(w => {
               const date = new Date(w.created_at)

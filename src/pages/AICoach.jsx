@@ -27,7 +27,7 @@ const VS_ICONS = {
   new: { icon: Sparkles, color: 'text-cyan-400', label: 'Nieuw' },
 }
 
-const ALL_MUSCLES = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
+const ALL_MUSCLES = ['borst', 'rug', 'schouders', 'bovenbenen', 'hamstrings', 'billen', 'biceps', 'triceps', 'core']
 
 // Use imported calcMuscleRecovery from training-analysis
 function calcRecovery(muscle, ms) {
@@ -230,7 +230,7 @@ export default function AICoach() {
         <>
           {/* ── HEADER ─────────────────────────────────────── */}
           <div className="mb-6">
-            <p className="label-caps mb-1">AI Training</p>
+            <p className="label-caps mb-1">Jouw training</p>
             <h1 className="text-3xl font-black tracking-tight">
               {selectedSplit || 'Vandaag'}
             </h1>
@@ -249,7 +249,7 @@ export default function AICoach() {
 
           {/* ── TIME (enige verplichte keuze) ──────────────── */}
           <div className="mb-6">
-            <p className="label-caps mb-3">Beschikbare tijd</p>
+            <p className="label-caps mb-3">Hoe lang?</p>
             <div className="flex gap-2">
               {[45, 60, 75, 90].map(t => (
                 <button key={t} onClick={() => setTime(t)}
@@ -262,7 +262,7 @@ export default function AICoach() {
 
           {/* ── GENERATE BUTTON ────────────────────────────── */}
           <button onClick={handleGenerate} disabled={generating || !selectedSplit} className="btn-primary mb-4 disabled:opacity-60">
-            {generating ? <><Loader2 size={20} className="animate-spin" />Training genereren...</> : <><Sparkles size={20} />Genereer mijn training</>}
+            {generating ? <><Loader2 size={20} className="animate-spin" />Bezig...</> : <><Sparkles size={20} />Maak mijn training</>}
           </button>
 
           {/* ── ADVANCED OPTIONS (collapsed) ───────────────── */}
@@ -276,7 +276,7 @@ export default function AICoach() {
             <div className="mt-2 space-y-4">
               {/* Energie */}
               <div>
-                <p className="label-caps mb-2">Energieniveau</p>
+                <p className="label-caps mb-2">Energie vandaag</p>
                 <div className="flex gap-2">
                   {ENERGY_OPTIONS.map(opt => (
                     <button key={opt.value} onClick={() => setEnergy(opt.value)}
@@ -304,7 +304,7 @@ export default function AICoach() {
 
               {/* Extra focus */}
               <div>
-                <p className="label-caps mb-2">Extra focus <span className="normal-case font-normal text-slate-600">(optioneel)</span></p>
+                <p className="label-caps mb-2">Wil je iets extra?</p>
                 <div className="flex flex-wrap gap-2">
                   {ALL_MUSCLES.map(m => (
                     <button key={m} onClick={() => toggleFocus(m)}
@@ -318,7 +318,7 @@ export default function AICoach() {
               {/* Recovery info */}
               {muscleStatus && (
                 <div>
-                  <p className="label-caps mb-3">Spierherstel</p>
+                  <p className="label-caps mb-3">Herstel</p>
                   {ALL_MUSCLES.map(m => (
                     <RecoveryBar key={m} muscle={m} ms={muscleStatus[m] || { setsThisWeek: 0, target: { min: 10, max: 16 } }} />
                   ))}
@@ -385,7 +385,7 @@ export default function AICoach() {
                 onClick={() => setShowReasoning(!showReasoning)}
                 className="flex w-full items-center justify-between rounded-xl bg-gray-900 px-4 py-3 text-sm text-gray-400 ring-1 ring-gray-800"
               >
-                <span>Motivatie coach</span>
+                <span>Waarom deze training?</span>
                 {showReasoning ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
               {showReasoning && (
@@ -476,7 +476,7 @@ export default function AICoach() {
               className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-900"
             >
               <RefreshCw size={16} className={generating ? 'animate-spin' : ''} />
-              Opnieuw genereren
+              Opnieuw
             </button>
             <button
               onClick={handleAccept}

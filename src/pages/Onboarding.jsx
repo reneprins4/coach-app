@@ -95,14 +95,14 @@ export default function Onboarding() {
         <div 
           className={`text-center transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
         >
-          <h1 className="mb-3 text-3xl font-bold text-white">Klaar om te starten</h1>
+          <h1 className="mb-3 text-3xl font-bold text-white">Je bent klaar</h1>
           <p className="mb-10 text-gray-500">Je eerste training staat voor je klaar</p>
           
           <button
             onClick={handleStartTraining}
             className="btn-primary"
           >
-            Genereer mijn eerste training
+            Start je eerste training
           </button>
         </div>
       </div>
@@ -123,7 +123,7 @@ export default function Onboarding() {
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Over jou</h1>
+          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Vertel iets over jezelf</h1>
           <p className="mb-8 text-sm text-gray-500">Dit helpt ons je training personaliseren</p>
 
           <div className="space-y-6">
@@ -140,7 +140,7 @@ export default function Onboarding() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">Lichaamsgewicht (kg)</label>
+              <label className="mb-2 block text-sm font-medium text-gray-300">Gewicht (kg)</label>
               <input
                 type="number"
                 value={bodyweight}
@@ -156,7 +156,7 @@ export default function Onboarding() {
                 max={250}
                 className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
               />
-              <p className="mt-1 text-xs text-gray-600">Gebruikt om startgewichten te schatten</p>
+              <p className="mt-1 text-xs text-gray-600">Helpt bij het schatten van startgewichten</p>
             </div>
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function Onboarding() {
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Hoe vaak train je?</h1>
+          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Hoe vaak?</h1>
           <p className="mb-8 text-sm text-gray-500">We stemmen je trainingsschema hierop af</p>
 
           <div className="space-y-3">

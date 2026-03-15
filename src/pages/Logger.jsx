@@ -173,7 +173,7 @@ export default function Logger() {
 
         {/* Cards */}
         <div className="space-y-4">
-          {/* AI Training - Primary Card */}
+          {/* Coach Training - Primary Card */}
           <button
             onClick={() => nav('/coach')}
             className="w-full rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-600/20 to-cyan-500/5 p-6 text-left active:scale-[0.98] transition-transform"
@@ -188,8 +188,8 @@ export default function Logger() {
                 <Sparkles size={24} className="text-cyan-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xl font-bold text-white">AI Training</p>
-                <p className="text-sm text-gray-400">Gegenereerd op basis van jouw herstel</p>
+                <p className="text-xl font-bold text-white">Coach training</p>
+                <p className="text-sm text-gray-400">Persoonlijk, op basis van herstel</p>
               </div>
               <ChevronRight size={20} className="text-cyan-400 shrink-0" />
             </div>
@@ -206,7 +206,7 @@ export default function Logger() {
               </div>
               <div className="flex-1 text-left">
                 <p className="font-bold text-white">Vrije training</p>
-                <p className="text-sm text-gray-500">Zelf oefeningen kiezen</p>
+                <p className="text-sm text-gray-500">Jij bepaalt</p>
               </div>
               <ChevronRight size={18} className="text-gray-600 shrink-0" />
             </div>
@@ -219,7 +219,7 @@ export default function Logger() {
             onClick={() => setShowTemplates(true)}
             className="mt-6 w-full text-center text-sm text-gray-500 active:text-gray-400"
           >
-            Of laad een template
+            Of kies een template
           </button>
         )}
 

@@ -166,7 +166,7 @@ export default function Profile() {
 
       {!profileComplete && (
         <div className="mb-6 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-400">
-          Vul je gegevens in zodat de AI coach nauwkeurige gewichten kan voorstellen
+          Vul je gegevens in voor nauwkeurigere gewichten
         </div>
       )}
 
@@ -184,20 +184,20 @@ export default function Profile() {
 
       {/* Bodyweight */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Lichaamsgewicht (kg)</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Gewicht (kg)</label>
         <input
           type="number"
           value={settings.bodyweight}
           onChange={(e) => update('bodyweight', e.target.value)}
-          placeholder="e.g. 80"
+          placeholder="80"
           className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
-        <p className="mt-1 text-xs text-gray-600">Gebruikt om startgewichten voor nieuwe oefeningen te schatten</p>
+        <p className="mt-1 text-xs text-gray-600">Helpt bij het schatten van startgewichten</p>
       </div>
 
       {/* Ervaringsniveau */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Ervaringsniveau</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Niveau</label>
         <div className="flex gap-2">
           {LEVELS.map(l => (
             <button
@@ -218,8 +218,8 @@ export default function Profile() {
 
       {/* Trainingsdoel */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Trainingsdoel</label>
-        <p className="mb-3 text-xs text-gray-500">Wat wil je bereiken? De AI past je trainingen hier op aan.</p>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Doel</label>
+        <p className="mb-3 text-xs text-gray-500">Wat wil je bereiken? De coach past je trainingen hierop aan.</p>
         <div className="flex flex-col gap-2">
           {GOALS.map(g => (
             <button
@@ -295,7 +295,7 @@ export default function Profile() {
 
       {/* Frequency */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Trainingsfrequentie</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Hoe vaak?</label>
         <div className="flex gap-2">
           {FREQUENCIES.map(f => (
             <button
@@ -315,7 +315,7 @@ export default function Profile() {
 
       {/* Rest time */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Standaard rusttijd</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Rustpauze</label>
         <div className="flex gap-2">
           {REST_TIMES.map(t => (
             <button
@@ -352,7 +352,7 @@ export default function Profile() {
         onClick={handleSave}
         className="btn-primary"
       >
-        {saved ? <><Check size={20} />Opgeslagen</> : <><Save size={20} />Profiel opslaan</>}
+        {saved ? <><Check size={20} />Opgeslagen</> : <><Save size={20} />Opslaan</>}
       </button>
 
       {/* Data export */}
@@ -388,7 +388,7 @@ export default function Profile() {
             className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 text-sm font-medium text-red-400 ring-1 ring-red-500/30 hover:bg-red-500/20 transition-colors"
           >
             <Trash2 size={16} />
-            Account permanent verwijderen
+            Verwijder mijn account
           </button>
         ) : (
           <div className="space-y-4">
