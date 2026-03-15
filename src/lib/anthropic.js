@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { workoutCacheKey, substituteCacheKey, cacheGet, cacheSet } from './aiCache'
+import { getExerciseSubstituteLocal } from './exerciseSubstitutes'
 
 // Robust JSON extractor — handles markdown fences and surrounding text
 function extractJSON(raw) {
@@ -180,6 +181,19 @@ Return ONLY valid JSON (no markdown, no code fences, no comments):
 
 
 export async function getExerciseSubstitute({ exercise, reason, equipment, experienceLevel, bodyweight }) {
+  // --- Static lookup first (zero API cost) ---
+  try {
+    const local = getExerciseSubstituteLocal({ exercise, reason, equipment, experienceLevel, bodyweight })
+    if (local && local.name !== exercise.name) {
+      console.log('[exerciseSubstitutes] Static HIT for:', exercise.name)
+      return local
+    }
+  } catch (e) {
+    console.warn('[exerciseSubstitutes] Static lookup failed:', e.message)
+  }
+  // --- Fallback: LLM (for unknown exercises) ---
+  console.log('[exerciseSubstitutes] LLM fallback for:', exercise.name)
+
   // --- Cache check (global, 30-day TTL) ---
   const subKey = substituteCacheKey({ exercise, reason, equipment })
   const cachedSub = await cacheGet(subKey, null)  // null = global cache
