@@ -82,8 +82,8 @@ export default function App() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  // Show loader while checking auth
-  if (auth.loading) {
+  // Show loader while checking auth OR while loading cloud settings for logged-in user
+  if (auth.loading || (auth.user && !settingsLoaded)) {
     return <AuthLoader />
   }
 
