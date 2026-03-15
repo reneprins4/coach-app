@@ -4,6 +4,8 @@ import { Sparkles, Dumbbell, ChevronRight } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
+import { analyzeTraining } from '../lib/training-analysis'
+import MuscleMap from '../components/MuscleMap'
 
 export default function Dashboard() {
   const { user, settings } = useAuthContext()
@@ -28,6 +30,8 @@ export default function Dashboard() {
 
     return { thisWeekCount: thisWeek.length, streak }
   }, [workouts])
+
+  const muscleStatus = useMemo(() => analyzeTraining(workouts.slice(0, 30)), [workouts])
 
   const block = getCurrentBlock()
   const progress = block ? getBlockProgress(block) : null
@@ -104,6 +108,17 @@ export default function Dashboard() {
               style={{ width: `${progress?.pct || 0}%` }}
             />
           </div>
+        </div>
+      )}
+
+      {/* Muscle Status Map */}
+      {workouts.length > 0 && (
+        <div className="mb-6 rounded-2xl p-4" style={{
+          background: 'linear-gradient(135deg, #0f1624 0%, #0a0f1a 100%)',
+          border: '1px solid rgba(255,255,255,0.05)'
+        }}>
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">Spierstatus</p>
+          <MuscleMap muscleStatus={muscleStatus} />
         </div>
       )}
 
