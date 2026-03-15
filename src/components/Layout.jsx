@@ -51,7 +51,7 @@ export default function Layout() {
       </main>
 
       {!hideNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#030712]/95 backdrop-blur-xl border-t border-white/[0.06] pb-safe">
+        <nav className="nav-premium fixed bottom-0 left-0 right-0 z-50 pb-safe">
           <div className="mx-auto flex max-w-lg w-full">
             {tabs.map(({ to, icon: Icon, label }) => (
               <NavLink
@@ -60,7 +60,7 @@ export default function Layout() {
                 end={to === '/'}
                 className={({ isActive }) =>
                   `relative flex flex-1 flex-col items-center gap-1 py-4 text-[10px] font-medium uppercase tracking-wide transition-colors ${
-                    isActive ? 'text-cyan-400' : 'text-slate-600'
+                    isActive ? 'text-cyan-400' : 'text-[var(--text-3)]'
                   }`
                 }
               >
