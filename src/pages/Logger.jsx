@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Minus, Timer, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Calculator, BookOpen, MoreVertical, X } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
@@ -24,6 +25,7 @@ import JunkVolumeAlert from '../components/JunkVolumeAlert'
 import MomentumIndicator from '../components/MomentumIndicator'
 
 export default function Logger() {
+  const { t } = useTranslation()
   const nav = useNavigate()
   const { user } = useAuthContext()
   const aw = useActiveWorkout(user?.id)
@@ -74,8 +76,8 @@ export default function Logger() {
   function handleRemoveSet(exerciseName, setId, setData) {
     aw.removeSet(exerciseName, setId)
     setToast({
-      message: 'Set verwijderd',
-      action: 'Ongedaan maken',
+      message: t('logger.set_removed'),
+      action: t('logger.undo'),
       onAction: () => {
         aw.addSet(exerciseName, setData)
       },
@@ -92,15 +94,15 @@ export default function Logger() {
     const exercises = templates.loadTemplate(template)
     aw.startWorkout(exercises)
     setShowTemplates(false)
-    setToast({ message: `Template "${template.name}" geladen` })
+    setToast({ message: `${t('logger.template_loaded')}: "${template.name}"` })
   }
 
   async function handleDeleteTemplate(id) {
     try {
       await templates.deleteTemplate(id)
-      setToast({ message: 'Template verwijderd' })
+      setToast({ message: t('logger.template_deleted') })
     } catch (err) {
-      setToast({ message: 'Kon template niet verwijderen' })
+      setToast({ message: t('logger.template_delete_error') })
     }
   }
 
@@ -109,12 +111,12 @@ export default function Logger() {
     // Note: We'll track superset groups visually, not reorder the actual state
     setSupersetMode({ supersets, active: true })
     setShowSupersetModal(false)
-    setToast({ message: 'Superset modus actief' })
+    setToast({ message: t('logger.superset_mode_active') })
   }
 
   function handleExitSupersetMode() {
     setSupersetMode(null)
-    setToast({ message: 'Superset modus uitgeschakeld' })
+    setToast({ message: t('logger.superset_exit') })
   }
 
   // Bereken adaptieve rusttijd op basis van RPE, oefening type en vermoeidheid
@@ -219,7 +221,7 @@ export default function Logger() {
       <div className="min-h-[80vh] px-5 py-10">
         {/* Header */}
         <p className="mb-1 text-xs font-medium uppercase tracking-widest text-gray-500">{formattedDate}</p>
-        <h1 className="mb-10 text-4xl font-black tracking-tight text-white">Trainen</h1>
+        <h1 className="mb-10 text-4xl font-black tracking-tight text-white">{t('logger.train')}</h1>
 
         {/* Cards */}
         <div className="space-y-3">
@@ -233,8 +235,8 @@ export default function Logger() {
                 {phase.label} · Week {block.currentWeek} van {phase.weeks}
               </p>
             )}
-            <p className="text-2xl font-black text-white">Coach training</p>
-            <p className="mt-1 text-sm font-medium text-cyan-900/70">Persoonlijk, op basis van herstel</p>
+            <p className="text-2xl font-black text-white">{t('logger.coach_training')}</p>
+            <p className="mt-1 text-sm font-medium text-cyan-900/70">{t('logger.coach_training_sub')}</p>
           </button>
 
           {/* Vrije Training Card */}
@@ -245,8 +247,8 @@ export default function Logger() {
               className="w-full p-6 text-left flex items-center justify-between active:bg-gray-800/80 transition-colors"
             >
               <div>
-                <p className="text-xl font-bold text-white">Vrije training</p>
-                <p className="mt-1 text-sm text-gray-500">Jij bepaalt</p>
+                <p className="text-xl font-bold text-white">{t('logger.free_training')}</p>
+                <p className="mt-1 text-sm text-gray-500">{t('logger.free_training_sub')}</p>
               </div>
               <ChevronRight
                 size={18}
@@ -259,7 +261,7 @@ export default function Logger() {
               <div className="border-t border-gray-700/50 px-5 pb-5 pt-4 space-y-5">
                 {/* Duration */}
                 <div>
-                  <p className="label-caps mb-2.5">Beschikbare tijd</p>
+                  <p className="label-caps mb-2.5">{t('logger.available_time')}</p>
                   <div className="flex gap-2">
                     {DURATIONS.map(d => (
                       <button
@@ -279,7 +281,7 @@ export default function Logger() {
 
                 {/* Muscle groups */}
                 <div>
-                  <p className="label-caps mb-2.5">Spiergroepen <span className="text-gray-600 font-normal normal-case">(optioneel)</span></p>
+                  <p className="label-caps mb-2.5">{t('logger.muscle_groups')} <span className="text-gray-600 font-normal normal-case">(optioneel)</span></p>
                   <div className="grid grid-cols-3 gap-2">
                     {ALL_MUSCLES.map(m => (
                       <button
@@ -303,7 +305,7 @@ export default function Logger() {
                     onClick={() => aw.startWorkout()}
                     className="flex-1 rounded-xl py-3 text-sm font-medium text-gray-400 ring-1 ring-gray-700 active:bg-gray-800"
                   >
-                    Start leeg
+                    {t('logger.start_empty')}
                   </button>
                   <button
                     onClick={() => aw.startWorkout(buildQuickWorkout(quickSetup.muscles, quickSetup.duration))}
@@ -311,7 +313,7 @@ export default function Logger() {
                   >
                     {quickSetup.muscles.length > 0
                       ? `Start ${quickSetup.muscles.map(m => MUSCLE_LABELS[m]).join(' + ')}`
-                      : `Start training`}
+                      : t('logger.start_training')}
                   </button>
                 </div>
               </div>
@@ -325,7 +327,7 @@ export default function Logger() {
             onClick={() => setShowTemplates(true)}
             className="mt-6 w-full text-center text-sm text-gray-500 active:text-gray-400"
           >
-            Of kies een template
+            {t('logger.choose_template')}
           </button>
         )}
 
@@ -375,7 +377,7 @@ export default function Logger() {
                   onClick={handleExitSupersetMode}
                   className="h-8 rounded-lg bg-cyan-500/20 px-2.5 text-xs font-semibold text-cyan-400 ring-1 ring-cyan-500/40"
                 >
-                  Superset
+                  {t('logger.superset_active')}
                 </button>
               )}
               <WorkoutMenu
@@ -388,7 +390,7 @@ export default function Logger() {
                 disabled={aw.saving || aw.totalSets === 0}
                 className="h-10 rounded-xl bg-cyan-500 px-4 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
               >
-                {aw.saving ? 'Opslaan...' : 'Afronden'}
+                {aw.saving ? t('logger.saving') : t('logger.finish')}
               </button>
             </div>
           </div>
@@ -463,17 +465,17 @@ export default function Logger() {
         {aw.workout.exercises.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20">
             <Dumbbell size={48} className="mb-4 text-gray-700" />
-            <p className="text-gray-500">Voeg een oefening toe om te beginnen</p>
+            <p className="text-gray-500">{t('logger.add_exercise_hint')}</p>
           </div>
         )}
 
         {/* Notes */}
         <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
-          <label className="mb-2 block label-caps">Notities</label>
+          <label className="mb-2 block label-caps">{t('logger.notes')}</label>
           <textarea
             value={aw.workout.notes}
             onChange={(e) => aw.updateNotes(e.target.value)}
-            placeholder="Training notities..."
+            placeholder={t('logger.notes_placeholder')}
             rows={2}
             className="w-full resize-none bg-transparent text-sm text-white placeholder-gray-600 outline-none"
           />
@@ -487,7 +489,7 @@ export default function Logger() {
           className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-700 active:bg-gray-800"
         >
           <Plus size={18} strokeWidth={2.5} />
-          Oefening toevoegen
+          {t('logger.add_exercise')}
         </button>
       </div>
 
@@ -514,20 +516,20 @@ export default function Logger() {
       {showDiscard && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">Training stoppen?</h3>
-            <p className="mb-6 text-sm text-gray-400">Alle gelogde sets gaan verloren.</p>
+            <h3 className="mb-2 text-lg font-bold text-white">{t('logger.stop_confirm')}</h3>
+            <p className="mb-6 text-sm text-gray-400">{t('logger.stop_confirm_sub')}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDiscard(false)}
                 className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
               >
-                Annuleer
+                {t('common.cancel')}
               </button>
               <button
                 onClick={() => { aw.discardWorkout(); setShowDiscard(false) }}
                 className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white active:bg-cyan-700"
               >
-                Stoppen
+                {t('logger.stop')}
               </button>
             </div>
           </div>
@@ -562,20 +564,20 @@ export default function Logger() {
       {showConfirmFinish && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">Training afronden?</h3>
-            <p className="mb-6 text-sm text-gray-400">Weet je zeker dat je deze training wilt opslaan?</p>
+            <h3 className="mb-2 text-lg font-bold text-white">{t('logger.confirm_finish')}</h3>
+            <p className="mb-6 text-sm text-gray-400">{t('logger.confirm_finish_sub')}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirmFinish(false)}
                 className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
               >
-                Annuleer
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleFinish}
                 className="h-12 flex-1 rounded-xl bg-cyan-500 font-semibold text-white active:bg-cyan-600"
               >
-                Afronden
+                {t('logger.finish')}
               </button>
             </div>
           </div>
@@ -635,14 +637,14 @@ function getWorkoutType(exercises) {
 }
 
 // ── SWAP MODAL ───────────────────────────────────────────────────────────────
-const SWAP_REASONS = [
-  { value: 'machine_busy', label: 'Machine bezet', desc: 'Apparaat bezet' },
-  { value: 'no_equipment', label: 'Geen apparaat', desc: 'Niet beschikbaar' },
-  { value: 'want_variety', label: 'Wil variatie', desc: 'Iets anders' },
-  { value: 'feels_off', label: 'Voelt niet goed', desc: 'Niet in de stemming' },
-]
-
 function SwapModal({ exercise, settings, onAccept, onClose }) {
+  const { t } = useTranslation()
+  const SWAP_REASONS = [
+    { value: 'machine_busy', label: t('logger.swap_busy'), desc: t('logger.swap_busy_sub') },
+    { value: 'no_equipment', label: t('logger.swap_no_equipment'), desc: t('logger.swap_no_equipment_sub') },
+    { value: 'want_variety', label: t('logger.swap_variety'), desc: t('logger.swap_variety_sub') },
+    { value: 'feels_off', label: t('logger.swap_feels_off'), desc: t('logger.swap_feels_off_sub') },
+  ]
   const [reason, setReason] = useState(null)
   const [loading, setLoading] = useState(false)
   const [suggestion, setSuggestion] = useState(null)
@@ -672,12 +674,12 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">Oefening wisselen</h3>
+          <h3 className="text-lg font-bold text-white">{t('logger.swap_exercise')}</h3>
           <button onClick={onClose} className="p-1 text-gray-500"><X size={20} /></button>
         </div>
 
         <div className="mb-4 rounded-xl bg-gray-800 px-3 py-2">
-          <p className="text-xs text-gray-500">Vervangen</p>
+          <p className="text-xs text-gray-500">{t('logger.replacing')}</p>
           <p className="font-semibold text-white">{exercise.name}</p>
           {exercise.muscle_group && (
             <p className="text-xs capitalize text-cyan-400">{exercise.muscle_group}</p>
@@ -686,7 +688,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
 
         {!suggestion ? (
           <>
-            <p className="mb-3 text-sm text-gray-400">Waarom wissel je?</p>
+            <p className="mb-3 text-sm text-gray-400">{t('logger.swap_why')}</p>
             <div className="mb-4 space-y-2">
               {SWAP_REASONS.map(r => (
                 <button
@@ -711,27 +713,27 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
               disabled={!reason || loading}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-bold text-white disabled:opacity-50"
             >
-              {loading ? <><Loader2 size={18} className="animate-spin" /> Alternatief zoeken...</> : <><RefreshCw size={18} /> Zoek alternatief</>}
+              {loading ? <><Loader2 size={18} className="animate-spin" /> {t('logger.finding_alternative')}</> : <><RefreshCw size={18} /> {t('logger.find_alternative')}</>}
             </button>
           </>
         ) : (
           <>
             <div className="mb-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4">
-              <p className="mb-1 label-caps text-cyan-400">Voorgesteld alternatief</p>
+              <p className="mb-1 label-caps text-cyan-400">{t('logger.suggested_alternative')}</p>
               <p className="text-xl font-black text-white">{suggestion.name}</p>
               <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-lg bg-gray-800 py-2">
                   <p className="font-bold text-white">{suggestion.sets}x{suggestion.reps_min}-{suggestion.reps_max}</p>
-                  <p className="text-[10px] text-gray-500">sets x herh.</p>
+                  <p className="text-[10px] text-gray-500">{t('logger.sets_x_reps')}</p>
                 </div>
                 <div className="rounded-lg bg-cyan-500/20 py-2">
                   <p className="font-bold text-cyan-400">{suggestion.weight_kg}kg</p>
-                  <p className="text-[10px] text-gray-500">gewicht</p>
+                  <p className="text-[10px] text-gray-500">{t('logger.weight').toLowerCase()}</p>
                 </div>
                 <div className="rounded-lg bg-gray-800 py-2">
                   <p className="font-bold text-white">RPE {suggestion.rpe_target}</p>
-                  <p className="text-[10px] text-gray-500">intensiteit</p>
+                  <p className="text-[10px] text-gray-500">{t('logger.intensity')}</p>
                 </div>
               </div>
               {suggestion.why && (
@@ -747,13 +749,13 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
                 onClick={() => { setSuggestion(null); setReason(null) }}
                 className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700"
               >
-                Probeer ander
+                {t('logger.try_other')}
               </button>
               <button
                 onClick={() => onAccept(suggestion)}
                 className="h-12 flex-1 rounded-xl bg-cyan-500 font-bold text-white active:scale-[0.97] transition-transform"
               >
-                Gebruik dit
+                {t('logger.use_this')}
               </button>
             </div>
           </>
@@ -765,6 +767,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
 
 // ── WORKOUT MENU ─────────────────────────────────────────────────────────────
 function WorkoutMenu({ canSuperset, onSuperset, onStop }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -792,15 +795,15 @@ function WorkoutMenu({ canSuperset, onSuperset, onStop }) {
               onClick={() => { onSuperset(); setOpen(false) }}
               className="flex w-full flex-col px-4 py-3 text-left active:bg-gray-800"
             >
-              <span className="text-sm font-semibold text-white">Superset modus</span>
-              <span className="text-xs text-gray-500">Koppel oefeningen</span>
+              <span className="text-sm font-semibold text-white">{t('logger.superset_mode')}</span>
+              <span className="text-xs text-gray-500">{t('logger.superset_link')}</span>
             </button>
           )}
           <button
             onClick={() => { onStop(); setOpen(false) }}
             className="flex w-full px-4 py-3 text-left text-sm font-medium text-cyan-400 active:bg-gray-800"
           >
-            Training stoppen
+            {t('logger.stop_workout')}
           </button>
         </div>
       )}
@@ -810,6 +813,7 @@ function WorkoutMenu({ canSuperset, onSuperset, onStop }) {
 
 // ── EXERCISE BLOCK (REDESIGNED) ──────────────────────────────────────────────
 function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed, compact }) {
+  const { t } = useTranslation()
   const [weight, setWeight] = useState(
     exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
   )
@@ -926,20 +930,20 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
                   onClick={() => { setShowGuide(true); setShowMenu(false) }}
                   className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-gray-800"
                 >
-                  Uitleg
+                  {t('logger.explain')}
                 </button>
                 <button
                   onClick={() => { onSwap(); setShowMenu(false) }}
                   className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-gray-800"
                 >
-                  Wissel oefening
+                  {t('logger.swap_exercise')}
                 </button>
                 <div className="mx-4 border-t border-gray-800" />
                 <button
                   onClick={() => { onRemove(); setShowMenu(false) }}
                   className="block w-full px-4 py-3 text-left text-sm font-medium text-red-400 active:bg-gray-800"
                 >
-                  Verwijderen
+                  {t('logger.remove')}
                 </button>
               </div>
             )}
@@ -980,13 +984,13 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
           {/* Weight */}
           <div>
             <div className="mb-2 flex h-5 items-center justify-between">
-              <span className="label-caps">Gewicht</span>
+              <span className="label-caps">{t('logger.weight')}</span>
               <button
                 type="button"
                 onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
                 className="label-caps text-cyan-500 active:text-cyan-400"
               >
-                Plates
+                {t('logger.plates')}
               </button>
             </div>
             <div className="flex items-center gap-1.5">
@@ -1019,7 +1023,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
           {/* Reps */}
           <div>
             <div className="mb-2 flex h-5 items-center">
-              <span className="label-caps">Herhalingen</span>
+              <span className="label-caps">{t('logger.reps_label')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <button
@@ -1051,13 +1055,13 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         {/* Previous session hint */}
         {prevData && (
           <p className="text-center label-caps">
-            Vorige keer: <span className="text-gray-400">{prevData.weight}kg × {prevData.reps}</span>
+            {t('logger.previous')}: <span className="text-gray-400">{prevData.weight}kg × {prevData.reps}</span>
           </p>
         )}
 
         {/* RPE hint for junk volume analysis */}
         {exercise.sets.length >= 3 && !exercise.sets.some(s => s.rpe) && (
-          <p className="text-center text-[10px] text-gray-700">RPE toevoegen verbetert set-kwaliteits analyse</p>
+          <p className="text-center text-[10px] text-gray-700">{t('logger.rpe_hint')}</p>
         )}
 
         {/* RPE toggle */}
@@ -1066,7 +1070,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
             onClick={() => setShowRpe(!showRpe)}
             className={`label-caps transition-colors ${showRpe ? 'text-cyan-400' : 'text-gray-700 active:text-gray-500'}`}
           >
-            {showRpe ? `RPE  ${rpe}` : '+ RPE toevoegen'}
+            {showRpe ? `RPE  ${rpe}` : t('logger.add_rpe')}
           </button>
           {showRpe && (
             <input
@@ -1086,13 +1090,13 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
           <div className="flex items-center justify-between rounded-xl border border-green-500/25 bg-green-500/10 px-4 py-3">
             <div className="flex items-center gap-2">
               <Check size={15} className="text-green-400 shrink-0" />
-              <span className="text-sm font-semibold text-green-400">Oefening klaar</span>
+              <span className="text-sm font-semibold text-green-400">{t('logger.exercise_done')}</span>
             </div>
             <button
               onClick={handleAdd}
               className="text-xs font-medium text-gray-500 active:text-gray-300"
             >
-              + Extra set
+              {t('logger.extra_set')}
             </button>
           </div>
         ) : (
@@ -1102,7 +1106,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               onClick={handleAdd}
               className="btn-primary"
             >
-              Set loggen
+              {t('logger.log_set')}
             </button>
 
             {/* Skip */}
@@ -1110,7 +1114,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               onClick={onRemove}
               className="w-full py-1 text-xs font-medium text-gray-600 active:text-gray-400"
             >
-              Sla over
+              {t('common.skip')}
             </button>
           </>
         )}
@@ -1121,6 +1125,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
 
 // ── SUPERSET GROUP BLOCK ─────────────────────────────────────────────────────
 function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, getLastUsed, junkWarning, onClearJunkWarning }) {
+  const { t } = useTranslation()
   // Find actual exercise data from workout
   const exerciseData = group.exercises.map(ex => 
     allExercises.find(e => e.name === ex.name) || ex
@@ -1136,7 +1141,7 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
         <div className="mb-3 flex items-center gap-2 px-1">
           <Sparkles size={14} className="text-cyan-500" />
           <span className="label-caps text-cyan-400">
-            Superset {groupIndex + 1}
+            {t('logger.superset_active')} {groupIndex + 1}
           </span>
           <span className="text-xs text-gray-500">- {group.pairReason}</span>
         </div>
@@ -1145,7 +1150,7 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
         <div className="mb-2">
           <div className="mb-1 flex items-center gap-2 px-1">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-xs font-bold text-white">A</span>
-            <span className="text-xs text-gray-400">Geen rust na deze</span>
+            <span className="text-xs text-gray-400">{t('logger.no_rest')}</span>
           </div>
           <ExerciseBlock
             exercise={exerciseData[0]}
@@ -1174,7 +1179,7 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
         <div>
           <div className="mb-1 flex items-center gap-2 px-1">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-xs font-bold text-white">B</span>
-            <span className="text-xs text-gray-400">{group.restAfter}s rust na deze</span>
+            <span className="text-xs text-gray-400">{group.restAfter}s {t('logger.rest_after')}</span>
           </div>
           <ExerciseBlock
             exercise={exerciseData[1]}
