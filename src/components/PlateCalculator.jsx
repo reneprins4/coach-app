@@ -83,7 +83,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
         
         {/* Weight input */}
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">
+          <label className="mb-2 block label-caps">
             Totaal gewicht (kg)
           </label>
           <input
@@ -98,7 +98,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
         
         {/* Bar weight selector */}
         <div className="mb-5">
-          <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">
+          <label className="mb-2 block label-caps">
             Stang gewicht
           </label>
           <div className="flex gap-2">
@@ -131,7 +131,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
               </p>
             ) : (
               <>
-                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                <p className="mb-3 label-caps">
                   Per kant van de stang
                 </p>
                 <div className="mb-4 flex flex-wrap gap-2">

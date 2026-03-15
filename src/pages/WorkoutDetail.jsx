@@ -80,7 +80,7 @@ export default function WorkoutDetail() {
         {Object.entries(grouped).map(([exercise, sets]) => (
           <div key={exercise} className="rounded-xl border border-gray-800 bg-gray-900 p-4">
             <h3 className="mb-3 text-base font-bold text-white">{exercise}</h3>
-            <div className="grid grid-cols-[1.5rem_1fr_1fr_3rem] gap-2 px-1 text-[10px] font-medium uppercase tracking-wider text-gray-600">
+            <div className="grid grid-cols-[1.5rem_1fr_1fr_3rem] gap-2 px-1 label-caps">
               <span>#</span><span>Kg</span><span>Reps</span><span>RPE</span>
             </div>
             {sets.map((s, i) => (

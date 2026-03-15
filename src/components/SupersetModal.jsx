@@ -93,7 +93,7 @@ export default function SupersetModal({ exercises, onApply, onClose }) {
         
         {/* Superset plan */}
         <div className="px-5 py-4">
-          <p className="mb-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+          <p className="mb-3 label-caps">
             Superset plan
           </p>
           

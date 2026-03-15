@@ -166,50 +166,34 @@ export default function Logger() {
     const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
 
     return (
-      <div className="min-h-[80vh] px-5 py-8">
+      <div className="min-h-[80vh] px-5 py-10">
         {/* Header */}
-        <h1 className="mb-1 text-3xl font-black tracking-tight text-white">Trainen</h1>
-        <p className="mb-8 text-sm text-gray-400">{formattedDate}</p>
+        <p className="mb-1 text-xs font-medium uppercase tracking-widest text-gray-500">{formattedDate}</p>
+        <h1 className="mb-10 text-4xl font-black tracking-tight text-white">Trainen</h1>
 
         {/* Cards */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Coach Training - Primary Card */}
           <button
             onClick={() => nav('/coach')}
-            className="w-full rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-600/20 to-cyan-500/5 p-6 text-left active:scale-[0.98] transition-transform"
+            className="w-full rounded-2xl bg-cyan-500 p-6 text-left active:scale-[0.98] transition-transform"
           >
             {block && phase && (
-              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-cyan-400">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-cyan-900/70">
                 {phase.label} · Week {block.currentWeek} van {phase.weeks}
               </p>
             )}
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/20">
-                <Sparkles size={24} className="text-cyan-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xl font-bold text-white">Coach training</p>
-                <p className="text-sm text-gray-400">Persoonlijk, op basis van herstel</p>
-              </div>
-              <ChevronRight size={20} className="text-cyan-400 shrink-0" />
-            </div>
+            <p className="text-2xl font-black text-white">Coach training</p>
+            <p className="mt-1 text-sm font-medium text-cyan-900/70">Persoonlijk, op basis van herstel</p>
           </button>
 
           {/* Vrije Training - Secondary Card */}
           <button
             onClick={() => aw.startWorkout()}
-            className="btn-secondary w-full justify-start p-5 h-auto"
+            className="w-full rounded-2xl bg-gray-800/60 border border-gray-700/50 p-6 text-left active:scale-[0.98] transition-transform"
           >
-            <div className="flex items-center gap-4 w-full">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-800">
-                <Dumbbell size={20} className="text-gray-400" />
-              </div>
-              <div className="flex-1 text-left">
-                <p className="font-bold text-white">Vrije training</p>
-                <p className="text-sm text-gray-500">Jij bepaalt</p>
-              </div>
-              <ChevronRight size={18} className="text-gray-600 shrink-0" />
-            </div>
+            <p className="text-xl font-bold text-white">Vrije training</p>
+            <p className="mt-1 text-sm text-gray-500">Jij bepaalt</p>
           </button>
         </div>
 
@@ -253,45 +237,30 @@ export default function Logger() {
       <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950/95 backdrop-blur-sm">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-lg font-bold text-white">{workoutType}</h1>
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <div className="flex items-center gap-1">
-                  <Timer size={14} className="text-cyan-500" />
-                  <span className="font-mono">{formatTime(aw.elapsed)}</span>
-                </div>
-                <span>-</span>
-                <span>{aw.totalSets} sets</span>
-                <span>-</span>
-                <span>{formatVolume(aw.totalVolume)}</span>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl font-black tracking-tight text-white">{workoutType}</h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="label-caps tabular text-cyan-500">{formatTime(aw.elapsed)}</span>
+                <span className="label-caps text-gray-700">·</span>
+                <span className="label-caps">{aw.totalSets} sets</span>
+                <span className="label-caps text-gray-700">·</span>
+                <span className="label-caps">{formatVolume(aw.totalVolume)}</span>
               </div>
             </div>
-            <div className="flex gap-2">
-              {!supersetMode && aw.workout.exercises.length >= 2 && (
-                <button
-                  onClick={() => setShowSupersetModal(true)}
-                  className="flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-cyan-400 ring-1 ring-cyan-500/30 active:bg-cyan-500/10"
-                  title="Superset modus"
-                >
-                  <Sparkles size={16} />
-                  <span className="hidden sm:inline">Superset</span>
-                </button>
-              )}
+            <div className="flex items-center gap-2">
               {supersetMode && (
                 <button
                   onClick={handleExitSupersetMode}
-                  className="flex h-10 items-center gap-1.5 rounded-xl bg-cyan-500/20 px-3 text-sm font-medium text-cyan-400 ring-1 ring-cyan-500/50 active:bg-cyan-500/30"
+                  className="h-8 rounded-lg bg-cyan-500/20 px-2.5 text-xs font-semibold text-cyan-400 ring-1 ring-cyan-500/40"
                 >
-                  <Sparkles size={16} />
-                  <span className="hidden sm:inline">Superset aan</span>
+                  Superset
                 </button>
               )}
-              <button
-                onClick={() => setShowDiscard(true)}
-                className="h-10 rounded-xl px-3 text-sm text-gray-400 ring-1 ring-gray-700 active:bg-gray-900"
-              >
-                Stop
-              </button>
+              <WorkoutMenu
+                canSuperset={aw.workout.exercises.length >= 2 && !supersetMode}
+                onSuperset={() => setShowSupersetModal(true)}
+                onStop={() => setShowDiscard(true)}
+              />
               <button
                 onClick={handleFinishClick}
                 disabled={aw.saving || aw.totalSets === 0}
@@ -378,7 +347,7 @@ export default function Logger() {
 
         {/* Notes */}
         <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
-          <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">Notities</label>
+          <label className="mb-2 block label-caps">Notities</label>
           <textarea
             value={aw.workout.notes}
             onChange={(e) => aw.updateNotes(e.target.value)}
@@ -390,12 +359,12 @@ export default function Logger() {
       </div>
 
       {/* Add exercise button */}
-      <div className="fixed bottom-20 left-0 right-0 z-30 px-4 pb-2">
+      <div className="fixed bottom-[72px] left-0 right-0 z-30 px-4 pb-3 pt-2 bg-gradient-to-t from-gray-950 via-gray-950/95 to-transparent">
         <button
           onClick={() => setShowPicker(true)}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-700 active:bg-gray-800"
+          className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-700 active:bg-gray-800"
         >
-          <Plus size={20} />
+          <Plus size={18} strokeWidth={2.5} />
           Oefening toevoegen
         </button>
       </div>
@@ -626,7 +595,7 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
         ) : (
           <>
             <div className="mb-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">Voorgesteld alternatief</p>
+              <p className="mb-1 label-caps text-cyan-400">Voorgesteld alternatief</p>
               <p className="text-xl font-black text-white">{suggestion.name}</p>
               <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -672,12 +641,59 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
   )
 }
 
+// ── WORKOUT MENU ─────────────────────────────────────────────────────────────
+function WorkoutMenu({ canSuperset, onSuperset, onStop }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [open])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 ring-1 ring-gray-700 active:bg-gray-900"
+      >
+        <MoreVertical size={18} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-2xl border border-gray-700 bg-gray-900 shadow-2xl">
+          {canSuperset && (
+            <button
+              onClick={() => { onSuperset(); setOpen(false) }}
+              className="flex w-full flex-col px-4 py-3 text-left active:bg-gray-800"
+            >
+              <span className="text-sm font-semibold text-white">Superset modus</span>
+              <span className="text-xs text-gray-500">Koppel oefeningen</span>
+            </button>
+          )}
+          <button
+            onClick={() => { onStop(); setOpen(false) }}
+            className="flex w-full px-4 py-3 text-left text-sm font-medium text-cyan-400 active:bg-gray-800"
+          >
+            Training stoppen
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── EXERCISE BLOCK (REDESIGNED) ──────────────────────────────────────────────
 function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed, compact }) {
   const [weight, setWeight] = useState(
     exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
   )
-  const [reps, setReps] = useState('')
+  const [reps, setReps] = useState(
+    exercise.plan?.reps_min?.toString() || lastUsed?.reps?.toString() || ''
+  )
   const [rpe, setRpe] = useState(7)
   const [showRpe, setShowRpe] = useState(false)
   const [prevData, setPrevData] = useState(null)
@@ -706,6 +722,14 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         if (!cancelled && data.length > 0) {
           const latest = data[0]
           setPrevData({ weight: latest.weight_kg, reps: latest.reps })
+          // Pre-fill reps van vorige sessie als er nog geen plan-default is
+          if (!exercise.plan?.reps_min) {
+            setReps(prev => prev || latest.reps?.toString() || '')
+          }
+          // Pre-fill gewicht ook als dat nog leeg is
+          if (!exercise.plan?.weight_kg) {
+            setWeight(prev => prev || latest.weight_kg?.toString() || '')
+          }
         }
       })
     }
@@ -738,49 +762,47 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
   return (
     <div className={`rounded-2xl border min-w-0 w-full ${compact ? 'border-gray-700 bg-gray-800/50' : 'border-gray-800 bg-gray-900'}`}>
       {/* Header */}
-      <div className={`border-b border-gray-800 px-4 ${compact ? 'py-2' : 'py-3'}`}>
-        <div className="flex items-start justify-between">
+      <div className={`border-b border-gray-800 px-4 ${compact ? 'py-3' : 'py-4'}`}>
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className={`font-bold text-white truncate ${compact ? 'text-base' : 'text-lg'}`}>{exercise.name}</h3>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <h3 className={`font-black tracking-tight text-white truncate ${compact ? 'text-base' : 'text-xl'}`}>{exercise.name}</h3>
+            <div className="mt-0.5 flex items-center gap-2">
               {exercise.muscle_group && (
-                <span className="capitalize">{exercise.muscle_group}</span>
+                <span className="label-caps">{exercise.muscle_group}</span>
               )}
               {aiTarget && (
-                <>
-                  <span className="text-gray-700">-</span>
-                  <span className="text-cyan-400">Doel: {aiTarget}</span>
-                </>
+                <span className="label-caps text-cyan-500">{aiTarget}</span>
               )}
             </div>
           </div>
           
           {/* 3-dot menu */}
-          <div className="relative" ref={menuRef}>
+          <div className="relative shrink-0" ref={menuRef}>
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 active:bg-gray-800"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 active:text-gray-400"
             >
-              <MoreVertical size={20} />
+              <MoreVertical size={18} />
             </button>
             
             {showMenu && (
-              <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-gray-700 bg-gray-800 shadow-xl">
+              <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-2xl border border-gray-700/60 bg-gray-900 shadow-2xl">
                 <button
                   onClick={() => { setShowGuide(true); setShowMenu(false) }}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white active:bg-gray-700"
+                  className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-gray-800"
                 >
                   Uitleg
                 </button>
                 <button
                   onClick={() => { onSwap(); setShowMenu(false) }}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white active:bg-gray-700"
+                  className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-gray-800"
                 >
                   Wissel oefening
                 </button>
+                <div className="mx-4 border-t border-gray-800" />
                 <button
                   onClick={() => { onRemove(); setShowMenu(false) }}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-cyan-400 active:bg-gray-700"
+                  className="block w-full px-4 py-3 text-left text-sm font-medium text-red-400 active:bg-gray-800"
                 >
                   Verwijderen
                 </button>
@@ -792,117 +814,119 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
 
       {showGuide && <ExerciseGuide exercise={exercise} onClose={() => setShowGuide(false)} />}
 
-      {/* Logged sets - compact display */}
+      {/* Logged sets */}
       {exercise.sets.length > 0 && (
-        <div className="border-b border-gray-800 px-4 py-3">
-          <div className="space-y-2">
-            {exercise.sets.map((s, i) => (
-              <div
-                key={s.id}
-                onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-                className="flex items-center justify-between rounded-xl bg-gray-800 px-4 py-3 active:bg-gray-700"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="w-12 text-sm font-medium text-gray-500">Set {i + 1}</span>
-                  <span className="text-base font-bold text-white">{s.weight_kg}kg x {s.reps}</span>
-                  {s.rpe && (
-                    <span className="text-sm text-gray-500">RPE {s.rpe}</span>
-                  )}
-                </div>
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/20">
-                  <Check size={14} className="text-green-400" />
-                </div>
+        <div className="border-b border-gray-800 px-4 py-3 space-y-1.5">
+          {exercise.sets.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
+              className="flex w-full items-center justify-between rounded-xl bg-gray-800/70 px-4 py-2.5 active:bg-gray-700/80"
+            >
+              <div className="flex items-center gap-3">
+                <span className="label-caps w-8 text-right">{i + 1}</span>
+                <span className="text-base font-bold tracking-tight text-white tabular">
+                  {s.weight_kg}<span className="text-sm font-normal text-gray-500">kg</span>
+                  <span className="mx-1.5 text-gray-600">×</span>
+                  {s.reps}<span className="text-sm font-normal text-gray-500"> reps</span>
+                </span>
+                {s.rpe && <span className="label-caps">RPE {s.rpe}</span>}
               </div>
-            ))}
-          </div>
+              <Check size={14} className="text-green-400 shrink-0" />
+            </button>
+          ))}
         </div>
       )}
 
       {/* Input section */}
-      <div className="px-4 py-4">
-        {/* Weight input */}
-        <div className="mb-4">
-          <div className="mb-2 flex items-center justify-between">
-            <label className="text-xs font-medium uppercase tracking-wider text-gray-500">Gewicht (kg)</label>
-            <button
-              type="button"
-              onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
-              className="flex items-center gap-1 text-xs text-cyan-400 active:text-cyan-300"
-            >
-              <Calculator size={12} />
-              <span>Plates</span>
-            </button>
+      <div className="px-4 py-4 space-y-4">
+        {/* Weight + Reps side by side */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Weight */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="label-caps">Gewicht</span>
+              <button
+                type="button"
+                onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
+                className="label-caps text-cyan-500 active:text-cyan-400"
+              >
+                Plates
+              </button>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => adjustWeight(-2.5)}
+                className="flex h-11 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.5"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="—"
+                className="h-11 min-w-0 flex-1 rounded-xl bg-gray-800 px-2 text-center text-lg font-black tracking-tight text-white tabular outline-none placeholder-gray-700"
+              />
+              <button
+                type="button"
+                onClick={() => adjustWeight(2.5)}
+                className="flex h-11 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700"
+              >
+                +
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-[48px_1fr_48px] gap-1.5">
-            <button
-              type="button"
-              onClick={() => adjustWeight(-2.5)}
-              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-            >
-              <Minus size={20} />
-            </button>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.5"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              placeholder="0"
-              className="h-12 w-full min-w-0 rounded-xl bg-gray-800 px-3 text-center text-xl font-bold text-white outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => adjustWeight(2.5)}
-              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-            >
-              <Plus size={20} />
-            </button>
-          </div>
-        </div>
 
-        {/* Reps input */}
-        <div className="mb-4">
-          <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-gray-500">Herhalingen</label>
-          <div className="grid grid-cols-[48px_1fr_48px] gap-1.5">
-            <button
-              type="button"
-              onClick={() => adjustReps(-1)}
-              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-            >
-              <Minus size={20} />
-            </button>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={reps}
-              onChange={(e) => setReps(e.target.value)}
-              placeholder="0"
-              className="h-12 w-full min-w-0 rounded-xl bg-gray-800 px-3 text-center text-xl font-bold text-white outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => adjustReps(1)}
-              className="flex h-12 w-full items-center justify-center rounded-xl bg-gray-800 text-gray-400 active:bg-gray-700"
-            >
-              <Plus size={20} />
-            </button>
+          {/* Reps */}
+          <div>
+            <div className="mb-2">
+              <span className="label-caps">Herhalingen</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => adjustReps(-1)}
+                className="flex h-11 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={reps}
+                onChange={(e) => setReps(e.target.value)}
+                placeholder="—"
+                className="h-11 min-w-0 flex-1 rounded-xl bg-gray-800 px-2 text-center text-lg font-black tracking-tight text-white tabular outline-none placeholder-gray-700"
+              />
+              <button
+                type="button"
+                onClick={() => adjustReps(1)}
+                className="flex h-11 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Previous session hint */}
         {prevData && (
-          <p className="mb-4 text-center text-sm text-gray-500">
-            Vorige keer: {prevData.weight}kg x {prevData.reps}
+          <p className="text-center label-caps">
+            Vorige keer: <span className="text-gray-400">{prevData.weight}kg × {prevData.reps}</span>
           </p>
         )}
 
         {/* RPE toggle */}
-        <div className="mb-4 flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <button
             onClick={() => setShowRpe(!showRpe)}
-            className={`text-sm ${showRpe ? 'font-medium text-cyan-400' : 'text-gray-600'}`}
+            className={`label-caps transition-colors ${showRpe ? 'text-cyan-400' : 'text-gray-700 active:text-gray-500'}`}
           >
-            {showRpe ? `RPE ${rpe}` : 'RPE toevoegen'}
+            {showRpe ? `RPE  ${rpe}` : '+ RPE toevoegen'}
           </button>
           {showRpe && (
             <input
@@ -912,7 +936,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               step="0.5"
               value={rpe}
               onChange={(e) => setRpe(parseFloat(e.target.value))}
-              className="w-32"
+              className="w-28"
             />
           )}
         </div>
@@ -920,10 +944,9 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
         {/* Add set button */}
         <button
           onClick={handleAdd}
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 text-lg font-bold text-white active:scale-[0.98] transition-transform"
+          className="btn-primary"
         >
-          <Plus size={20} strokeWidth={3} />
-          SET LOGGEN
+          Set loggen
         </button>
       </div>
     </div>
@@ -946,7 +969,7 @@ function SupersetGroupBlock({ group, groupIndex, allExercises, userId, onAddSet,
         {/* Superset header */}
         <div className="mb-3 flex items-center gap-2 px-1">
           <Sparkles size={14} className="text-cyan-500" />
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
+          <span className="label-caps text-cyan-400">
             Superset {groupIndex + 1}
           </span>
           <span className="text-xs text-gray-500">- {group.pairReason}</span>

@@ -24,7 +24,7 @@ export default function MuscleMap({ muscleStatus = {} }) {
       <div className="flex gap-4 justify-center items-start">
         {/* Front view */}
         <div className="flex-1 max-w-[140px]">
-          <p className="text-center text-xs text-slate-500 mb-2 uppercase tracking-wider font-semibold">Voor</p>
+          <p className="text-center label-caps mb-2">Voor</p>
           <svg viewBox="0 0 140 300" className="w-full" style={{ height: 'auto' }}>
             <defs>
               <filter id="glow-front">
@@ -150,7 +150,7 @@ export default function MuscleMap({ muscleStatus = {} }) {
 
         {/* Back view */}
         <div className="flex-1 max-w-[140px]">
-          <p className="text-center text-xs text-slate-500 mb-2 uppercase tracking-wider font-semibold">Achter</p>
+          <p className="text-center label-caps mb-2">Achter</p>
           <svg viewBox="0 0 140 300" className="w-full" style={{ height: 'auto' }}>
             <defs>
               <filter id="glow-back">

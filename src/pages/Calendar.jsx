@@ -188,17 +188,17 @@ export default function Calendar() {
         <div className="flex flex-1 flex-col items-center rounded-xl bg-gray-900 py-3">
           <CalendarIcon size={16} className="mb-1 text-gray-500" />
           <span className="text-xl font-bold text-white">{stats.thisMonth}</span>
-          <span className="text-[10px] uppercase tracking-wider text-gray-600">deze maand</span>
+          <span className="label-caps">deze maand</span>
         </div>
         <div className="flex flex-1 flex-col items-center rounded-xl bg-gray-900 py-3">
           <Flame size={16} className="mb-1 text-cyan-500" />
           <span className="text-xl font-bold text-white">{stats.streak}</span>
-          <span className="text-[10px] uppercase tracking-wider text-gray-600">streak</span>
+          <span className="label-caps">streak</span>
         </div>
         <div className="flex flex-1 flex-col items-center rounded-xl bg-gray-900 py-3">
           <Trophy size={16} className="mb-1 text-yellow-500" />
           <span className="text-xl font-bold text-white">{stats.thisYear}</span>
-          <span className="text-[10px] uppercase tracking-wider text-gray-600">dit jaar</span>
+          <span className="label-caps">dit jaar</span>
         </div>
       </div>
       
@@ -224,7 +224,7 @@ export default function Calendar() {
       {/* Day headers */}
       <div className="mb-2 grid grid-cols-7 gap-1">
         {DAYS_NL.map(day => (
-          <div key={day} className="py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-600">
+          <div key={day} className="py-2 text-center label-caps">
             {day}
           </div>
         ))}

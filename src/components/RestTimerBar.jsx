@@ -17,7 +17,7 @@ export default function RestTimerBar({ remaining, total, onStop }) {
     <div className="border-b border-gray-800 bg-gray-900 px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-lg font-bold text-cyan-500">
+          <span className="tabular text-lg font-bold text-cyan-500">
             {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
           </span>
           <div>

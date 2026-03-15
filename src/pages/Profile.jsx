@@ -280,7 +280,7 @@ export default function Profile() {
             { key: 'deadliftMax', label: 'Deadlift (kg)' },
           ].map(({ key, label }) => (
             <div key={key}>
-              <label className="mb-1 block text-[10px] uppercase tracking-wider text-gray-500">{label}</label>
+              <label className="mb-1 block label-caps">{label}</label>
               <input
                 type="number"
                 value={settings[key]}

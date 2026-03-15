@@ -457,7 +457,7 @@ export default function AICoach() {
           {/* Exercises grouped by muscle */}
           {Object.entries(exercisesByMuscle).map(([muscle, exercises]) => (
             <div key={muscle} className="mb-5">
-              <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <h3 className="mb-2 flex items-center gap-2 label-caps">
                 <span className="h-px flex-1 bg-gray-800" />
                 {muscle}
                 <span className="h-px flex-1 bg-gray-800" />
