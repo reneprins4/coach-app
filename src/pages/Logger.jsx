@@ -741,7 +741,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
     const r = parseInt(reps, 10)
     if (isNaN(r) || r <= 0) return
     onAddSet({ weight_kg: w, reps: r, rpe: showRpe ? rpe : null })
-    setReps('')
+    // reps bewaren zodat volgende set direct gelogd kan worden
   }
 
   function adjustWeight(delta) {
