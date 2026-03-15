@@ -165,6 +165,7 @@ export default function Plan() {
                 )
               })}
             </div>
+            <p className="mt-2 text-[10px] text-gray-600 text-center">Weeknummer is gebaseerd op startdatum van het blok</p>
 
             {/* Current week details */}
             {weekTarget && (

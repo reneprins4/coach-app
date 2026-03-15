@@ -72,13 +72,27 @@ export function calculateTrainingFrequency(sessions) {
 /**
  * Hoofdfunctie: berekent forecast voor een oefening
  * @param {Array<{date: string, bestE1rm: number, fullDate?: string}>} sessions
- * @returns {{status: string, forecastDate?: string, currentPR?: number, targetPR?: number, chartData?: Array}}
+ * @returns {{status: string, forecastDate?: string, currentPR?: number, targetPR?: number, chartData?: Array, stale?: boolean}}
  */
 export function calculateForecast(sessions) {
   // Check minimum sessions
   if (!sessions || sessions.length < MIN_SESSIONS) {
     return { status: 'insufficient' }
   }
+
+  // Check recency of last session - ignore stale data
+  const lastSession = sessions[sessions.length - 1]
+  const lastDate = new Date(lastSession.fullDate || lastSession.date)
+  const now = new Date()
+  const daysSinceLastSession = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24))
+  
+  // If > 21 days since last session, forecast is unreliable
+  if (daysSinceLastSession > 21) {
+    return { status: 'plateau' }
+  }
+  
+  // Track if data is getting stale (14-21 days)
+  const isStale = daysSinceLastSession > 14
 
   // Extract e1rm values with indices
   const points = sessions.map((s, i) => ({
@@ -170,6 +184,7 @@ export function calculateForecast(sessions) {
     sessionsNeeded,
     weeksNeeded,
     slope,
-    chartData
+    chartData,
+    stale: isStale
   }
 }

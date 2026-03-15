@@ -118,8 +118,9 @@ export default function Logger() {
   }
 
   // Bereken adaptieve rusttijd op basis van RPE, oefening type en vermoeidheid
-  function calcAdaptiveRest(exerciseName, data) {
-    const base = getSettings().restTime || 90
+  // Als planRestSeconds is meegegeven (AI-gegenereerd), gebruik dat als basis
+  function calcAdaptiveRest(exerciseName, data, planRestSeconds = null) {
+    const base = planRestSeconds || getSettings().restTime || 90
     let duration = base
     const rpe = data.rpe || 7
 
@@ -132,18 +133,25 @@ export default function Logger() {
     const compound = /squat|deadlift|press|row|pull.up|chin.up|bench|overhead/i.test(exerciseName)
     if (compound && rpe >= 8) duration = Math.max(duration, 180)
 
+    // Cap RPE-override at plan value × 1.5 if plan was provided
+    if (planRestSeconds && duration > planRestSeconds * 1.5) {
+      duration = Math.round(planRestSeconds * 1.5)
+    }
+
     return duration
   }
 
   // Wrapper voor addSet die ook junk volume detecteert
   function handleAddSet(exerciseName, data) {
     aw.addSet(exerciseName, data)
-    const adaptiveRest = calcAdaptiveRest(exerciseName, data)
+    // Use AI plan rest_seconds as base if available
+    const exercise = aw.workout?.exercises.find(e => e.name === exerciseName)
+    const planRest = exercise?.plan?.rest_seconds || null
+    const adaptiveRest = calcAdaptiveRest(exerciseName, data, planRest)
     rest.start(adaptiveRest)
 
     // Check junk volume na het toevoegen van de set
     // We moeten de nieuwe set meenemen in de check
-    const exercise = aw.workout?.exercises.find(e => e.name === exerciseName)
     if (exercise) {
       const updatedSets = [...exercise.sets, { ...data, id: 'temp' }]
       const warning = detectJunkVolume(exerciseName, updatedSets)
@@ -868,9 +876,9 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
     setReps(String(Math.max(0, current + delta)))
   }
 
-  // Build AI target string
+  // Build AI target string (including RPE target if available)
   const aiTarget = exercise.plan ? (
-    `${exercise.plan.sets}x${exercise.plan.reps_min || exercise.plan.reps_target}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${exercise.plan.weight_kg}kg`
+    `${exercise.plan.sets}x${exercise.plan.reps_min || exercise.plan.reps_target}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${exercise.plan.weight_kg}kg${exercise.plan.rpe_target ? ` · RPE ${exercise.plan.rpe_target}` : ''}`
   ) : null
 
   const plannedSets = exercise.plan?.sets ?? null
@@ -1045,6 +1053,11 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
           <p className="text-center label-caps">
             Vorige keer: <span className="text-gray-400">{prevData.weight}kg × {prevData.reps}</span>
           </p>
+        )}
+
+        {/* RPE hint for junk volume analysis */}
+        {exercise.sets.length >= 3 && !exercise.sets.some(s => s.rpe) && (
+          <p className="text-center text-[10px] text-gray-700">RPE toevoegen verbetert set-kwaliteits analyse</p>
         )}
 
         {/* RPE toggle */}

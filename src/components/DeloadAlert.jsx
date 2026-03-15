@@ -110,7 +110,7 @@ export default function DeloadAlert({ workouts, settings, updateSettings }) {
             isUrgent ? 'bg-red-500 active:bg-red-600' : 'bg-orange-500 active:bg-orange-600'
           }`}
         >
-          Start deload week
+          Ga naar trainingsplan
           <ChevronRight size={14} />
         </button>
         <button
@@ -120,6 +120,7 @@ export default function DeloadAlert({ workouts, settings, updateSettings }) {
           Later
         </button>
       </div>
+      <p className="text-center text-xs text-gray-600 mt-2">Kies 'Deload' in je trainingsplan om een herstelweek te starten.</p>
     </div>
   )
 }

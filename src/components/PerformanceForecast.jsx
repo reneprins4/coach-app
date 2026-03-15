@@ -43,6 +43,10 @@ export default function PerformanceForecast({ sessions, exerciseName }) {
         <span className="text-sm font-medium text-cyan-400">Performance Forecast</span>
       </div>
       
+      {forecast.stale && (
+        <p className="mb-2 text-xs text-yellow-500">Laatste training meer dan 2 weken geleden — prognose mogelijk niet actueel.</p>
+      )}
+      
       <p className="mb-2 text-sm text-white">
         Verwacht nieuw PR: <span className="font-semibold text-cyan-400">{forecast.forecastDate}</span>
       </p>
