@@ -270,7 +270,7 @@ export default function Profile() {
       {/* Known maxes — optional but improves accuracy */}
       <div className="mb-6">
         <label className="mb-2 block text-sm font-medium text-gray-300">Bekende 1RM schattingen <span className="text-gray-600 font-normal">(optioneel)</span></label>
-        <p className="mb-3 text-xs text-gray-600">Helpt de AI met de juiste startgewichten. Leeg laten indien onbekend.</p>
+        <p className="mb-3 text-xs text-gray-600">Helpt de AI met startgewichten. De app gebruikt je trainingshistorie als dat nauwkeuriger is.</p>
         <div className="grid grid-cols-3 gap-2">
           {[
             { key: 'benchMax', label: 'Bench (kg)' },
@@ -293,7 +293,8 @@ export default function Profile() {
 
       {/* Frequency */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">Hoe vaak?</label>
+        <label className="mb-2 block text-sm font-medium text-gray-300">Trainingsvoorkeur</label>
+        <p className="mb-3 text-xs text-gray-600">Wordt als context gebruikt voor je AI trainingsschema — geen automatische planning.</p>
         <div className="flex gap-2">
           {FREQUENCIES.map(f => (
             <button
