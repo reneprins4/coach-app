@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import {
   ArrowLeft, Sparkles, RefreshCw, ChevronDown, ChevronUp,
-  Loader2, AlertCircle, ArrowUpRight, ArrowDownRight, Minus, Clock, Flame, Target, User
+  Loader2, AlertCircle, ArrowUpRight, ArrowDownRight, Minus, Clock, Flame, User
 } from 'lucide-react'
 import { generateScientificWorkout } from '../lib/anthropic'
 import { fetchRecentHistory } from '../hooks/useWorkouts'
@@ -65,14 +65,6 @@ function RecoveryBar({ muscle, ms }) {
   )
 }
 
-// Weekly plan based on frequency
-const WEEK_PLANS = {
-  '3x': ['Push', 'Pull', 'Legs'],
-  '4x': ['Push', 'Pull', 'Legs', 'Upper'],
-  '5x': ['Push', 'Pull', 'Legs', 'Push', 'Pull'],
-  '6x': ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs'],
-}
-
 export default function AICoach() {
   const nav = useNavigate()
   const { user } = useAuthContext()
@@ -97,8 +89,7 @@ export default function AICoach() {
   const [retryCount, setRetryCount] = useState(0)
   const [result, setResult] = useState(null)
   const [showReasoning, setShowReasoning] = useState(false)
-  const [showRecovery, setShowRecovery] = useState(true)
-  const [showWeekPlan, setShowWeekPlan] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   // Check if profile is incomplete (no bodyweight)
   const showProfileBanner = !settings.bodyweight
@@ -214,10 +205,6 @@ export default function AICoach() {
     )
   }
 
-  const weekPlan = WEEK_PLANS[settings.frequency] || WEEK_PLANS['4x']
-  const todayIndex = new Date().getDay() // 0=Sun, use Mon as day 1
-  const planDayIndex = ((todayIndex + 6) % 7) % weekPlan.length // Mon=0
-
   return (
     <div className="min-h-dvh bg-gray-950 px-4 py-6 pb-28">
       <button
@@ -226,11 +213,6 @@ export default function AICoach() {
       >
         <ArrowLeft size={18} /> Terug
       </button>
-
-      <div className="mb-6 flex items-center gap-3">
-        <Sparkles size={28} className="text-cyan-500" />
-        <h1 className="text-3xl font-black tracking-tight">AI Coach</h1>
-      </div>
 
       {/* Profile completion banner */}
       {showProfileBanner && !result && (
@@ -246,182 +228,108 @@ export default function AICoach() {
 
       {!result ? (
         <>
-          {/* ── RECOVERY SECTION ───────────────────────────── */}
-          <div className="mb-5 rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <button
-              className="flex w-full items-center justify-between"
-              onClick={() => setShowRecovery(v => !v)}
-            >
-              <h2 className="label-caps">Spierherstel</h2>
-              {showRecovery ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
-            </button>
-
-            {showRecovery && muscleStatus && (
-              <div className="mt-4">
-                {ALL_MUSCLES.map(m => (
-                  <RecoveryBar key={m} muscle={m} ms={muscleStatus[m] || { setsThisWeek: 0, target: { min: 10, max: 16 }, daysSinceLastTrained: null, avgRpeLastSession: null }} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* ── WEEK PLAN ───────────────────────────────────── */}
-          <div className="mb-5 rounded-xl border border-gray-800 bg-gray-900 p-4">
-            <button
-              className="flex w-full items-center justify-between"
-              onClick={() => setShowWeekPlan(v => !v)}
-            >
-              <h2 className="label-caps">Weekstructuur</h2>
-              {showWeekPlan ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
-            </button>
-
-            {showWeekPlan && (
-              <div className="mt-3 flex gap-1.5">
-                {weekPlan.map((split, i) => (
-                  <div
-                    key={i}
-                    className={`flex flex-1 flex-col items-center rounded-lg py-2 text-center ${
-                      i === planDayIndex
-                        ? 'bg-cyan-500/20 ring-1 ring-cyan-500/50'
-                        : 'bg-gray-800'
-                    }`}
-                  >
-                    <span className={`text-[9px] font-medium uppercase tracking-wider ${i === planDayIndex ? 'text-cyan-400' : 'text-gray-500'}`}>
-                      Dag {i + 1}
-                    </span>
-                    <span className={`text-[10px] font-bold mt-0.5 ${i === planDayIndex ? 'text-white' : 'text-gray-400'}`}>
-                      {split}
-                    </span>
-                    {i === planDayIndex && (
-                      <span className="mt-1 text-[8px] text-cyan-400">Vandaag</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+          {/* ── HEADER ─────────────────────────────────────── */}
+          <div className="mb-6">
+            <p className="label-caps mb-1">AI Training</p>
+            <h1 className="text-3xl font-black tracking-tight">
+              {selectedSplit || 'Vandaag'}
+            </h1>
+            {splitScores[0] && (
+              <p className="text-sm text-slate-400 mt-1">{splitScores[0].reasoning}</p>
             )}
           </div>
 
           {/* ── BLOCK CONTEXT ──────────────────────────────── */}
           {block && phase && weekTarget && (
-            <div className={`mb-4 rounded-xl border px-4 py-3 ${
-              phase.color === 'blue' ? 'border-blue-500/30 bg-blue-500/10' :
-              phase.color === 'gray' ? 'border-gray-500/30 bg-gray-500/10' :
-              'border-cyan-500/30 bg-cyan-500/10'
-            }`}>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                {phase.label} · Week {block.currentWeek}/{phase.weeks}
-              </p>
-              <p className="mt-1 text-sm font-bold text-white">
-                {weekTarget.isDeload ? 'Deload — rustige training vandaag' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
-              </p>
-              <p className="text-xs text-gray-500">{weekTarget.setNote}</p>
+            <div className="mb-4 rounded-xl px-4 py-3" style={{background:'linear-gradient(135deg,rgba(6,182,212,0.08),rgba(6,182,212,0.02))', border:'1px solid rgba(6,182,212,0.2)'}}>
+              <p className="text-xs text-cyan-400 font-semibold">{phase.label} · Week {block.currentWeek}/{phase.weeks}</p>
+              <p className="text-sm text-white mt-0.5">{weekTarget.isDeload ? 'Deload week — lichte training' : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}</p>
             </div>
           )}
 
-          {/* ── TODAY'S SPLIT ───────────────────────────────── */}
-          {selectedSplit && (
-            <div className="mb-5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-cyan-400">Vandaag aanbevolen</p>
-              <div className="mt-1 flex items-center justify-between">
-                <p className="text-xl font-black text-white">{selectedSplit}</p>
-                {splitScores.length > 1 && (
-                  <select
-                    value={selectedSplit}
-                    onChange={e => setSelectedSplit(e.target.value)}
-                    className="rounded-lg bg-gray-800 px-2 py-1 text-xs text-gray-300 outline-none"
-                  >
-                    {splitScores.map(s => (
-                      <option key={s.name} value={s.name}>{s.name}</option>
-                    ))}
-                  </select>
-                )}
-              </div>
-              {splitScores[0] && (
-                <p className="mt-1 text-xs text-gray-400">{splitScores[0].reasoning}</p>
-              )}
-            </div>
-          )}
-
-          {/* ── MUSCLE FOCUS ────────────────────────────────── */}
-          <div className="mb-5">
-            <div className="mb-2 flex items-center gap-2">
-              <Target size={14} className="text-cyan-500" />
-              <h2 className="label-caps">Extra focus <span className="normal-case font-normal">(optioneel)</span></h2>
-            </div>
-            <p className="mb-2 text-xs text-gray-600">Tik op spieren om te benadrukken in de training</p>
-            <div className="flex flex-wrap gap-2">
-              {ALL_MUSCLES.map(m => {
-                const ms = muscleStatus?.[m]
-                const recovery = ms ? (ms.recoveryPct ?? calcRecovery(m, ms)) : 100
-                const focused = focusedMuscles.includes(m)
-                return (
-                  <button
-                    key={m}
-                    onClick={() => toggleFocus(m)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium capitalize transition-all ${
-                      focused
-                        ? 'bg-cyan-500 text-white'
-                        : recovery < 50
-                        ? 'bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/30'
-                        : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'
-                    }`}
-                  >
-                    {m}
-                    {focused && <span className="ml-1 text-cyan-200">*</span>}
-                  </button>
-                )
-              })}
-            </div>
-            {focusedMuscles.length > 0 && (
-              <p className="mt-2 text-xs text-cyan-400">
-                AI voegt extra sets toe voor: {focusedMuscles.join(', ')}
-              </p>
-            )}
-          </div>
-
-          {/* ── ENERGY ──────────────────────────────────────── */}
-          <div className="mb-4">
-            <h2 className="label-caps mb-2">Energieniveau</h2>
-            <div className="flex gap-2">
-              {ENERGY_OPTIONS.map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => setEnergy(opt.value)}
-                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                    energy === opt.value
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* ── TIME ────────────────────────────────────────── */}
+          {/* ── TIME (enige verplichte keuze) ──────────────── */}
           <div className="mb-6">
-            <h2 className="label-caps mb-2">Beschikbare tijd</h2>
+            <p className="label-caps mb-3">Beschikbare tijd</p>
             <div className="flex gap-2">
-              {TIME_OPTIONS.map(t => (
-                <button
-                  key={t}
-                  onClick={() => setTime(t)}
-                  className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                    time === t
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'
-                  }`}
-                >
+              {[45, 60, 75, 90].map(t => (
+                <button key={t} onClick={() => setTime(t)}
+                  className={`flex-1 rounded-full py-2.5 text-sm font-semibold transition-all ${time === t ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
                   {t}m
                 </button>
               ))}
             </div>
           </div>
 
+          {/* ── GENERATE BUTTON ────────────────────────────── */}
+          <button onClick={handleGenerate} disabled={generating || !selectedSplit} className="btn-primary mb-4 disabled:opacity-60">
+            {generating ? <><Loader2 size={20} className="animate-spin" />Training genereren...</> : <><Sparkles size={20} />Genereer mijn training</>}
+          </button>
+
+          {/* ── ADVANCED OPTIONS (collapsed) ───────────────── */}
+          <button onClick={() => setShowAdvanced(v => !v)}
+            className="flex w-full items-center justify-between px-1 py-2 text-sm text-slate-500">
+            <span>Aanpassen</span>
+            {showAdvanced ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-2 space-y-4">
+              {/* Energie */}
+              <div>
+                <p className="label-caps mb-2">Energieniveau</p>
+                <div className="flex gap-2">
+                  {ENERGY_OPTIONS.map(opt => (
+                    <button key={opt.value} onClick={() => setEnergy(opt.value)}
+                      className={`flex-1 rounded-full py-2 text-sm font-medium ${energy === opt.value ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Split kiezen */}
+              {splitScores.length > 1 && (
+                <div>
+                  <p className="label-caps mb-2">Training type</p>
+                  <div className="flex flex-wrap gap-2">
+                    {splitScores.map(s => (
+                      <button key={s.name} onClick={() => setSelectedSplit(s.name)}
+                        className={`rounded-full px-4 py-2 text-sm font-medium ${selectedSplit === s.name ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                        {s.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Extra focus */}
+              <div>
+                <p className="label-caps mb-2">Extra focus <span className="normal-case font-normal text-slate-600">(optioneel)</span></p>
+                <div className="flex flex-wrap gap-2">
+                  {ALL_MUSCLES.map(m => (
+                    <button key={m} onClick={() => toggleFocus(m)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize ${focusedMuscles.includes(m) ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recovery info */}
+              {muscleStatus && (
+                <div>
+                  <p className="label-caps mb-3">Spierherstel</p>
+                  {ALL_MUSCLES.map(m => (
+                    <RecoveryBar key={m} muscle={m} ms={muscleStatus[m] || { setsThisWeek: 0, target: { min: 10, max: 16 } }} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Error state with retry */}
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+            <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle size={20} className="mt-0.5 shrink-0 text-red-400" />
                 <div className="flex-1">
@@ -448,18 +356,6 @@ export default function AICoach() {
               </div>
             </div>
           )}
-
-          <button
-            onClick={handleGenerate}
-            disabled={generating || !selectedSplit}
-            className="btn-primary disabled:opacity-60"
-          >
-            {generating ? (
-              <><Loader2 size={20} className="animate-spin" />Training genereren...</>
-            ) : (
-              <><Sparkles size={20} />Genereer mijn training</>
-            )}
-          </button>
         </>
       ) : (
         /* ══════════════════════════════
