@@ -759,19 +759,32 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
     `${exercise.plan.sets}x${exercise.plan.reps_min || exercise.plan.reps_target}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${exercise.plan.weight_kg}kg`
   ) : null
 
+  const plannedSets = exercise.plan?.sets ?? null
+  const loggedSets = exercise.sets?.length ?? 0
+  const isDone = plannedSets !== null && loggedSets >= plannedSets
+
   return (
-    <div className={`rounded-2xl border min-w-0 w-full ${compact ? 'border-gray-700 bg-gray-800/50' : 'border-gray-800 bg-gray-900'}`}>
+    <div className={`rounded-2xl border min-w-0 w-full transition-colors ${
+      isDone
+        ? (compact ? 'border-green-500/30 bg-gray-800/50' : 'border-green-500/25 bg-gray-900')
+        : (compact ? 'border-gray-700 bg-gray-800/50' : 'border-gray-800 bg-gray-900')
+    }`}>
       {/* Header */}
       <div className={`border-b border-gray-800 px-4 ${compact ? 'py-3' : 'py-4'}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h3 className={`font-black tracking-tight text-white truncate ${compact ? 'text-base' : 'text-xl'}`}>{exercise.name}</h3>
-            <div className="mt-0.5 flex items-center gap-2">
+            <div className="mt-0.5 flex items-center gap-2 flex-wrap">
               {exercise.muscle_group && (
                 <span className="label-caps">{exercise.muscle_group}</span>
               )}
               {aiTarget && (
                 <span className="label-caps text-cyan-500">{aiTarget}</span>
+              )}
+              {plannedSets !== null && (
+                <span className={`label-caps font-bold ${isDone ? 'text-green-400' : 'text-gray-500'}`}>
+                  {isDone ? `✓ ${loggedSets}/${plannedSets} sets` : `${loggedSets}/${plannedSets} sets`}
+                </span>
               )}
             </div>
           </div>
@@ -941,13 +954,39 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
           )}
         </div>
 
-        {/* Add set button */}
-        <button
-          onClick={handleAdd}
-          className="btn-primary"
-        >
-          Set loggen
-        </button>
+        {/* Done state banner */}
+        {isDone ? (
+          <div className="flex items-center justify-between rounded-xl border border-green-500/25 bg-green-500/10 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Check size={15} className="text-green-400 shrink-0" />
+              <span className="text-sm font-semibold text-green-400">Oefening klaar</span>
+            </div>
+            <button
+              onClick={handleAdd}
+              className="text-xs font-medium text-gray-500 active:text-gray-300"
+            >
+              + Extra set
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Add set button */}
+            <button
+              onClick={handleAdd}
+              className="btn-primary"
+            >
+              Set loggen
+            </button>
+
+            {/* Skip */}
+            <button
+              onClick={onRemove}
+              className="w-full py-1 text-xs font-medium text-gray-600 active:text-gray-400"
+            >
+              Sla over
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
