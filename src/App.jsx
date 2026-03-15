@@ -15,6 +15,7 @@ const AICoach = lazy(() => import('./pages/AICoach'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Plan = lazy(() => import('./pages/Plan'))
 const Calendar = lazy(() => import('./pages/Calendar'))
+const Privacy = lazy(() => import('./pages/Privacy'))
 
 // Auth context
 const AuthContext = createContext(null)
@@ -96,6 +97,7 @@ export default function App() {
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route element={<Layout />}>
               <Route path="/" element={needsOnboarding ? <Navigate to="/onboarding" replace /> : <Dashboard />} />
               <Route path="/calendar" element={<Calendar />} />

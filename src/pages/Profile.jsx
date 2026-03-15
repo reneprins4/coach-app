@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Save, Check, LogOut, Trash2, AlertTriangle } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
@@ -329,6 +329,11 @@ export default function Profile() {
             <span className="text-sm font-medium text-white">{(stats.totalVol / 1000).toFixed(1)} ton</span>
           </div>
         </div>
+      </div>
+
+      {/* Privacy link */}
+      <div className="mt-6 text-center">
+        <Link to="/privacy" className="text-xs text-gray-500 hover:text-gray-400">Privacybeleid</Link>
       </div>
 
       {/* Account verwijderen */}

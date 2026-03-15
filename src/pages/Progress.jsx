@@ -5,6 +5,7 @@ import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import FormDetective from '../components/FormDetective'
 import WeaknessHunter from '../components/WeaknessHunter'
+import PerformanceForecast from '../components/PerformanceForecast'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -225,6 +226,9 @@ export default function Progress() {
                   </ResponsiveContainer>
                 </div>
               )}
+
+              {/* Performance Forecast */}
+              <PerformanceForecast sessions={exerciseData.sessions} exerciseName={selectedExercise} />
 
               {/* Last 5 sessions table */}
               <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
