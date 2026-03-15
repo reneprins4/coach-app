@@ -350,7 +350,7 @@ export default function Profile() {
       {/* Save */}
       <button
         onClick={handleSave}
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-cyan-400 text-base font-bold text-white shadow-[0_4px_20px_rgba(6,182,212,0.35)] active:scale-[0.97] transition-all"
+        className="btn-primary"
       >
         {saved ? <><Check size={20} />Opgeslagen</> : <><Save size={20} />Profiel opslaan</>}
       </button>

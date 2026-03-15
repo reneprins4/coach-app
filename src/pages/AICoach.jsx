@@ -252,7 +252,7 @@ export default function AICoach() {
               className="flex w-full items-center justify-between"
               onClick={() => setShowRecovery(v => !v)}
             >
-              <h2 className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Spierherstel</h2>
+              <h2 className="label-caps">Spierherstel</h2>
               {showRecovery ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
 
@@ -271,7 +271,7 @@ export default function AICoach() {
               className="flex w-full items-center justify-between"
               onClick={() => setShowWeekPlan(v => !v)}
             >
-              <h2 className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Weekstructuur</h2>
+              <h2 className="label-caps">Weekstructuur</h2>
               {showWeekPlan ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
 
@@ -346,7 +346,7 @@ export default function AICoach() {
           <div className="mb-5">
             <div className="mb-2 flex items-center gap-2">
               <Target size={14} className="text-cyan-500" />
-              <h2 className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Extra focus <span className="normal-case font-normal">(optioneel)</span></h2>
+              <h2 className="label-caps">Extra focus <span className="normal-case font-normal">(optioneel)</span></h2>
             </div>
             <p className="mb-2 text-xs text-gray-600">Tik op spieren om te benadrukken in de training</p>
             <div className="flex flex-wrap gap-2">
@@ -381,7 +381,7 @@ export default function AICoach() {
 
           {/* ── ENERGY ──────────────────────────────────────── */}
           <div className="mb-4">
-            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Energieniveau</h2>
+            <h2 className="label-caps mb-2">Energieniveau</h2>
             <div className="flex gap-2">
               {ENERGY_OPTIONS.map(opt => (
                 <button
@@ -401,7 +401,7 @@ export default function AICoach() {
 
           {/* ── TIME ────────────────────────────────────────── */}
           <div className="mb-6">
-            <h2 className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Beschikbare tijd</h2>
+            <h2 className="label-caps mb-2">Beschikbare tijd</h2>
             <div className="flex gap-2">
               {TIME_OPTIONS.map(t => (
                 <button
@@ -452,7 +452,7 @@ export default function AICoach() {
           <button
             onClick={handleGenerate}
             disabled={generating || !selectedSplit}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 text-lg font-bold text-white disabled:opacity-60 active:scale-[0.97] transition-transform"
+            className="btn-primary disabled:opacity-60"
           >
             {generating ? (
               <><Loader2 size={20} className="animate-spin" />Training genereren...</>

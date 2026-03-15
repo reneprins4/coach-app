@@ -168,7 +168,7 @@ export default function Logger() {
     return (
       <div className="min-h-[80vh] px-5 py-8">
         {/* Header */}
-        <h1 className="mb-1 text-3xl font-bold text-white">Trainen</h1>
+        <h1 className="mb-1 text-3xl font-black tracking-tight text-white">Trainen</h1>
         <p className="mb-8 text-sm text-gray-400">{formattedDate}</p>
 
         {/* Cards */}
@@ -198,13 +198,13 @@ export default function Logger() {
           {/* Vrije Training - Secondary Card */}
           <button
             onClick={() => aw.startWorkout()}
-            className="w-full rounded-2xl border border-gray-800 bg-gray-900 p-5 text-left active:scale-[0.98] transition-transform"
+            className="btn-secondary w-full justify-start p-5 h-auto"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-800">
                 <Dumbbell size={20} className="text-gray-400" />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 text-left">
                 <p className="font-bold text-white">Vrije training</p>
                 <p className="text-sm text-gray-500">Zelf oefeningen kiezen</p>
               </div>

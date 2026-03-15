@@ -51,20 +51,20 @@ export default function Dashboard() {
   if (workouts.length === 0) {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
-        <h1 className="mb-3 text-2xl font-bold text-white">{getGreeting()}</h1>
+        <h1 className="mb-3 text-3xl font-black tracking-tight text-white">{getGreeting()}</h1>
         <p className="mb-8 text-sm text-gray-500">
           Je hebt nog geen trainingen.<br />
           Laten we beginnen.
         </p>
         <button
           onClick={() => nav('/coach')}
-          className="mb-4 w-full max-w-xs rounded-xl bg-cyan-500 px-6 py-4 font-bold text-white transition-colors active:bg-cyan-600"
+          className="btn-primary mb-4 max-w-xs"
         >
           Start training
         </button>
         <button
           onClick={() => nav('/log')}
-          className="w-full max-w-xs rounded-xl bg-gray-900 px-6 py-4 font-semibold text-white ring-1 ring-gray-800 transition-colors active:bg-gray-800"
+          className="btn-secondary max-w-xs"
         >
           Vrije training
         </button>
@@ -77,8 +77,8 @@ export default function Dashboard() {
 
       {/* Header */}
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">{getDayName()}</p>
-        <h1 className="text-2xl font-bold text-white">
+        <p className="label-caps">{getDayName()}</p>
+        <h1 className="text-3xl font-black tracking-tight text-white">
           {getGreeting()}{settings.name ? `, ${settings.name}` : ''}
         </h1>
       </div>
@@ -117,15 +117,15 @@ export default function Dashboard() {
           background: 'linear-gradient(135deg, #0f1624 0%, #0a0f1a 100%)',
           border: '1px solid rgba(255,255,255,0.05)'
         }}>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">Spierstatus</p>
+          <p className="label-caps mb-4">Spierstatus</p>
           <MuscleMap muscleStatus={muscleStatus} />
         </div>
       )}
 
-      {/* Primary CTA - Premium gradient with glow */}
+      {/* Primary CTA */}
       <button
         onClick={() => nav('/coach')}
-        className="glow-cyan mb-3 flex h-16 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-400 text-lg font-bold text-white shadow-lg shadow-cyan-500/25 transition-all active:scale-[0.98]"
+        className="btn-primary mb-3"
       >
         <Sparkles size={22} />
         Start training
@@ -134,7 +134,7 @@ export default function Dashboard() {
       {/* Secondary CTA */}
       <button
         onClick={() => nav('/log')}
-        className="mb-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gray-900 font-medium text-gray-300 ring-1 ring-gray-800 transition-colors active:bg-gray-800"
+        className="btn-secondary mb-6"
       >
         <Dumbbell size={18} />
         Vrije training
@@ -143,7 +143,7 @@ export default function Dashboard() {
       {/* Recent workouts - clean list style */}
       {recentWorkouts.length > 0 && (
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Laatste trainingen</p>
+          <p className="label-caps mb-3">Laatste trainingen</p>
           <div className="divide-y divide-gray-800/50">
             {recentWorkouts.map(w => {
               const date = new Date(w.created_at)

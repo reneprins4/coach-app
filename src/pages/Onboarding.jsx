@@ -100,7 +100,7 @@ export default function Onboarding() {
           
           <button
             onClick={handleStartTraining}
-            className="h-14 w-full rounded-2xl bg-cyan-500 px-8 text-lg font-bold text-white active:scale-[0.97] transition-transform"
+            className="btn-primary"
           >
             Genereer mijn eerste training
           </button>
@@ -123,7 +123,7 @@ export default function Onboarding() {
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-2xl font-bold text-white">Over jou</h1>
+          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Over jou</h1>
           <p className="mb-8 text-sm text-gray-500">Dit helpt ons je training personaliseren</p>
 
           <div className="space-y-6">
@@ -171,7 +171,7 @@ export default function Onboarding() {
           </button>
           <button
             onClick={handleProfileContinue}
-            className="rounded-xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-white active:scale-[0.97] transition-transform"
+            className="btn-primary w-auto px-6 h-12"
           >
             Doorgaan
           </button>
@@ -201,7 +201,7 @@ export default function Onboarding() {
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-2xl font-bold text-white">Hoe vaak train je?</h1>
+          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Hoe vaak train je?</h1>
           <p className="mb-8 text-sm text-gray-500">We stemmen je trainingsschema hierop af</p>
 
           <div className="space-y-3">
@@ -241,7 +241,7 @@ export default function Onboarding() {
 
       {/* Content */}
       <div className="flex-1">
-        <h1 className="mb-2 text-2xl font-bold text-white">{current.title}</h1>
+        <h1 className="mb-2 text-3xl font-black tracking-tight text-white">{current.title}</h1>
         <p className="mb-8 text-sm text-gray-500">{current.sub}</p>
 
         <div className="space-y-3">

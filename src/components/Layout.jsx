@@ -28,8 +28,7 @@ export default function Layout() {
 
   const isOnLogPage = location.pathname === '/log'
   const hideNav =
-    location.pathname.startsWith('/history/') ||
-    location.pathname === '/coach'
+    location.pathname.startsWith('/history/')
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-950">
