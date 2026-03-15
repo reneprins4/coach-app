@@ -21,15 +21,34 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signIn = useCallback(async (email) => {
-    const { error } = await supabase.auth.signInWithOtp({ email })
+  // Stap 1: verstuur OTP code naar email
+  const sendOtp = useCallback(async (email) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+      }
+    })
     return { error }
   }, [])
+
+  // Stap 2: verifieer de ingevoerde code
+  const verifyOtp = useCallback(async (email, token) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email'
+    })
+    return { data, error }
+  }, [])
+
+  // Legacy alias voor backward compatibility
+  const signIn = sendOtp
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut()
     return { error }
   }, [])
 
-  return { user, loading, signIn, signOut }
+  return { user, loading, sendOtp, verifyOtp, signIn, signOut }
 }

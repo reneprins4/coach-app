@@ -88,7 +88,7 @@ export default function App() {
 
   // Show login if not authenticated
   if (!auth.user) {
-    return <Login onSignIn={auth.signIn} />
+    return <Login onSendOtp={auth.sendOtp} onVerifyOtp={auth.verifyOtp} />
   }
 
   return (
