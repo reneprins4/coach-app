@@ -32,9 +32,13 @@ export default function FormDetective({ workouts, userId }) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    getCachedAnalysis(userId).then(cached => {
-      if (cached && cached.length > 0) setInsights(cached)
-    })
+    let cancelled = false
+    getCachedAnalysis(userId)
+      .then(cached => {
+        if (!cancelled && cached && cached.length > 0) setInsights(cached)
+      })
+      .catch(() => { /* silent - cache miss is fine */ })
+    return () => { cancelled = true }
   }, [userId])
 
   async function runAnalysis(force = false) {

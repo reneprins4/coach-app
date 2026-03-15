@@ -109,9 +109,14 @@ export default function SupersetModal({ exercises, onApply, onClose }) {
 
 function GroupCard({ group, index }) {
   if (group.type === 'superset') {
-    const [a, b] = group.exercises
+    const a = group.exercises[0]
+    const b = group.exercises[1]
+    
+    // Guard: need both exercises for a superset
+    if (!a || !b) return null
+    
     const setsA = a.plan?.sets || a.sets || 3
-    const setsB = b.plan?.sets || b.sets || 3
+    const setsB = b?.plan?.sets || b?.sets || 3
 
     return (
       <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 const QUEUE_KEY = 'coach-offline-queue'
@@ -39,12 +39,15 @@ export function useOfflineQueue() {
     saveQueue(queue)
   }, [queue])
 
+  // Keep a ref to syncQueue to avoid stale closures
+  const syncQueueRef = useRef(null)
+
   // Sync when coming back online
   useEffect(() => {
-    if (isOnline && queue.length > 0 && !syncing) {
-      syncQueue()
+    if (isOnline && queue.length > 0 && !syncing && syncQueueRef.current) {
+      syncQueueRef.current()
     }
-  }, [isOnline]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline, queue.length, syncing])
 
   const addToQueue = useCallback((action) => {
     const item = {
@@ -61,8 +64,10 @@ export function useOfflineQueue() {
 
     setSyncing(true)
     const processedIds = []
+    // Snapshot the queue to avoid race condition during async iteration
+    const currentQueue = [...queue]
 
-    for (const item of queue) {
+    for (const item of currentQueue) {
       try {
         const { action } = item
         
@@ -104,6 +109,11 @@ export function useOfflineQueue() {
 
     return processedIds.length
   }, [queue, syncing, isOnline])
+
+  // Update ref after syncQueue is defined
+  useEffect(() => {
+    syncQueueRef.current = syncQueue
+  }, [syncQueue])
 
   const clearQueue = useCallback(() => {
     setQueue([])

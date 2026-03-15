@@ -275,7 +275,7 @@ export default function Calendar() {
           
           {selectedWorkouts.map(workout => (
             <div key={workout.id} className="mt-3 first:mt-0">
-              {workout.exerciseNames.length > 0 && (
+              {workout.exerciseNames?.length > 0 && (
                 <p className="mb-2 text-base font-bold text-white">
                   {workout.exerciseNames.slice(0, 3).join(' + ')}
                   {workout.exerciseNames.length > 3 && ` +${workout.exerciseNames.length - 3}`}
@@ -284,9 +284,9 @@ export default function Calendar() {
               
               {/* Exercise summary */}
               <div className="space-y-1.5">
-                {workout.exerciseNames.slice(0, 4).map(name => {
+                {(workout.exerciseNames || []).slice(0, 4).map(name => {
                   const sets = workout.workout_sets.filter(s => s.exercise === name)
-                  const maxWeight = Math.max(...sets.map(s => s.weight_kg || 0))
+                  const maxWeight = sets.length > 0 ? Math.max(...sets.map(s => s.weight_kg || 0)) : 0
                   return (
                     <div key={name} className="flex items-center justify-between text-sm">
                       <span className="text-gray-400">{name}</span>
@@ -296,7 +296,7 @@ export default function Calendar() {
                     </div>
                   )
                 })}
-                {workout.exerciseNames.length > 4 && (
+                {workout.exerciseNames?.length > 4 && (
                   <p className="text-xs text-gray-600">
                     +{workout.exerciseNames.length - 4} meer
                   </p>

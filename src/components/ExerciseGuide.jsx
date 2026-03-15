@@ -8,12 +8,23 @@ export default function ExerciseGuide({ exercise, onClose }) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    let cancelled = false
     setLoading(true)
     setError(null)
     getExerciseGuide(exercise.name)
-      .then(setGuide)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false))
+      .then(data => {
+        if (!cancelled) {
+          setGuide(data)
+          setLoading(false)
+        }
+      })
+      .catch(e => {
+        if (!cancelled) {
+          setError(e.message || 'Fout bij laden')
+          setLoading(false)
+        }
+      })
+    return () => { cancelled = true }
   }, [exercise.name])
 
   const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name + ' uitvoering techniek')}`

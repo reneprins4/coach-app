@@ -20,7 +20,7 @@ export default function JunkVolumeAlert({ warning, onDismiss }) {
       {/* Dismiss button */}
       <button
         onClick={onDismiss}
-        className="absolute right-2 top-2 p-1 text-gray-400 hover:text-white"
+        className="absolute right-2 top-2 p-1 text-gray-400 active:text-white"
         aria-label="Sluiten"
       >
         <X size={16} />

@@ -13,7 +13,7 @@ export default function Toast({ message, action, onAction, onDismiss, duration =
     }, duration)
 
     return () => clearTimeout(timer)
-  }, [duration])
+  }, [duration, onDismiss])
 
   function handleDismiss() {
     setExiting(true)

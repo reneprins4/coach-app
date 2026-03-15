@@ -113,9 +113,10 @@ export default function Profile() {
   const stats = useMemo(() => {
     const totalWorkouts = workouts.length
     const totalVol = workouts.reduce((s, w) => s + (w.totalVolume || 0), 0)
-    const memberSince = settings.memberSince
-      ? new Date(settings.memberSince).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { month: 'long', year: 'numeric' })
-      : (i18n.language === 'nl' ? 'Vandaag' : 'Today')
+    const memberSinceDate = settings.memberSince ? new Date(settings.memberSince) : null
+    const memberSince = memberSinceDate && !isNaN(memberSinceDate)
+      ? memberSinceDate.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { month: 'long', year: 'numeric' })
+      : (i18n.language === 'nl' ? 'Onbekend' : 'Unknown')
     return { totalWorkouts, totalVol, memberSince }
   }, [workouts, settings.memberSince, i18n.language])
 

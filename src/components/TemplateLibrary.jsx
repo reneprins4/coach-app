@@ -50,7 +50,7 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
                       <div className="flex gap-1">
                         <button
                           onClick={() => onDelete(template.id)}
-                          className="rounded-lg p-2 text-gray-600 hover:bg-gray-700 hover:text-cyan-400"
+                          className="rounded-lg p-2 text-gray-600 active:bg-gray-700 active:text-cyan-400"
                         >
                           <Trash2 size={16} />
                         </button>

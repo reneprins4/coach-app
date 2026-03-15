@@ -22,7 +22,7 @@ export default function History() {
     if (!query.trim()) return workouts
     const lower = query.toLowerCase()
     return workouts.filter(w =>
-      w.exerciseNames.some(n => n.toLowerCase().includes(lower)) ||
+      w.exerciseNames?.some(n => n.toLowerCase().includes(lower)) ||
       (w.notes || '').toLowerCase().includes(lower)
     )
   }, [workouts, query])
