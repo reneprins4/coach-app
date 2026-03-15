@@ -94,6 +94,9 @@ export default function AICoach() {
   // Check if profile is incomplete (no bodyweight)
   const showProfileBanner = !settings.bodyweight
 
+  // Track last workout info for consecutive training warnings
+  const [lastWorkoutInfo, setLastWorkoutInfo] = useState(null)
+
   useEffect(() => {
     async function analyze() {
       setAnalyzing(true)
@@ -102,7 +105,20 @@ export default function AICoach() {
         setWorkoutHistory(history)
         const analysis = analyzeTraining(history)
         setMuscleStatus(analysis)
-        const scores = scoreSplits(analysis)
+        
+        // Calculate last workout info for consecutive training detection
+        let lwInfo = null
+        if (history.length > 0) {
+          const lastWorkout = history[0]
+          const lastWorkoutDate = new Date(lastWorkout.created_at)
+          const hoursSince = (Date.now() - lastWorkoutDate.getTime()) / 3600000
+          // Detect split from exercises in last workout
+          const lastSplit = detectSplitFromWorkout(lastWorkout)
+          lwInfo = { split: lastSplit, hoursSince }
+          setLastWorkoutInfo(lwInfo)
+        }
+        
+        const scores = scoreSplits(analysis, lwInfo)
         setSplitScores(scores)
         if (scores.length > 0) setSelectedSplit(scores[0].name)
       } catch (err) {
@@ -112,6 +128,35 @@ export default function AICoach() {
     }
     analyze()
   }, [user?.id])
+
+  // Helper to detect split type from workout exercises
+  function detectSplitFromWorkout(workout) {
+    const muscles = new Set()
+    for (const set of (workout.workout_sets || [])) {
+      const exercise = set.exercise?.toLowerCase() || ''
+      // Simple muscle detection
+      if (/bench|chest|fly|push.?up|pec/i.test(exercise)) muscles.add('chest')
+      if (/row|pull|lat|back/i.test(exercise)) muscles.add('back')
+      if (/shoulder|overhead|lateral|face.?pull/i.test(exercise)) muscles.add('shoulders')
+      if (/squat|leg.?press|lunge|quad|extension/i.test(exercise)) muscles.add('quads')
+      if (/deadlift|rdl|romanian|hamstring|curl/i.test(exercise)) muscles.add('hamstrings')
+      if (/hip.?thrust|glute|bridge/i.test(exercise)) muscles.add('glutes')
+      if (/curl|bicep|hammer/i.test(exercise)) muscles.add('biceps')
+      if (/tricep|pushdown|skull|dip/i.test(exercise)) muscles.add('triceps')
+    }
+    
+    const hasUpper = muscles.has('chest') || muscles.has('back') || muscles.has('shoulders')
+    const hasLower = muscles.has('quads') || muscles.has('hamstrings') || muscles.has('glutes')
+    
+    if (hasUpper && hasLower && muscles.size >= 5) return 'Full Body'
+    if (hasUpper && !hasLower) {
+      if (muscles.has('chest') && !muscles.has('back')) return 'Push'
+      if (muscles.has('back') && !muscles.has('chest')) return 'Pull'
+      return 'Upper'
+    }
+    if (hasLower && !hasUpper) return 'Lower'
+    return 'Full Body'
+  }
 
   function toggleFocus(muscle) {
     setFocusedMuscles(prev =>
@@ -237,6 +282,13 @@ export default function AICoach() {
             {splitScores[0] && (
               <p className="text-sm text-slate-400 mt-1">{splitScores[0].reasoning}</p>
             )}
+            {/* Warning for consecutive training <20h ago */}
+            {lastWorkoutInfo && lastWorkoutInfo.hoursSince < 20 && (
+              <p className="text-xs text-amber-400 mt-2 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                Je trainde {Math.round(lastWorkoutInfo.hoursSince)} uur geleden — overweeg een rustdag of lichtere training.
+              </p>
+            )}
           </div>
 
           {/* ── BLOCK CONTEXT ──────────────────────────────── */}
@@ -262,7 +314,7 @@ export default function AICoach() {
 
           {/* ── GENERATE BUTTON ────────────────────────────── */}
           <button onClick={handleGenerate} disabled={generating || !selectedSplit} className="btn-primary mb-4 disabled:opacity-60">
-            {generating ? <><Loader2 size={20} className="animate-spin" />Bezig...</> : <><Sparkles size={20} />Maak mijn training</>}
+            {generating ? 'Bezig...' : 'Maak mijn training'}
           </button>
 
           {/* ── ADVANCED OPTIONS (collapsed) ───────────────── */}

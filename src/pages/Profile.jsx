@@ -35,7 +35,7 @@ const EQUIPMENT = [
   { value: 'dumbbells_only', label: 'Dumbbells' },
 ]
 
-const FREQUENCIES = ['3x', '4x', '5x', '6x']
+const FREQUENCIES = ['2x', '3x', '4x', '5x', '6x']
 const REST_TIMES = [60, 90, 120, 180]
 
 export default function Profile() {
@@ -352,7 +352,7 @@ export default function Profile() {
         onClick={handleSave}
         className="btn-primary"
       >
-        {saved ? <><Check size={20} />Opgeslagen</> : <><Save size={20} />Opslaan</>}
+        {saved ? 'Opgeslagen' : 'Opslaan'}
       </button>
 
       {/* Data export */}
