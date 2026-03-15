@@ -322,3 +322,26 @@ input[type="range"]::-moz-range-thumb {
 .pt-safe {
   padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* ============================================
+   PREMIUM VISUAL HELPERS
+   ============================================ */
+
+/* Glow effect voor primary buttons */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3), 0 4px 15px rgba(6, 182, 212, 0.2);
+}
+
+/* Premium card gradient */
+.card-premium {
+  background: linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(6,182,212,0.02) 100%);
+  border: 1px solid rgba(6,182,212,0.2);
+  border-radius: 1rem;
+}
+
+/* Subtle gradient overlay voor cards */
+.card-dark {
+  background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 0.75rem;
+}

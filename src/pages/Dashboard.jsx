@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, Dumbbell } from 'lucide-react'
+import { Sparkles, Dumbbell, ChevronRight } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
@@ -79,40 +79,40 @@ export default function Dashboard() {
         </h1>
       </div>
 
-      {/* Compact stats - 2 columns */}
+      {/* Stats - 2 columns with visual weight */}
       <div className="mb-5 grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-gray-900 p-4 text-center">
-          <p className="text-2xl font-bold text-white">{stats.thisWeekCount}</p>
-          <p className="mt-1 text-xs text-gray-500">Deze week</p>
+          <p className="text-3xl font-bold tabular text-white">{stats.thisWeekCount}</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Deze week</p>
         </div>
         <div className="rounded-xl bg-gray-900 p-4 text-center">
-          <p className="text-2xl font-bold text-white">{stats.streak}</p>
-          <p className="mt-1 text-xs text-gray-500">Dagen streak</p>
+          <p className="text-3xl font-bold tabular text-white">{stats.streak}</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Dagen streak</p>
         </div>
       </div>
 
-      {/* Active block - compact single line with progress */}
+      {/* Active block - with subtle cyan gradient and glowing progress */}
       {block && phase && (
-        <div className="mb-5 rounded-xl bg-gray-900 p-4">
+        <div className="card-premium mb-5 p-4">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-medium text-white">{phase.label}</span>
             <span className="text-xs text-gray-500">Week {progress?.currentWeek}/{progress?.totalWeeks}</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
             <div
-              className="h-full rounded-full bg-cyan-500 transition-all"
+              className="h-full rounded-full bg-cyan-500 transition-all shadow-[0_0_8px_rgba(6,182,212,0.5)]"
               style={{ width: `${progress?.pct || 0}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* Primary CTA */}
+      {/* Primary CTA - Premium gradient with glow */}
       <button
         onClick={() => nav('/coach')}
-        className="mb-3 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-cyan-500 font-bold text-white transition-colors active:bg-cyan-600"
+        className="glow-cyan mb-3 flex h-16 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-400 text-lg font-bold text-white shadow-lg shadow-cyan-500/25 transition-all active:scale-[0.98]"
       >
-        <Sparkles size={20} />
+        <Sparkles size={22} />
         Start training
       </button>
 
@@ -125,29 +125,29 @@ export default function Dashboard() {
         Vrije training
       </button>
 
-      {/* Recent workouts - compact */}
+      {/* Recent workouts - clean list style */}
       {recentWorkouts.length > 0 && (
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Laatste trainingen</p>
-          <div className="space-y-2">
+          <div className="divide-y divide-gray-800/50">
             {recentWorkouts.map(w => {
               const date = new Date(w.created_at)
-              const exercises = [...new Set((w.workout_sets || []).map(s => s.exercise))].slice(0, 3)
+              const exercises = [...new Set((w.workout_sets || []).map(s => s.exercise))].slice(0, 4)
               return (
                 <div
                   key={w.id}
                   onClick={() => nav(`/history/${w.id}`)}
-                  className="flex cursor-pointer items-center justify-between rounded-xl bg-gray-900 px-4 py-3 active:bg-gray-800"
+                  className="flex cursor-pointer items-center justify-between py-3 active:opacity-70"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-white">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-gray-400">
                       {date.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' })}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="truncate text-sm text-white">
                       {exercises.length > 0 ? exercises.join(', ') : 'Geen oefeningen'}
                     </p>
                   </div>
-                  <span className="text-xs text-gray-600">{(w.workout_sets || []).length} sets</span>
+                  <ChevronRight size={16} className="ml-2 shrink-0 text-gray-600" />
                 </div>
               )
             })}

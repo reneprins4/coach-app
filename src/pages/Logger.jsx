@@ -160,72 +160,68 @@ export default function Logger() {
 
   if (!aw.isActive) {
     const block = getCurrentBlock()
-    const weekTarget = block ? getCurrentWeekTarget(block) : null
     const phase = block ? PHASES[block.phase] : null
+    const today = new Date()
+    const dateStr = today.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })
+    const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
 
     return (
       <div className="min-h-[80vh] px-5 py-8">
-        <h1 className="mb-1 text-2xl font-bold">Trainen</h1>
-        <p className="mb-7 text-sm text-gray-400">Kies hoe je wilt beginnen</p>
+        {/* Header */}
+        <h1 className="mb-1 text-3xl font-bold text-white">Trainen</h1>
+        <p className="mb-8 text-sm text-gray-400">{formattedDate}</p>
 
-        <div className="space-y-3">
+        {/* Cards */}
+        <div className="space-y-4">
+          {/* AI Training - Primary Card */}
           <button
             onClick={() => nav('/coach')}
-            className="flex w-full items-center gap-4 rounded-2xl bg-cyan-500 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+            className="w-full rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-600/20 to-cyan-500/5 p-6 text-left active:scale-[0.98] transition-transform"
           >
-            <Sparkles size={24} className="text-white shrink-0" />
-            <div className="flex-1">
-              <p className="font-bold text-white">AI workout genereren</p>
-              <p className="text-sm text-cyan-200">Gepersonaliseerd op basis van jouw herstel</p>
-            </div>
-            <ChevronRight size={18} className="text-cyan-200 shrink-0" />
-          </button>
-
-          <button
-            onClick={() => setShowTemplates(true)}
-            className="flex w-full items-center gap-4 rounded-2xl border border-gray-700 bg-gray-900 px-5 py-4 text-left active:scale-[0.97] transition-transform"
-          >
-            <BookOpen size={24} className="text-gray-400 shrink-0" />
-            <div className="flex-1">
-              <p className="font-bold text-white">Gebruik template</p>
-              <p className="text-sm text-gray-500">
-                {templates.templates.length > 0 
-                  ? `${templates.templates.length} opgeslagen templates`
-                  : 'Sla trainingen op voor hergebruik'}
+            {block && phase && (
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-cyan-400">
+                {phase.label} · Week {block.currentWeek} van {phase.weeks}
               </p>
+            )}
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/20">
+                <Sparkles size={24} className="text-cyan-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xl font-bold text-white">AI Training</p>
+                <p className="text-sm text-gray-400">Gegenereerd op basis van jouw herstel</p>
+              </div>
+              <ChevronRight size={20} className="text-cyan-400 shrink-0" />
             </div>
-            <ChevronRight size={18} className="text-gray-600 shrink-0" />
           </button>
 
-          {block && phase && weekTarget && (
-            <button
-              onClick={() => nav('/coach')}
-              className="flex w-full items-center gap-4 rounded-2xl border border-blue-500/30 bg-blue-500/10 px-5 py-4 text-left active:scale-[0.97] transition-transform"
-            >
-              <CalendarDays size={24} className="text-blue-400 shrink-0" />
-              <div className="flex-1">
-                <p className="font-bold text-white">Volgende uit programma</p>
-                <p className="text-sm text-blue-300">
-                  {phase.label} - Week {block.currentWeek}/{phase.weeks} -{' '}
-                  {weekTarget.isDeload ? 'Deload' : `RPE ${weekTarget.rpe} - ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} herh.`}
-                </p>
-              </div>
-              <ChevronRight size={18} className="text-blue-400 shrink-0" />
-            </button>
-          )}
-
+          {/* Vrije Training - Secondary Card */}
           <button
             onClick={() => aw.startWorkout()}
-            className="flex w-full items-center gap-4 rounded-2xl border border-gray-700 bg-gray-900 px-5 py-4 text-left active:scale-[0.97] transition-transform"
+            className="w-full rounded-2xl border border-gray-800 bg-gray-900 p-5 text-left active:scale-[0.98] transition-transform"
           >
-            <Dumbbell size={24} className="text-gray-400 shrink-0" />
-            <div className="flex-1">
-              <p className="font-bold text-white">Losse training</p>
-              <p className="text-sm text-gray-500">Zelf oefeningen kiezen en loggen</p>
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-800">
+                <Dumbbell size={20} className="text-gray-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-white">Vrije training</p>
+                <p className="text-sm text-gray-500">Zelf oefeningen kiezen</p>
+              </div>
+              <ChevronRight size={18} className="text-gray-600 shrink-0" />
             </div>
-            <ChevronRight size={18} className="text-gray-600 shrink-0" />
           </button>
         </div>
+
+        {/* Templates link - compact */}
+        {templates.templates.length > 0 && (
+          <button
+            onClick={() => setShowTemplates(true)}
+            className="mt-6 w-full text-center text-sm text-gray-500 active:text-gray-400"
+          >
+            Of laad een template
+          </button>
+        )}
 
         {showTemplates && (
           <TemplateLibrary
