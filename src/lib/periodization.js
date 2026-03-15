@@ -92,12 +92,13 @@ export async function loadBlock(userId) {
   return getCurrentBlock()
 }
 
-export async function startBlock(phase, userId) {
+export async function startBlock(phase, userId, fullPlan = null) {
   const block = {
     id: crypto.randomUUID(),
     phase,
     startDate: new Date().toISOString(),
     createdAt: new Date().toISOString(),
+    fullPlan: fullPlan || null,
   }
   localStorage.setItem(BLOCK_KEY, JSON.stringify(block))
 

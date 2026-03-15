@@ -173,8 +173,8 @@ Return ONLY valid JSON (no markdown, no code fences, no comments):
     }))
   }
 
-  // --- Cache write (4h TTL) ---
-  cacheSet(cacheKey, userId, result, 4)
+  // --- Cache write (2h TTL) ---
+  cacheSet(cacheKey, userId, result, 2)
 
   return result
 }

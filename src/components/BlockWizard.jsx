@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, ChevronLeft, ChevronRight, Zap, TrendingUp, Target, Battery, Check } from 'lucide-react'
 import { startBlock, PHASES } from '../lib/periodization'
+import { saveSettings, getSettings } from '../lib/settings'
 
 const GOALS = [
   {
@@ -111,9 +112,17 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }) {
     if (!config) return
     setLoading(true)
     try {
-      // Start with the first phase
+      // Start with the first phase, pass full plan for multi-phase tracking
       const firstPhase = config.phases[0]
-      await onStart(firstPhase.type, userId)
+      const fullPlan = config.phases.map(p => p.type)
+      await onStart(firstPhase.type, userId, fullPlan)
+      
+      // Sync wizard goal to profile settings
+      const goalMap = { muscle: 'hypertrophy', strength: 'strength', both: 'hypertrophy' }
+      const mappedGoal = goalMap[selectedGoal] || 'hypertrophy'
+      const current = getSettings()
+      saveSettings({ ...current, goal: mappedGoal })
+      
       onClose()
     } catch (err) {
       console.error('Failed to start block:', err)

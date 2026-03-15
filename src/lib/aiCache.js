@@ -23,9 +23,15 @@ export function workoutCacheKey({ split, muscleStatus, preferences }) {
   // Only hash the parts that actually change per workout
   const relevant = {
     split,
-    // Which muscles are ready vs recovering (not the exact numbers)
+    // Include status AND recovery buckets (rounded to nearest 20%) for meaningful cache invalidation
     muscleStates: Object.fromEntries(
-      Object.entries(muscleStatus).map(([m, v]) => [m, v.status])
+      Object.entries(muscleStatus).map(([m, v]) => [
+        m,
+        {
+          status: v.status,
+          recoveryBucket: Math.round((v.recoveryPct ?? 100) / 20) * 20, // round to nearest 20%
+        }
+      ])
     ),
     // User preferences that affect the workout
     goal: preferences.goal,

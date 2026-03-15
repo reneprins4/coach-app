@@ -65,8 +65,8 @@ export default function Plan() {
 
   const PhaseIcon = block ? PHASE_ICONS[block.phase] : null
 
-  async function handleWizardStart(phaseKey, userId) {
-    const b = await startBlock(phaseKey, userId)
+  async function handleWizardStart(phaseKey, userId, fullPlan = null) {
+    const b = await startBlock(phaseKey, userId, fullPlan)
     setBlock({ ...b, currentWeek: 1, daysElapsed: 0 })
   }
 
@@ -223,6 +223,16 @@ export default function Plan() {
             <p className="mt-3 text-[11px] text-gray-600">
               Na dit blok, ga naar de volgende fase voor continue vooruitgang.
             </p>
+            {block.fullPlan && block.fullPlan.length > 1 && (
+              <div className="mt-3 rounded-xl bg-gray-800/50 px-3 py-2">
+                <p className="text-[10px] text-gray-500">
+                  Programma: {block.fullPlan.map(p => PHASES[p]?.label || p).join(' → ')}
+                </p>
+                <p className="text-[10px] text-gray-600 mt-0.5">
+                  Volgende fase start automatisch na dit blok.
+                </p>
+              </div>
+            )}
           </div>
         </>
       ) : (

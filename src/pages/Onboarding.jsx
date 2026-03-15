@@ -202,7 +202,7 @@ export default function Onboarding() {
         {/* Content */}
         <div className="flex-1">
           <h1 className="mb-2 text-3xl font-black tracking-tight text-white">Hoe vaak?</h1>
-          <p className="mb-8 text-sm text-gray-500">We stemmen je trainingsschema hierop af</p>
+          <p className="mb-8 text-sm text-gray-500">Dit helpt de AI coach met het samenstellen van je trainingen</p>
 
           <div className="space-y-3">
             {FREQUENCY_OPTIONS.map((option) => (
