@@ -7,6 +7,13 @@ export function useWorkouts(userId) {
   const [error, setError] = useState(null)
 
   const fetchWorkouts = useCallback(async () => {
+    // Early return when no userId to prevent fetching all workouts
+    if (!userId) {
+      setWorkouts([])
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
@@ -14,11 +21,7 @@ export function useWorkouts(userId) {
         .from('workouts')
         .select('*')
         .order('created_at', { ascending: false })
-
-      // Filter op user_id alleen als er een ingelogde user is
-      if (userId) {
-        query = query.eq('user_id', userId)
-      }
+        .eq('user_id', userId)
 
       const { data, error: err } = await query
 
@@ -76,39 +79,60 @@ export function useWorkouts(userId) {
 export function useWorkoutDetail(id, userId) {
   const [workout, setWorkout] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (!id || !userId) return
     let cancelled = false
     async function load() {
       setLoading(true)
-      const { data: w } = await supabase
+      setError(null)
+      
+      const { data: w, error: wErr } = await supabase
         .from('workouts')
         .select('*')
         .eq('id', id)
         .eq('user_id', userId)
         .single()
-      const { data: sets } = await supabase
+      
+      if (wErr || !w) {
+        if (!cancelled) {
+          setError('Workout niet gevonden')
+          setLoading(false)
+        }
+        return
+      }
+      
+      const { data: sets, error: sErr } = await supabase
         .from('sets')
         .select('*')
         .eq('workout_id', id)
         .eq('user_id', userId)
         .order('created_at')
-      if (!cancelled && w) {
+      
+      if (sErr) {
+        if (!cancelled) {
+          setError('Sets laden mislukt')
+          setLoading(false)
+        }
+        return
+      }
+      
+      if (!cancelled) {
         setWorkout({
           ...w,
           workout_sets: sets || [],
           totalVolume: (sets || []).reduce((sum, s) => sum + (s.weight_kg || 0) * (s.reps || 0), 0),
           exerciseNames: [...new Set((sets || []).map(s => s.exercise))],
         })
+        setLoading(false)
       }
-      if (!cancelled) setLoading(false)
     }
     load()
     return () => { cancelled = true }
   }, [id, userId])
 
-  return { workout, loading }
+  return { workout, loading, error }
 }
 
 // Fetch recent history for AI coach

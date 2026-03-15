@@ -71,7 +71,9 @@ export async function cacheGet(cacheKey, userId = null) {
         .delete()
         .eq('cache_key', cacheKey)
         .eq('user_id', userId)
-        .then(() => {})
+        .then(({ error }) => {
+          if (error) console.warn('[aiCache] Expired entry cleanup failed:', error.message)
+        })
       return null
     }
 
@@ -86,12 +88,26 @@ export async function cacheSet(cacheKey, userId = null, response, ttlHours = 4) 
   try {
     const expires_at = new Date(Date.now() + ttlHours * 60 * 60 * 1000).toISOString()
 
-    await supabase
-      .from('ai_response_cache')
-      .upsert(
-        { cache_key: cacheKey, user_id: userId, response, expires_at },
-        { onConflict: userId ? 'cache_key,user_id' : 'cache_key' }
-      )
+    if (!userId) {
+      // For global cache (userId null), onConflict doesn't work properly with NULL values in Postgres
+      // Use delete-then-insert pattern instead
+      await supabase
+        .from('ai_response_cache')
+        .delete()
+        .eq('cache_key', cacheKey)
+        .is('user_id', null)
+      
+      await supabase
+        .from('ai_response_cache')
+        .insert({ cache_key: cacheKey, user_id: null, response, expires_at })
+    } else {
+      await supabase
+        .from('ai_response_cache')
+        .upsert(
+          { cache_key: cacheKey, user_id: userId, response, expires_at },
+          { onConflict: 'cache_key,user_id' }
+        )
+    }
   } catch {
     // Cache write failure is non-fatal — just log
     console.warn('[aiCache] Write failed for', cacheKey)
@@ -101,9 +117,15 @@ export async function cacheSet(cacheKey, userId = null, response, ttlHours = 4) 
 /** Cleanup expired cache entries (call occasionally, e.g. on login) */
 export async function cacheCleanup() {
   try {
-    await supabase
+    const { error } = await supabase
       .from('ai_response_cache')
       .delete()
       .lt('expires_at', new Date().toISOString())
-  } catch {}
+    
+    if (error) {
+      console.warn('[aiCache] Cache cleanup failed:', error.message)
+    }
+  } catch (err) {
+    console.warn('[aiCache] Cache cleanup error:', err.message)
+  }
 }

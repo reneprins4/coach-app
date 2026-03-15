@@ -94,7 +94,7 @@ export default function History() {
                   <span className="text-sm font-bold text-cyan-400 tabular-nums">{formatVol(w.totalVolume)}</span>
                 </div>
                 <p className="text-sm font-semibold text-white truncate">
-                  {w.exerciseNames.join(', ') || t('history.empty_workout')}
+                  {w.exerciseNames?.join(', ') || t('history.empty_workout')}
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
                   {w.workout_sets.length} {t('common.sets')}
