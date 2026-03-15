@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   ArrowLeft, Sparkles, RefreshCw, ChevronDown, ChevronUp,
-  Loader2, AlertCircle, ArrowUpRight, ArrowDownRight, Minus, Clock, Flame, Target
+  Loader2, AlertCircle, ArrowUpRight, ArrowDownRight, Minus, Clock, Flame, Target, User
 } from 'lucide-react'
 import { generateScientificWorkout } from '../lib/anthropic'
 import { fetchRecentHistory } from '../hooks/useWorkouts'
@@ -94,10 +94,14 @@ export default function AICoach() {
 
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState(null)
+  const [retryCount, setRetryCount] = useState(0)
   const [result, setResult] = useState(null)
   const [showReasoning, setShowReasoning] = useState(false)
   const [showRecovery, setShowRecovery] = useState(true)
   const [showWeekPlan, setShowWeekPlan] = useState(false)
+
+  // Check if profile is incomplete (no bodyweight)
+  const showProfileBanner = !settings.bodyweight
 
   useEffect(() => {
     async function analyze() {
@@ -159,8 +163,10 @@ export default function AICoach() {
         },
       })
       setResult(workout)
+      setRetryCount(0) // Reset retry count on success
     } catch (err) {
       setError(err.message)
+      setRetryCount(prev => prev + 1)
     } finally {
       setGenerating(false)
     }
@@ -225,6 +231,18 @@ export default function AICoach() {
         <Sparkles size={28} className="text-cyan-500" />
         <h1 className="text-2xl font-bold">AI Coach</h1>
       </div>
+
+      {/* Profile completion banner */}
+      {showProfileBanner && !result && (
+        <Link
+          to="/profile"
+          className="mb-5 flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-400 hover:bg-amber-500/15 transition-colors"
+        >
+          <User size={18} className="shrink-0" />
+          <span>Vul je profiel aan voor betere trainingssuggesties</span>
+          <ArrowUpRight size={16} className="ml-auto shrink-0" />
+        </Link>
+      )}
 
       {!result ? (
         <>
@@ -401,12 +419,32 @@ export default function AICoach() {
             </div>
           </div>
 
+          {/* Error state with retry */}
           {error && (
-            <div className="mb-4 flex items-start gap-2 rounded-xl bg-cyan-900/20 p-4">
-              <AlertCircle size={18} className="mt-0.5 shrink-0 text-cyan-400" />
-              <div>
-                <p className="text-sm text-cyan-400">{error}</p>
-                <button onClick={handleGenerate} className="mt-2 text-sm font-medium text-cyan-500">Probeer opnieuw</button>
+            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle size={20} className="mt-0.5 shrink-0 text-red-400" />
+                <div className="flex-1">
+                  {retryCount >= 2 ? (
+                    <>
+                      <p className="text-sm font-medium text-red-400">Er is een tijdelijk probleem met de AI</p>
+                      <p className="mt-1 text-sm text-gray-400">Probeer het later opnieuw</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-red-400">Er ging iets mis</p>
+                      <p className="mt-1 text-sm text-gray-500">{error}</p>
+                      <button 
+                        onClick={handleGenerate}
+                        disabled={generating}
+                        className="mt-3 flex items-center gap-2 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                      >
+                        <RefreshCw size={14} className={generating ? 'animate-spin' : ''} />
+                        Probeer opnieuw
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           )}

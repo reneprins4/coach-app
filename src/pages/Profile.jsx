@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
-import { Save, Check, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Save, Check, LogOut, Trash2, AlertTriangle } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
+import { supabase } from '../lib/supabase'
 
 const GOALS = [
   {
@@ -37,11 +39,17 @@ const FREQUENCIES = ['3x', '4x', '5x', '6x']
 const REST_TIMES = [60, 90, 120, 180]
 
 export default function Profile() {
+  const navigate = useNavigate()
   const { user, signOut, settings: globalSettings, updateSettings } = useAuthContext()
   const [localSettings, setLocalSettings] = useState(globalSettings)
   const [saved, setSaved] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const { workouts } = useWorkouts(user?.id)
+  
+  // Account deletion state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState(null)
 
   // Sync local form state wanneer global settings bijgewerkt worden
   const settings = localSettings
@@ -60,6 +68,43 @@ export default function Profile() {
   async function handleLogout() {
     setLoggingOut(true)
     await signOut()
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true)
+    setDeleteError(null)
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) {
+        throw new Error('Geen geldige sessie gevonden')
+      }
+      
+      const res = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Account verwijderen mislukt')
+      }
+      
+      // Clear local storage
+      localStorage.clear()
+      
+      // Sign out and navigate to login
+      await supabase.auth.signOut()
+      navigate('/', { replace: true })
+      window.location.reload()
+    } catch (err) {
+      setDeleteError(err.message)
+      setDeleting(false)
+    }
   }
 
   const stats = useMemo(() => {
@@ -284,6 +329,54 @@ export default function Profile() {
             <span className="text-sm font-medium text-white">{(stats.totalVol / 1000).toFixed(1)} ton</span>
           </div>
         </div>
+      </div>
+
+      {/* Account verwijderen */}
+      <div className="mt-8 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+        <h2 className="mb-2 text-sm font-semibold text-red-400">Gevarenzone</h2>
+        
+        {!showDeleteConfirm ? (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 text-sm font-medium text-red-400 ring-1 ring-red-500/30 hover:bg-red-500/20 transition-colors"
+          >
+            <Trash2 size={16} />
+            Account permanent verwijderen
+          </button>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 rounded-lg bg-red-500/10 p-3">
+              <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-400" />
+              <p className="text-sm text-red-300">
+                Dit verwijdert al je trainingsdata, instellingen en je account. Dit kan niet ongedaan worden gemaakt.
+              </p>
+            </div>
+            
+            {deleteError && (
+              <p className="text-sm text-red-400">{deleteError}</p>
+            )}
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false)
+                  setDeleteError(null)
+                }}
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-gray-800 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                Annuleer
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Verwijderen...' : 'Ja, verwijder alles'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
