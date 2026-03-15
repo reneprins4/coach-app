@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Save, Check, LogOut, Trash2, AlertTriangle, Download } from 'lucide-react'
+import { Check, LogOut, Trash2, AlertTriangle, Download } from 'lucide-react'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
@@ -154,7 +154,7 @@ export default function Profile() {
         <button
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-gray-900 hover:text-white"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-400 active:bg-gray-900 active:text-white"
         >
           <LogOut size={16} />
           {loggingOut ? 'Uitloggen...' : 'Uitloggen'}
@@ -239,9 +239,7 @@ export default function Profile() {
               </div>
               {settings.goal === g.value && (
                 <div className="h-5 w-5 rounded-full bg-cyan-500 flex items-center justify-center shrink-0">
-                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <Check size={12} className="text-white" strokeWidth={3} />
                 </div>
               )}
             </button>
@@ -337,7 +335,7 @@ export default function Profile() {
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[
           { label: 'Trainingen', value: stats.totalWorkouts },
-          { label: 'Volume', value: `${(stats.totalVol/1000).toFixed(1)}t` },
+          { label: 'Volume', value: stats.totalVol >= 1000 ? `${(stats.totalVol/1000).toFixed(1)}t` : `${stats.totalVol.toFixed(0)}kg` },
           { label: 'Lid sinds', value: stats.memberSince },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-2xl p-4 text-center" style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)'}}>
@@ -350,9 +348,16 @@ export default function Profile() {
       {/* Save */}
       <button
         onClick={handleSave}
-        className="btn-primary"
+        className="btn-primary flex items-center justify-center gap-2"
       >
-        {saved ? 'Opgeslagen' : 'Opslaan'}
+        {saved ? (
+          <>
+            <Check size={16} />
+            Opgeslagen
+          </>
+        ) : (
+          'Opslaan'
+        )}
       </button>
 
       {/* Data export */}
@@ -360,7 +365,7 @@ export default function Profile() {
         <button
           onClick={exportWorkoutsCSV}
           disabled={workouts.length === 0}
-          className="w-full rounded-xl bg-gray-900 px-4 py-3 text-left text-sm text-gray-300 ring-1 ring-gray-800 hover:ring-gray-700 transition-colors flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:ring-gray-800"
+          className="w-full rounded-xl bg-gray-900 px-4 py-3 text-left text-sm text-gray-300 ring-1 ring-gray-800 active:ring-gray-700 transition-colors flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Download size={18} className="text-gray-500" />
           <div className="flex-1">
@@ -374,8 +379,8 @@ export default function Profile() {
 
       {/* Privacy & Terms links */}
       <div className="mt-6 flex justify-center gap-4">
-        <Link to="/privacy" className="text-xs text-gray-500 hover:text-gray-400">Privacybeleid</Link>
-        <Link to="/terms" className="text-xs text-gray-500 hover:text-gray-400">Gebruiksvoorwaarden</Link>
+        <Link to="/privacy" className="text-xs text-gray-500 active:text-gray-400">Privacybeleid</Link>
+        <Link to="/terms" className="text-xs text-gray-500 active:text-gray-400">Gebruiksvoorwaarden</Link>
       </div>
 
       {/* Account verwijderen */}
@@ -385,7 +390,7 @@ export default function Profile() {
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 text-sm font-medium text-red-400 ring-1 ring-red-500/30 hover:bg-red-500/20 transition-colors"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 text-sm font-medium text-red-400 ring-1 ring-red-500/30 active:bg-red-500/20 transition-colors"
           >
             <Trash2 size={16} />
             Verwijder mijn account
@@ -410,14 +415,14 @@ export default function Profile() {
                   setDeleteError(null)
                 }}
                 disabled={deleting}
-                className="flex-1 rounded-xl bg-gray-800 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-xl bg-gray-800 py-3 text-sm font-medium text-gray-300 active:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 Annuleer
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting}
-                className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white active:bg-red-600 transition-colors disabled:opacity-50"
               >
                 {deleting ? 'Verwijderen...' : 'Ja, verwijder alles'}
               </button>
