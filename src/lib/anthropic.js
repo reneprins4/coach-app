@@ -1,3 +1,6 @@
+import { supabase } from './supabase'
+import { workoutCacheKey, substituteCacheKey, cacheGet, cacheSet } from './aiCache'
+
 // Robust JSON extractor — handles markdown fences and surrounding text
 function extractJSON(raw) {
   if (!raw || typeof raw !== 'string') throw new Error('Empty response from AI')
@@ -16,7 +19,17 @@ function extractJSON(raw) {
   throw new Error('Failed to parse AI response. Please try again.')
 }
 
-export async function generateScientificWorkout({ muscleStatus, recommendedSplit, recentHistory, preferences }) {
+export async function generateScientificWorkout({ muscleStatus, recommendedSplit, recentHistory, preferences, userId = null }) {
+  // --- Cache check ---
+  const cacheKey = workoutCacheKey({ split: recommendedSplit, muscleStatus, preferences })
+  const cached = await cacheGet(cacheKey, userId)
+  if (cached) {
+    console.log('[aiCache] Workout cache HIT:', cacheKey)
+    return cached
+  }
+  console.log('[aiCache] Workout cache MISS — calling Gemini')
+  // --- End cache check ---
+
   const muscleStatusText = Object.entries(muscleStatus)
     .map(([muscle, ms]) =>
       `${muscle}: ${ms.setsThisWeek} sets this week (target ${ms.target.min}-${ms.target.max}), ` +
@@ -159,11 +172,24 @@ Return ONLY valid JSON (no markdown, no code fences, no comments):
     }))
   }
 
+  // --- Cache write (4h TTL) ---
+  cacheSet(cacheKey, userId, result, 4)
+
   return result
 }
 
 
 export async function getExerciseSubstitute({ exercise, reason, equipment, experienceLevel, bodyweight }) {
+  // --- Cache check (global, 30-day TTL) ---
+  const subKey = substituteCacheKey({ exercise, reason, equipment })
+  const cachedSub = await cacheGet(subKey, null)  // null = global cache
+  if (cachedSub) {
+    console.log('[aiCache] Substitute cache HIT:', subKey)
+    return cachedSub
+  }
+  console.log('[aiCache] Substitute cache MISS — calling Gemini')
+  // --- End cache check ---
+
   const prompt = `Suggest ONE substitute exercise for: "${exercise.name}" (targets: ${exercise.muscle_group || 'same muscle group'})
 
 Reason for substitution: ${reason}
@@ -206,7 +232,12 @@ Return ONLY this JSON (no markdown):
   const data = await response.json()
   if (data.error) throw new Error(data.error)
 
-  return extractJSON(data.content)
+  const subResult = extractJSON(data.content)
+
+  // --- Cache write (30-day TTL, global) ---
+  cacheSet(subKey, null, subResult, 30 * 24)
+
+  return subResult
 }
 
 

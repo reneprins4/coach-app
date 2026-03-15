@@ -8,6 +8,7 @@ import { generateScientificWorkout } from '../lib/anthropic'
 import { fetchRecentHistory } from '../hooks/useWorkouts'
 import { analyzeTraining, scoreSplits, getRelevantHistory, calcMuscleRecovery } from '../lib/training-analysis'
 import { getSettings } from '../lib/settings'
+import { supabase } from '../lib/supabase'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
 import { useAuthContext } from '../App'
 
@@ -129,10 +130,12 @@ export default function AICoach() {
     setError(null)
     try {
       const relevantHistory = getRelevantHistory(workoutHistory, selectedSplit)
+      const { data: { user } } = await supabase.auth.getUser()
       const workout = await generateScientificWorkout({
         muscleStatus,
         recommendedSplit: selectedSplit,
         recentHistory: relevantHistory,
+        userId: user?.id || null,
         preferences: {
           energy,
           time,
