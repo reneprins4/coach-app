@@ -178,23 +178,43 @@ export default function Logger() {
   }
 
   // ── New Workout Start Flow State ─────────────────────────────────────────────
-  const [startFlowState, setStartFlowState] = useState({
-    loading: true,
-    generating: false,
-    error: null,
-    muscleStatus: null,
-    splits: [],
-    recommendedSplit: null,
-    selectedSplit: null,
-    generatedWorkout: null,
-    recoveredMuscles: [],
-    showSplitPicker: false,
+  // Module-level session cache: persists across navigations within the same browser session
+  // Prevents re-calling Gemini every time the user navigates back to the Logger tab
+  // Key: userId — cache is per-user and cleared when user changes
+  const SESSION_CACHE_KEY = '__kravex_start_flow_cache__'
+
+  const [startFlowState, setStartFlowState] = useState(() => {
+    // Restore from session cache if available (avoids Gemini call on tab switch)
+    try {
+      const raw = sessionStorage.getItem(SESSION_CACHE_KEY)
+      if (raw) {
+        const cached = JSON.parse(raw)
+        // Only use cache if it has a generated workout and isn't stale (< 30 min)
+        if (cached.generatedWorkout && cached.cachedAt && Date.now() - cached.cachedAt < 30 * 60 * 1000) {
+          return { ...cached, loading: false, generating: false, showSplitPicker: false }
+        }
+      }
+    } catch {}
+    return {
+      loading: true,
+      generating: false,
+      error: null,
+      muscleStatus: null,
+      splits: [],
+      recommendedSplit: null,
+      selectedSplit: null,
+      generatedWorkout: null,
+      recoveredMuscles: [],
+      showSplitPicker: false,
+    }
   })
   const generateAbortRef = useRef(null)
 
   // Background analysis and workout generation on mount
   useEffect(() => {
     if (aw.isActive || !user?.id) return
+    // Skip if we already have a valid session-cached workout
+    if (startFlowState.generatedWorkout && !startFlowState.error) return
     
     let cancelled = false
     
@@ -284,13 +304,19 @@ export default function Logger() {
           },
         }))
         
-        setStartFlowState(prev => ({
-          ...prev,
+        const newState = {
           generating: false,
           generatedWorkout: workoutExercises,
           estimatedDuration: result.estimated_duration_min,
           exerciseCount: result.exercises.length,
-        }))
+          cachedAt: Date.now(),
+        }
+        setStartFlowState(prev => ({ ...prev, ...newState }))
+        // Save to sessionStorage so navigating back doesn't re-generate
+        try {
+          const cacheData = { ...startFlowState, ...newState }
+          sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(cacheData))
+        } catch {}
         
       } catch (err) {
         if (cancelled) return
