@@ -2,6 +2,45 @@ import { supabase } from './supabase'
 import { workoutCacheKey, substituteCacheKey, cacheGet, cacheSet } from './aiCache'
 import { getExerciseSubstituteLocal } from './exerciseSubstitutes'
 
+/**
+ * Format exercise history for progressive overload in AI prompt
+ * Groups by exercise name and shows last few sets with weight/reps/RPE
+ * @param {Array} history - Array of { date, sets: [{ exercise, weight_kg, reps, rpe }] }
+ * @returns {string} Formatted history string for prompt
+ */
+function formatExerciseHistory(history) {
+  if (!history || history.length === 0) return 'No previous session data available'
+  
+  // Group all sets by exercise name
+  const byExercise = {}
+  for (const workout of history) {
+    for (const set of (workout.sets || [])) {
+      if (!set.exercise) continue
+      if (!byExercise[set.exercise]) byExercise[set.exercise] = []
+      byExercise[set.exercise].push({
+        weight: set.weight_kg,
+        reps: set.reps,
+        rpe: set.rpe,
+        date: workout.date,
+      })
+    }
+  }
+  
+  // Format top exercises (limit to 10 to keep prompt small)
+  const lines = []
+  const exercises = Object.entries(byExercise).slice(0, 10)
+  for (const [name, sets] of exercises) {
+    // Take last 3 sets to show recent progression
+    const recent = sets.slice(-3)
+    const summary = recent.map(s => 
+      `${s.weight || '?'}kg×${s.reps || '?'}${s.rpe ? ` @RPE${s.rpe}` : ''}`
+    ).join(', ')
+    lines.push(`- ${name}: ${summary}`)
+  }
+  
+  return lines.join('\n') || 'No previous session data available'
+}
+
 /** Get auth headers for API calls — includes Supabase JWT if logged in */
 async function getAuthHeaders() {
   try {
@@ -148,6 +187,16 @@ ${muscleStatusText}
 
 ## Recent Training History
 ${historyText}
+
+## Exercise-Specific History (for progressive overload)
+${formatExerciseHistory(recentHistory)}
+
+**PROGRESSIVE OVERLOAD RULES (use the exercise history above):**
+- If last session RPE was ≥8: suggest SAME weight, try for +1 rep
+- If last session RPE was 6-7: suggest +2.5kg with same reps
+- If last session RPE was ≤5: suggest +5kg (session was too easy)
+- For NEW exercises (not in history): estimate from athlete profile, never 0kg
+- ALWAYS explain the overload decision in the "notes" field (e.g. "Last time: 80kg×8 @RPE7 → adding 2.5kg")
 
 VOLUME RULES (strict):
 - Include AT LEAST 2 exercises per muscle group in the split
