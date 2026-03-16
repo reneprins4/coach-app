@@ -85,13 +85,14 @@ export default function Logger() {
       try {
         const { data } = await supabase
           .from('workouts')
-          .select('id, created_at, workout_sets(exercise)')
+          .select('id, created_at, sets(exercise)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .single()
-        if (data?.workout_sets?.length > 0) {
-          const exercises = [...new Set(data.workout_sets.map(s => s.exercise))]
+        const rawSets = data?.sets || data?.workout_sets || []
+        if (rawSets.length > 0) {
+          const exercises = [...new Set(rawSets.map(s => s.exercise))]
           const preview = exercises.slice(0, 3).join(', ') + (exercises.length > 3 ? ` +${exercises.length - 3}` : '')
           setLastWorkout({
             preview,

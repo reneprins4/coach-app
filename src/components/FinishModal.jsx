@@ -93,7 +93,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
           // Query 1: Get exercise history for PR detection
           exerciseNames.length > 0
             ? supabase
-                .from('workout_sets')
+                .from('sets')
                 .select('exercise, weight_kg, reps')
                 .eq('user_id', user.id)
                 .lt('created_at', workoutDate)
@@ -102,7 +102,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
           // Query 2: Get recent workouts for next recommendation
           supabase
             .from('workouts')
-            .select('id, created_at, workout_sets(*)')
+            .select('id, created_at, sets(exercise, weight_kg, reps, rpe)') /* sets table join */
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(20)
@@ -157,7 +157,13 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
             created_at: new Date().toISOString(),
             workout_sets: result.workout_sets || [],
           }
-          const allWorkouts = [currentWorkout, ...(workouts || [])]
+          const allWorkouts = [
+            currentWorkout,
+            ...(workouts || []).map(w => ({
+              ...w,
+              workout_sets: w.sets || w.workout_sets || [],  // normalize table name
+            }))
+          ]
           
           const muscleStatus = analyzeTraining(allWorkouts)
           const splits = scoreSplits(muscleStatus)
