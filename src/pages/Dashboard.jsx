@@ -261,7 +261,7 @@ export default function Dashboard() {
                       {date.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
                     </p>
                     <p className="truncate text-sm text-white">
-                      {exercises.length > 0 ? exercises.join(', ') : (i18n.language === 'nl' ? 'Geen oefeningen' : 'No exercises')}
+                      {exercises.length > 0 ? exercises.join(', ') : t('dashboard.no_exercises')}
                     </p>
                   </div>
                   <ChevronRight size={16} className="ml-2 shrink-0 text-gray-600" />

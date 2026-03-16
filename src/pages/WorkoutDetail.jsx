@@ -53,7 +53,7 @@ export default function WorkoutDetail() {
       <div className="mb-5">
         <p className="label-caps mb-1">{dateStr}</p>
         <h1 className="text-2xl font-black tracking-tight text-white">
-          {workout.exerciseNames?.slice(0, 2).join(' + ') || 'Training'}
+          {workout.exerciseNames?.slice(0, 2).join(' + ') || t('workout_detail.workout')}
           {(workout.exerciseNames?.length ?? 0) > 2 && ` +${(workout.exerciseNames?.length ?? 0) - 2}`}
         </h1>
       </div>

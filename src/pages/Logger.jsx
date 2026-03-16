@@ -229,6 +229,7 @@ export default function Logger() {
       loading: true,
       generating: false,
       error: null,
+      retryCount: 0, // Track failed retry attempts
       muscleStatus: null,
       splits: [],
       recommendedSplit: null,
@@ -531,6 +532,7 @@ export default function Logger() {
         ...prev,
         generating: false,
         error: err.message,
+        retryCount: (prev.retryCount || 0) + 1,
       }))
     }
   }, [user?.id, startFlowState.muscleStatus, startFlowState.splits, startFlowState.recommendedSplit, startFlowState.recoveredMuscles, startFlowState.availableTime])
@@ -763,20 +765,27 @@ export default function Logger() {
 
           {/* Error state with fallback */}
           {error && (
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() => generateForSplit(selectedSplit || 'Full Body')}
-                className="flex-1 rounded-xl bg-white/20 py-2.5 text-sm font-semibold text-white active:bg-white/30"
-              >
-                <RefreshCw size={14} className="inline mr-1.5" />
-                Opnieuw
-              </button>
-              <button
-                onClick={() => nav('/coach')}
-                className="flex-1 rounded-xl bg-white/20 py-2.5 text-sm font-semibold text-white active:bg-white/30"
-              >
-                Handmatig
-              </button>
+            <div className="mt-3">
+              {startFlowState.retryCount >= 2 && (
+                <p className="mb-2 text-center text-sm font-medium text-white/70">
+                  {t('logger.try_later')}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => generateForSplit(selectedSplit || 'Full Body')}
+                  className="flex-1 rounded-xl bg-white/20 py-2.5 text-sm font-semibold text-white active:bg-white/30"
+                >
+                  <RefreshCw size={14} className="inline mr-1.5" />
+                  {t('common.retry')}
+                </button>
+                <button
+                  onClick={() => nav('/coach')}
+                  className="flex-1 rounded-xl bg-white/20 py-2.5 text-sm font-semibold text-white active:bg-white/30"
+                >
+                  {t('logger.choose_exercises')}
+                </button>
+              </div>
             </div>
           )}
         </div>

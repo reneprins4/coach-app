@@ -59,6 +59,11 @@ export function getCurrentBlock(userId) {
     const raw = localStorage.getItem(BLOCK_KEY)
     if (!raw) return null
     const block = JSON.parse(raw)
+    // Validate block structure - clear corrupted data
+    if (!block?.startDate || !block?.phase || !PHASES[block.phase]) {
+      localStorage.removeItem(BLOCK_KEY)
+      return null
+    }
     // Calculate which week we're in
     const startDate = new Date(block.startDate)
     const now = new Date()

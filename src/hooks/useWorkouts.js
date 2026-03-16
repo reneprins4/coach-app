@@ -43,12 +43,17 @@ export function useWorkouts(userId) {
       const ids = (data || []).map(w => w.id)
       let setsMap = {}
       if (ids.length > 0 && userId) {
-        const { data: sets } = await supabase
+        const { data: sets, error: setsErr } = await supabase
           .from('sets')
           .select('*')
           .in('workout_id', ids)
           .eq('user_id', userId)
           .order('created_at', { ascending: true })
+
+        if (setsErr) {
+          console.error('Failed to fetch sets:', setsErr)
+          // Continue with empty sets rather than failing completely
+        }
 
         for (const s of (sets || [])) {
           if (!setsMap[s.workout_id]) setsMap[s.workout_id] = []

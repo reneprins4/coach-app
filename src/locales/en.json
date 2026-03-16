@@ -78,7 +78,8 @@
     "delete_confirm": "Delete workout?",
     "delete_confirm_sub": "This cannot be undone.",
     "empty_workout": "Empty workout",
-    "subtitle": "Your workouts"
+    "subtitle": "Your workouts",
+    "load_more": "Load more"
   },
   "profile": {
     "title": "Profile",

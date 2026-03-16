@@ -78,7 +78,8 @@
     "delete_confirm": "Training verwijderen?",
     "delete_confirm_sub": "Dit kan niet ongedaan worden gemaakt.",
     "empty_workout": "Lege training",
-    "subtitle": "Jouw trainingen"
+    "subtitle": "Jouw trainingen",
+    "load_more": "Laad meer"
   },
   "profile": {
     "title": "Profiel",
