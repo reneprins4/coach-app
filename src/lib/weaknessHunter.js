@@ -42,7 +42,7 @@ function getDetailedMuscleGroup(name) {
   if (/squat|leg.?press|lunge|extension|hack/.test(l)) return 'quadriceps'
   if (/hamstring|leg.?curl|romanian|rdl|stiff.?leg/.test(l)) return 'hamstrings'
   if (/glute|hip.?thrust|bridge/.test(l)) return 'glutes'
-  if (/calf|raise(?!.*lateral)/.test(l)) return 'calves'
+  if (/calf/.test(l)) return 'calves'
   
   // Schouders - gedetailleerd
   if (/front.?raise|press(?!.*bench|.*leg)/.test(l)) return 'shoulders_front'

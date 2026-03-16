@@ -62,16 +62,18 @@ export function useWorkouts(userId) {
   useEffect(() => { fetchWorkouts() }, [fetchWorkouts])
 
   const deleteWorkout = useCallback(async (id) => {
+    // Snapshot for reliable rollback
+    const snapshot = [...workouts]
     // Optimistic delete
     setWorkouts(prev => prev.filter(w => w.id !== id))
     try {
       const { error } = await supabase.from('workouts').delete().eq('id', id)
       if (error) throw error
     } catch (err) {
-      fetchWorkouts() // revert
+      setWorkouts(snapshot) // restore exact previous state
       throw err
     }
-  }, [fetchWorkouts])
+  }, [workouts])
 
   return { workouts, loading, error, refetch: fetchWorkouts, deleteWorkout }
 }

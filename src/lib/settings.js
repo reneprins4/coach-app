@@ -8,7 +8,7 @@ const DEFAULTS = {
   frequency: '4x',
   restTime: 90,
   units: 'kg',
-  memberSince: new Date().toISOString(),
+  memberSince: null,
   bodyweight: '',
   experienceLevel: 'intermediate',
   equipment: 'full_gym',
@@ -32,6 +32,10 @@ export function getSettings() {
 // Save settings to localStorage and optionally to Supabase
 export function saveSettings(settings, userId = null) {
   const merged = { ...getSettings(), ...settings }
+  // Set memberSince on first save if not already set
+  if (!merged.memberSince) {
+    merged.memberSince = new Date().toISOString()
+  }
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged))
   
   // If user is logged in, also sync to cloud

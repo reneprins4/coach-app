@@ -76,6 +76,12 @@ export function useTemplates(userId) {
       }
     }
 
+    // Validate exercises is an array before mapping
+    if (!Array.isArray(exercises)) {
+      console.warn('Template has invalid exercises data:', template.name)
+      return []
+    }
+
     // Transform to active workout format (with empty sets)
     return exercises.map(ex => ({
       name: ex.name,
