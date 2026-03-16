@@ -149,7 +149,11 @@
     "try_other": "Probeer ander",
     "use_this": "Gebruik dit",
     "explain": "Uitleg",
-    "remove": "Verwijderen"
+    "remove": "Verwijderen",
+    "ai_suggest": "AI voorstel",
+    "swap_no_options": "Geen alternatief gevonden voor jouw equipment",
+    "swap_already_in_workout": "Dit zit al in je workout",
+    "swap_ai_failed": "AI kon geen alternatief vinden"
   },
   "progress": {
     "title": "Voortgang",

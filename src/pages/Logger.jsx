@@ -8,6 +8,7 @@ import { useRestTimer } from '../hooks/useRestTimer'
 import { useTemplates } from '../hooks/useTemplates'
 import { getExerciseHistory } from '../hooks/useWorkouts'
 import { getExerciseSubstitute } from '../lib/anthropic'
+import { getSubstituteOptions } from '../lib/exerciseSubstitutes'
 import { getSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
@@ -540,6 +541,7 @@ export default function Logger() {
         <SwapModal
           exercise={swapTarget}
           settings={settings}
+          currentExerciseNames={aw.workout.exercises.map(e => e.name)}
           onAccept={(sub) => {
             aw.replaceExercise(swapTarget.name, {
               name: sub.name,
@@ -637,36 +639,44 @@ function getWorkoutType(exercises) {
 }
 
 // ── SWAP MODAL ───────────────────────────────────────────────────────────────
-function SwapModal({ exercise, settings, onAccept, onClose }) {
+function SwapModal({ exercise, settings, currentExerciseNames = [], onAccept, onClose }) {
   const { t } = useTranslation()
-  const SWAP_REASONS = [
-    { value: 'machine_busy', label: t('logger.swap_busy'), desc: t('logger.swap_busy_sub') },
-    { value: 'no_equipment', label: t('logger.swap_no_equipment'), desc: t('logger.swap_no_equipment_sub') },
-    { value: 'want_variety', label: t('logger.swap_variety'), desc: t('logger.swap_variety_sub') },
-    { value: 'feels_off', label: t('logger.swap_feels_off'), desc: t('logger.swap_feels_off_sub') },
-  ]
-  const [reason, setReason] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [suggestion, setSuggestion] = useState(null)
-  const [error, setError] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState(null)
 
-  async function handleFetch() {
-    if (!reason) return
-    setLoading(true)
-    setError(null)
+  // Instant suggestions from static DB — no API call, filtered for duplicates
+  const options = useMemo(() =>
+    getSubstituteOptions({
+      exercise,
+      equipment: settings.equipment || 'full_gym',
+      excludeNames: currentExerciseNames,
+      max: 4,
+    }),
+    [exercise, settings.equipment, currentExerciseNames]
+  )
+
+  async function handleAiSuggest() {
+    setAiLoading(true)
+    setAiError(null)
     try {
       const sub = await getExerciseSubstitute({
         exercise,
-        reason,
+        reason: 'want_variety',
         equipment: settings.equipment,
         experienceLevel: settings.experienceLevel,
         bodyweight: settings.bodyweight,
+        excludeNames: currentExerciseNames,
       })
-      setSuggestion(sub)
+      // Check if AI returned something already in the workout
+      if (currentExerciseNames.map(n => n.toLowerCase()).includes(sub.name.toLowerCase())) {
+        setAiError(t('logger.swap_already_in_workout'))
+      } else {
+        onAccept(sub)
+      }
     } catch (e) {
-      setError(e.message)
+      setAiError(t('logger.swap_ai_failed'))
     } finally {
-      setLoading(false)
+      setAiLoading(false)
     }
   }
 
@@ -674,92 +684,49 @@ function SwapModal({ exercise, settings, onAccept, onClose }) {
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">{t('logger.swap_exercise')}</h3>
-          <button onClick={onClose} className="p-1 text-gray-500"><X size={20} /></button>
+          <div>
+            <p className="label-caps mb-0.5">{t('logger.replacing')}</p>
+            <h3 className="text-lg font-black tracking-tight text-white">{exercise.name}</h3>
+          </div>
+          <button onClick={onClose} className="rounded-xl p-2 text-gray-500 active:bg-gray-800"><X size={20} /></button>
         </div>
 
-        <div className="mb-4 rounded-xl bg-gray-800 px-3 py-2">
-          <p className="text-xs text-gray-500">{t('logger.replacing')}</p>
-          <p className="font-semibold text-white">{exercise.name}</p>
-          {exercise.muscle_group && (
-            <p className="text-xs capitalize text-cyan-400">{exercise.muscle_group}</p>
-          )}
-        </div>
-
-        {!suggestion ? (
-          <>
-            <p className="mb-3 text-sm text-gray-400">{t('logger.swap_why')}</p>
-            <div className="mb-4 space-y-2">
-              {SWAP_REASONS.map(r => (
-                <button
-                  key={r.value}
-                  onClick={() => setReason(r.value)}
-                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
-                    reason === r.value
-                      ? 'bg-cyan-500/20 ring-1 ring-cyan-500/50'
-                      : 'bg-gray-800 ring-1 ring-gray-700'
-                  }`}
-                >
-                  <span className="font-medium text-white">{r.label}</span>
-                  <span className="text-xs text-gray-500">{r.desc}</span>
-                </button>
-              ))}
-            </div>
-
-            {error && <p className="mb-3 text-sm text-cyan-400">{error}</p>}
-
-            <button
-              onClick={handleFetch}
-              disabled={!reason || loading}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-bold text-white disabled:opacity-50"
-            >
-              {loading ? <><Loader2 size={18} className="animate-spin" /> {t('logger.finding_alternative')}</> : <><RefreshCw size={18} /> {t('logger.find_alternative')}</>}
-            </button>
-          </>
+        {options.length > 0 ? (
+          <div className="mb-4 space-y-2">
+            {options.map((opt, idx) => (
+              <button
+                key={idx}
+                onClick={() => onAccept(opt)}
+                className="flex w-full items-center justify-between rounded-2xl px-4 py-3.5 text-left active:scale-[0.98] transition-transform"
+                style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                <div>
+                  <p className="font-black tracking-tight text-white">{opt.name}</p>
+                  <p className="text-xs capitalize text-gray-500">{opt.equipment} · {opt.muscle_group}</p>
+                </div>
+                {opt.weight_kg > 0 && (
+                  <span className="ml-2 shrink-0 rounded-lg bg-cyan-500/20 px-2.5 py-1 text-sm font-bold tabular-nums text-cyan-400">
+                    {opt.weight_kg}kg
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         ) : (
-          <>
-            <div className="mb-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4">
-              <p className="mb-1 label-caps text-cyan-400">{t('logger.suggested_alternative')}</p>
-              <p className="text-xl font-black text-white">{suggestion.name}</p>
-              <p className="mt-1 text-xs capitalize text-gray-400">{suggestion.muscle_group}</p>
-              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-lg bg-gray-800 py-2">
-                  <p className="font-bold text-white">{suggestion.sets}x{suggestion.reps_min}-{suggestion.reps_max}</p>
-                  <p className="text-[10px] text-gray-500">{t('logger.sets_x_reps')}</p>
-                </div>
-                <div className="rounded-lg bg-cyan-500/20 py-2">
-                  <p className="font-bold text-cyan-400">{suggestion.weight_kg}kg</p>
-                  <p className="text-[10px] text-gray-500">{t('logger.weight').toLowerCase()}</p>
-                </div>
-                <div className="rounded-lg bg-gray-800 py-2">
-                  <p className="font-bold text-white">RPE {suggestion.rpe_target}</p>
-                  <p className="text-[10px] text-gray-500">{t('logger.intensity')}</p>
-                </div>
-              </div>
-              {suggestion.why && (
-                <p className="mt-3 text-xs text-gray-400">{suggestion.why}</p>
-              )}
-              {suggestion.notes && (
-                <p className="mt-1 text-xs text-cyan-300">{suggestion.notes}</p>
-              )}
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => { setSuggestion(null); setReason(null) }}
-                className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700"
-              >
-                {t('logger.try_other')}
-              </button>
-              <button
-                onClick={() => onAccept(suggestion)}
-                className="h-12 flex-1 rounded-xl bg-cyan-500 font-bold text-white active:scale-[0.97] transition-transform"
-              >
-                {t('logger.use_this')}
-              </button>
-            </div>
-          </>
+          <p className="mb-4 text-sm text-gray-500">{t('logger.swap_no_options')}</p>
         )}
+
+        <button
+          onClick={handleAiSuggest}
+          disabled={aiLoading}
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-gray-400 ring-1 ring-gray-700 disabled:opacity-50 active:bg-gray-800"
+        >
+          {aiLoading
+            ? <><Loader2 size={15} className="animate-spin" /> {t('logger.finding_alternative')}</>
+            : <><Sparkles size={15} /> {t('logger.ai_suggest')}</>}
+        </button>
+        {aiError && <p className="mt-2 text-center text-xs text-red-400">{aiError}</p>}
+
       </div>
     </div>
   )

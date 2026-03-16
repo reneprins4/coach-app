@@ -149,7 +149,11 @@
     "try_other": "Try another",
     "use_this": "Use this",
     "explain": "Explain",
-    "remove": "Remove"
+    "remove": "Remove",
+    "ai_suggest": "AI suggestion",
+    "swap_no_options": "No alternative found for your equipment",
+    "swap_already_in_workout": "This is already in your workout",
+    "swap_ai_failed": "AI could not find an alternative"
   },
   "progress": {
     "title": "Progress",

@@ -314,6 +314,83 @@ function estimateSubstituteWeight(originalWeight, originalEquipment, substituteE
 }
 
 /**
+ * Get multiple distinct substitute options for an exercise.
+ * Returns up to `max` alternatives, filtered by excludeNames.
+ */
+export function getSubstituteOptions({ exercise, equipment, excludeNames = [], max = 4 }) {
+  const excluded = new Set([
+    exercise.name.toLowerCase(),
+    ...excludeNames.map(n => n.toLowerCase()),
+  ])
+  const available = EQUIPMENT_SETS[equipment] || EQUIPMENT_SETS.full_gym
+  const seen = new Set()
+  const results = []
+
+  // 1. Direct substitutes for each reason — most relevant first
+  const reasons = ['machine_busy', 'no_equipment', 'injury', 'default']
+  const directMap = DIRECT_SUBSTITUTES[exercise.name] || {}
+  for (const reason of reasons) {
+    const name = directMap[reason]
+    if (name && !excluded.has(name.toLowerCase()) && !seen.has(name)) {
+      seen.add(name)
+      const info = getExerciseInfo(name)
+      if (!info || available.includes(info.equipment)) {
+        results.push(_buildOption(name, exercise))
+        if (results.length >= max) return results
+      }
+    }
+  }
+
+  // 2. Fallback: all same-muscle-group exercises, sorted by equipment priority
+  const priorityOrder = ['dumbbell', 'cable', 'barbell', 'machine', 'bodyweight']
+  const candidates = ALL_EXERCISES
+    .filter(ex =>
+      ex.muscle_group === exercise.muscle_group &&
+      !excluded.has(ex.name.toLowerCase()) &&
+      !seen.has(ex.name) &&
+      available.includes(ex.equipment)
+    )
+    .sort((a, b) => {
+      const ai = priorityOrder.indexOf(a.equipment)
+      const bi = priorityOrder.indexOf(b.equipment)
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+    })
+
+  for (const candidate of candidates) {
+    if (!seen.has(candidate.name)) {
+      seen.add(candidate.name)
+      results.push(_buildOption(candidate.name, exercise))
+      if (results.length >= max) break
+    }
+  }
+
+  return results
+}
+
+function _buildOption(substituteName, exercise) {
+  const subInfo = getExerciseInfo(substituteName)
+  const originalEquipment = getExerciseInfo(exercise.name)?.equipment || 'barbell'
+  const subEquipment = subInfo?.equipment || 'dumbbell'
+  const weight = estimateSubstituteWeight(
+    exercise.plan?.weight_kg || exercise.weight_kg || 0,
+    originalEquipment,
+    subEquipment
+  )
+  return {
+    name: substituteName,
+    muscle_group: exercise.muscle_group || subInfo?.muscle_group || 'unknown',
+    equipment: subEquipment,
+    weight_kg: weight,
+    sets: exercise.plan?.sets || 3,
+    reps_min: exercise.plan?.reps_min || 8,
+    reps_max: exercise.plan?.reps_max || 12,
+    rpe_target: exercise.plan?.rpe_target || 8,
+    rest_seconds: exercise.plan?.rest_seconds || 90,
+    notes: NOTES[substituteName] || DEFAULT_NOTE,
+  }
+}
+
+/**
  * Main function: get exercise substitute without LLM.
  * Returns same format as getExerciseSubstitute() from anthropic.js.
  */
