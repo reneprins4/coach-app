@@ -6,7 +6,7 @@ import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
 import { analyzeTraining } from '../lib/training-analysis'
-import MuscleMap from '../components/MuscleMap'
+
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation()
@@ -176,16 +176,52 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Muscle Status Map */}
-      {workouts.length > 0 && (
-        <div className="mb-6 rounded-2xl p-4" style={{
-          background: 'linear-gradient(135deg, #0f1624 0%, #0a0f1a 100%)',
-          border: '1px solid rgba(255,255,255,0.05)'
-        }}>
-          <p className="label-caps mb-4">{i18n.language === 'nl' ? 'Herstel' : 'Recovery'}</p>
-          <MuscleMap muscleStatus={muscleStatus} />
-        </div>
-      )}
+      {/* Muscle Recovery */}
+      {workouts.length > 0 && muscleStatus && (() => {
+        const MUSCLE_DISPLAY = {
+          chest: t('muscles.chest'), back: t('muscles.back'), shoulders: t('muscles.shoulders'),
+          quads: t('muscles.quads'), hamstrings: t('muscles.hamstrings'), glutes: t('muscles.glutes'),
+          biceps: t('muscles.biceps'), triceps: t('muscles.triceps'), core: t('muscles.core'),
+        }
+        const muscles = Object.entries(muscleStatus)
+          .filter(([, ms]) => ms.setsThisWeek > 0 || ms.daysSinceLastTrained != null)
+          .sort(([, a], [, b]) => (a.recoveryPct ?? 100) - (b.recoveryPct ?? 100))
+
+        if (muscles.length === 0) return null
+
+        return (
+          <div className="mb-6 rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <p className="label-caps mb-4">{t('dashboard.recovery')}</p>
+            <div className="space-y-3">
+              {muscles.map(([muscle, ms]) => {
+                const pct = ms.recoveryPct ?? 100
+                const barColor = pct < 40 ? '#ef4444' : pct < 75 ? '#f97316' : '#22c55e'
+                const statusKey = pct < 40 ? 'dashboard.recovery_fatigued' : pct < 75 ? 'dashboard.recovery_recovering' : 'dashboard.recovery_ready'
+                const days = ms.daysSinceLastTrained
+                return (
+                  <div key={muscle}>
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black tracking-tight text-white">{MUSCLE_DISPLAY[muscle] || muscle}</span>
+                        <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold" style={{ color: barColor, background: `${barColor}22` }}>{t(statusKey)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-right">
+                        <span className="text-xs text-gray-600">
+                          {days === 0 ? t('dashboard.trained_today') : days === 1 ? t('dashboard.trained_yesterday') : days != null ? t('dashboard.trained_days_ago', { days }) : ''}
+                        </span>
+                        <span className="tabular-nums text-sm font-black" style={{ color: barColor }}>{Math.round(pct)}%</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Primary CTA */}
       <button

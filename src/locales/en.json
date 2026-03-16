@@ -42,7 +42,14 @@
     "streak": "Streak",
     "recent": "Recent",
     "view_all": "View all",
-    "no_workouts": "No workouts yet"
+    "no_workouts": "No workouts yet",
+    "recovery": "Recovery",
+    "recovery_ready": "Ready",
+    "recovery_recovering": "Recovering",
+    "recovery_fatigued": "Fatigued",
+    "trained_today": "today",
+    "trained_yesterday": "yesterday",
+    "trained_days_ago": "{{days}}d ago"
   },
   "history": {
     "title": "History",

@@ -42,7 +42,14 @@
     "streak": "Streak",
     "recent": "Recent",
     "view_all": "Bekijk alles",
-    "no_workouts": "Nog geen trainingen"
+    "no_workouts": "Nog geen trainingen",
+    "recovery": "Herstel",
+    "recovery_ready": "Klaar",
+    "recovery_recovering": "Herstellend",
+    "recovery_fatigued": "Vermoeid",
+    "trained_today": "vandaag",
+    "trained_yesterday": "gisteren",
+    "trained_days_ago": "{{days}}d geleden"
   },
   "history": {
     "title": "Geschiedenis",
