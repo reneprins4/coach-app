@@ -92,6 +92,8 @@ const EXERCISE_MUSCLE_MAP = {
   'upright.*row':       'shoulders', 'shoulder.*press': 'shoulders', 'cable.*lateral': 'shoulders',
   'military.*press':    'shoulders', 'front.*raise': 'shoulders', 'reverse.*fly':   'shoulders',
   'side.*raise':        'shoulders', 'delt.*raise':  'shoulders',
+  // Chest dip — BEFORE triceps (dip pattern would otherwise match first)
+  'chest.*dip':         'chest',
   // Triceps — before chest: "close grip bench press" should be triceps
   'close.*grip.*bench': 'triceps', 'pushdown':      'triceps', 'skull.*crush':    'triceps',
   'overhead.*extension':'triceps',  'tricep':        'triceps', 'dip':             'triceps',
@@ -238,6 +240,7 @@ function toNL(muscles) {
 
 /**
  * Score each split based on current training state.
+ * Scores are NORMALIZED per primary muscle count to ensure fair comparison.
  * @param {Object} muscleStatus - Per-muscle analysis data
  * @param {Object} lastWorkoutInfo - Optional: { split: string, hoursSince: number }
  */
@@ -261,13 +264,19 @@ export function scoreSplits(muscleStatus, lastWorkoutInfo = null, experienceLeve
         score += deficit * 2
       }
       // Penalize muscles that are still fatigued — harder for primary muscles
-      if (ms.recoveryPct < 50) score -= isPrimary ? 25 : 8
+      if (ms.recoveryPct < 50) score -= isPrimary ? 40 : 10
     }
 
-    // Harde penalty als MEERDERHEID van de primaire spieren nog vermoeid is
+    // NORMALIZE: divide by number of primary muscles to compare splits fairly
+    // This ensures Full Body (8 primary) doesn't auto-win vs Push (3 primary)
+    const normFactor = primaryMuscles.length || 1
+    score = score / normFactor
+
+    // Harde penalty als ANY primary spier nog vermoeid is (<50%)
     const fatiguedPrimary = primaryMuscles.filter(m => (muscleStatus[m]?.recoveryPct ?? 100) < 50)
-    if (fatiguedPrimary.length > 0 && fatiguedPrimary.length >= primaryMuscles.length / 2) {
-      score -= 40
+    if (fatiguedPrimary.length > 0) {
+      // Penalty scales with how many primary muscles are fatigued
+      score -= 15 * fatiguedPrimary.length
     }
     
     // Penalty for Full Body if last workout was also Full Body and <24h ago
