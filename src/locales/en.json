@@ -62,7 +62,7 @@
     "goal_strength": "Get stronger",
     "goal_endurance": "Get fitter",
     "frequency_label": "Training preference",
-    "frequency_hint": "Used as context for your AI training schedule — no automatic planning.",
+    "frequency_hint": "Used as context for your training schedule — no automatic planning.",
     "rest_label": "Default rest time",
     "rest_hint": "The app automatically adjusts this based on your effort — this is your starting value.",
     "experience_label": "Experience level",
@@ -74,7 +74,7 @@
     "equipment_dumbbells": "Dumbbells",
     "equipment_bodyweight": "Bodyweight",
     "maxes_label": "Known maxes",
-    "maxes_hint": "Helps the AI with starting weights. The app uses your training history when more accurate.",
+    "maxes_hint": "Helps determine starting weights. The app uses your training history when more accurate.",
     "export_data": "Export data",
     "delete_account": "Delete account",
     "logout": "Log out",
@@ -150,10 +150,10 @@
     "use_this": "Use this",
     "explain": "Explain",
     "remove": "Remove",
-    "ai_suggest": "AI suggestion",
+    "ai_suggest": "More options",
     "swap_no_options": "No alternative found for your equipment",
     "swap_already_in_workout": "This is already in your workout",
-    "swap_ai_failed": "AI could not find an alternative"
+    "swap_ai_failed": "Could not find an alternative"
   },
   "progress": {
     "title": "Progress",
@@ -208,7 +208,7 @@
     "now": "Now"
   },
   "aicoach": {
-    "title": "AI Coach",
+    "title": "Coach",
     "loading": "Analyzing training...",
     "loading_sub": "Reviewing last 3 weeks of data",
     "error": "Something went wrong",
@@ -277,7 +277,7 @@
     "weight_label": "Weight (kg)",
     "weight_hint": "Helps estimate starting weights",
     "frequency_question": "How often?",
-    "frequency_sub": "This helps the AI coach create your workouts",
+    "frequency_sub": "This helps create your workouts",
     "next": "Next",
     "skip": "Skip",
     "continue": "Continue",
@@ -461,7 +461,7 @@
   "analyse": {
     "title": "Analysis",
     "subtitle": "Training Patterns",
-    "cta_title": "AI Training Analysis",
+    "cta_title": "Training Analysis",
     "cta_sub": "Analyze your training patterns and get insights from a virtual personal trainer",
     "run_btn": "Analyze my training",
     "need_more": "Need at least 3 workouts",

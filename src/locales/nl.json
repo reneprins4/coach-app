@@ -62,7 +62,7 @@
     "goal_strength": "Sterker worden",
     "goal_endurance": "Fitter worden",
     "frequency_label": "Trainingsvoorkeur",
-    "frequency_hint": "Wordt als context gebruikt voor je AI trainingsschema — geen automatische planning.",
+    "frequency_hint": "Wordt als context gebruikt voor je trainingsschema — geen automatische planning.",
     "rest_label": "Standaard rusttijd",
     "rest_hint": "De app past dit automatisch aan op basis van jouw inspanning — dit is je startwaarde.",
     "experience_label": "Ervaringsniveau",
@@ -74,7 +74,7 @@
     "equipment_dumbbells": "Dumbbells",
     "equipment_bodyweight": "Eigen lichaam",
     "maxes_label": "Bekende maxima",
-    "maxes_hint": "Helpt de AI met startgewichten. De app gebruikt je trainingshistorie als dat nauwkeuriger is.",
+    "maxes_hint": "Helpt bij het bepalen van startgewichten. De app gebruikt je trainingshistorie als dat nauwkeuriger is.",
     "export_data": "Exporteer data",
     "delete_account": "Account verwijderen",
     "logout": "Uitloggen",
@@ -150,10 +150,10 @@
     "use_this": "Gebruik dit",
     "explain": "Uitleg",
     "remove": "Verwijderen",
-    "ai_suggest": "AI voorstel",
+    "ai_suggest": "Ander voorstel",
     "swap_no_options": "Geen alternatief gevonden voor jouw equipment",
     "swap_already_in_workout": "Dit zit al in je workout",
-    "swap_ai_failed": "AI kon geen alternatief vinden"
+    "swap_ai_failed": "Kon geen alternatief vinden"
   },
   "progress": {
     "title": "Voortgang",
@@ -208,7 +208,7 @@
     "now": "Nu"
   },
   "aicoach": {
-    "title": "AI Coach",
+    "title": "Coach",
     "loading": "Training analyseren...",
     "loading_sub": "Laatste 3 weken data doornemen",
     "error": "Er ging iets mis",
@@ -277,7 +277,7 @@
     "weight_label": "Gewicht (kg)",
     "weight_hint": "Helpt bij het schatten van startgewichten",
     "frequency_question": "Hoe vaak?",
-    "frequency_sub": "Dit helpt de AI coach met het samenstellen van je trainingen",
+    "frequency_sub": "Dit helpt bij het samenstellen van je trainingen",
     "next": "Volgende",
     "skip": "Overslaan",
     "continue": "Doorgaan",
@@ -461,7 +461,7 @@
   "analyse": {
     "title": "Analyse",
     "subtitle": "Trainingspatronen",
-    "cta_title": "AI Trainingsanalyse",
+    "cta_title": "Trainingsanalyse",
     "cta_sub": "Analyseer je trainingspatronen en krijg inzichten van een virtuele personal trainer",
     "run_btn": "Analyseer mijn training",
     "need_more": "Minimaal 3 trainingen nodig",
