@@ -20,24 +20,7 @@ export default function Profile() {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
 
-  // Goals array with translations
-  const GOALS = [
-    {
-      value: 'hypertrophy',
-      label: t('profile.goal_hypertrophy'),
-      sub: i18n.language === 'nl' ? 'Meer spiermassa en een sterk lichaam' : 'More muscle mass and a strong body',
-    },
-    {
-      value: 'strength',
-      label: t('profile.goal_strength'),
-      sub: i18n.language === 'nl' ? 'Meer gewicht tillen, meer kracht' : 'Lift heavier, gain strength',
-    },
-    {
-      value: 'endurance',
-      label: t('profile.goal_endurance'),
-      sub: i18n.language === 'nl' ? 'Langer vol kunnen houden' : 'Build endurance and stamina',
-    },
-  ]
+
 
   const LEVELS = [
     { value: 'beginner', label: t('profile.experience_beginner'), sub: '< 1 year' },
@@ -244,38 +227,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Trainingsdoel */}
-      <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.goal_label')}</label>
-        <p className="mb-3 text-xs text-gray-500">{i18n.language === 'nl' ? 'Wat wil je bereiken? De coach past je trainingen hierop aan.' : 'What do you want to achieve? The coach adapts your workouts accordingly.'}</p>
-        <div className="flex flex-col gap-2">
-          {GOALS.map(g => (
-            <button
-              key={g.value}
-              onClick={() => update('goal', g.value)}
-              className={`flex items-center gap-4 rounded-2xl p-4 text-left transition-colors ${
-                settings.goal === g.value
-                  ? 'bg-cyan-500/15 ring-1 ring-cyan-500'
-                  : 'bg-gray-900 ring-1 ring-gray-800 active:bg-gray-800'
-              }`}
-            >
-              <div className="flex-1">
-                <p className={`text-sm font-semibold ${settings.goal === g.value ? 'text-cyan-400' : 'text-white'}`}>
-                  {g.label}
-                </p>
-                <p className="mt-0.5 text-xs text-gray-500">{g.sub}</p>
-              </div>
-              {settings.goal === g.value && (
-                <div className="h-5 w-5 rounded-full bg-cyan-500 flex items-center justify-center shrink-0">
-                  <Check size={12} className="text-white" strokeWidth={3} />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Feature 1: Trainingsdoel + Fase */}
+      {/* Trainingsdoel + Fase */}
       <div className="mb-6">
         <label className="mb-2 block text-sm font-medium text-gray-300">{t('training_goal.title')}</label>
         <div className="flex flex-col gap-2">
