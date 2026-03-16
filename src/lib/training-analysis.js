@@ -63,6 +63,7 @@ const SPLIT_MUSCLES = {
   'Legs':       ['quads', 'hamstrings', 'glutes', 'core'],
   'Upper':      ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
   'Lower':      ['quads', 'hamstrings', 'glutes', 'core'],
+  'Lower Body': ['quads', 'hamstrings', 'glutes', 'calves'],
   'Full Body':  ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'],
 }
 
@@ -73,6 +74,7 @@ const SPLIT_PRIMARY_MUSCLES = {
   'Legs':       ['quads', 'hamstrings', 'glutes'],
   'Upper':      ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
   'Lower':      ['quads', 'hamstrings', 'glutes'],
+  'Lower Body': ['quads', 'hamstrings', 'glutes'],
   'Full Body':  ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps'],
 }
 

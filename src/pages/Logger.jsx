@@ -17,6 +17,7 @@ import { detectPR } from '../lib/prDetector'
 import { isCompound, calculateWarmupSets } from '../lib/warmupCalculator'
 import { analyzeTraining, scoreSplits, getRelevantHistory } from '../lib/training-analysis'
 import { useAuthContext } from '../App'
+import { supabase } from '../lib/supabase'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
 import FinishModal from '../components/FinishModal'
@@ -55,6 +56,7 @@ export default function Logger() {
   const [plateCalcWeight, setPlateCalcWeight] = useState(null)
   const [showTemplates, setShowTemplates] = useState(false)
   const [showSupersetModal, setShowSupersetModal] = useState(false)
+  const [lastWorkout, setLastWorkout] = useState(null)
   const [supersetMode, setSupersetMode] = useState(null) // { supersets: [...], active: true }
   const [junkWarning, setJunkWarning] = useState(null) // { exercise, message, severity, ... }
   const [trainingIntent, setTrainingIntent] = useState(null) // 'strength' | 'volume' | 'technique' | 'recovery'
@@ -75,6 +77,36 @@ export default function Logger() {
       localStorage.removeItem('coach-pending-workout')
     }
   }, [aw.isActive])
+
+  // Load last workout for "repeat" feature
+  useEffect(() => {
+    if (!user?.id || aw.isActive) return
+    async function loadLastWorkout() {
+      try {
+        const { data } = await supabase
+          .from('workouts')
+          .select('id, created_at, workout_sets(exercise)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+        if (data?.workout_sets?.length > 0) {
+          const exercises = [...new Set(data.workout_sets.map(s => s.exercise))]
+          const preview = exercises.slice(0, 3).join(', ') + (exercises.length > 3 ? ` +${exercises.length - 3}` : '')
+          setLastWorkout({
+            preview,
+            exercises: exercises.map(name => ({ name, sets: [], plan: null }))
+          })
+        }
+      } catch {}
+    }
+    loadLastWorkout()
+  }, [user?.id, aw.isActive])
+
+  const handleRepeatLastWorkout = useCallback(() => {
+    if (!lastWorkout?.exercises) return
+    aw.startWorkout(lastWorkout.exercises)
+  }, [lastWorkout, aw])
 
   function handleFinishClick() {
     setShowConfirmFinish(true)
@@ -571,7 +603,7 @@ export default function Logger() {
     const { loading, generating, error, selectedSplit, generatedWorkout, recoveredMuscles, showSplitPicker, estimatedDuration, exerciseCount, availableTime } = startFlowState
     const timeSelected = availableTime !== null
     const isReady = timeSelected && !loading && !generating && generatedWorkout && !error
-    const splitOptions = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Full Body']
+    const splitOptions = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Lower Body', 'Full Body']
 
     // If user is not logged in, show simple start screen
     if (!user) {
@@ -768,6 +800,17 @@ export default function Logger() {
             <p className="text-xs text-gray-500">{t('logger.templates_saved', { count: templates.templates.length })}</p>
           </button>
         </div>
+
+        {/* Repeat last workout button */}
+        {lastWorkout && (
+          <button
+            onClick={handleRepeatLastWorkout}
+            className="w-full rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-white/10 active:bg-gray-800 active:scale-[0.97] transition-transform mt-3"
+          >
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1">{t('logger.repeat_last')}</p>
+            <p className="text-sm font-bold text-white truncate">{lastWorkout.preview}</p>
+          </button>
+        )}
 
         {/* Split switcher */}
         <div className="mt-6">
@@ -1282,6 +1325,13 @@ function WorkoutMenu({ canSuperset, onSuperset, onStop }) {
 }
 
 // ── EXERCISE BLOCK (REDESIGNED) ──────────────────────────────────────────────
+// Helper function for progressive overload suggestion
+function suggestNextWeight(kg) {
+  if (!kg || kg <= 0) return null
+  const next = kg + 2.5
+  return Math.round(next * 2) / 2 // Nearest 0.5
+}
+
 function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSwap, onOpenPlateCalc, lastUsed, compact }) {
   const { t } = useTranslation()
   const [weight, setWeight] = useState(
@@ -1662,10 +1712,13 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
           </div>
         </div>
 
-        {/* Previous session hint */}
+        {/* Previous session hint with progressive overload suggestion */}
         {prevData && (
           <p className="text-center label-caps">
-            {t('logger.previous')}: <span className="text-gray-400">{prevData.weight}kg × {prevData.reps}</span>
+            {t('logger.last_session')}: <span className="text-gray-400">{prevData.weight}kg × {prevData.reps}</span>
+            {suggestNextWeight(prevData.weight) && (
+              <span className="text-cyan-400 font-medium"> — {t('logger.try')}: {suggestNextWeight(prevData.weight)}kg</span>
+            )}
           </p>
         )}
 
@@ -1694,6 +1747,11 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
             />
           )}
         </div>
+        {showRpe && (
+          <p className="mt-0.5 text-[10px] text-gray-600 text-center">
+            {t('logger.rpe_scale_hint')}
+          </p>
+        )}
 
         {/* Done state banner */}
         {isDone ? (
