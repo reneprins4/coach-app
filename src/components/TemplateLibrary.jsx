@@ -19,9 +19,9 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
           {templates.length === 0 ? (
             <div className="py-12 text-center">
               <Dumbbell size={40} className="mx-auto mb-3 text-gray-700" />
-              <p className="text-gray-500">Nog geen templates</p>
+              <p className="text-gray-500">{t('template_library.no_templates')}</p>
               <p className="mt-1 text-sm text-gray-600">
-                Sla een training op als template om hem hier te zien
+                {t('template_library.no_templates_sub')}
               </p>
             </div>
           ) : (
@@ -46,7 +46,7 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
                       <div>
                         <h3 className="font-bold text-white">{template.name}</h3>
                         <p className="text-xs text-gray-500">
-                          {exercises.length} oefeningen
+                          {exercises.length} {t('template_library.exercises')}
                         </p>
                       </div>
                       <div className="flex gap-1">
@@ -81,7 +81,7 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
                       className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-cyan-500 font-semibold text-white active:scale-[0.97] transition-transform"
                     >
                       <Play size={16} />
-                      Laden
+                      {t('template_library.load')}
                     </button>
                   </div>
                 )

@@ -32,23 +32,29 @@ const ANTAGONIST_PAIRS = [
 function getDetailedMuscleGroup(name) {
   const l = name.toLowerCase()
   
-  // Borst
+  // Borst (bench press VOOR back check — anders matcht "bench" ook /back/ niet maar /lat/ kan conflicteren)
   if (/bench|chest|fly|dip|push.?up|pec/.test(l)) return 'chest'
+
+  // Schouders — VOOR back check: "shoulder press" en "overhead press" moeten hier landen
+  if (/front.?raise/.test(l)) return 'shoulders_front'
+  if (/face.?pull|rear.?delt|reverse.?fly/.test(l)) return 'shoulders_rear'
+  if (/lateral.?raise|side.?raise|upright/.test(l)) return 'shoulders_side'
+  if (/shoulder|delt|shrug/.test(l)) return 'shoulders_front'
+  // Overhead/military press (geen bench, geen leg)
+  if (/overhead|military|(?:press)(?!.*bench)(?!.*leg)(?!.*chest)(?!.*incline)(?!.*decline)/.test(l)) return 'shoulders_front'
+
+  // Hamstrings — VOOR back check: "romanian deadlift", "stiff leg deadlift" hebben "dead" in naam
+  if (/hamstring|leg.?curl|romanian|rdl|stiff.?leg|nordic/.test(l)) return 'hamstrings'
+
+  // Glutes — VOOR back check: "hip thrust" kan conflicteren met /back/
+  if (/glute|hip.?thrust|bridge/.test(l)) return 'glutes'
   
   // Rug
   if (/dead|row|pull|lat|back/.test(l)) return 'back'
   
   // Benen - gedetailleerd
   if (/squat|leg.?press|lunge|extension|hack/.test(l)) return 'quadriceps'
-  if (/hamstring|leg.?curl|romanian|rdl|stiff.?leg/.test(l)) return 'hamstrings'
-  if (/glute|hip.?thrust|bridge/.test(l)) return 'glutes'
   if (/calf/.test(l)) return 'calves'
-  
-  // Schouders - gedetailleerd
-  if (/front.?raise|press(?!.*bench|.*leg)/.test(l)) return 'shoulders_front'
-  if (/face.?pull|rear.?delt|reverse.?fly/.test(l)) return 'shoulders_rear'
-  if (/lateral.?raise|side.?raise|upright/.test(l)) return 'shoulders_side'
-  if (/shoulder|delt|shrug/.test(l)) return 'shoulders_front' // default naar front
   
   // Armen
   if (/curl|bicep|hammer/.test(l)) return 'biceps'

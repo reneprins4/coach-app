@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import { classifyExercise } from '../lib/training-analysis'
 
@@ -290,16 +291,29 @@ export function analyzeInjuryRisks(workouts) {
 }
 
 export default function InjuryRadar({ workouts }) {
+  const { t } = useTranslation()
   const risks = analyzeInjuryRisks(workouts)
   
   if (risks.length === 0) return null
+
+  // Map muscle keys to translated names
+  const getMuscleLabel = (muscle) => {
+    const muscleKey = muscle.toLowerCase()
+    // Check if it's a known muscle from the muscles section
+    const knownMuscles = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core', 'arms', 'legs']
+    if (knownMuscles.includes(muscleKey)) {
+      return t(`muscles.${muscleKey}`)
+    }
+    // Fallback to MUSCLE_NL or muscle name
+    return MUSCLE_NL[muscle] || muscle
+  }
   
   return (
     <div className="mb-5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4">
       <div className="mb-3 flex items-center gap-2">
         <AlertTriangle size={16} className="text-cyan-400" />
         <span className="text-xs font-semibold uppercase tracking-widest text-cyan-400">
-          Blessurerisico detectie
+          {t('injury_radar.title')}
         </span>
       </div>
       <div className="space-y-2">
@@ -310,11 +324,11 @@ export default function InjuryRadar({ workouts }) {
                 ? 'bg-red-500/20 text-red-400' 
                 : 'bg-yellow-500/20 text-yellow-400'
             }`}>
-              {risk.level}
+              {risk.level === 'hoog' ? t('injury_radar.high') : t('injury_radar.moderate')}
             </span>
             <div className="flex-1">
               <p className="text-sm font-medium text-white">
-                {MUSCLE_NL[risk.muscle] || risk.muscle}
+                {getMuscleLabel(risk.muscle)}
               </p>
               <p className="text-xs text-gray-400">{risk.reason}</p>
             </div>

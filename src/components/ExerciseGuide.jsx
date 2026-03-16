@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Youtube, ChevronRight, AlertCircle, Lightbulb, Dumbbell } from 'lucide-react'
 import { getExerciseGuide } from '../lib/anthropic'
 
 export default function ExerciseGuide({ exercise, onClose }) {
+  const { t } = useTranslation()
   const [guide, setGuide] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -64,7 +66,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
         >
           <div className="flex items-center gap-3">
             <Youtube size={20} className="text-cyan-400" />
-            <span className="text-sm font-semibold text-white">Bekijk op YouTube</span>
+            <span className="text-sm font-semibold text-white">{t('exercise_guide.youtube')}</span>
           </div>
           <ChevronRight size={16} className="text-gray-500" />
         </a>
@@ -73,7 +75,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
         {loading && (
           <div className="flex flex-col items-center gap-3 py-10">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
-            <p className="text-sm text-gray-500">Uitleg laden...</p>
+            <p className="text-sm text-gray-500">{t('exercise_guide.loading')}</p>
           </div>
         )}
 
@@ -87,7 +89,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
           <div className="space-y-5">
             {/* Steps */}
             <div>
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Uitvoering</p>
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('exercise_guide.execution')}</p>
               <div className="space-y-2">
                 {guide.steps.map((step, i) => (
                   <div key={i} className="flex gap-3">
@@ -103,7 +105,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
             {/* Muscles */}
             {guide.muscles?.length > 0 && (
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Spieren</p>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('exercise_guide.muscles')}</p>
                 <div className="flex flex-wrap gap-2">
                   {guide.muscles.map((m, i) => (
                     <span key={i} className="rounded-lg bg-gray-800 px-3 py-1 text-xs text-gray-300 flex items-center gap-1.5">
@@ -118,7 +120,7 @@ export default function ExerciseGuide({ exercise, onClose }) {
             {/* Mistakes */}
             {guide.mistakes?.length > 0 && (
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Veelgemaakte fouten</p>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('exercise_guide.common_mistakes')}</p>
                 <div className="space-y-1.5">
                   {guide.mistakes.map((m, i) => (
                     <div key={i} className="flex items-start gap-2">

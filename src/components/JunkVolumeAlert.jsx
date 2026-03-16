@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, X } from 'lucide-react'
 
 /**
@@ -5,6 +6,7 @@ import { AlertTriangle, X } from 'lucide-react'
  * Verschijnt wanneer set-kwaliteit daalt tijdens een oefening
  */
 export default function JunkVolumeAlert({ warning, onDismiss }) {
+  const { t } = useTranslation()
   if (!warning) return null
 
   const isHigh = warning.severity === 'high'
@@ -21,7 +23,7 @@ export default function JunkVolumeAlert({ warning, onDismiss }) {
       <button
         onClick={onDismiss}
         className="absolute right-2 top-2 p-1 text-gray-400 active:text-white"
-        aria-label="Sluiten"
+        aria-label={t('common.close')}
       >
         <X size={16} />
       </button>
@@ -37,7 +39,7 @@ export default function JunkVolumeAlert({ warning, onDismiss }) {
             isHigh ? 'text-red-400' : 'text-orange-400'
           }`}
         >
-          {isHigh ? 'Stop - junk volume' : 'Let op - kwaliteit daalt'}
+          {isHigh ? t('junk_volume.stop') : t('junk_volume.warning')}
         </span>
       </div>
 
@@ -58,7 +60,7 @@ export default function JunkVolumeAlert({ warning, onDismiss }) {
         onClick={onDismiss}
         className="mt-3 text-xs text-gray-400 underline"
       >
-        Ik snap het, ga verder
+        {t('junk_volume.dismiss')}
       </button>
     </div>
   )
