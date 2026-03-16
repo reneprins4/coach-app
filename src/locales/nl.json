@@ -419,7 +419,7 @@
     "of_total": "% van totaal"
   },
   "finish_modal": {
-    "title": "Training voltooid",
+    "title": "Klaar",
     "great_session": "Geweldige sessie",
     "minutes": "minuten",
     "volume": "volume",
@@ -428,7 +428,14 @@
     "template_saved": "Template opgeslagen",
     "template_name_placeholder": "Naam voor template...",
     "save": "Opslaan",
-    "done": "Klaar"
+    "done": "Klaar",
+    "next_workout": "Volgende training",
+    "best_time": "Beste moment",
+    "recovery": "Herstel",
+    "new_pr": "Nieuw PR",
+    "plan_next": "Volgende workout plannen",
+    "ready_on": "Klaar op",
+    "days": "dagen"
   },
   "exercise_picker": {
     "search_placeholder": "Zoek oefeningen...",

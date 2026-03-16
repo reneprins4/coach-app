@@ -45,7 +45,7 @@ export const SET_TARGETS = SET_TARGETS_BY_GOAL.hypertrophy
 
 // Muscle-specific recovery hours (evidence-based)
 // Large/compound-heavy = slower recovery; small/single-joint = faster
-const RECOVERY_HOURS = {
+export const RECOVERY_HOURS = {
   chest:      72,   // 3 days — moderate compound involvement
   back:       72,   // 3 days — large muscle, many joints
   shoulders:  48,   // 2 days — smaller muscle, recovers faster
