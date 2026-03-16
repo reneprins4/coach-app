@@ -585,5 +585,22 @@
     "bar_only": "Bar only",
     "hide": "Hide",
     "set_label": "Set {{n}}"
+  },
+  "volume": {
+    "tab": "Volume",
+    "title": "Training Volume",
+    "period_4w": "4w",
+    "period_12w": "12w",
+    "period_6m": "6m",
+    "avg_per_week": "Avg per week",
+    "best_week": "Best week",
+    "trend": "Trend",
+    "trend_up": "+{{pct}}% vs previous",
+    "trend_down": "-{{pct}}% vs previous",
+    "trend_flat": "Stable",
+    "muscle_breakdown": "Per muscle group",
+    "no_data": "No training data yet",
+    "total_volume": "Total volume",
+    "sets_label": "sets"
   }
 }

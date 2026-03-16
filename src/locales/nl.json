@@ -585,5 +585,22 @@
     "bar_only": "Alleen stang",
     "hide": "Verbergen",
     "set_label": "Set {{n}}"
+  },
+  "volume": {
+    "tab": "Volume",
+    "title": "Trainingsvolume",
+    "period_4w": "4w",
+    "period_12w": "12w",
+    "period_6m": "6m",
+    "avg_per_week": "Gem. per week",
+    "best_week": "Beste week",
+    "trend": "Trend",
+    "trend_up": "+{{pct}}% vs vorige periode",
+    "trend_down": "-{{pct}}% vs vorige periode",
+    "trend_flat": "Stabiel",
+    "muscle_breakdown": "Per spiergroep",
+    "no_data": "Nog geen trainingsdata",
+    "total_volume": "Totaal volume",
+    "sets_label": "sets"
   }
 }

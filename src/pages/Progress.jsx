@@ -1,13 +1,15 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Award, TrendingUp, Trophy } from 'lucide-react'
+import { Search, Award, TrendingUp, Trophy, ArrowUp, ArrowDown, Minus } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import FormDetective from '../components/FormDetective'
 import WeaknessHunter from '../components/WeaknessHunter'
 import PerformanceForecast from '../components/PerformanceForecast'
+import VolumeChart from '../components/VolumeChart'
 import { computeAllPRs, sortPRsForDisplay } from '../lib/prDetector'
+import { groupVolumeByWeek, groupVolumeByMonth, groupVolumeByMuscle, calcTrend, calcAvgWeeklyVolume, findBestWeek } from '../lib/volumeTracker'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -42,9 +44,11 @@ export default function Progress() {
   const [tab, setTab] = useState('exercise')
   const [query, setQuery] = useState('')
   const [selectedExercise, setSelectedExercise] = useState(null)
+  const [volumePeriod, setVolumePeriod] = useState('12w')
 
   const TABS = [
     { id: 'exercise', label: t('progress.tab_exercise') },
+    { id: 'volume',   label: t('volume.tab') },
     { id: 'muscle',   label: t('progress.tab_muscle') },
     { id: 'records',  label: t('pr.tab') },
     { id: 'analyse',  label: t('progress.tab_analyse') },
@@ -132,6 +136,38 @@ export default function Progress() {
     }
     return grouped
   }, [allPRs])
+
+  // Volume tracking data
+  const volumeData = useMemo(() => {
+    if (volumePeriod === '6m') {
+      return groupVolumeByMonth(workouts, 6)
+    } else if (volumePeriod === '4w') {
+      return groupVolumeByWeek(workouts, 4)
+    } else {
+      return groupVolumeByWeek(workouts, 12)
+    }
+  }, [workouts, volumePeriod])
+
+  const volumeStats = useMemo(() => {
+    const weeklyData = groupVolumeByWeek(workouts, 12)
+    const trend = calcTrend(weeklyData, 4)
+    const avgVolume = calcAvgWeeklyVolume(weeklyData)
+    const best = findBestWeek(weeklyData)
+    const weeksForMuscle = volumePeriod === '4w' ? 4 : volumePeriod === '6m' ? 26 : 12
+    const muscleBreakdown = groupVolumeByMuscle(workouts, weeksForMuscle)
+    return { trend, avgVolume, best, muscleBreakdown }
+  }, [workouts, volumePeriod])
+
+  // Muscle breakdown for volume tab (sorted by sets)
+  const muscleSorted = useMemo(() => {
+    const breakdown = volumeStats.muscleBreakdown
+    const entries = Object.entries(breakdown)
+    if (entries.length === 0) return []
+    const max = Math.max(...entries.map(([, v]) => v))
+    return entries
+      .map(([key, sets]) => ({ key, sets, pct: max > 0 ? Math.round((sets / max) * 100) : 0 }))
+      .sort((a, b) => b.sets - a.sets)
+  }, [volumeStats.muscleBreakdown])
 
   if (loading) {
     return (
@@ -275,6 +311,144 @@ export default function Progress() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Volume ─────────────────────────────────────────────────── */}
+      {tab === 'volume' && (
+        <div className="space-y-5">
+          {/* Header with period selector */}
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="label-caps mb-1">{t('volume.title')}</p>
+            </div>
+            <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+              {['4w', '12w', '6m'].map(p => (
+                <button
+                  key={p}
+                  onClick={() => setVolumePeriod(p)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                    volumePeriod === p
+                      ? 'bg-white text-black'
+                      : 'text-gray-500 active:text-gray-300'
+                  }`}
+                >
+                  {t(`volume.period_${p}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Volume chart */}
+          {volumeData.length > 0 ? (
+            <div
+              className="rounded-2xl p-4"
+              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <p className="label-caps mb-4">{t('volume.total_volume')}</p>
+              <VolumeChart data={volumeData} unit="kg" />
+            </div>
+          ) : (
+            <div
+              className="rounded-2xl p-8 text-center"
+              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <p className="text-sm text-gray-500">{t('volume.no_data')}</p>
+            </div>
+          )}
+
+          {/* Stats cards */}
+          <div className="grid grid-cols-3 gap-3">
+            {/* Avg per week */}
+            <div
+              className="rounded-2xl p-4 text-center"
+              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <p className="text-2xl font-black tabular-nums text-white">
+                {volumeStats.avgVolume >= 1000
+                  ? `${(volumeStats.avgVolume / 1000).toFixed(1)}k`
+                  : volumeStats.avgVolume}
+              </p>
+              <p className="label-caps mt-1">{t('volume.avg_per_week')}</p>
+            </div>
+
+            {/* Best week */}
+            <div
+              className="rounded-2xl p-4 text-center"
+              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <p className="text-2xl font-black tabular-nums text-white">
+                {volumeStats.best
+                  ? volumeStats.best.totalVolume >= 1000
+                    ? `${(volumeStats.best.totalVolume / 1000).toFixed(1)}k`
+                    : volumeStats.best.totalVolume
+                  : '—'}
+              </p>
+              <p className="label-caps mt-1">{t('volume.best_week')}</p>
+            </div>
+
+            {/* Trend */}
+            <div
+              className="rounded-2xl p-4 text-center"
+              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <div className="flex items-center justify-center gap-1">
+                {volumeStats.trend.direction === 'up' && (
+                  <>
+                    <ArrowUp size={20} className="text-emerald-400" />
+                    <span className="text-2xl font-black tabular-nums text-emerald-400">
+                      {volumeStats.trend.pct}%
+                    </span>
+                  </>
+                )}
+                {volumeStats.trend.direction === 'down' && (
+                  <>
+                    <ArrowDown size={20} className="text-red-400" />
+                    <span className="text-2xl font-black tabular-nums text-red-400">
+                      {volumeStats.trend.pct}%
+                    </span>
+                  </>
+                )}
+                {volumeStats.trend.direction === 'flat' && (
+                  <>
+                    <Minus size={20} className="text-gray-400" />
+                    <span className="text-2xl font-black tabular-nums text-gray-400">—</span>
+                  </>
+                )}
+              </div>
+              <p className="label-caps mt-1">{t('volume.trend')}</p>
+            </div>
+          </div>
+
+          {/* Muscle breakdown */}
+          {muscleSorted.length > 0 && (
+            <div
+              className="rounded-2xl p-5"
+              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <p className="label-caps mb-4">{t('volume.muscle_breakdown')}</p>
+              <div className="space-y-4">
+                {muscleSorted.map(group => (
+                  <div key={group.key}>
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-sm font-black tracking-tight text-white">
+                        {t(`muscles.${group.key}`, group.key)}
+                      </span>
+                      <span className="tabular-nums text-sm font-bold text-gray-300">
+                        {group.sets} <span className="font-normal text-gray-600">{t('volume.sets_label')}</span>
+                      </span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${group.pct}%`, backgroundColor: '#06b6d4', minWidth: group.sets > 0 ? '6px' : '0' }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
