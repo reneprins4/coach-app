@@ -16,8 +16,11 @@ export default async function handler(req, res) {
   }
 
   const { prompt } = req.body || {}
-  if (!prompt) {
-    return res.status(400).json({ error: 'Missing prompt' })
+  if (!prompt || typeof prompt !== 'string') {
+    return res.status(400).json({ error: 'prompt required' })
+  }
+  if (prompt.length > 50000) {
+    return res.status(400).json({ error: 'prompt too long' })
   }
 
   try {

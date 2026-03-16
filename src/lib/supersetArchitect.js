@@ -124,16 +124,13 @@ export function estimateWorkoutTime(supersets) {
   const setTime = 45 // seconden per set gemiddeld
   
   for (const group of supersets) {
-    const totalSets = group.exercises.reduce((sum, e) => {
-      // Check plan voor geplande sets, anders default 3
-      const sets = e.plan?.sets || e.sets || 3
-      return sum + sets
-    }, 0)
+    const setSizes = group.exercises.map(e => e.plan?.sets || e.sets || 3)
+    const totalSets = setSizes.reduce((sum, s) => sum + s, 0)
     
     if (group.type === 'superset') {
-      // Superset: set A + set B + korte rust, herhaal
-      const setsPerRound = 2
-      const rounds = Math.ceil(totalSets / setsPerRound)
+      // Superset: rounds = max sets of any exercise (uneven sets handled)
+      // e.g., A(3 sets) + B(4 sets) = 4 rounds (last round only has B)
+      const rounds = Math.max(...setSizes)
       totalSeconds += totalSets * setTime + rounds * group.restAfter
     } else {
       // Single: set + rust, herhaal
