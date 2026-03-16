@@ -28,6 +28,9 @@ import SupersetModal from '../components/SupersetModal'
 import JunkVolumeAlert from '../components/JunkVolumeAlert'
 import MomentumIndicator from '../components/MomentumIndicator'
 
+// Session cache key - defined outside component to avoid recreation
+const SESSION_CACHE_KEY = '__kravex_start_flow_cache__'
+
 export default function Logger() {
   const { t } = useTranslation()
   const nav = useNavigate()
@@ -181,7 +184,6 @@ export default function Logger() {
   // Module-level session cache: persists across navigations within the same browser session
   // Prevents re-calling Gemini every time the user navigates back to the Logger tab
   // Key: userId — cache is per-user and cleared when user changes
-  const SESSION_CACHE_KEY = '__kravex_start_flow_cache__'
 
   const [startFlowState, setStartFlowState] = useState(() => {
     // Restore from session cache if available (avoids Gemini call on tab switch)
@@ -206,15 +208,22 @@ export default function Logger() {
       generatedWorkout: null,
       recoveredMuscles: [],
       showSplitPicker: false,
+      estimatedDuration: null,
+      exerciseCount: null,
+      cachedAt: null,
     }
   })
   const generateAbortRef = useRef(null)
+  const hasWorkoutRef = useRef(false)
+  
+  // Sync ref with state for useEffect guard
+  hasWorkoutRef.current = !!startFlowState.generatedWorkout && !startFlowState.error
 
   // Background analysis and workout generation on mount
   useEffect(() => {
     if (aw.isActive || !user?.id) return
-    // Skip if we already have a valid session-cached workout
-    if (startFlowState.generatedWorkout && !startFlowState.error) return
+    // Skip if we already have a valid session-cached workout (use ref for fresh value)
+    if (hasWorkoutRef.current) return
     
     let cancelled = false
     
@@ -313,8 +322,20 @@ export default function Logger() {
         }
         setStartFlowState(prev => ({ ...prev, ...newState }))
         // Save to sessionStorage so navigating back doesn't re-generate
+        // Build cacheData from local variables to avoid stale closure issue
         try {
-          const cacheData = { ...startFlowState, ...newState }
+          const cacheData = {
+            loading: false,
+            generating: false,
+            error: null,
+            showSplitPicker: false,
+            muscleStatus,
+            splits,
+            recommendedSplit,
+            selectedSplit: recommendedSplit,
+            recoveredMuscles,
+            ...newState,
+          }
           sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(cacheData))
         } catch {}
         
@@ -401,13 +422,32 @@ export default function Logger() {
         },
       }))
       
-      setStartFlowState(prev => ({
-        ...prev,
+      const newState = {
         generating: false,
         generatedWorkout: workoutExercises,
         estimatedDuration: result.estimated_duration_min,
         exerciseCount: result.exercises.length,
-      }))
+        cachedAt: Date.now(),
+      }
+      
+      setStartFlowState(prev => ({ ...prev, ...newState }))
+      
+      // Save to sessionStorage so split choice persists across navigations
+      try {
+        const cacheData = {
+          loading: false,
+          generating: false,
+          error: null,
+          showSplitPicker: false,
+          muscleStatus: startFlowState.muscleStatus,
+          splits: startFlowState.splits,
+          recommendedSplit: startFlowState.recommendedSplit,
+          selectedSplit: splitName,
+          recoveredMuscles: startFlowState.recoveredMuscles,
+          ...newState,
+        }
+        sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(cacheData))
+      } catch {}
       
     } catch (err) {
       console.error('Workout generation failed:', err)
@@ -417,11 +457,13 @@ export default function Logger() {
         error: err.message,
       }))
     }
-  }, [user?.id, startFlowState.muscleStatus])
+  }, [user?.id, startFlowState.muscleStatus, startFlowState.splits, startFlowState.recommendedSplit, startFlowState.recoveredMuscles])
 
   // Start the AI-generated workout
   const handleStartAIWorkout = useCallback(() => {
     if (!startFlowState.generatedWorkout) return
+    // Clear session cache so returning after workout completion triggers fresh generation
+    sessionStorage.removeItem(SESSION_CACHE_KEY)
     localStorage.setItem('coach-pending-workout', JSON.stringify(startFlowState.generatedWorkout))
     // Trigger the existing useEffect that handles coach-pending-workout
     const plan = startFlowState.generatedWorkout
