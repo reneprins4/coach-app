@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Minus, Timer, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Calculator, BookOpen, MoreVertical, X } from 'lucide-react'
+import { Plus, Minus, Timer, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Calculator, BookOpen, MoreVertical, X, ChevronDown, Trophy } from 'lucide-react'
 import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
@@ -13,6 +13,8 @@ import { getSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
 import { calculateMomentum } from '../lib/momentumCalculator'
+import { detectPR } from '../lib/prDetector'
+import { isCompound, calculateWarmupSets } from '../lib/warmupCalculator'
 import { useAuthContext } from '../App'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
@@ -828,6 +830,22 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
   const [showGuide, setShowGuide] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef(null)
+  
+  // PR Banner state
+  const [prBanner, setPrBanner] = useState(null)
+  const [historicalSets, setHistoricalSets] = useState([])
+  
+  // Warmup state
+  const [showWarmup, setShowWarmup] = useState(false)
+  const [warmupDone, setWarmupDone] = useState([])
+  
+  // Check if this is a compound exercise
+  const isCompoundExercise = isCompound(exercise.name)
+  const workingWeight = parseFloat(exercise.plan?.weight_kg) || parseFloat(weight) || 0
+  const warmupSets = useMemo(() => {
+    if (!isCompoundExercise || exercise.sets.length > 0) return []
+    return calculateWarmupSets(workingWeight)
+  }, [isCompoundExercise, workingWeight, exercise.sets.length])
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -842,12 +860,19 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
     }
   }, [showMenu])
 
-  // Load previous session data
+  // Load previous session data and historical sets for PR detection
   useEffect(() => {
     let cancelled = false
     if (userId && exercise.name) {
       getExerciseHistory(exercise.name, userId).then(data => {
         if (!cancelled && data.length > 0) {
+          // Store historical sets for PR detection (convert to expected format)
+          setHistoricalSets(data.map(s => ({
+            exercise: exercise.name,
+            weight_kg: s.weight_kg,
+            reps: s.reps
+          })))
+          
           const latest = data[0]
           setPrevData({ weight: latest.weight_kg, reps: latest.reps })
           // Pre-fill reps van vorige sessie als er nog geen plan-default is
@@ -863,11 +888,33 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
     }
     return () => { cancelled = true }
   }, [exercise.name, userId])
+  
+  // Auto-dismiss PR banner after 4 seconds
+  useEffect(() => {
+    if (prBanner) {
+      const timer = setTimeout(() => setPrBanner(null), 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [prBanner])
 
   function handleAdd() {
     const w = parseFloat(weight) || 0
     const r = parseInt(reps, 10)
     if (isNaN(r) || r <= 0) return
+    
+    // Check for PR before adding the set
+    if (historicalSets.length > 0) {
+      const pr = detectPR(exercise.name, w, r, historicalSets)
+      if (pr && pr.isPR) {
+        setPrBanner({
+          weight: w,
+          reps: r,
+          improvement: pr.improvement,
+          type: pr.type
+        })
+      }
+    }
+    
     onAddSet({ weight_kg: w, reps: r, rpe: showRpe ? rpe : null })
     // reps bewaren zodat volgende set direct gelogd kan worden
   }
@@ -955,6 +1002,80 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
 
       {showGuide && <ExerciseGuide exercise={exercise} onClose={() => setShowGuide(false)} />}
 
+      {/* Warmup section for compound exercises */}
+      {isCompoundExercise && exercise.sets.length === 0 && warmupSets.length > 0 && (
+        <div className="border-b border-gray-800 px-4 py-3">
+          <button
+            onClick={() => setShowWarmup(!showWarmup)}
+            className="flex w-full items-center justify-between rounded-xl bg-gray-800/50 px-3 py-2.5 text-left active:bg-gray-700/50"
+          >
+            <span className="text-sm font-semibold text-gray-400">
+              {showWarmup ? t('warmup.title') : t('warmup.calculate')}
+            </span>
+            <ChevronDown 
+              size={16} 
+              className={`text-gray-500 transition-transform ${showWarmup ? 'rotate-180' : ''}`} 
+            />
+          </button>
+          
+          {showWarmup && (
+            <div className="mt-2 space-y-1.5">
+              {warmupSets.map((ws, idx) => {
+                const isDone = warmupDone.includes(idx)
+                return (
+                  <div
+                    key={idx}
+                    className={`flex items-center justify-between rounded-xl px-3 py-2 ${
+                      isDone ? 'bg-green-500/10' : 'bg-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="label-caps w-8 text-right">{idx + 1}</span>
+                      <span className="text-sm font-bold text-white tabular-nums">
+                        {ws.isBarOnly ? (
+                          <span className="text-gray-400">{t('warmup.bar_only')}</span>
+                        ) : (
+                          <>{ws.weight_kg}<span className="text-xs font-normal text-gray-500">kg</span></>
+                        )}
+                        <span className="mx-1.5 text-gray-600">x</span>
+                        {ws.reps}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (isDone) {
+                          setWarmupDone(prev => prev.filter(i => i !== idx))
+                        } else {
+                          const newDone = [...warmupDone, idx]
+                          setWarmupDone(newDone)
+                          // Auto-collapse when all warmup sets done
+                          if (newDone.length === warmupSets.length) {
+                            setTimeout(() => setShowWarmup(false), 300)
+                          }
+                        }
+                      }}
+                      className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition-colors ${
+                        isDone 
+                          ? 'bg-green-500/20 text-green-400' 
+                          : 'bg-gray-800 text-gray-400 active:bg-gray-700'
+                      }`}
+                    >
+                      {isDone ? <Check size={14} /> : t('warmup.done_btn')}
+                    </button>
+                  </div>
+                )
+              })}
+              <button
+                onClick={() => setShowWarmup(false)}
+                className="mt-2 w-full py-1 text-center text-xs text-gray-600 active:text-gray-400"
+              >
+                {t('warmup.hide')}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Logged sets */}
       {exercise.sets.length > 0 && (
         <div className="border-b border-gray-800 px-4 py-3 space-y-1.5">
@@ -976,6 +1097,27 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
               <Check size={14} className="text-green-400 shrink-0" />
             </button>
           ))}
+        </div>
+      )}
+
+      {/* PR Banner */}
+      {prBanner && (
+        <div className="mx-4 mt-3 flex items-center justify-between rounded-xl bg-cyan-500/10 border border-cyan-500/20 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Trophy size={16} className="text-cyan-400 shrink-0" />
+            <span className="text-sm font-bold text-cyan-400">
+              {t('pr.new_record')}: {prBanner.weight}kg · {prBanner.reps} reps
+              {prBanner.improvement > 0 && (
+                <span className="ml-2 text-cyan-300">+{prBanner.improvement}kg</span>
+              )}
+            </span>
+          </div>
+          <button
+            onClick={() => setPrBanner(null)}
+            className="p-1 text-cyan-500 active:text-cyan-300"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 

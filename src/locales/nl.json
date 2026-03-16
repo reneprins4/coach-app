@@ -64,6 +64,10 @@
   },
   "profile": {
     "title": "Profiel",
+    "tab_personal": "Jij",
+    "tab_training": "Training",
+    "tab_account": "Account",
+    "autosaved": "Opgeslagen",
     "language_label": "Taal",
     "goal_label": "Doel",
     "goal_hypertrophy": "Spieren opbouwen",
@@ -563,5 +567,23 @@
     "male": "Man",
     "female": "Vrouw",
     "other": "Anders"
+  },
+  "pr": {
+    "new_record": "Nieuw record",
+    "improvement": "+{{kg}}kg verbetering",
+    "tab": "Records",
+    "all_time_bests": "Alltime records",
+    "no_records": "Nog geen records. Start een training!",
+    "e1rm_label": "Geschatte 1RM",
+    "weight_at_reps": "{{weight}}kg x {{reps}}",
+    "achieved": "Behaald"
+  },
+  "warmup": {
+    "title": "Warming up",
+    "calculate": "Warming up berekenen",
+    "done_btn": "Klaar",
+    "bar_only": "Alleen stang",
+    "hide": "Verbergen",
+    "set_label": "Set {{n}}"
   }
 }

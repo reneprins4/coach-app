@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Award, TrendingUp } from 'lucide-react'
+import { Search, Award, TrendingUp, Trophy } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import FormDetective from '../components/FormDetective'
 import WeaknessHunter from '../components/WeaknessHunter'
 import PerformanceForecast from '../components/PerformanceForecast'
+import { computeAllPRs, sortPRsForDisplay } from '../lib/prDetector'
 
 function e1rm(weight, reps) {
   if (reps <= 0 || weight <= 0) return 0
@@ -45,6 +46,7 @@ export default function Progress() {
   const TABS = [
     { id: 'exercise', label: t('progress.tab_exercise') },
     { id: 'muscle',   label: t('progress.tab_muscle') },
+    { id: 'records',  label: t('pr.tab') },
     { id: 'analyse',  label: t('progress.tab_analyse') },
     { id: 'balans',   label: t('progress.tab_balance') },
   ]
@@ -113,6 +115,23 @@ export default function Progress() {
     const favorite = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
     return { totalWorkouts, totalVol, favorite: favorite?.[0] || '—' }
   }, [workouts])
+
+  // Compute all-time PRs for Records tab
+  const allPRs = useMemo(() => {
+    const prsMap = computeAllPRs(workouts)
+    return sortPRsForDisplay(prsMap)
+  }, [workouts])
+
+  // Group PRs by muscle group for display
+  const prsByMuscle = useMemo(() => {
+    const grouped = {}
+    for (const pr of allPRs) {
+      const mg = pr.muscleGroup || 'other'
+      if (!grouped[mg]) grouped[mg] = []
+      grouped[mg].push(pr)
+    }
+    return grouped
+  }, [allPRs])
 
   if (loading) {
     return (
@@ -307,6 +326,59 @@ export default function Progress() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ── Records ─────────────────────────────────────────────── */}
+      {tab === 'records' && (
+        <div className="space-y-4">
+          {allPRs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Trophy size={48} className="mb-4 text-gray-700" />
+              <p className="text-gray-500">{t('pr.no_records')}</p>
+            </div>
+          ) : (
+            <>
+              <p className="label-caps">{t('pr.all_time_bests')}</p>
+              {Object.entries(prsByMuscle).map(([muscleGroup, prs]) => (
+                <div key={muscleGroup} className="space-y-2">
+                  <p className="label-caps text-cyan-500 capitalize">{t(`muscles.${muscleGroup}`, muscleGroup)}</p>
+                  {prs.map((pr, idx) => (
+                    <div
+                      key={`${pr.exercise}-${idx}`}
+                      className="rounded-2xl p-4"
+                      style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-black tracking-tight text-white truncate">{pr.exercise}</h3>
+                          <div className="mt-1 flex items-center gap-3">
+                            <span className="text-lg font-bold tabular-nums text-white">
+                              {pr.bestWeight}<span className="text-sm font-normal text-gray-500">kg</span>
+                              <span className="mx-1 text-gray-600">x</span>
+                              {pr.bestReps}
+                            </span>
+                            <span className="label-caps text-cyan-500">
+                              {t('pr.e1rm_label')}: {pr.bestE1RM}kg
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-gray-500">
+                            {new Date(pr.date).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-US', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
 

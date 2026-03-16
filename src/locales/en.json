@@ -64,6 +64,10 @@
   },
   "profile": {
     "title": "Profile",
+    "tab_personal": "You",
+    "tab_training": "Training",
+    "tab_account": "Account",
+    "autosaved": "Saved",
     "language_label": "Language",
     "goal_label": "Goal",
     "goal_hypertrophy": "Build muscle",
@@ -563,5 +567,23 @@
     "male": "Male",
     "female": "Female",
     "other": "Other"
+  },
+  "pr": {
+    "new_record": "New record",
+    "improvement": "+{{kg}}kg improvement",
+    "tab": "Records",
+    "all_time_bests": "All-time bests",
+    "no_records": "No records yet. Start a workout!",
+    "e1rm_label": "Est. 1RM",
+    "weight_at_reps": "{{weight}}kg x {{reps}}",
+    "achieved": "Achieved"
+  },
+  "warmup": {
+    "title": "Warm-up",
+    "calculate": "Calculate warm-up",
+    "done_btn": "Done",
+    "bar_only": "Bar only",
+    "hide": "Hide",
+    "set_label": "Set {{n}}"
   }
 }
