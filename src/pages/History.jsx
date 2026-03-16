@@ -45,7 +45,10 @@ export default function History() {
   return (
     <div className="px-4 py-6 pb-28">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tight text-white">{t('history.title')}</h1>
+        <div>
+          <p className="label-caps mb-1">{t('history.subtitle')}</p>
+          <h1 className="text-3xl font-black tracking-tight text-white">{t('history.title')}</h1>
+        </div>
         <button
           onClick={() => nav('/calendar')}
           className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 active:bg-gray-800 active:text-white"

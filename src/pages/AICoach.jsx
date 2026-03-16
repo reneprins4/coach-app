@@ -247,7 +247,7 @@ export default function AICoach() {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center bg-gray-950 px-4">
         <div className="mb-4 h-10 w-10 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
-        <p className="text-lg font-semibold text-white">{t('aicoach.loading')}</p>
+        <p className="text-lg font-black tracking-tight text-white">{t('aicoach.loading')}</p>
         <p className="mt-1 text-sm text-gray-500">{t('aicoach.loading_sub')}</p>
       </div>
     )
@@ -314,7 +314,7 @@ export default function AICoach() {
             <div className="flex gap-2">
               {[45, 60, 75, 90].map(tm => (
                 <button key={tm} onClick={() => setTime(tm)}
-                  className={`flex-1 rounded-full py-2.5 text-sm font-semibold transition-all ${time === tm ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                  className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all ${time === tm ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
                   {tm}m
                 </button>
               ))}
@@ -341,7 +341,7 @@ export default function AICoach() {
                 <div className="flex gap-2">
                   {ENERGY_OPTIONS.map(opt => (
                     <button key={opt.value} onClick={() => setEnergy(opt.value)}
-                      className={`flex-1 rounded-full py-2 text-sm font-medium ${energy === opt.value ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                      className={`flex-1 rounded-xl py-2 text-sm font-bold ${energy === opt.value ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
                       {t(opt.labelKey)}
                     </button>
                   ))}
@@ -355,7 +355,7 @@ export default function AICoach() {
                   <div className="flex flex-wrap gap-2">
                     {splitScores.map(s => (
                       <button key={s.name} onClick={() => setSelectedSplit(s.name)}
-                        className={`rounded-full px-4 py-2 text-sm font-medium ${selectedSplit === s.name ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                        className={`rounded-xl px-4 py-2 text-sm font-bold ${selectedSplit === s.name ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
                         {s.name}
                       </button>
                     ))}
@@ -369,7 +369,7 @@ export default function AICoach() {
                 <div className="flex flex-wrap gap-2">
                   {ALL_MUSCLES.map(m => (
                     <button key={m} onClick={() => toggleFocus(m)}
-                      className={`rounded-full px-3 py-1.5 text-xs font-medium ${focusedMuscles.includes(m) ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
+                      className={`rounded-xl px-3 py-1.5 text-xs font-bold ${focusedMuscles.includes(m) ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-slate-400 ring-1 ring-white/10'}`}>
                       {t(`muscles.${m}`)}
                     </button>
                   ))}

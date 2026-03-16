@@ -59,7 +59,8 @@
     "start_first": "Start your first workout",
     "delete_confirm": "Delete workout?",
     "delete_confirm_sub": "This cannot be undone.",
-    "empty_workout": "Empty workout"
+    "empty_workout": "Empty workout",
+    "subtitle": "Your workouts"
   },
   "profile": {
     "title": "Profile",
@@ -112,7 +113,8 @@
     "privacy": "Privacy Policy",
     "terms_label": "Terms of Use",
     "export_sub": "workouts available",
-    "no_export": "No training data yet"
+    "no_export": "No training data yet",
+    "subtitle": "Account"
   },
   "logger": {
     "train": "Train",

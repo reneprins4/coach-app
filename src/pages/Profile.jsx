@@ -114,7 +114,10 @@ export default function Profile() {
 
       {/* Header */}
       <div className="mb-1 flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tight text-white">{t('profile.title')}</h1>
+        <div>
+          <p className="label-caps mb-1">{t('profile.subtitle')}</p>
+          <h1 className="text-3xl font-black tracking-tight text-white">{t('profile.title')}</h1>
+        </div>
         <button
           onClick={handleLogout}
           disabled={loggingOut}
@@ -141,7 +144,7 @@ export default function Profile() {
             <button
               key={lang.value}
               onClick={() => { i18n.changeLanguage(lang.value); localStorage.setItem('coach-lang', lang.value) }}
-              className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-colors ${
+              className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-colors ${
                 i18n.language === lang.value ? 'bg-white text-black' : 'text-gray-500 active:text-gray-300'
               }`}
             >
@@ -262,7 +265,7 @@ export default function Profile() {
             <button
               key={p.value}
               onClick={() => update('trainingPhase', p.value)}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold ${
+              className={`flex-1 rounded-xl py-2 text-xs font-bold ${
                 settings.trainingPhase === p.value ? 'bg-white text-black' : 'text-gray-500 active:text-gray-300'
               }`}
             >

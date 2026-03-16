@@ -59,7 +59,8 @@
     "start_first": "Start je eerste training",
     "delete_confirm": "Training verwijderen?",
     "delete_confirm_sub": "Dit kan niet ongedaan worden gemaakt.",
-    "empty_workout": "Lege training"
+    "empty_workout": "Lege training",
+    "subtitle": "Jouw trainingen"
   },
   "profile": {
     "title": "Profiel",
@@ -112,7 +113,8 @@
     "privacy": "Privacybeleid",
     "terms_label": "Gebruiksvoorwaarden",
     "export_sub": "trainingen beschikbaar",
-    "no_export": "Nog geen trainingsdata"
+    "no_export": "Nog geen trainingsdata",
+    "subtitle": "Account"
   },
   "logger": {
     "train": "Trainen",
