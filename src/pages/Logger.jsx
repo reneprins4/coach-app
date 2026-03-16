@@ -218,6 +218,20 @@ export default function Logger() {
     return result
   }
 
+  // FinishModal MOET voor de isActive check staan — finishWorkout() zet workout op null
+  // waardoor isActive false wordt VOORDAT showFinish gezet is.
+  if (showFinish && finishResult) {
+    return (
+      <FinishModal
+        result={finishResult}
+        onClose={handleFinishClose}
+        onSaveTemplate={async (name) => {
+          await templates.saveTemplate(name, finishResult.exercises)
+        }}
+      />
+    )
+  }
+
   if (!aw.isActive) {
     const block = getCurrentBlock()
     const phase = block ? PHASES[block.phase] : null
@@ -538,16 +552,6 @@ export default function Logger() {
           addedNames={aw.workout.exercises.map(e => e.name)}
           onSelect={(ex) => aw.addExercise(ex)}
           onClose={() => setShowPicker(false)}
-        />
-      )}
-
-      {showFinish && finishResult && (
-        <FinishModal 
-          result={finishResult} 
-          onClose={handleFinishClose}
-          onSaveTemplate={async (name) => {
-            await templates.saveTemplate(name, finishResult.exercises)
-          }}
         />
       )}
 
