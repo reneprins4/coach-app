@@ -79,6 +79,8 @@ const SPLIT_PRIMARY_MUSCLES = {
 // Map exercise names → muscle groups
 const EXERCISE_MUSCLE_MAP = {
   // Hamstrings — MUST come before back (romanian/stiff-leg deadlifts contain "dead" which matches back)
+  // Glute Ham Raise contains "glute" but is primarily hamstrings - must come before glutes section
+  'glute.*ham':         'hamstrings',
   'romanian':           'hamstrings', 'rdl':          'hamstrings', 'leg.*curl':      'hamstrings',
   'nordic':             'hamstrings', 'good.*morning':'hamstrings', 'stiff.?leg':     'hamstrings',
   'hamstring':          'hamstrings',
@@ -87,6 +89,8 @@ const EXERCISE_MUSCLE_MAP = {
   'kickback':           'glutes', 'abductor':   'glutes',
   // Shoulders — before chest: "reverse fly" would match 'fly'→chest if chest comes first
   // Also: "military press" and "front raise" were missing
+  // Reverse pec deck MUST come before 'pec' pattern!
+  'reverse.*pec':       'shoulders', 'landmine':     'shoulders',
   'overhead.*press':    'shoulders', 'ohp':          'shoulders', 'lateral.*raise': 'shoulders',
   'face.*pull':         'shoulders', 'rear.*delt':   'shoulders', 'arnold':         'shoulders',
   'upright.*row':       'shoulders', 'shoulder.*press': 'shoulders', 'cable.*lateral': 'shoulders',
@@ -97,11 +101,13 @@ const EXERCISE_MUSCLE_MAP = {
   // Triceps — before chest: "close grip bench press" should be triceps
   'close.*grip.*bench': 'triceps', 'pushdown':      'triceps', 'skull.*crush':    'triceps',
   'overhead.*extension':'triceps',  'tricep':        'triceps', 'dip':             'triceps',
-  'cable.*extension':   'triceps',
-  // Chest
+  'cable.*extension':   'triceps', 'jm.*press':     'triceps',
+  // Chest - includes bench variations, machine, floor press, specialty presses
   'bench':              'chest',  'press.*chest':  'chest',  'incline.*press':  'chest',
   'cable.*cross':       'chest',  'crossover':     'chest',  'fly(?!.*reverse)':'chest',
   'pec':                'chest',  'push.?up':      'chest',  'cable.*fly':      'chest',
+  'floor.*press':       'chest',  'spoto':         'chest',  'board.*press':    'chest',
+  'pin.*press':         'chest',  'machine.*press':'chest',  'pullover':        'chest',
   // Back — after hamstrings/glutes (deadlift pattern now simple since special cases handled above)
   'deadlift':           'back',   'row(?!.*upright)': 'back', 'pull.?up':       'back',
   'pullup':             'back',   'chin.?up':      'back',   'pulldown':        'back',
@@ -119,6 +125,42 @@ const EXERCISE_MUSCLE_MAP = {
   'russian.*twist':     'core',   'sit.?up':       'core',
 }
 
+// Compound exercises hit multiple muscle groups (primary + secondary)
+// This is CRITICAL for powerlifters who do big compound lifts
+const COMPOUND_SECONDARY_MUSCLES = {
+  // Deadlift patterns → also hit hamstrings and glutes (not just back)
+  'deadlift':         ['hamstrings', 'glutes'],
+  'trap.*bar':        ['quads', 'hamstrings'],
+  // Squat patterns → also hit hamstrings and glutes (not just quads)
+  'squat':            ['hamstrings', 'glutes'],
+  'leg.*press':       ['hamstrings', 'glutes'],
+  'lunge':            ['hamstrings', 'glutes'],
+  'split.*squat':     ['hamstrings', 'glutes'],
+  'bulgarian':        ['hamstrings', 'glutes'],
+  // Bench patterns → also hit triceps and shoulders (not just chest)
+  'bench(?!.*close)': ['triceps', 'shoulders'],
+  'incline.*press':   ['triceps', 'shoulders'],
+  // Row patterns → also hit biceps
+  'row(?!.*upright)': ['biceps'],
+  'pull.?up':         ['biceps'],
+  'chin.?up':         ['biceps'],
+  'pulldown':         ['biceps'],
+  'lat.*pull':        ['biceps'],
+  // Romanian/stiff leg → also hit glutes
+  'romanian':         ['glutes'],
+  'rdl':              ['glutes'],
+  'stiff.?leg':       ['glutes'],
+  'good.*morning':    ['glutes'],
+  // Hip thrust → also hit hamstrings
+  'hip.*thrust':      ['hamstrings'],
+  'glute.*bridge':    ['hamstrings'],
+  // Overhead press → also hit triceps
+  'overhead.*press':  ['triceps'],
+  'ohp':              ['triceps'],
+  'military.*press':  ['triceps'],
+  'shoulder.*press':  ['triceps'],
+}
+
 export function classifyExercise(exerciseName) {
   if (!exerciseName) return null
   const lower = exerciseName.toLowerCase()
@@ -126,6 +168,29 @@ export function classifyExercise(exerciseName) {
     if (new RegExp(pattern, 'i').test(lower)) return muscle
   }
   return null
+}
+
+/**
+ * Get all muscles trained by an exercise (primary + secondary)
+ * @returns {Object} { primary: string|null, secondary: string[] }
+ */
+export function classifyExerciseFull(exerciseName) {
+  if (!exerciseName) return { primary: null, secondary: [] }
+  const lower = exerciseName.toLowerCase()
+  const primary = classifyExercise(exerciseName)
+  const secondary = []
+  
+  for (const [pattern, muscles] of Object.entries(COMPOUND_SECONDARY_MUSCLES)) {
+    if (new RegExp(pattern, 'i').test(lower)) {
+      for (const m of muscles) {
+        if (m !== primary && !secondary.includes(m)) {
+          secondary.push(m)
+        }
+      }
+    }
+  }
+  
+  return { primary, secondary }
 }
 
 /**
@@ -138,7 +203,9 @@ export function calcMuscleRecovery(muscle, hoursSinceTrained, avgRPE, setsCount)
   // Volume penalty: each set above 6 adds 8% more recovery time needed
   const volumeMult = 1 + Math.max(0, ((setsCount || 0) - 6) * 0.08)
   // Intensity penalty: RPE above 7 slows recovery
-  const rpeMult = 1 + Math.max(0, ((avgRPE || 7) - 7) * 0.15)
+  // Clamp RPE to valid range 1-10, default to 7 if null/undefined
+  const clampedRPE = avgRPE != null ? Math.max(1, Math.min(10, avgRPE)) : 7
+  const rpeMult = 1 + Math.max(0, (clampedRPE - 7) * 0.15)
   const adjustedHours = baseHours * volumeMult * rpeMult
   return Math.min(100, Math.round((hoursSinceTrained / adjustedHours) * 100))
 }
@@ -178,26 +245,52 @@ export function analyzeTraining(workouts, goal = 'hypertrophy') {
 
   for (const w of workouts) {
     const workoutDate = new Date(w.created_at)
+    // Skip future workouts (invalid data)
+    if (workoutDate > now) continue
+    
     const daysAgo = (now - workoutDate) / 86400000
     const hoursAgo = (now - workoutDate) / 3600000
     const isThisWeek = workoutDate >= weekStart
 
     for (const s of (w.workout_sets || [])) {
-      const muscle = classifyExercise(s.exercise)
-      if (!muscle || !muscleStatus[muscle]) continue
+      const { primary, secondary } = classifyExerciseFull(s.exercise)
+      
+      // Process primary muscle (full credit)
+      if (primary && muscleStatus[primary]) {
+        if (isThisWeek) muscleStatus[primary].setsThisWeek++
 
-      if (isThisWeek) muscleStatus[muscle].setsThisWeek++
+        if (
+          muscleStatus[primary].hoursSinceLastTrained === null ||
+          hoursAgo < muscleStatus[primary].hoursSinceLastTrained
+        ) {
+          muscleStatus[primary].daysSinceLastTrained = Math.floor(daysAgo)
+          muscleStatus[primary].hoursSinceLastTrained = hoursAgo
+        }
 
-      if (
-        muscleStatus[muscle].hoursSinceLastTrained === null ||
-        hoursAgo < muscleStatus[muscle].hoursSinceLastTrained
-      ) {
-        muscleStatus[muscle].daysSinceLastTrained = Math.floor(daysAgo)
-        muscleStatus[muscle].hoursSinceLastTrained = hoursAgo
+        if (daysAgo <= 7 && !muscleStatus[primary].recentExercises.includes(s.exercise)) {
+          muscleStatus[primary].recentExercises.push(s.exercise)
+        }
       }
-
-      if (daysAgo <= 7 && !muscleStatus[muscle].recentExercises.includes(s.exercise)) {
-        muscleStatus[muscle].recentExercises.push(s.exercise)
+      
+      // Process secondary muscles (50% credit for compound involvement)
+      // Critical for powerlifters: Deadlift counts for back + hamstrings + glutes
+      for (const secMuscle of secondary) {
+        if (muscleStatus[secMuscle]) {
+          if (isThisWeek) muscleStatus[secMuscle].setsThisWeek += 0.5
+          
+          // Also track recovery for secondary muscles
+          if (
+            muscleStatus[secMuscle].hoursSinceLastTrained === null ||
+            hoursAgo < muscleStatus[secMuscle].hoursSinceLastTrained
+          ) {
+            muscleStatus[secMuscle].daysSinceLastTrained = Math.floor(daysAgo)
+            muscleStatus[secMuscle].hoursSinceLastTrained = hoursAgo
+          }
+          
+          if (daysAgo <= 7 && !muscleStatus[secMuscle].recentExercises.includes(s.exercise + ' (compound)')) {
+            muscleStatus[secMuscle].recentExercises.push(s.exercise + ' (compound)')
+          }
+        }
       }
     }
   }
