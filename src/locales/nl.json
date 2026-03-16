@@ -222,7 +222,8 @@
     "choose_split": "Kies split",
     "advanced_options": "Geavanceerde opties",
     "analysis_required": "Analyse vereist",
-    "recovered": "hersteld"
+    "recovered": "hersteld",
+    "select_time_first": "Kies een tijd"
   },
   "progress": {
     "title": "Voortgang",

@@ -222,7 +222,8 @@
     "choose_split": "Choose split",
     "advanced_options": "Advanced options",
     "analysis_required": "Analysis required",
-    "recovered": "recovered"
+    "recovered": "recovered",
+    "select_time_first": "Select a duration"
   },
   "progress": {
     "title": "Progress",

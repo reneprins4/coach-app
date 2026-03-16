@@ -206,7 +206,7 @@ export default function Logger() {
       estimatedDuration: null,
       exerciseCount: null,
       cachedAt: null,
-      availableTime: getSettings().time || 60,
+      availableTime: null, // null = user hasn't selected a time yet; generation blocked until set
     }
   })
   
@@ -227,9 +227,11 @@ export default function Logger() {
   }, [user?.id])
   const generateAbortRef = useRef(null)
   const hasWorkoutRef = useRef(false)
+  const availableTimeRef = useRef(null)
   
   // Sync ref with state for useEffect guard
   hasWorkoutRef.current = !!startFlowState.generatedWorkout && !startFlowState.error
+  availableTimeRef.current = startFlowState.availableTime
 
   // Background analysis and workout generation on mount
   useEffect(() => {
@@ -270,7 +272,14 @@ export default function Logger() {
           recoveredMuscles,
         }))
         
-        // Step 3: Start AI generation immediately
+        // Step 3: Only generate if user has already selected a time (not null)
+        // If no time selected yet, stop here — generation fires when user taps a time chip
+        const currentTime = availableTimeRef.current
+        if (currentTime === null || currentTime === undefined) {
+          setStartFlowState(prev => ({ ...prev, loading: false, generating: false }))
+          return
+        }
+        
         const settings = getSettings()
         const block = getCurrentBlock()
         const recentHistory = getRelevantHistory(history, recommendedSplit)
@@ -550,8 +559,9 @@ export default function Logger() {
     // Muscle name translations - use i18n
     const getMuscleLabel = (muscle) => t(`muscles.${muscle}`)
 
-    const { loading, generating, error, selectedSplit, generatedWorkout, recoveredMuscles, showSplitPicker, estimatedDuration, exerciseCount } = startFlowState
-    const isReady = !loading && !generating && generatedWorkout && !error
+    const { loading, generating, error, selectedSplit, generatedWorkout, recoveredMuscles, showSplitPicker, estimatedDuration, exerciseCount, availableTime } = startFlowState
+    const timeSelected = availableTime !== null
+    const isReady = timeSelected && !loading && !generating && generatedWorkout && !error
     const splitOptions = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Full Body']
 
     // If user is not logged in, show simple start screen
@@ -688,7 +698,9 @@ export default function Logger() {
                 : 'bg-white/30 text-white/70 cursor-not-allowed'
             }`}
           >
-            {loading || generating ? (
+            {!timeSelected ? (
+              t('logger.select_time_first')
+            ) : loading || generating ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 size={18} className="animate-spin" />
                 {t('logger.loading_workout')}
