@@ -1,171 +1,156 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Target, TrendingDown } from 'lucide-react'
+import { AlertTriangle, CheckCircle } from 'lucide-react'
 import { analyzeWeaknesses } from '../lib/weaknessHunter'
 
-const MG_COLORS = {
-  chest: '#ef4444',
-  back: '#3b82f6', 
-  legs: '#22c55e',
-  shoulders: '#eab308',
-  arms: '#a855f7',
-  core: '#06b6d4'
+// Cyan-based palette — consistent with app accent color
+const MG_ACCENT = {
+  chest:     'bg-cyan-500',
+  back:      'bg-blue-500',
+  legs:      'bg-emerald-500',
+  shoulders: 'bg-violet-500',
+  arms:      'bg-amber-500',
+  core:      'bg-pink-500',
+}
+
+const MG_ACCENT_HEX = {
+  chest:     '#06b6d4',
+  back:      '#3b82f6',
+  legs:      '#10b981',
+  shoulders: '#8b5cf6',
+  arms:      '#f59e0b',
+  core:      '#ec4899',
 }
 
 export default function WeaknessHunter({ workouts }) {
   const { t } = useTranslation()
   const [weeksBack, setWeeksBack] = useState(4)
-  
-  const analysis = useMemo(() => {
-    return analyzeWeaknesses(workouts, weeksBack)
-  }, [workouts, weeksBack])
-  
+
+  const analysis = useMemo(() => analyzeWeaknesses(workouts, weeksBack), [workouts, weeksBack])
   const maxSets = Math.max(...(analysis.sortedGroups || []).map(g => g.sets), 1)
-  
-  // Bepaal bar kleur op basis van volume (relative to max)
-  function getBarColor(sets, key) {
-    const ratio = sets / maxSets
-    if (ratio >= 0.5) return MG_COLORS[key] || '#22c55e' // Spiergroep kleur
-    if (ratio >= 0.25) return '#f59e0b' // Oranje - weinig
-    return '#ef4444' // Rood - heel weinig
-  }
-  
+
   if (!analysis.hasEnoughData) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <Target size={48} className="mb-4 text-gray-600" />
-        <h3 className="mb-2 text-lg font-semibold text-gray-300">{t('weakness.insufficient_data')}</h3>
-        <p className="text-sm text-gray-500">
-          {t('weakness.insufficient_sub', { weeks: weeksBack })}
-        </p>
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-900">
+          <CheckCircle size={24} className="text-gray-600" />
+        </div>
+        <p className="label-caps mb-1">{t('weakness.insufficient_data')}</p>
+        <p className="text-sm text-gray-500">{t('weakness.insufficient_sub', { weeks: weeksBack })}</p>
       </div>
     )
   }
-  
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">{t('weakness.title')}</h2>
-          <p className="text-xs text-gray-500">
-            {analysis.workoutCount} workouts, {analysis.totalSets} {t('common.sets')}
-          </p>
-        </div>
-      </div>
-      
-      {/* Week selector */}
-      <div className="flex gap-2">
-        {[2, 4, 8].map(w => (
-          <button
-            key={w}
-            onClick={() => setWeeksBack(w)}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-              weeksBack === w
-                ? 'bg-red-500 text-white'
-                : 'bg-gray-800 text-gray-400 active:bg-gray-700'
-            }`}
-          >
-            {w} {t('weakness.weeks')}
-          </button>
-        ))}
-      </div>
-      
-      {/* Volume bars */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
-        <h3 className="mb-4 text-sm font-semibold text-gray-300">{t('weakness.volume_per_group')}</h3>
-        <div className="space-y-3">
-          {analysis.sortedGroups.map(group => (
-            <div key={group.key}>
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-sm text-gray-300">{group.name}</span>
-                <span className="text-sm font-medium text-white">{group.sets} {t('common.sets')}</span>
-              </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-gray-800">
-                <div
-                  className="h-full rounded-full transition-all duration-300"
-                  style={{
-                    width: `${(group.sets / maxSets) * 100}%`,
-                    backgroundColor: getBarColor(group.sets, group.key),
-                    minWidth: group.sets > 0 ? '4px' : '0'
-                  }}
-                />
-              </div>
-              <div className="mt-0.5 text-right text-[10px] text-gray-600">
-                {group.percentage}{t('weakness.of_total')}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Legende */}
-        <div className="mt-4 flex flex-wrap gap-3 border-t border-gray-800 pt-3">
-          {analysis.sortedGroups.map(group => (
-            <div key={group.key} className="flex items-center gap-1.5">
-              <div 
-                className="h-2.5 w-2.5 rounded-full" 
-                style={{ backgroundColor: MG_COLORS[group.key] }} 
-              />
-              <span className="text-[10px] text-gray-400">{group.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Imbalances */}
-      {analysis.imbalances.length > 0 && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
-          <div className="mb-3 flex items-center gap-2">
-            <AlertTriangle size={18} className="text-red-500" />
-            <h3 className="text-sm font-semibold text-red-400">{t('weakness.needs_attention')}</h3>
+          <p className="label-caps mb-1">{t('weakness.title')}</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black tracking-tight text-white">{analysis.workoutCount}</span>
+            <span className="text-sm text-gray-500">{t('dashboard.workouts').toLowerCase()}</span>
+            <span className="text-gray-700">·</span>
+            <span className="text-2xl font-black tracking-tight text-white">{analysis.totalSets}</span>
+            <span className="text-sm text-gray-500">{t('common.sets')}</span>
           </div>
-          <div className="space-y-3">
-            {analysis.imbalances.map((imb, idx) => (
-              <div 
-                key={idx}
-                className={`rounded-lg p-3 ${
-                  imb.severity === 'high' 
-                    ? 'border border-red-500/30 bg-red-500/10' 
-                    : 'border border-yellow-500/20 bg-yellow-500/5'
-                }`}
-              >
-                <div className="flex items-start gap-2">
-                  <TrendingDown 
-                    size={16} 
-                    className={imb.severity === 'high' ? 'mt-0.5 text-red-400' : 'mt-0.5 text-yellow-400'} 
+        </div>
+
+        {/* Week selector — tab bar style */}
+        <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+          {[2, 4, 8].map(w => (
+            <button
+              key={w}
+              onClick={() => setWeeksBack(w)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                weeksBack === w
+                  ? 'bg-white text-black'
+                  : 'text-gray-500 active:text-gray-300'
+              }`}
+            >
+              {w}w
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Volume bars card */}
+      <div
+        className="rounded-2xl p-5"
+        style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <p className="label-caps mb-4">{t('weakness.volume_per_group')}</p>
+        <div className="space-y-4">
+          {analysis.sortedGroups.map(group => {
+            const pct = Math.round((group.sets / maxSets) * 100)
+            const hex = MG_ACCENT_HEX[group.key] || '#06b6d4'
+            return (
+              <div key={group.key}>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-black tracking-tight text-white">{group.name}</span>
+                  <span className="tabular-nums text-sm font-bold text-gray-300">
+                    {group.sets} <span className="font-normal text-gray-600">{t('common.sets')}</span>
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${pct}%`, backgroundColor: hex, minWidth: group.sets > 0 ? '6px' : '0' }}
                   />
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-200">
-                      Je <span className="font-semibold text-white">{imb.weakNL}</span> krijgt{' '}
-                      <span className={imb.severity === 'high' ? 'font-bold text-red-400' : 'font-bold text-yellow-400'}>
-                        {imb.deficit}% {t('weakness.less_volume')}
-                      </span>{' '}
-                      {imb.dominantNL}.
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {imb.dominantNL}: {imb.dominantSets} {t('common.sets')} vs {imb.weakNL}: {imb.weakSets} {t('common.sets')}
-                    </p>
-                    <p className="mt-2 text-xs text-gray-400">
-                      {imb.advice}
-                    </p>
-                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
-      )}
-      
-      {/* Geen imbalances */}
-      {analysis.imbalances.length === 0 && (
-        <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4">
-          <div className="flex items-center gap-2">
-            <Target size={18} className="text-green-500" />
-            <div>
-              <h3 className="text-sm font-semibold text-green-400">{t('weakness.good_balance')}</h3>
-              <p className="text-xs text-gray-500">
-                {t('weakness.no_imbalances', { weeks: weeksBack })}
+      </div>
+
+      {/* Imbalances */}
+      {analysis.imbalances.length > 0 ? (
+        <div className="space-y-3">
+          <p className="label-caps">{t('weakness.needs_attention')}</p>
+          {analysis.imbalances.map((imb, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl p-4"
+              style={
+                imb.severity === 'high'
+                  ? { background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }
+                  : { background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }
+              }
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-black tracking-tight text-white">{imb.weakNL}</span>
+                <span
+                  className="rounded-lg px-2 py-0.5 text-xs font-bold tabular-nums"
+                  style={
+                    imb.severity === 'high'
+                      ? { background: 'rgba(239,68,68,0.15)', color: '#f87171' }
+                      : { background: 'rgba(245,158,11,0.15)', color: '#fbbf24' }
+                  }
+                >
+                  -{imb.deficit}%
+                </span>
+              </div>
+              <p className="mb-2 text-xs text-gray-400">
+                {imb.dominantNL}: <span className="font-bold text-gray-300">{imb.dominantSets}</span> {t('common.sets')} &nbsp;·&nbsp;
+                {imb.weakNL}: <span className="font-bold text-gray-300">{imb.weakSets}</span> {t('common.sets')}
               </p>
+              <p className="text-xs text-gray-500">{imb.advice}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          className="rounded-2xl p-4"
+          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+              <CheckCircle size={16} className="text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm font-black tracking-tight text-white">{t('weakness.good_balance')}</p>
+              <p className="text-xs text-gray-500">{t('weakness.no_imbalances', { weeks: weeksBack })}</p>
             </div>
           </div>
         </div>
