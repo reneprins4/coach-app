@@ -76,9 +76,11 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
 
   // Load PRs and next workout recommendation
   useEffect(() => {
+    let cancelled = false
+    
     async function loadData() {
       if (!user?.id) {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
         return
       }
 
@@ -88,12 +90,15 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
         const exerciseNames = [...new Set(result.workout_sets?.map(s => s.exercise) || [])]
         
         if (exerciseNames.length > 0) {
-          const { data: history } = await supabase
+          const { data: history, error: historyError } = await supabase
             .from('workout_sets')
             .select('exercise, weight_kg, reps')
             .eq('user_id', user.id)
             .lt('created_at', workoutDate)
             .in('exercise', exerciseNames)
+          
+          if (historyError) throw historyError
+          if (cancelled) return
           
           const bestByExercise = {}
           for (const h of (history || [])) {
@@ -126,16 +131,21 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
               }
             }
           }
-          setPrs(newPrs)
+          if (!cancelled) setPrs(newPrs)
         }
 
+        if (cancelled) return
+
         // Get next workout recommendation
-        const { data: workouts } = await supabase
+        const { data: workouts, error: workoutsError } = await supabase
           .from('workouts')
           .select('id, created_at, workout_sets(*)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(20)
+
+        if (workoutsError) throw workoutsError
+        if (cancelled) return
 
         // Add current workout to analysis
         const currentWorkout = {
@@ -148,7 +158,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
         const muscleStatus = analyzeTraining(allWorkouts)
         const splits = scoreSplits(muscleStatus)
         
-        if (splits.length > 0) {
+        if (splits.length > 0 && !cancelled) {
           const best = splits[0]
           
           // Find when the slowest recovering muscle of this split is 80%+ ready
@@ -176,11 +186,13 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
       } catch (err) {
         console.error('Failed to load finish data:', err)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     loadData()
+    
+    return () => { cancelled = true }
   }, [user?.id, result])
 
   async function handleSaveTemplate() {
@@ -322,7 +334,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
               {!showTemplateInput ? (
                 <button
                   onClick={() => setShowTemplateInput(true)}
-                  className="flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium text-gray-400 ring-1 ring-gray-700 transition-colors hover:bg-gray-800 active:scale-[0.97]"
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium text-gray-400 ring-1 ring-gray-700 transition-colors active:bg-gray-800 active:scale-[0.97]"
                 >
                   <BookmarkPlus size={16} />
                   {t('finish_modal.save_template')}
@@ -374,7 +386,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
             </button>
             <button
               onClick={handlePlanNext}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium text-gray-400 ring-1 ring-gray-700 transition-colors hover:bg-gray-900 active:scale-[0.97]"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium text-gray-400 ring-1 ring-gray-700 transition-colors active:bg-gray-900 active:scale-[0.97]"
             >
               <Calendar size={16} />
               {t('finish_modal.plan_next')}

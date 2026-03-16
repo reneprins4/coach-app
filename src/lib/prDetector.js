@@ -10,7 +10,8 @@
  * Calculate estimated 1RM using Brzycki-style formula
  */
 export function calculateE1RM(weight, reps) {
-  if (reps <= 0 || weight <= 0) return 0
+  // Guard against NaN - comparisons with NaN return false
+  if (!Number.isFinite(reps) || !Number.isFinite(weight) || reps <= 0 || weight <= 0) return 0
   if (reps === 1) return weight
   return weight * (1 + reps / 30)
 }

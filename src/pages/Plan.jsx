@@ -45,7 +45,11 @@ export default function Plan() {
 
   // Laad blok van Supabase (of localStorage als fallback)
   useEffect(() => {
-    loadBlock(user?.id).then(b => setBlock(b))
+    let cancelled = false
+    loadBlock(user?.id).then(b => {
+      if (!cancelled) setBlock(b)
+    })
+    return () => { cancelled = true }
   }, [user?.id])
 
   const weekTarget = block ? getCurrentWeekTarget(block) : null

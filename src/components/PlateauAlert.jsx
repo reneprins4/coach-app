@@ -1,18 +1,19 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TrendingDown, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { detectPlateaus } from '../lib/plateauDetector'
 
 const STATUS_CONFIG = {
   plateau: {
-    label: 'Plateau',
+    labelKey: 'plateau_alert.plateau',
     bg: 'bg-red-500/10',
     border: 'border-red-500/20',
     text: 'text-red-400',
     badge: 'bg-red-500/20 text-red-400'
   },
   slowing: {
-    label: 'Vertraagt',
+    labelKey: 'plateau_alert.slowing',
     bg: 'bg-yellow-500/10',
     border: 'border-yellow-500/20',
     text: 'text-yellow-400',
@@ -21,6 +22,7 @@ const STATUS_CONFIG = {
 }
 
 export default function PlateauAlert({ workouts, maxItems = 3 }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
 
   const plateaus = useMemo(() => {
@@ -37,10 +39,10 @@ export default function PlateauAlert({ workouts, maxItems = 3 }) {
     <div className="mb-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-          Aandachtspunten
+          {t('plateau_alert.title', 'Attention Points')}
         </p>
         <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-medium text-red-400">
-          {plateaus.length} oefening{plateaus.length !== 1 ? 'en' : ''}
+          {t('plateau_alert.exercise_count', { count: plateaus.length, defaultValue: `${plateaus.length} exercise${plateaus.length !== 1 ? 's' : ''}` })}
         </span>
       </div>
 
@@ -59,7 +61,7 @@ export default function PlateauAlert({ workouts, maxItems = 3 }) {
                   <div className="mb-1 flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-medium text-white truncate">{item.exercise}</span>
                     <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${config.badge}`}>
-                      {config.label}
+                      {t(config.labelKey, item.status === 'plateau' ? 'Plateau' : 'Slowing')}
                     </span>
                   </div>
 
@@ -102,12 +104,12 @@ export default function PlateauAlert({ workouts, maxItems = 3 }) {
           {expanded ? (
             <>
               <ChevronUp size={14} />
-              Minder tonen
+              {t('common.show_less', 'Show less')}
             </>
           ) : (
             <>
               <ChevronDown size={14} />
-              Toon {plateaus.length - maxItems} meer
+              {t('common.show_more', { count: plateaus.length - maxItems, defaultValue: `Show ${plateaus.length - maxItems} more` })}
             </>
           )}
         </button>

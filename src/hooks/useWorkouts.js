@@ -144,21 +144,31 @@ export async function fetchRecentHistory(userId, days = 30) {
   const since = new Date()
   since.setDate(since.getDate() - days)
 
-  const { data: workouts } = await supabase
+  const { data: workouts, error: wErr } = await supabase
     .from('workouts')
     .select('*')
     .eq('user_id', userId)
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: false })
 
+  if (wErr) {
+    console.error('Failed to fetch recent history:', wErr)
+    return []
+  }
+
   if (!workouts?.length) return []
 
   const ids = workouts.map(w => w.id)
-  const { data: sets } = await supabase
+  const { data: sets, error: sErr } = await supabase
     .from('sets')
     .select('*')
     .in('workout_id', ids)
     .eq('user_id', userId)
+
+  if (sErr) {
+    console.error('Failed to fetch sets for history:', sErr)
+    // Return workouts without sets rather than failing completely
+  }
 
   const setsMap = {}
   for (const s of (sets || [])) {
@@ -173,13 +183,18 @@ export async function fetchRecentHistory(userId, days = 30) {
 export async function getExerciseHistory(exerciseName, userId) {
   if (!userId) return []
   
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('sets')
     .select('weight_kg, reps, rpe, created_at, workout_id')
     .eq('exercise', exerciseName)
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(50)
+
+  if (error) {
+    console.error('Failed to fetch exercise history:', error)
+    return []
+  }
 
   return data || []
 }

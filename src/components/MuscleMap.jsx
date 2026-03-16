@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 /**
  * MuscleMap - Fitbod-style muscle recovery visualization
  * Shows front/back body silhouette with color-coded muscle groups
@@ -19,12 +21,14 @@ function getRecoveryPct(muscleStatus, muscle) {
 }
 
 export default function MuscleMap({ muscleStatus = {} }) {
+  const { t } = useTranslation()
+  
   return (
     <div>
       <div className="flex gap-4 justify-center items-start">
         {/* Front view */}
         <div className="flex-1 max-w-[140px]">
-          <p className="text-center label-caps mb-2">Voor</p>
+          <p className="text-center label-caps mb-2">{t('muscle_map.front', 'Front')}</p>
           <svg viewBox="0 0 140 300" className="w-full" style={{ height: 'auto' }}>
             <defs>
               <filter id="glow-front">
@@ -150,7 +154,7 @@ export default function MuscleMap({ muscleStatus = {} }) {
 
         {/* Back view */}
         <div className="flex-1 max-w-[140px]">
-          <p className="text-center label-caps mb-2">Achter</p>
+          <p className="text-center label-caps mb-2">{t('muscle_map.back', 'Back')}</p>
           <svg viewBox="0 0 140 300" className="w-full" style={{ height: 'auto' }}>
             <defs>
               <filter id="glow-back">
@@ -274,13 +278,13 @@ export default function MuscleMap({ muscleStatus = {} }) {
       {/* Legend */}
       <div className="flex justify-center gap-6 mt-4">
         {[
-          { color: '#22c55e', label: 'Klaar' },
-          { color: '#f97316', label: 'Herstellend' },
-          { color: '#ef4444', label: 'Vermoeid' },
-        ].map(({ color, label }) => (
-          <div key={label} className="flex items-center gap-2">
+          { color: '#22c55e', labelKey: 'muscle_map.ready', fallback: 'Ready' },
+          { color: '#f97316', labelKey: 'muscle_map.recovering', fallback: 'Recovering' },
+          { color: '#ef4444', labelKey: 'muscle_map.fatigued', fallback: 'Fatigued' },
+        ].map(({ color, labelKey, fallback }) => (
+          <div key={labelKey} className="flex items-center gap-2">
             <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-            <span className="text-xs text-slate-500">{label}</span>
+            <span className="text-xs text-slate-500">{t(labelKey, fallback)}</span>
           </div>
         ))}
       </div>

@@ -28,8 +28,13 @@ import SupersetModal from '../components/SupersetModal'
 import JunkVolumeAlert from '../components/JunkVolumeAlert'
 import MomentumIndicator from '../components/MomentumIndicator'
 
-// Session cache key - defined outside component to avoid recreation
-const SESSION_CACHE_KEY = '__kravex_start_flow_cache__'
+// Session cache key - will be combined with userId for isolation
+const SESSION_CACHE_PREFIX = '__kravex_start_flow_cache_'
+
+// Get user-specific cache key
+function getSessionCacheKey(userId) {
+  return `${SESSION_CACHE_PREFIX}${userId || 'anonymous'}__`
+}
 
 export default function Logger() {
   const { t } = useTranslation()
@@ -186,17 +191,7 @@ export default function Logger() {
   // Key: userId — cache is per-user and cleared when user changes
 
   const [startFlowState, setStartFlowState] = useState(() => {
-    // Restore from session cache if available (avoids Gemini call on tab switch)
-    try {
-      const raw = sessionStorage.getItem(SESSION_CACHE_KEY)
-      if (raw) {
-        const cached = JSON.parse(raw)
-        // Only use cache if it has a generated workout and isn't stale (< 30 min)
-        if (cached.generatedWorkout && cached.cachedAt && Date.now() - cached.cachedAt < 30 * 60 * 1000) {
-          return { ...cached, loading: false, generating: false, showSplitPicker: false }
-        }
-      }
-    } catch {}
+    // Initial state - cache will be loaded once user is available via useEffect
     return {
       loading: true,
       generating: false,
@@ -213,6 +208,22 @@ export default function Logger() {
       cachedAt: null,
     }
   })
+  
+  // Load session cache when user becomes available
+  useEffect(() => {
+    if (!user?.id) return
+    try {
+      const cacheKey = getSessionCacheKey(user.id)
+      const raw = sessionStorage.getItem(cacheKey)
+      if (raw) {
+        const cached = JSON.parse(raw)
+        // Only use cache if it has a generated workout, matches userId, and isn't stale (< 30 min)
+        if (cached.generatedWorkout && cached.cachedAt && cached.userId === user.id && Date.now() - cached.cachedAt < 30 * 60 * 1000) {
+          setStartFlowState({ ...cached, loading: false, generating: false, showSplitPicker: false })
+        }
+      }
+    } catch {}
+  }, [user?.id])
   const generateAbortRef = useRef(null)
   const hasWorkoutRef = useRef(false)
   
@@ -334,10 +345,13 @@ export default function Logger() {
             recommendedSplit,
             selectedSplit: recommendedSplit,
             recoveredMuscles,
+            userId: user.id, // Store userId for cache isolation
             ...newState,
           }
-          sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(cacheData))
-        } catch {}
+          sessionStorage.setItem(getSessionCacheKey(user.id), JSON.stringify(cacheData))
+        } catch (e) {
+          console.warn('Failed to save session cache:', e)
+        }
         
       } catch (err) {
         if (cancelled) return
@@ -444,10 +458,13 @@ export default function Logger() {
           recommendedSplit: startFlowState.recommendedSplit,
           selectedSplit: splitName,
           recoveredMuscles: startFlowState.recoveredMuscles,
+          userId: user.id, // Store userId for cache isolation
           ...newState,
         }
-        sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(cacheData))
-      } catch {}
+        sessionStorage.setItem(getSessionCacheKey(user.id), JSON.stringify(cacheData))
+      } catch (e) {
+        console.warn('Failed to save session cache:', e)
+      }
       
     } catch (err) {
       console.error('Workout generation failed:', err)
@@ -463,13 +480,19 @@ export default function Logger() {
   const handleStartAIWorkout = useCallback(() => {
     if (!startFlowState.generatedWorkout) return
     // Clear session cache so returning after workout completion triggers fresh generation
-    sessionStorage.removeItem(SESSION_CACHE_KEY)
-    localStorage.setItem('coach-pending-workout', JSON.stringify(startFlowState.generatedWorkout))
+    if (user?.id) {
+      sessionStorage.removeItem(getSessionCacheKey(user.id))
+    }
+    try {
+      localStorage.setItem('coach-pending-workout', JSON.stringify(startFlowState.generatedWorkout))
+    } catch (e) {
+      console.warn('Failed to save pending workout to localStorage:', e)
+    }
     // Trigger the existing useEffect that handles coach-pending-workout
     const plan = startFlowState.generatedWorkout
     aw.startWorkout(plan)
     localStorage.removeItem('coach-pending-workout')
-  }, [startFlowState.generatedWorkout, aw])
+  }, [startFlowState.generatedWorkout, aw, user?.id])
 
   // FinishModal MOET voor de isActive check staan — finishWorkout() zet workout op null
   // waardoor isActive false wordt VOORDAT showFinish gezet is.

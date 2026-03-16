@@ -47,7 +47,12 @@ export function saveSettings(settings, userId = null) {
   if (!merged.memberSince) {
     merged.memberSince = new Date().toISOString()
   }
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged))
+  
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged))
+  } catch (e) {
+    console.error('Failed to save settings locally:', e)
+  }
   
   // If user is logged in, also sync to cloud
   if (userId) {
@@ -118,7 +123,11 @@ export async function mergeSettingsOnLogin(userId) {
     }
     
     // Save merged to localStorage
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged))
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged))
+    } catch (e) {
+      console.error('Failed to save merged settings locally:', e)
+    }
     return merged
   } else {
     // No cloud settings - upload local settings to cloud

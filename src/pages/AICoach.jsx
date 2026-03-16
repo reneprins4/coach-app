@@ -86,12 +86,18 @@ export default function AICoach() {
   const [lastWorkoutInfo, setLastWorkoutInfo] = useState(null)
 
   useEffect(() => {
+    let cancelled = false
+    
     async function analyze() {
       setAnalyzing(true)
       try {
         const history = await fetchRecentHistory(user?.id, 21)
+        if (cancelled) return
+        
         setWorkoutHistory(history)
         const analysis = analyzeTraining(history, settings.goal || 'hypertrophy')
+        if (cancelled) return
+        
         setMuscleStatus(analysis)
         
         // Calculate last workout info for consecutive training detection
@@ -103,10 +109,14 @@ export default function AICoach() {
           // Detect split from exercises in last workout
           const lastSplit = detectSplitFromWorkout(lastWorkout)
           lwInfo = { split: lastSplit, hoursSince }
-          setLastWorkoutInfo(lwInfo)
+          if (!cancelled) setLastWorkoutInfo(lwInfo)
         }
         
+        if (cancelled) return
+        
         const scores = scoreSplits(analysis, lwInfo, settings.experienceLevel || 'intermediate')
+        if (cancelled) return
+        
         setSplitScores(scores)
         if (scores.length > 0) setSelectedSplit(scores[0].name)
 
@@ -116,15 +126,17 @@ export default function AICoach() {
           .filter(imb => imb.severity === 'high')
           .map(imb => imb.weak)
           .filter(Boolean)
-        if (weakMuscles.length > 0) {
+        if (weakMuscles.length > 0 && !cancelled) {
           setFocusedMuscles(weakMuscles)
         }
       } catch (err) {
         console.error('Analysis failed:', err)
       }
-      setTimeout(() => setAnalyzing(false), 800)
+      if (!cancelled) setTimeout(() => setAnalyzing(false), 800)
     }
     analyze()
+    
+    return () => { cancelled = true }
   }, [user?.id])
 
   // Helper to detect split type from workout exercises using unified classifier
@@ -160,7 +172,11 @@ export default function AICoach() {
     setError(null)
     try {
       const relevantHistory = getRelevantHistory(workoutHistory, selectedSplit)
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        setError(t('aicoach.auth_error', 'Authentication error. Please log in again.'))
+        return
+      }
       const workout = await generateScientificWorkout({
         muscleStatus,
         recommendedSplit: selectedSplit,

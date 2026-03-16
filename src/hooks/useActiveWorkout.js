@@ -8,8 +8,23 @@ function load(key) {
   try { return JSON.parse(localStorage.getItem(key)) } catch { return null }
 }
 function save(key, val) {
-  if (val) localStorage.setItem(key, JSON.stringify(val))
-  else localStorage.removeItem(key)
+  try {
+    if (val) localStorage.setItem(key, JSON.stringify(val))
+    else localStorage.removeItem(key)
+  } catch (e) {
+    if (e.name === 'QuotaExceededError') {
+      console.warn('localStorage quota exceeded, clearing old data...')
+      // Try to clear less important caches first
+      try {
+        localStorage.removeItem('coach-last-used')
+        if (val) localStorage.setItem(key, JSON.stringify(val))
+      } catch {
+        console.error('Failed to save even after clearing cache')
+      }
+    } else {
+      console.warn('localStorage unavailable:', e)
+    }
+  }
 }
 
 export function useActiveWorkout(userId) {
