@@ -66,6 +66,16 @@ const SPLIT_MUSCLES = {
   'Full Body':  ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'],
 }
 
+// Primaire (zware) spieren per split — core is altijd secundair (24u herstel)
+const SPLIT_PRIMARY_MUSCLES = {
+  'Push':       ['chest', 'shoulders', 'triceps'],
+  'Pull':       ['back', 'biceps'],
+  'Legs':       ['quads', 'hamstrings', 'glutes'],
+  'Upper':      ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
+  'Lower':      ['quads', 'hamstrings', 'glutes'],
+  'Full Body':  ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps'],
+}
+
 // Map exercise names → muscle groups
 const EXERCISE_MUSCLE_MAP = {
   // Hamstrings — MUST come before back (romanian/stiff-leg deadlifts contain "dead" which matches back)
@@ -235,16 +245,29 @@ export function scoreSplits(muscleStatus, lastWorkoutInfo = null, experienceLeve
   const scores = {}
   for (const [splitName, muscles] of Object.entries(SPLIT_MUSCLES)) {
     let score = 0
+    const primaryMuscles = SPLIT_PRIMARY_MUSCLES[splitName] || muscles
+
     for (const muscle of muscles) {
       const ms = muscleStatus[muscle]
       if (!ms) continue
+      const isPrimary = primaryMuscles.includes(muscle)
+      // Primaire spieren wegen zwaarder; core/stabilisatoren minder
+      const recoveryWeight = isPrimary ? 0.3 : 0.1
       // Recovery score: higher recovery = better time to train
-      score += ms.recoveryPct * 0.3
-      // Volume deficit: need to hit weekly targets
-      const deficit = Math.max(0, ms.target.min - ms.setsThisWeek)
-      score += deficit * 2
-      // Penalize muscles that are still fatigued
-      if (ms.recoveryPct < 50) score -= 15
+      score += ms.recoveryPct * recoveryWeight
+      // Volume deficit: need to hit weekly targets (alleen primaire spieren)
+      if (isPrimary) {
+        const deficit = Math.max(0, ms.target.min - ms.setsThisWeek)
+        score += deficit * 2
+      }
+      // Penalize muscles that are still fatigued — harder for primary muscles
+      if (ms.recoveryPct < 50) score -= isPrimary ? 25 : 8
+    }
+
+    // Harde penalty als MEERDERHEID van de primaire spieren nog vermoeid is
+    const fatiguedPrimary = primaryMuscles.filter(m => (muscleStatus[m]?.recoveryPct ?? 100) < 50)
+    if (fatiguedPrimary.length > 0 && fatiguedPrimary.length >= primaryMuscles.length / 2) {
+      score -= 40
     }
     
     // Penalty for Full Body if last workout was also Full Body and <24h ago
