@@ -557,6 +557,12 @@ export default function Profile() {
             <Link to="/terms"   className="text-xs text-gray-500 active:text-gray-400">{t('profile.terms_label')}</Link>
           </div>
 
+          {/* Versie info */}
+          <div className="rounded-2xl bg-gray-900 px-4 py-3 flex items-center justify-between">
+            <span className="text-xs text-gray-600 font-mono">versie</span>
+            <span className="text-xs text-gray-500 font-mono">{__GIT_HASH__} · {__GIT_DATE__}</span>
+          </div>
+
           {/* Account verwijderen */}
           <div className="rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(239,68,68,0.10)' }}>
             <p className="mb-2 text-sm font-bold text-red-400">{t('profile.danger_zone')}</p>
