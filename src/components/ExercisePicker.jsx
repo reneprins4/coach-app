@@ -1,19 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Search } from 'lucide-react'
 import { useFilteredExercises } from '../hooks/useExercises'
 
 const MUSCLE_FILTERS = ['all', 'chest', 'back', 'legs', 'shoulders', 'arms', 'core']
-const MUSCLE_NL = {
-  all: 'Alles',
-  chest: 'Borst',
-  back: 'Rug',
-  legs: 'Benen',
-  shoulders: 'Schouders',
-  arms: 'Armen',
-  core: 'Core',
-}
 const EQUIPMENT_FILTERS = [
-  { value: null, label: 'Alles' },
+  { value: null, labelKey: 'exercise_picker.all' },
   { value: 'barbell', label: 'Barbell' },
   { value: 'dumbbell', label: 'Dumbbell' },
   { value: 'cable', label: 'Cable' },
@@ -30,6 +22,7 @@ const EQUIPMENT_BADGE = {
 }
 
 export default function ExercisePicker({ exercises, addedNames = [], onSelect, onClose }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [muscleFilter, setMuscleFilter] = useState(null)
   const [equipmentFilter, setEquipmentFilter] = useState(null)
@@ -49,7 +42,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Zoek oefeningen..."
+            placeholder={t('exercise_picker.search_placeholder')}
             autoFocus
             className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
           />
@@ -68,7 +61,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
                 : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
             }`}
           >
-            {MUSCLE_NL[mg] || mg}
+            {mg === 'all' ? t('exercise_picker.all') : t(`muscles.${mg}`)}
           </button>
         ))}
       </div>
@@ -77,7 +70,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
       <div className="flex gap-2 overflow-x-auto px-4 py-2 scrollbar-none">
         {EQUIPMENT_FILTERS.map(eq => (
           <button
-            key={eq.label}
+            key={eq.label || eq.labelKey}
             onClick={() => setEquipmentFilter(eq.value)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               equipmentFilter === eq.value
@@ -85,7 +78,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
                 : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
             }`}
           >
-            {eq.label}
+            {eq.labelKey ? t(eq.labelKey) : eq.label}
           </button>
         ))}
       </div>
@@ -93,7 +86,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
       {/* Results */}
       <div className="flex-1 overflow-y-auto">
         {available.length === 0 && (
-          <p className="px-4 py-12 text-center text-gray-500">Geen oefeningen gevonden</p>
+          <p className="px-4 py-12 text-center text-gray-500">{t('exercise_picker.no_results')}</p>
         )}
         {available.map(exercise => (
           <button

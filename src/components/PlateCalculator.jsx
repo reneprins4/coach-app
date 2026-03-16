@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Calculator } from 'lucide-react'
 
 const PLATES = [25, 20, 15, 10, 5, 2.5, 1.25]
@@ -37,6 +38,7 @@ function calculatePlates(targetWeight, barWeight) {
 }
 
 export default function PlateCalculator({ targetWeight, onClose }) {
+  const { t } = useTranslation()
   const [barWeight, setBarWeight] = useState(20)
   const [customWeight, setCustomWeight] = useState(targetWeight?.toString() || '')
   
@@ -74,7 +76,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
         <div className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Calculator size={20} className="text-cyan-500" />
-            <h2 className="text-lg font-bold text-white">Plate Calculator</h2>
+            <h2 className="text-lg font-bold text-white">{t('plate_calc.title')}</h2>
           </div>
           <button onClick={onClose} className="rounded-xl p-2 text-gray-500 active:bg-gray-800">
             <X size={20} />
@@ -84,7 +86,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
         {/* Weight input */}
         <div className="mb-4">
           <label className="mb-2 block label-caps">
-            Totaal gewicht (kg)
+            {t('plate_calc.total_weight')}
           </label>
           <input
             type="number"
@@ -99,7 +101,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
         {/* Bar weight selector */}
         <div className="mb-5">
           <label className="mb-2 block label-caps">
-            Stang gewicht
+            {t('plate_calc.bar_weight')}
           </label>
           <div className="flex gap-2">
             {BAR_WEIGHTS.map((w) => (
@@ -123,16 +125,16 @@ export default function PlateCalculator({ targetWeight, onClose }) {
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
             {weight < barWeight ? (
               <p className="text-center text-sm text-gray-400">
-                Gewicht moet hoger zijn dan stang ({barWeight}kg)
+                {t('plate_calc.too_light')} ({barWeight}kg)
               </p>
             ) : groupedPlates.length === 0 ? (
               <p className="text-center text-sm text-gray-400">
-                Alleen de stang ({barWeight}kg)
+                {t('plate_calc.bar_only')} ({barWeight}kg)
               </p>
             ) : (
               <>
                 <p className="mb-3 label-caps">
-                  Per kant van de stang
+                  {t('plate_calc.per_side')}
                 </p>
                 <div className="mb-4 flex flex-wrap gap-2">
                   {groupedPlates.map(({ weight, count }) => (
@@ -149,8 +151,8 @@ export default function PlateCalculator({ targetWeight, onClose }) {
                 {!result.exact && (
                   <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
                     <p className="text-xs text-yellow-400">
-                      Exacte gewicht niet haalbaar. Dichtstbijzijnde: {result.achievable}kg
-                      {result.difference > 0 && ` (${result.difference}kg verschil)`}
+                      {t('plate_calc.not_exact')}. {result.achievable}kg
+                      {result.difference > 0 && ` (${result.difference}kg)`}
                     </p>
                   </div>
                 )}
@@ -158,7 +160,7 @@ export default function PlateCalculator({ targetWeight, onClose }) {
                 {result.exact && (
                   <div className="text-center">
                     <p className="text-xs text-gray-500">
-                      {barWeight}kg stang + 2× ({result.plates.reduce((s, p) => s + p, 0)}kg) = {weight}kg
+                      {barWeight}kg + 2× ({result.plates.reduce((s, p) => s + p, 0)}kg) = {weight}kg
                     </p>
                   </div>
                 )}
