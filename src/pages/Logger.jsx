@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Minus, Timer, Check, Sparkles, RefreshCw, Loader2, Dumbbell, CalendarDays, ChevronRight, Calculator, BookOpen, MoreVertical, X, ChevronDown, Trophy } from 'lucide-react'
@@ -6,8 +6,8 @@ import { useActiveWorkout } from '../hooks/useActiveWorkout'
 import { useExercises } from '../hooks/useExercises'
 import { useRestTimer } from '../hooks/useRestTimer'
 import { useTemplates } from '../hooks/useTemplates'
-import { getExerciseHistory } from '../hooks/useWorkouts'
-import { getExerciseSubstitute } from '../lib/anthropic'
+import { getExerciseHistory, fetchRecentHistory } from '../hooks/useWorkouts'
+import { getExerciseSubstitute, generateScientificWorkout } from '../lib/anthropic'
 import { getSubstituteOptions } from '../lib/exerciseSubstitutes'
 import { getSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
@@ -15,6 +15,7 @@ import { detectJunkVolume } from '../lib/junkVolumeDetector'
 import { calculateMomentum } from '../lib/momentumCalculator'
 import { detectPR } from '../lib/prDetector'
 import { isCompound, calculateWarmupSets } from '../lib/warmupCalculator'
+import { analyzeTraining, scoreSplits, getRelevantHistory } from '../lib/training-analysis'
 import { useAuthContext } from '../App'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
@@ -176,47 +177,231 @@ export default function Logger() {
     setJunkWarning(null)
   }
 
-  // ── Quick Setup state (vrije training configurator) ─────────────────────────
-  const [quickSetup, setQuickSetup] = useState({ show: false, muscles: [], duration: 45 })
+  // ── New Workout Start Flow State ─────────────────────────────────────────────
+  const [startFlowState, setStartFlowState] = useState({
+    loading: true,
+    generating: false,
+    error: null,
+    muscleStatus: null,
+    splits: [],
+    recommendedSplit: null,
+    selectedSplit: null,
+    generatedWorkout: null,
+    recoveredMuscles: [],
+    showSplitPicker: false,
+  })
+  const generateAbortRef = useRef(null)
 
-  const MUSCLE_LABELS = {
-    chest: 'Borst', back: 'Rug', shoulders: 'Schouders',
-    legs: 'Benen', arms: 'Armen', core: 'Core',
-  }
-  const ALL_MUSCLES = Object.keys(MUSCLE_LABELS)
-  const DURATIONS = [30, 45, 60, 90]
-
-  function toggleMuscle(m) {
-    setQuickSetup(prev => ({
-      ...prev,
-      muscles: prev.muscles.includes(m) ? prev.muscles.filter(x => x !== m) : [...prev.muscles, m],
-    }))
-  }
-
-  function buildQuickWorkout(selectedMuscles, durationMin) {
-    const exPerMuscle   = durationMin <= 30 ? 1 : durationMin <= 60 ? 2 : 3
-    const setsPerEx     = durationMin <= 30 ? 3 : durationMin <= 60 ? 3 : 4
-    const targetMuscles = selectedMuscles.length > 0 ? selectedMuscles : ALL_MUSCLES.slice(0, 2)
-    const result = []
-
-    for (const muscle of targetMuscles) {
-      const pool = exercises.filter(e => e.muscle_group === muscle)
-      const compounds  = pool.filter(e => e.category === 'compound')
-      const isolations = pool.filter(e => e.category === 'isolation')
-      const picked = [...compounds.slice(0, Math.ceil(exPerMuscle / 2)), ...isolations.slice(0, Math.floor(exPerMuscle / 2))]
-        .slice(0, exPerMuscle)
-
-      for (const ex of picked) {
-        result.push({
+  // Background analysis and workout generation on mount
+  useEffect(() => {
+    if (aw.isActive || !user?.id) return
+    
+    let cancelled = false
+    
+    async function analyzeAndGenerate() {
+      try {
+        // Step 1: Fetch workout history
+        const history = await fetchRecentHistory(user.id, 20)
+        
+        if (cancelled) return
+        
+        // Step 2: Analyze training status
+        const muscleStatus = analyzeTraining(history)
+        const splits = scoreSplits(muscleStatus)
+        const recommendedSplit = splits[0]?.name || 'Full Body'
+        
+        // Find recovered muscles for display
+        const recoveredMuscles = Object.entries(muscleStatus)
+          .filter(([_, status]) => status.status === 'ready')
+          .map(([muscle]) => muscle)
+          .slice(0, 3)
+        
+        if (cancelled) return
+        
+        setStartFlowState(prev => ({
+          ...prev,
+          loading: false,
+          generating: true,
+          muscleStatus,
+          splits,
+          recommendedSplit,
+          selectedSplit: recommendedSplit,
+          recoveredMuscles,
+        }))
+        
+        // Step 3: Start AI generation immediately
+        const settings = getSettings()
+        const block = getCurrentBlock()
+        const recentHistory = getRelevantHistory(history, recommendedSplit)
+        
+        const preferences = {
+          name: settings.name,
+          gender: settings.gender,
+          bodyweight: settings.bodyweight,
+          experienceLevel: settings.experienceLevel,
+          equipment: settings.equipment,
+          goal: settings.goal,
+          frequency: settings.frequency,
+          time: settings.time || 60,
+          energy: 'medium',
+          benchMax: settings.benchMax,
+          squatMax: settings.squatMax,
+          deadliftMax: settings.deadliftMax,
+          focusedMuscles: settings.focusedMuscles,
+          priorityMuscles: settings.priorityMuscles,
+          trainingGoal: settings.trainingGoal,
+          trainingPhase: block?.phase,
+          blockWeek: block?.currentWeek,
+          blockTotalWeeks: block ? PHASES[block.phase]?.weeks : null,
+          isDeload: block?.phase === 'deload',
+          targetRPE: block ? getCurrentWeekTarget(block)?.rpe : null,
+          targetRepRange: block ? getCurrentWeekTarget(block)?.reps : null,
+        }
+        
+        const result = await generateScientificWorkout({
+          muscleStatus,
+          recommendedSplit,
+          recentHistory,
+          preferences,
+          userId: user.id,
+        })
+        
+        if (cancelled) return
+        
+        // Transform AI result to workout format
+        const workoutExercises = result.exercises.map(ex => ({
           name: ex.name,
           muscle_group: ex.muscle_group,
           sets: [],
-          plan: { sets: setsPerEx, reps_min: 8, reps_max: 12, weight_kg: null },
-        })
+          plan: {
+            sets: ex.sets,
+            reps_min: ex.reps_min,
+            reps_max: ex.reps_max,
+            weight_kg: ex.weight_kg,
+            rpe_target: ex.rpe_target,
+            rest_seconds: ex.rest_seconds,
+            notes: ex.notes,
+          },
+        }))
+        
+        setStartFlowState(prev => ({
+          ...prev,
+          generating: false,
+          generatedWorkout: workoutExercises,
+          estimatedDuration: result.estimated_duration_min,
+          exerciseCount: result.exercises.length,
+        }))
+        
+      } catch (err) {
+        if (cancelled) return
+        console.error('Workout generation failed:', err)
+        setStartFlowState(prev => ({
+          ...prev,
+          loading: false,
+          generating: false,
+          error: err.message,
+        }))
       }
     }
-    return result
-  }
+    
+    analyzeAndGenerate()
+    
+    return () => { cancelled = true }
+  }, [user?.id, aw.isActive])
+
+  // Generate workout for a different split
+  const generateForSplit = useCallback(async (splitName) => {
+    if (!user?.id || !startFlowState.muscleStatus) return
+    
+    setStartFlowState(prev => ({
+      ...prev,
+      selectedSplit: splitName,
+      generating: true,
+      generatedWorkout: null,
+      error: null,
+      showSplitPicker: false,
+    }))
+    
+    try {
+      const history = await fetchRecentHistory(user.id, 20)
+      const settings = getSettings()
+      const block = getCurrentBlock()
+      const recentHistory = getRelevantHistory(history, splitName)
+      
+      const preferences = {
+        name: settings.name,
+        gender: settings.gender,
+        bodyweight: settings.bodyweight,
+        experienceLevel: settings.experienceLevel,
+        equipment: settings.equipment,
+        goal: settings.goal,
+        frequency: settings.frequency,
+        time: settings.time || 60,
+        energy: 'medium',
+        benchMax: settings.benchMax,
+        squatMax: settings.squatMax,
+        deadliftMax: settings.deadliftMax,
+        focusedMuscles: settings.focusedMuscles,
+        priorityMuscles: settings.priorityMuscles,
+        trainingGoal: settings.trainingGoal,
+        trainingPhase: block?.phase,
+        blockWeek: block?.currentWeek,
+        blockTotalWeeks: block ? PHASES[block.phase]?.weeks : null,
+        isDeload: block?.phase === 'deload',
+        targetRPE: block ? getCurrentWeekTarget(block)?.rpe : null,
+        targetRepRange: block ? getCurrentWeekTarget(block)?.reps : null,
+      }
+      
+      const result = await generateScientificWorkout({
+        muscleStatus: startFlowState.muscleStatus,
+        recommendedSplit: splitName,
+        recentHistory,
+        preferences,
+        userId: user.id,
+      })
+      
+      const workoutExercises = result.exercises.map(ex => ({
+        name: ex.name,
+        muscle_group: ex.muscle_group,
+        sets: [],
+        plan: {
+          sets: ex.sets,
+          reps_min: ex.reps_min,
+          reps_max: ex.reps_max,
+          weight_kg: ex.weight_kg,
+          rpe_target: ex.rpe_target,
+          rest_seconds: ex.rest_seconds,
+          notes: ex.notes,
+        },
+      }))
+      
+      setStartFlowState(prev => ({
+        ...prev,
+        generating: false,
+        generatedWorkout: workoutExercises,
+        estimatedDuration: result.estimated_duration_min,
+        exerciseCount: result.exercises.length,
+      }))
+      
+    } catch (err) {
+      console.error('Workout generation failed:', err)
+      setStartFlowState(prev => ({
+        ...prev,
+        generating: false,
+        error: err.message,
+      }))
+    }
+  }, [user?.id, startFlowState.muscleStatus])
+
+  // Start the AI-generated workout
+  const handleStartAIWorkout = useCallback(() => {
+    if (!startFlowState.generatedWorkout) return
+    localStorage.setItem('coach-pending-workout', JSON.stringify(startFlowState.generatedWorkout))
+    // Trigger the existing useEffect that handles coach-pending-workout
+    const plan = startFlowState.generatedWorkout
+    aw.startWorkout(plan)
+    localStorage.removeItem('coach-pending-workout')
+  }, [startFlowState.generatedWorkout, aw])
 
   // FinishModal MOET voor de isActive check staan — finishWorkout() zet workout op null
   // waardoor isActive false wordt VOORDAT showFinish gezet is.
@@ -239,119 +424,236 @@ export default function Logger() {
     const dateStr = today.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })
     const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
 
+    // Muscle name translations
+    const MUSCLE_NL = {
+      chest: 'Borst', back: 'Rug', shoulders: 'Schouders',
+      quads: 'Bovenbenen', hamstrings: 'Hamstrings', glutes: 'Billen',
+      biceps: 'Biceps', triceps: 'Triceps', core: 'Core',
+    }
+
+    const { loading, generating, error, selectedSplit, generatedWorkout, recoveredMuscles, showSplitPicker, estimatedDuration, exerciseCount } = startFlowState
+    const isReady = !loading && !generating && generatedWorkout && !error
+    const splitOptions = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Full Body']
+
+    // If user is not logged in, show simple start screen
+    if (!user) {
+      return (
+        <div className="min-h-[80vh] px-5 py-10">
+          <p className="mb-1 text-xs font-medium uppercase tracking-widest text-gray-500">{formattedDate}</p>
+          <h1 className="mb-10 text-4xl font-black tracking-tight text-white">{t('logger.train')}</h1>
+          
+          <button
+            onClick={() => aw.startWorkout()}
+            className="w-full rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-6 text-left active:scale-[0.97] transition-transform"
+          >
+            <p className="text-2xl font-black text-white">{t('logger.start_empty')}</p>
+            <p className="mt-1 text-sm font-medium text-white/70">{t('logger.free_training_sub')}</p>
+          </button>
+
+          {templates.templates.length > 0 && (
+            <button
+              onClick={() => setShowTemplates(true)}
+              className="mt-4 w-full rounded-2xl bg-gray-900 p-4 text-center text-sm font-medium text-gray-400 ring-1 ring-gray-800 active:bg-gray-800"
+            >
+              {t('logger.choose_template')}
+            </button>
+          )}
+
+          {showTemplates && (
+            <TemplateLibrary
+              templates={templates.templates}
+              onLoad={handleLoadTemplate}
+              onDelete={handleDeleteTemplate}
+              onClose={() => setShowTemplates(false)}
+            />
+          )}
+
+          {toast && (
+            <Toast
+              message={toast.message}
+              action={toast.action}
+              onAction={toast.onAction}
+              onDismiss={() => setToast(null)}
+            />
+          )}
+        </div>
+      )
+    }
+
     return (
       <div className="min-h-[80vh] px-5 py-10">
         {/* Header */}
         <p className="mb-1 text-xs font-medium uppercase tracking-widest text-gray-500">{formattedDate}</p>
-        <h1 className="mb-10 text-4xl font-black tracking-tight text-white">{t('logger.train')}</h1>
+        <h1 className="mb-8 text-4xl font-black tracking-tight text-white">
+          {loading ? t('dashboard.title') : (selectedSplit || t('dashboard.title'))}
+        </h1>
 
-        {/* Cards */}
-        <div className="space-y-3">
-          {/* Coach Training - Primary Card */}
-          <button
-            onClick={() => nav('/coach')}
-            className="w-full rounded-2xl bg-cyan-500 p-6 text-left active:scale-[0.98] transition-transform"
-          >
-            {block && phase && (
-              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-cyan-900/70">
-                {phase.label} · Week {block.currentWeek} van {phase.weeks}
-              </p>
+        {/* Primary AI Workout Card */}
+        <div className="rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-6">
+          {/* Split name + status badge */}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-lg font-black text-white">{selectedSplit || 'Workout'}</p>
+            {loading && (
+              <span className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
+                <Loader2 size={12} className="animate-spin" />
+                Analyseren...
+              </span>
             )}
-            <p className="text-2xl font-black text-white">{t('logger.coach_training')}</p>
-            <p className="mt-1 text-sm font-medium text-cyan-900/70">{t('logger.coach_training_sub')}</p>
-          </button>
-
-          {/* Vrije Training Card */}
-          <div className="rounded-2xl bg-gray-800/60 border border-gray-700/50 overflow-hidden">
-            {/* Card header — altijd zichtbaar */}
-            <button
-              onClick={() => setQuickSetup(prev => ({ ...prev, show: !prev.show, muscles: [], duration: 45 }))}
-              className="w-full p-6 text-left flex items-center justify-between active:bg-gray-800/80 transition-colors"
-            >
-              <div>
-                <p className="text-xl font-bold text-white">{t('logger.free_training')}</p>
-                <p className="mt-1 text-sm text-gray-500">{t('logger.free_training_sub')}</p>
-              </div>
-              <ChevronRight
-                size={18}
-                className={`text-gray-600 transition-transform duration-200 ${quickSetup.show ? 'rotate-90' : ''}`}
-              />
-            </button>
-
-            {/* Expanded quick setup */}
-            {quickSetup.show && (
-              <div className="border-t border-gray-700/50 px-5 pb-5 pt-4 space-y-5">
-                {/* Duration */}
-                <div>
-                  <p className="label-caps mb-2.5">{t('logger.available_time')}</p>
-                  <div className="flex gap-2">
-                    {DURATIONS.map(d => (
-                      <button
-                        key={d}
-                        onClick={() => setQuickSetup(prev => ({ ...prev, duration: d }))}
-                        className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition-colors ${
-                          quickSetup.duration === d
-                            ? 'bg-cyan-500 text-white'
-                            : 'bg-gray-900 text-gray-400 ring-1 ring-gray-700'
-                        }`}
-                      >
-                        {d}m
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Muscle groups */}
-                <div>
-                  <p className="label-caps mb-2.5">{t('logger.muscle_groups')} <span className="text-gray-600 font-normal normal-case">(optioneel)</span></p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {ALL_MUSCLES.map(m => (
-                      <button
-                        key={m}
-                        onClick={() => toggleMuscle(m)}
-                        className={`rounded-xl py-2.5 text-sm font-medium transition-colors ${
-                          quickSetup.muscles.includes(m)
-                            ? 'bg-cyan-500/20 ring-1 ring-cyan-500 text-cyan-400'
-                            : 'bg-gray-900 text-gray-400 ring-1 ring-gray-700'
-                        }`}
-                      >
-                        {MUSCLE_LABELS[m]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3 pt-1">
-                  <button
-                    onClick={() => aw.startWorkout()}
-                    className="flex-1 rounded-xl py-3 text-sm font-medium text-gray-400 ring-1 ring-gray-700 active:bg-gray-800"
-                  >
-                    {t('logger.start_empty')}
-                  </button>
-                  <button
-                    onClick={() => aw.startWorkout(buildQuickWorkout(quickSetup.muscles, quickSetup.duration))}
-                    className="flex-[2] rounded-xl bg-white py-3 text-sm font-bold text-black active:bg-gray-100"
-                  >
-                    {quickSetup.muscles.length > 0
-                      ? `Start ${quickSetup.muscles.map(m => MUSCLE_LABELS[m]).join(' + ')}`
-                      : t('logger.start_training')}
-                  </button>
-                </div>
-              </div>
+            {generating && !loading && (
+              <span className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
+                <Loader2 size={12} className="animate-spin" />
+                AI bezig...
+              </span>
+            )}
+            {isReady && (
+              <span className="flex items-center gap-1.5 rounded-lg bg-white/30 px-2.5 py-1 text-xs font-bold text-white">
+                <Check size={12} />
+                Klaar
+              </span>
+            )}
+            {error && (
+              <span className="rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
+                Fout
+              </span>
             )}
           </div>
+
+          {/* Recovery context */}
+          {recoveredMuscles.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {recoveredMuscles.map(muscle => (
+                <span
+                  key={muscle}
+                  className="rounded-lg bg-white/20 px-2 py-0.5 text-xs font-medium text-white"
+                >
+                  {MUSCLE_NL[muscle] || muscle} hersteld
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Block context if active */}
+          {block && phase && (
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/60">
+              {phase.label} · Week {block.currentWeek}/{phase.weeks}
+            </p>
+          )}
+
+          {/* Main action button */}
+          <button
+            onClick={handleStartAIWorkout}
+            disabled={!isReady}
+            className={`w-full rounded-xl py-4 text-base font-black transition-all active:scale-[0.97] ${
+              isReady
+                ? 'bg-white text-cyan-600'
+                : 'bg-white/30 text-white/70 cursor-not-allowed'
+            }`}
+          >
+            {loading || generating ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 size={18} className="animate-spin" />
+                Workout laden...
+              </span>
+            ) : error ? (
+              'Genereren mislukt'
+            ) : (
+              `Start ${selectedSplit}`
+            )}
+          </button>
+
+          {/* Exercise count + duration when ready */}
+          {isReady && (
+            <p className="mt-2 text-center text-sm font-medium text-white/70">
+              {exerciseCount} oefeningen · ~{estimatedDuration} min
+            </p>
+          )}
+
+          {/* Error state with fallback */}
+          {error && (
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => generateForSplit(selectedSplit || 'Full Body')}
+                className="flex-1 rounded-xl bg-white/20 py-2.5 text-sm font-semibold text-white active:bg-white/30"
+              >
+                <RefreshCw size={14} className="inline mr-1.5" />
+                Opnieuw
+              </button>
+              <button
+                onClick={() => nav('/coach')}
+                className="flex-1 rounded-xl bg-white/20 py-2.5 text-sm font-semibold text-white active:bg-white/30"
+              >
+                Handmatig
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Templates link - compact */}
-        {templates.templates.length > 0 && (
+        {/* Secondary action buttons */}
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <button
+            onClick={() => aw.startWorkout()}
+            className="rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-gray-800 active:scale-[0.97] transition-transform"
+          >
+            <Dumbbell size={20} className="mb-2 text-gray-500" />
+            <p className="text-sm font-bold text-white">Lege training</p>
+            <p className="text-xs text-gray-500">Zelf oefeningen kiezen</p>
+          </button>
+
           <button
             onClick={() => setShowTemplates(true)}
-            className="mt-6 w-full text-center text-sm text-gray-500 active:text-gray-400"
+            className="rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-gray-800 active:scale-[0.97] transition-transform"
           >
-            {t('logger.choose_template')}
+            <BookOpen size={20} className="mb-2 text-gray-500" />
+            <p className="text-sm font-bold text-white">Template</p>
+            <p className="text-xs text-gray-500">{templates.templates.length} opgeslagen</p>
           </button>
-        )}
+        </div>
+
+        {/* Split switcher */}
+        <div className="mt-6">
+          {!showSplitPicker ? (
+            <button
+              onClick={() => setStartFlowState(prev => ({ ...prev, showSplitPicker: true }))}
+              className="w-full text-center text-sm text-gray-500 active:text-gray-400"
+            >
+              Andere split kiezen
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-center label-caps">Kies split</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {splitOptions.map(split => (
+                  <button
+                    key={split}
+                    onClick={() => generateForSplit(split)}
+                    disabled={generating}
+                    className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+                      selectedSplit === split
+                        ? 'bg-cyan-500 text-white'
+                        : 'bg-gray-900 text-gray-400 ring-1 ring-gray-700 active:bg-gray-800'
+                    } ${generating ? 'opacity-50' : ''}`}
+                  >
+                    {split}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setStartFlowState(prev => ({ ...prev, showSplitPicker: false }))}
+                className="w-full text-center text-xs text-gray-600 active:text-gray-500"
+              >
+                Annuleren
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Advanced link to full AICoach */}
+        <button
+          onClick={() => nav('/coach')}
+          className="mt-6 w-full text-center text-xs text-gray-600 active:text-gray-500"
+        >
+          Geavanceerde opties
+        </button>
 
         {showTemplates && (
           <TemplateLibrary
