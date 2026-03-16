@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { BookmarkPlus, Loader2, Calendar } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../context/AuthContext'
+import { useAuthContext } from '../App'
 import {
   classifyExercise,
   analyzeTraining,
@@ -15,7 +15,7 @@ import {
 export default function FinishModal({ result, onClose, onSaveTemplate }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user } = useAuthContext()
   
   const duration = result.duration || 0
   const mins = Math.floor(duration / 60)
