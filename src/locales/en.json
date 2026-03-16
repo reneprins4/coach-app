@@ -477,5 +477,46 @@
     "insight_other": "insights found",
     "refresh": "Refresh",
     "rec_label": "Recommendation:"
+  },
+  "training_goal": {
+    "title": "Training Goal",
+    "strength": "Max Strength",
+    "strength_sub": "Low reps, heavy weight",
+    "hypertrophy": "Muscle Mass",
+    "hypertrophy_sub": "More volume, hypertrophy",
+    "powerbuilding": "Powerbuilding",
+    "powerbuilding_sub": "Strength + mass combined",
+    "conditioning": "Conditioning",
+    "conditioning_sub": "Endurance training",
+    "phase_build": "Build",
+    "phase_strength": "Strength",
+    "phase_peak": "Peak",
+    "phase_deload": "Recovery"
+  },
+  "main_lift": {
+    "title": "Main Lift",
+    "squat": "Squat",
+    "bench": "Bench",
+    "deadlift": "Deadlift",
+    "ohp": "OHP",
+    "goal_kg": "Goal (kg)",
+    "goal_date": "Deadline",
+    "current": "Current",
+    "target": "Target",
+    "days_left": "days to go",
+    "no_goal": "No PR goal set"
+  },
+  "priority_muscles": {
+    "title": "Muscle Focus",
+    "subtitle": "Select max 2 muscle groups for extra volume",
+    "until": "Focus until",
+    "focus_badge": "Focus"
+  },
+  "session_intent": {
+    "title": "Session focus",
+    "strength": "Strength",
+    "volume": "Volume",
+    "technique": "Technique",
+    "recovery": "Recovery"
   }
 }

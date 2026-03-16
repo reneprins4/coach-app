@@ -275,6 +275,157 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Feature 1: Trainingsdoel + Fase */}
+      <div className="mb-6">
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('training_goal.title')}</label>
+        <div className="flex flex-col gap-2">
+          {[
+            { value: 'strength', label: t('training_goal.strength'), sub: t('training_goal.strength_sub') },
+            { value: 'hypertrophy', label: t('training_goal.hypertrophy'), sub: t('training_goal.hypertrophy_sub') },
+            { value: 'powerbuilding', label: t('training_goal.powerbuilding'), sub: t('training_goal.powerbuilding_sub') },
+            { value: 'conditioning', label: t('training_goal.conditioning'), sub: t('training_goal.conditioning_sub') },
+          ].map(g => (
+            <button
+              key={g.value}
+              onClick={() => update('trainingGoal', g.value)}
+              className={`flex items-center gap-4 rounded-2xl p-4 text-left transition-colors ${
+                settings.trainingGoal === g.value
+                  ? 'bg-cyan-500/15 ring-1 ring-cyan-500'
+                  : 'bg-gray-900 ring-1 ring-gray-800 active:bg-gray-800'
+              }`}
+            >
+              <div className="flex-1">
+                <p className={`text-sm font-semibold ${settings.trainingGoal === g.value ? 'text-cyan-400' : 'text-white'}`}>
+                  {g.label}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500">{g.sub}</p>
+              </div>
+              {settings.trainingGoal === g.value && (
+                <div className="h-5 w-5 rounded-full bg-cyan-500 flex items-center justify-center shrink-0">
+                  <Check size={12} className="text-white" strokeWidth={3} />
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+        {/* Phase selector */}
+        <div className="mt-4 flex gap-1 rounded-xl bg-gray-900 p-1">
+          {[
+            { value: 'build', label: t('training_goal.phase_build') },
+            { value: 'strength', label: t('training_goal.phase_strength') },
+            { value: 'peak', label: t('training_goal.phase_peak') },
+            { value: 'deload', label: t('training_goal.phase_deload') },
+          ].map(p => (
+            <button
+              key={p.value}
+              onClick={() => update('trainingPhase', p.value)}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${
+                settings.trainingPhase === p.value
+                  ? 'bg-white text-black'
+                  : 'text-gray-500 active:text-gray-300'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Feature 2: Hoofdlift Focus */}
+      <div className="mb-6">
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('main_lift.title')}</label>
+        <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+          {[
+            { value: 'squat', label: t('main_lift.squat') },
+            { value: 'bench', label: t('main_lift.bench') },
+            { value: 'deadlift', label: t('main_lift.deadlift') },
+            { value: 'ohp', label: t('main_lift.ohp') },
+          ].map(lift => (
+            <button
+              key={lift.value}
+              onClick={() => update('mainLift', settings.mainLift === lift.value ? null : lift.value)}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${
+                settings.mainLift === lift.value
+                  ? 'bg-white text-black'
+                  : 'text-gray-500 active:text-gray-300'
+              }`}
+            >
+              {lift.label}
+            </button>
+          ))}
+        </div>
+        {settings.mainLift && (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block label-caps">{t('main_lift.goal_kg')}</label>
+              <input
+                type="number"
+                value={settings.mainLiftGoalKg || ''}
+                onChange={(e) => update('mainLiftGoalKg', e.target.value ? Number(e.target.value) : null)}
+                placeholder="100"
+                className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block label-caps">{t('main_lift.goal_date')}</label>
+              <input
+                type="date"
+                value={settings.mainLiftGoalDate ? settings.mainLiftGoalDate.split('T')[0] : ''}
+                onChange={(e) => update('mainLiftGoalDate', e.target.value ? new Date(e.target.value).toISOString() : null)}
+                className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Feature 3: Prioritaire Spiergroep */}
+      <div className="mb-6">
+        <label className="mb-2 block text-sm font-medium text-gray-300">{t('priority_muscles.title')}</label>
+        <p className="mb-3 text-xs text-gray-500">{t('priority_muscles.subtitle')}</p>
+        <div className="grid grid-cols-3 gap-2">
+          {['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'].map(muscle => {
+            const isSelected = (settings.priorityMuscles || []).includes(muscle)
+            const canSelect = isSelected || (settings.priorityMuscles || []).length < 2
+            return (
+              <button
+                key={muscle}
+                onClick={() => {
+                  if (!canSelect) return
+                  const current = settings.priorityMuscles || []
+                  if (isSelected) {
+                    update('priorityMuscles', current.filter(m => m !== muscle))
+                  } else {
+                    update('priorityMuscles', [...current, muscle])
+                  }
+                }}
+                disabled={!canSelect}
+                className={`rounded-xl py-3 text-xs font-bold transition-colors ${
+                  isSelected
+                    ? 'bg-cyan-500 text-white'
+                    : canSelect
+                      ? 'bg-gray-900 text-gray-400 ring-1 ring-gray-800 active:bg-gray-800'
+                      : 'bg-gray-900/50 text-gray-600 ring-1 ring-gray-800/50'
+                }`}
+              >
+                {t(`muscles.${muscle}`)}
+              </button>
+            )
+          })}
+        </div>
+        {(settings.priorityMuscles || []).length > 0 && (
+          <div className="mt-3">
+            <label className="mb-1 block label-caps">{t('priority_muscles.until')}</label>
+            <input
+              type="date"
+              value={settings.priorityMusclesUntil ? settings.priorityMusclesUntil.split('T')[0] : ''}
+              onChange={(e) => update('priorityMusclesUntil', e.target.value ? new Date(e.target.value).toISOString() : null)}
+              className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+            />
+          </div>
+        )}
+      </div>
+
       {/* Equipment */}
       <div className="mb-6">
         <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.equipment_label')}</label>

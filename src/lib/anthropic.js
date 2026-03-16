@@ -72,6 +72,33 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
     ? `\nFOCUS MUSCLES (add extra sets/exercises): ${preferences.focusedMuscles.join(', ')}`
     : ''
 
+  // Priority muscles (Feature 3) - add 1-2 extra sets
+  const priorityNote = preferences.priorityMuscles?.length > 0
+    ? `\nPRIORITY MUSCLES (add 1-2 extra sets): ${preferences.priorityMuscles.join(', ')}`
+    : ''
+
+  // Main lift focus (Feature 2)
+  const mainLiftNote = preferences.mainLift && preferences.mainLiftGoalKg
+    ? `\nMAIN LIFT FOCUS: ${preferences.mainLift.toUpperCase()} - Target PR: ${preferences.mainLiftGoalKg}kg. Prioritize this lift with optimal placement and intensity.`
+    : ''
+
+  // Training goal and phase (Feature 1)
+  const trainingGoalNote = preferences.trainingGoal
+    ? `\nTRAINING GOAL: ${preferences.trainingGoal}${preferences.trainingPhase ? ` (Phase: ${preferences.trainingPhase})` : ''}`
+    : ''
+  
+  // Rep range adjustments based on training goal
+  const goalRepRanges = {
+    strength: { min: 1, max: 5, note: 'Low reps, high weight, focus on compound lifts' },
+    hypertrophy: { min: 8, max: 12, note: 'Moderate weight, higher volume' },
+    powerbuilding: { min: 4, max: 8, note: 'Mix of strength and hypertrophy ranges' },
+    conditioning: { min: 12, max: 20, note: 'Lighter weight, higher reps, shorter rest' },
+  }
+  const goalReps = goalRepRanges[preferences.trainingGoal] || goalRepRanges.hypertrophy
+  const goalRepNote = preferences.trainingGoal 
+    ? `\nGOAL-BASED REP RANGE: ${goalReps.min}-${goalReps.max} reps — ${goalReps.note}`
+    : ''
+
   const periodizationNote = preferences.trainingPhase
     ? `\n## Training Block\n- Phase: ${preferences.trainingPhase} (Week ${preferences.blockWeek}/${preferences.blockTotalWeeks})\n- ${preferences.isDeload ? 'DELOAD WEEK: Reduce volume 40-50%, keep same weight, RPE max 6. No grinding.' : `Target RPE: ${preferences.targetRPE} | Rep range: ${preferences.targetRepRange?.[0]}-${preferences.targetRepRange?.[1]} reps`}\n- Volume note: ${preferences.weekTargetNote || 'standard'}`
     : ''
@@ -85,7 +112,7 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
 - Training frequency: ${preferences.frequency || '4x'}/week
 - Energy today: ${preferences.energy || 'medium'}
 - Available time: ${preferences.time || 60} min
-${focusNote}
+${focusNote}${priorityNote}${mainLiftNote}${trainingGoalNote}${goalRepNote}
 ${periodizationNote}
 
 ${weightGuidance}

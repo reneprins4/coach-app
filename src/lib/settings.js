@@ -17,6 +17,16 @@ const DEFAULTS = {
   deadliftMax: '',
   onboardingCompleted: false,
   language: 'auto',
+  // Feature 1: Training Goal + Phase
+  trainingGoal: 'hypertrophy', // 'hypertrophy' | 'strength' | 'powerbuilding' | 'conditioning'
+  trainingPhase: 'build', // 'build' | 'strength' | 'peak' | 'deload'
+  // Feature 2: Main Lift PR Target
+  mainLift: null, // 'squat' | 'bench' | 'deadlift' | 'ohp' | null
+  mainLiftGoalKg: null,
+  mainLiftGoalDate: null, // ISO date string
+  // Feature 3: Priority Muscles
+  priorityMuscles: [], // max 2 items
+  priorityMusclesUntil: null, // ISO date string
 }
 
 // Get settings from localStorage (fallback/cache)

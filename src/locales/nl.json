@@ -477,5 +477,46 @@
     "insight_other": "inzichten gevonden",
     "refresh": "Vernieuwen",
     "rec_label": "Aanbeveling:"
+  },
+  "training_goal": {
+    "title": "Trainingsdoel",
+    "strength": "Maximale kracht",
+    "strength_sub": "Lage reps, hoog gewicht",
+    "hypertrophy": "Spiermassa",
+    "hypertrophy_sub": "Meer volume, hypertrofie",
+    "powerbuilding": "Powerbuilding",
+    "powerbuilding_sub": "Kracht + massa gecombineerd",
+    "conditioning": "Conditie",
+    "conditioning_sub": "Uithoudingsvermogen",
+    "phase_build": "Opbouw",
+    "phase_strength": "Kracht",
+    "phase_peak": "Piek",
+    "phase_deload": "Herstel"
+  },
+  "main_lift": {
+    "title": "Hoofdlift",
+    "squat": "Squat",
+    "bench": "Bench",
+    "deadlift": "Deadlift",
+    "ohp": "OHP",
+    "goal_kg": "Doel (kg)",
+    "goal_date": "Deadline",
+    "current": "Huidig",
+    "target": "Doel",
+    "days_left": "dagen te gaan",
+    "no_goal": "Geen PR doel ingesteld"
+  },
+  "priority_muscles": {
+    "title": "Spiergroep focus",
+    "subtitle": "Selecteer max. 2 spiergroepen voor extra volume",
+    "until": "Focus tot",
+    "focus_badge": "Focus"
+  },
+  "session_intent": {
+    "title": "Focus van deze sessie",
+    "strength": "Kracht",
+    "volume": "Volume",
+    "technique": "Techniek",
+    "recovery": "Herstel"
   }
 }

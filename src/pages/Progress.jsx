@@ -36,7 +36,7 @@ const CHART_TOOLTIP_STYLE = {
 
 export default function Progress() {
   const { t, i18n } = useTranslation()
-  const { user } = useAuthContext()
+  const { user, settings } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
   const [tab, setTab] = useState('exercise')
   const [query, setQuery] = useState('')
@@ -317,7 +317,7 @@ export default function Progress() {
 
       {/* ── Balans ────────────────────────────────────────────────── */}
       {tab === 'balans' && (
-        <WeaknessHunter workouts={workouts} />
+        <WeaknessHunter workouts={workouts} priorityMuscles={settings?.priorityMuscles || []} />
       )}
     </div>
   )

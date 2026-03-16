@@ -22,7 +22,7 @@ const MG_ACCENT_HEX = {
   core:      '#ec4899',
 }
 
-export default function WeaknessHunter({ workouts }) {
+export default function WeaknessHunter({ workouts, priorityMuscles = [] }) {
   const { t } = useTranslation()
   const [weeksBack, setWeeksBack] = useState(4)
 
@@ -84,10 +84,18 @@ export default function WeaknessHunter({ workouts }) {
           {analysis.sortedGroups.map(group => {
             const pct = Math.round((group.sets / maxSets) * 100)
             const hex = MG_ACCENT_HEX[group.key] || '#06b6d4'
+            const isPriority = priorityMuscles.includes(group.key)
             return (
               <div key={group.key}>
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-black tracking-tight text-white">{group.name}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-sm font-black tracking-tight text-white">{group.name}</span>
+                    {isPriority && (
+                      <span className="rounded bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-bold text-cyan-400">
+                        {t('priority_muscles.focus_badge')}
+                      </span>
+                    )}
+                  </span>
                   <span className="tabular-nums text-sm font-bold text-gray-300">
                     {group.sets} <span className="font-normal text-gray-600">{t('common.sets')}</span>
                   </span>

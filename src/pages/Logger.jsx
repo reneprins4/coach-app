@@ -46,9 +46,13 @@ export default function Logger() {
   const [showSupersetModal, setShowSupersetModal] = useState(false)
   const [supersetMode, setSupersetMode] = useState(null) // { supersets: [...], active: true }
   const [junkWarning, setJunkWarning] = useState(null) // { exercise, message, severity, ... }
+  const [trainingIntent, setTrainingIntent] = useState(null) // 'strength' | 'volume' | 'technique' | 'recovery'
 
   // Bereken momentum real-time op basis van alle sets in de sessie
   const momentum = useMemo(() => calculateMomentum(aw.workout), [aw.workout])
+  
+  // Check if any sets have been logged
+  const hasLoggedSets = aw.workout?.exercises?.some(e => e.sets.length > 0) || false
 
   useEffect(() => {
     const raw = localStorage.getItem('coach-pending-workout')
@@ -69,7 +73,8 @@ export default function Logger() {
     setShowConfirmFinish(false)
     const result = await aw.finishWorkout()
     if (result) {
-      setFinishResult(result)
+      // Include training intent in finish data
+      setFinishResult({ ...result, trainingIntent })
       setShowFinish(true)
     }
   }
@@ -402,6 +407,36 @@ export default function Logger() {
         {momentum && (
           <div className="px-4 pb-3">
             <MomentumIndicator momentum={momentum} />
+          </div>
+        )}
+        {/* Training Intent Picker - show when no sets logged yet */}
+        {!hasLoggedSets && !trainingIntent && (
+          <div className="px-4 pb-3">
+            <p className="label-caps mb-2">{t('session_intent.title')}</p>
+            <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+              {[
+                { value: 'strength', label: t('session_intent.strength') },
+                { value: 'volume', label: t('session_intent.volume') },
+                { value: 'technique', label: t('session_intent.technique') },
+                { value: 'recovery', label: t('session_intent.recovery') },
+              ].map(intent => (
+                <button
+                  key={intent.value}
+                  onClick={() => setTrainingIntent(intent.value)}
+                  className="flex-1 rounded-lg py-2 text-xs font-bold text-gray-500 active:text-gray-300 active:bg-gray-800"
+                >
+                  {intent.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* Show intent badge once selected */}
+        {trainingIntent && (
+          <div className="px-4 pb-3">
+            <span className="inline-flex items-center rounded-lg bg-cyan-500/20 px-2.5 py-1 text-xs font-bold text-cyan-400">
+              {t(`session_intent.${trainingIntent}`)}
+            </span>
           </div>
         )}
       </header>

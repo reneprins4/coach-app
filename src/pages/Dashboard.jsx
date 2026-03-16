@@ -96,6 +96,70 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Training Goal + Phase status card */}
+      {settings.trainingGoal && (
+        <div
+          onClick={() => nav('/profile')}
+          className="mb-5 flex cursor-pointer items-center justify-between rounded-2xl p-4 active:opacity-80"
+          style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <div>
+            <p className="label-caps mb-1">{t('training_goal.title')}</p>
+            <p className="text-sm font-black tracking-tight text-white">
+              {t(`training_goal.${settings.trainingGoal}`)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="rounded-lg bg-cyan-500/20 px-2 py-1 text-xs font-bold text-cyan-400">
+              {t(`training_goal.phase_${settings.trainingPhase || 'build'}`)}
+            </span>
+            <ChevronRight size={16} className="text-gray-600" />
+          </div>
+        </div>
+      )}
+
+      {/* Main Lift PR Progress card */}
+      {settings.mainLift && settings.mainLiftGoalKg && (
+        <div
+          onClick={() => nav('/profile')}
+          className="mb-5 cursor-pointer rounded-2xl p-4 active:opacity-80"
+          style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <p className="label-caps mb-3">{t(`main_lift.${settings.mainLift}`)} PR</p>
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black tabular-nums text-white">
+                  {settings[`${settings.mainLift}Max`] || '?'}
+                </span>
+                <span className="text-sm text-gray-500">kg</span>
+                <span className="text-gray-600 mx-1">→</span>
+                <span className="text-2xl font-black tabular-nums text-cyan-400">
+                  {settings.mainLiftGoalKg}
+                </span>
+                <span className="text-sm text-gray-500">kg</span>
+              </div>
+            </div>
+            {settings.mainLiftGoalDate && (
+              <div className="text-right">
+                <p className="text-xl font-black tabular-nums text-white">
+                  {Math.max(0, Math.ceil((new Date(settings.mainLiftGoalDate) - new Date()) / (1000 * 60 * 60 * 24)))}
+                </p>
+                <p className="text-xs text-gray-500">{t('main_lift.days_left')}</p>
+              </div>
+            )}
+          </div>
+          {settings[`${settings.mainLift}Max`] && settings.mainLiftGoalKg && (
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-800">
+              <div
+                className="h-full rounded-full bg-cyan-500 transition-all"
+                style={{ width: `${Math.min(100, Math.round((settings[`${settings.mainLift}Max`] / settings.mainLiftGoalKg) * 100))}%` }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Active block - with subtle cyan gradient and glowing progress */}
       {block && phase && (
         <div className="card-premium mb-5 p-4">
