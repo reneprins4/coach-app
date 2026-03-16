@@ -14,31 +14,27 @@ export default function Profile() {
   const [saved, setSaved] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const { workouts } = useWorkouts(user?.id)
-  
-  // Account deletion state
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
 
-
+  const settings = localSettings
 
   const LEVELS = [
-    { value: 'beginner', label: t('profile.experience_beginner'), sub: '< 1 year' },
-    { value: 'intermediate', label: t('profile.experience_intermediate'), sub: '1-3 years' },
-    { value: 'advanced', label: t('profile.experience_advanced'), sub: '3+ years' },
+    { value: 'beginner',     label: t('profile.experience_beginner'),     sub: '< 1 jaar' },
+    { value: 'intermediate', label: t('profile.experience_intermediate'), sub: '1–3 jaar' },
+    { value: 'advanced',     label: t('profile.experience_advanced'),     sub: '3+ jaar' },
   ]
 
   const EQUIPMENT = [
-    { value: 'full_gym', label: t('profile.equipment_full_gym') },
-    { value: 'home_gym', label: i18n.language === 'nl' ? 'Thuisgym' : 'Home gym' },
-    { value: 'dumbbells_only', label: t('profile.equipment_dumbbells') },
+    { value: 'full_gym',      label: t('profile.equipment_full_gym') },
+    { value: 'home_gym',      label: t('profile.equipment_home_gym') ?? 'Thuisgym' },
+    { value: 'dumbbells_only',label: t('profile.equipment_dumbbells') },
   ]
 
   const FREQUENCIES = ['2x', '3x', '4x', '5x', '6x']
-  const REST_TIMES = [60, 90, 120, 180]
-
-  // Sync local form state wanneer global settings bijgewerkt worden
-  const settings = localSettings
+  const REST_TIMES  = [60, 90, 120, 180]
 
   function update(key, value) {
     setLocalSettings(prev => ({ ...prev, [key]: value }))
@@ -59,31 +55,18 @@ export default function Profile() {
   async function handleDeleteAccount() {
     setDeleting(true)
     setDeleteError(null)
-    
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session?.access_token) {
-        throw new Error(i18n.language === 'nl' ? 'Geen geldige sessie gevonden' : 'No valid session found')
-      }
-      
+      if (!session?.access_token) throw new Error(t('profile.session_error'))
       const res = await fetch('/api/delete-account', {
         method: 'POST',
-        headers: { 
-          Authorization: `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
       })
-      
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || (i18n.language === 'nl' ? 'Account verwijderen mislukt' : 'Failed to delete account'))
+        throw new Error(data.error || t('profile.delete_failed'))
       }
-      
-      // Clear local storage
       localStorage.clear()
-      
-      // Sign out and navigate to login
       await supabase.auth.signOut()
       navigate('/', { replace: true })
       window.location.reload()
@@ -99,39 +82,20 @@ export default function Profile() {
     const memberSinceDate = settings.memberSince ? new Date(settings.memberSince) : null
     const memberSince = memberSinceDate && !isNaN(memberSinceDate)
       ? memberSinceDate.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { month: 'long', year: 'numeric' })
-      : (i18n.language === 'nl' ? 'Onbekend' : 'Unknown')
+      : t('profile.unknown')
     return { totalWorkouts, totalVol, memberSince }
-  }, [workouts, settings.memberSince, i18n.language])
-
-  const profileComplete = settings.name && settings.bodyweight && settings.experienceLevel
+  }, [workouts, settings.memberSince, i18n.language, t])
 
   function exportWorkoutsCSV() {
-    const rows = [[
-      i18n.language === 'nl' ? 'Datum' : 'Date', 
-      'Training ID', 
-      i18n.language === 'nl' ? 'Oefening' : 'Exercise', 
-      i18n.language === 'nl' ? 'Gewicht (kg)' : 'Weight (kg)', 
-      i18n.language === 'nl' ? 'Herhalingen' : 'Reps', 
-      'RPE', 
-      'Volume (kg)'
-    ]]
-    
+    const headers = ['Datum', 'Training ID', 'Oefening', 'Gewicht (kg)', 'Herhalingen', 'RPE', 'Volume (kg)']
+    const rows = [headers]
     for (const w of workouts) {
       const date = new Date(w.created_at).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB')
       for (const s of (w.workout_sets || [])) {
         const volume = ((s.weight_kg || 0) * (s.reps || 0)).toFixed(1)
-        rows.push([
-          date,
-          w.id.slice(0, 8),
-          s.exercise,
-          s.weight_kg || 0,
-          s.reps || 0,
-          s.rpe || '',
-          volume
-        ])
+        rows.push([date, w.id.slice(0, 8), s.exercise, s.weight_kg || 0, s.reps || 0, s.rpe || '', volume])
       }
     }
-    
     const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n')
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -142,38 +106,44 @@ export default function Profile() {
     URL.revokeObjectURL(url)
   }
 
+  const profileComplete = settings.name && settings.bodyweight && settings.experienceLevel
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="px-4 py-6 pb-24">
+
+      {/* Header */}
       <div className="mb-1 flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tight">{t('profile.title')}</h1>
+        <h1 className="text-3xl font-black tracking-tight text-white">{t('profile.title')}</h1>
         <button
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-400 active:bg-gray-900 active:text-white"
+          className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm text-slate-400 active:bg-gray-900 active:text-white"
         >
           <LogOut size={16} />
-          {loggingOut ? (i18n.language === 'nl' ? 'Uitloggen...' : 'Logging out...') : t('profile.logout')}
+          {loggingOut ? t('profile.logging_out') : t('profile.logout')}
         </button>
       </div>
-      <p className="mb-6 text-sm text-slate-500">
-        {user?.email && <span>{user.email}</span>}
-      </p>
+      {user?.email && <p className="mb-6 text-sm text-slate-500">{user.email}</p>}
 
+      {/* Incomplete banner */}
       {!profileComplete && (
         <div className="mb-6 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-400">
-          {i18n.language === 'nl' ? 'Vul je gegevens in voor nauwkeurigere gewichten' : 'Fill in your details for more accurate weights'}
+          {t('profile.incomplete_banner')}
         </div>
       )}
 
-      {/* Language switcher */}
+      {/* ── Taal ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.language_label')}</label>
-        <div className="flex gap-2">
-          {[{ value: 'nl', label: '🇳🇱 Nederlands' }, { value: 'en', label: '🇬🇧 English' }].map(lang => (
-            <button 
+        <p className="label-caps mb-2">{t('profile.language_label')}</p>
+        <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+          {[{ value: 'nl', label: 'NL' }, { value: 'en', label: 'EN' }].map(lang => (
+            <button
               key={lang.value}
               onClick={() => { i18n.changeLanguage(lang.value); localStorage.setItem('coach-lang', lang.value) }}
-              className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${i18n.language === lang.value ? 'bg-cyan-500 text-white' : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'}`}
+              className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-colors ${
+                i18n.language === lang.value ? 'bg-white text-black' : 'text-gray-500 active:text-gray-300'
+              }`}
             >
               {lang.label}
             </button>
@@ -181,100 +151,97 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Name */}
+      {/* ── Naam ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{i18n.language === 'nl' ? 'Naam' : 'Name'}</label>
+        <p className="label-caps mb-2">{t('profile.name_label')}</p>
         <input
           type="text"
           value={settings.name}
           onChange={(e) => update('name', e.target.value)}
-          placeholder={i18n.language === 'nl' ? 'Jouw naam' : 'Your name'}
+          placeholder={t('profile.name_placeholder')}
           className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
       </div>
 
-      {/* Bodyweight */}
+      {/* ── Lichaamsgewicht ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{i18n.language === 'nl' ? 'Gewicht (kg)' : 'Weight (kg)'}</label>
+        <p className="label-caps mb-2">{t('profile.weight_label')}</p>
         <input
           type="number"
           value={settings.bodyweight}
           onChange={(e) => update('bodyweight', e.target.value)}
-          placeholder="80"
+          placeholder={t('profile.weight_placeholder')}
           className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
         />
-        <p className="mt-1 text-xs text-gray-600">{i18n.language === 'nl' ? 'Helpt bij het schatten van startgewichten' : 'Helps estimate starting weights'}</p>
+        <p className="mt-1 text-xs text-gray-600">{t('profile.weight_hint')}</p>
       </div>
 
-      {/* Ervaringsniveau */}
+      {/* ── Ervaringsniveau ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.experience_label')}</label>
+        <p className="label-caps mb-2">{t('profile.experience_label')}</p>
         <div className="flex gap-2">
           {LEVELS.map(l => (
             <button
               key={l.value}
               onClick={() => update('experienceLevel', l.value)}
-              className={`flex flex-1 flex-col items-center rounded-xl py-3 text-sm font-medium transition-colors ${
+              className={`flex flex-1 flex-col items-center rounded-xl py-3 text-sm font-bold ${
                 settings.experienceLevel === l.value
                   ? 'bg-cyan-500 text-white'
-                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800 active:bg-gray-800'
               }`}
             >
               <span>{l.label}</span>
-              <span className={`text-[10px] ${settings.experienceLevel === l.value ? 'text-cyan-200' : 'text-gray-600'}`}>{l.sub}</span>
+              <span className={`text-[10px] font-normal ${settings.experienceLevel === l.value ? 'text-cyan-200' : 'text-gray-600'}`}>{l.sub}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Trainingsdoel + Fase */}
+      {/* ── Trainingsdoel ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('training_goal.title')}</label>
+        <p className="label-caps mb-2">{t('training_goal.title')}</p>
         <div className="flex flex-col gap-2">
           {[
-            { value: 'strength', label: t('training_goal.strength'), sub: t('training_goal.strength_sub') },
-            { value: 'hypertrophy', label: t('training_goal.hypertrophy'), sub: t('training_goal.hypertrophy_sub') },
+            { value: 'strength',      label: t('training_goal.strength'),      sub: t('training_goal.strength_sub') },
+            { value: 'hypertrophy',   label: t('training_goal.hypertrophy'),   sub: t('training_goal.hypertrophy_sub') },
             { value: 'powerbuilding', label: t('training_goal.powerbuilding'), sub: t('training_goal.powerbuilding_sub') },
-            { value: 'conditioning', label: t('training_goal.conditioning'), sub: t('training_goal.conditioning_sub') },
+            { value: 'conditioning',  label: t('training_goal.conditioning'),  sub: t('training_goal.conditioning_sub') },
           ].map(g => (
             <button
               key={g.value}
               onClick={() => update('trainingGoal', g.value)}
-              className={`flex items-center gap-4 rounded-2xl p-4 text-left transition-colors ${
+              className={`flex items-center gap-4 rounded-2xl p-4 text-left ${
                 settings.trainingGoal === g.value
                   ? 'bg-cyan-500/15 ring-1 ring-cyan-500'
                   : 'bg-gray-900 ring-1 ring-gray-800 active:bg-gray-800'
               }`}
             >
               <div className="flex-1">
-                <p className={`text-sm font-semibold ${settings.trainingGoal === g.value ? 'text-cyan-400' : 'text-white'}`}>
-                  {g.label}
-                </p>
+                <p className={`text-sm font-black tracking-tight ${settings.trainingGoal === g.value ? 'text-cyan-400' : 'text-white'}`}>{g.label}</p>
                 <p className="mt-0.5 text-xs text-gray-500">{g.sub}</p>
               </div>
               {settings.trainingGoal === g.value && (
-                <div className="h-5 w-5 rounded-full bg-cyan-500 flex items-center justify-center shrink-0">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-500">
                   <Check size={12} className="text-white" strokeWidth={3} />
                 </div>
               )}
             </button>
           ))}
         </div>
-        {/* Phase selector */}
-        <div className="mt-4 flex gap-1 rounded-xl bg-gray-900 p-1">
+
+        {/* Trainingsfase */}
+        <div className="mt-3 flex gap-1 rounded-xl bg-gray-900 p-1">
           {[
-            { value: 'build', label: t('training_goal.phase_build') },
+            { value: 'build',    label: t('training_goal.phase_build') },
             { value: 'strength', label: t('training_goal.phase_strength') },
-            { value: 'peak', label: t('training_goal.phase_peak') },
-            { value: 'deload', label: t('training_goal.phase_deload') },
+            { value: 'peak',     label: t('training_goal.phase_peak') },
+            { value: 'deload',   label: t('training_goal.phase_deload') },
           ].map(p => (
             <button
               key={p.value}
               onClick={() => update('trainingPhase', p.value)}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${
-                settings.trainingPhase === p.value
-                  ? 'bg-white text-black'
-                  : 'text-gray-500 active:text-gray-300'
+              className={`flex-1 rounded-lg py-2 text-xs font-bold ${
+                settings.trainingPhase === p.value ? 'bg-white text-black' : 'text-gray-500 active:text-gray-300'
               }`}
             >
               {p.label}
@@ -283,23 +250,21 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Feature 2: Hoofdlift Focus */}
+      {/* ── Hoofdlift ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('main_lift.title')}</label>
+        <p className="label-caps mb-2">{t('main_lift.title')}</p>
         <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
           {[
-            { value: 'squat', label: t('main_lift.squat') },
-            { value: 'bench', label: t('main_lift.bench') },
+            { value: 'squat',    label: t('main_lift.squat') },
+            { value: 'bench',    label: t('main_lift.bench') },
             { value: 'deadlift', label: t('main_lift.deadlift') },
-            { value: 'ohp', label: t('main_lift.ohp') },
+            { value: 'ohp',      label: t('main_lift.ohp') },
           ].map(lift => (
             <button
               key={lift.value}
               onClick={() => update('mainLift', settings.mainLift === lift.value ? null : lift.value)}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${
-                settings.mainLift === lift.value
-                  ? 'bg-white text-black'
-                  : 'text-gray-500 active:text-gray-300'
+              className={`flex-1 rounded-lg py-2 text-xs font-bold ${
+                settings.mainLift === lift.value ? 'bg-white text-black' : 'text-gray-500 active:text-gray-300'
               }`}
             >
               {lift.label}
@@ -309,7 +274,7 @@ export default function Profile() {
         {settings.mainLift && (
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block label-caps">{t('main_lift.goal_kg')}</label>
+              <p className="label-caps mb-1">{t('main_lift.goal_kg')}</p>
               <input
                 type="number"
                 value={settings.mainLiftGoalKg || ''}
@@ -319,7 +284,7 @@ export default function Profile() {
               />
             </div>
             <div>
-              <label className="mb-1 block label-caps">{t('main_lift.goal_date')}</label>
+              <p className="label-caps mb-1">{t('main_lift.goal_date')}</p>
               <input
                 type="date"
                 value={settings.mainLiftGoalDate ? settings.mainLiftGoalDate.split('T')[0] : ''}
@@ -331,9 +296,9 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Feature 3: Prioritaire Spiergroep */}
+      {/* ── Spiergroep focus ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('priority_muscles.title')}</label>
+        <p className="label-caps mb-1">{t('priority_muscles.title')}</p>
         <p className="mb-3 text-xs text-gray-500">{t('priority_muscles.subtitle')}</p>
         <div className="grid grid-cols-3 gap-2">
           {['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'].map(muscle => {
@@ -345,19 +310,15 @@ export default function Profile() {
                 onClick={() => {
                   if (!canSelect) return
                   const current = settings.priorityMuscles || []
-                  if (isSelected) {
-                    update('priorityMuscles', current.filter(m => m !== muscle))
-                  } else {
-                    update('priorityMuscles', [...current, muscle])
-                  }
+                  update('priorityMuscles', isSelected ? current.filter(m => m !== muscle) : [...current, muscle])
                 }}
                 disabled={!canSelect}
-                className={`rounded-xl py-3 text-xs font-bold transition-colors ${
+                className={`rounded-xl py-3 text-xs font-bold ${
                   isSelected
                     ? 'bg-cyan-500 text-white'
                     : canSelect
                       ? 'bg-gray-900 text-gray-400 ring-1 ring-gray-800 active:bg-gray-800'
-                      : 'bg-gray-900/50 text-gray-600 ring-1 ring-gray-800/50'
+                      : 'cursor-not-allowed bg-gray-900/50 text-gray-700 ring-1 ring-gray-800/50'
                 }`}
               >
                 {t(`muscles.${muscle}`)}
@@ -367,7 +328,7 @@ export default function Profile() {
         </div>
         {(settings.priorityMuscles || []).length > 0 && (
           <div className="mt-3">
-            <label className="mb-1 block label-caps">{t('priority_muscles.until')}</label>
+            <p className="label-caps mb-1">{t('priority_muscles.until')}</p>
             <input
               type="date"
               value={settings.priorityMusclesUntil ? settings.priorityMusclesUntil.split('T')[0] : ''}
@@ -378,18 +339,18 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Equipment */}
+      {/* ── Equipment ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.equipment_label')}</label>
+        <p className="label-caps mb-2">{t('profile.equipment_label')}</p>
         <div className="flex gap-2">
           {EQUIPMENT.map(e => (
             <button
               key={e.value}
               onClick={() => update('equipment', e.value)}
-              className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-xl py-3 text-sm font-bold ${
                 settings.equipment === e.value
                   ? 'bg-cyan-500 text-white'
-                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800 active:bg-gray-800'
               }`}
             >
               {e.label}
@@ -398,18 +359,18 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Known maxes — optional but improves accuracy */}
+      {/* ── 1RM Maxima ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.maxes_label')} <span className="text-gray-600 font-normal">({i18n.language === 'nl' ? 'optioneel' : 'optional'})</span></label>
+        <p className="label-caps mb-1">{t('profile.maxes_label')} <span className="normal-case font-normal text-gray-600">({t('profile.optional')})</span></p>
         <p className="mb-3 text-xs text-gray-600">{t('profile.maxes_hint')}</p>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { key: 'benchMax', label: 'Bench (kg)' },
-            { key: 'squatMax', label: 'Squat (kg)' },
+            { key: 'benchMax',    label: 'Bench (kg)' },
+            { key: 'squatMax',    label: 'Squat (kg)' },
             { key: 'deadliftMax', label: 'Deadlift (kg)' },
           ].map(({ key, label }) => (
             <div key={key}>
-              <label className="mb-1 block label-caps">{label}</label>
+              <p className="label-caps mb-1">{label}</p>
               <input
                 type="number"
                 value={settings[key]}
@@ -422,40 +383,40 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Frequency */}
+      {/* ── Trainingsfrequentie ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.frequency_label')}</label>
+        <p className="label-caps mb-1">{t('profile.frequency_label')}</p>
         <p className="mb-3 text-xs text-gray-600">{t('profile.frequency_hint')}</p>
         <div className="flex gap-2">
           {FREQUENCIES.map(f => (
             <button
               key={f}
               onClick={() => update('frequency', f)}
-              className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-xl py-3 text-sm font-bold ${
                 settings.frequency === f
                   ? 'bg-cyan-500 text-white'
-                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800 active:bg-gray-800'
               }`}
             >
-              {f}/{i18n.language === 'nl' ? 'wk' : 'wk'}
+              {f}/{t('profile.week_abbr')}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Rest time */}
+      {/* ── Rusttijd ── */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-300">{t('profile.rest_label')}</label>
+        <p className="label-caps mb-1">{t('profile.rest_label')}</p>
         <p className="mb-3 text-xs text-gray-600">{t('profile.rest_hint')}</p>
         <div className="flex gap-2">
           {REST_TIMES.map(time => (
             <button
               key={time}
               onClick={() => update('restTime', time)}
-              className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-xl py-3 text-sm font-bold ${
                 settings.restTime === time
                   ? 'bg-cyan-500 text-white'
-                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                  : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800 active:bg-gray-800'
               }`}
             >
               {time}s
@@ -464,106 +425,82 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Stats summary */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      {/* ── Stats ── */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
         {[
-          { label: t('profile.stats_workouts'), value: stats.totalWorkouts },
-          { label: t('profile.stats_volume'), value: stats.totalVol >= 1000 ? `${(stats.totalVol/1000).toFixed(1)}t` : `${stats.totalVol.toFixed(0)}kg` },
-          { label: i18n.language === 'nl' ? 'Lid sinds' : 'Member since', value: stats.memberSince },
+          { label: t('profile.stats_workouts'),    value: stats.totalWorkouts },
+          { label: t('profile.stats_volume'),      value: stats.totalVol >= 1000 ? `${(stats.totalVol / 1000).toFixed(1)}t` : `${stats.totalVol.toFixed(0)}kg` },
+          { label: t('profile.member_since_label'), value: stats.memberSince },
         ].map(({ label, value }) => (
-          <div key={label} className="rounded-2xl p-4 text-center" style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)'}}>
-            <p className="text-xl font-black text-white tabular-nums">{value}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mt-1">{label}</p>
+          <div key={label} className="rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <p className="text-xl font-black tabular-nums text-white">{value}</p>
+            <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
           </div>
         ))}
       </div>
 
-      {/* Save */}
-      <button
-        onClick={handleSave}
-        className="btn-primary flex items-center justify-center gap-2"
-      >
-        {saved ? (
-          <>
-            <Check size={16} />
-            {t('common.saved')}
-          </>
-        ) : (
-          t('common.save')
-        )}
+      {/* ── Opslaan ── */}
+      <button onClick={handleSave} className="btn-primary flex items-center justify-center gap-2">
+        {saved ? <><Check size={16} />{t('common.saved')}</> : t('common.save')}
       </button>
 
-      {/* Data export */}
+      {/* ── Data exporteren ── */}
       <div className="mt-6">
         <button
           onClick={exportWorkoutsCSV}
           disabled={workouts.length === 0}
-          className="w-full rounded-xl bg-gray-900 px-4 py-3 text-left text-sm text-gray-300 ring-1 ring-gray-800 active:ring-gray-700 transition-colors flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex w-full items-center gap-3 rounded-xl bg-gray-900 px-4 py-3 text-left text-sm text-gray-300 ring-1 ring-gray-800 active:ring-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download size={18} className="text-gray-500" />
           <div className="flex-1">
-            <div>{t('profile.export_data')}</div>
-            <div className="text-xs text-gray-500">
-              {workouts.length === 0 
-                ? (i18n.language === 'nl' ? 'Nog geen trainingsdata' : 'No training data yet') 
-                : `${workouts.length} ${i18n.language === 'nl' ? 'trainingen beschikbaar' : 'workouts available'}`}
-            </div>
+            <p>{t('profile.export_data')}</p>
+            <p className="text-xs text-gray-500">
+              {workouts.length === 0
+                ? t('profile.no_export')
+                : `${workouts.length} ${t('profile.export_sub')}`}
+            </p>
           </div>
         </button>
       </div>
 
-      {/* Privacy & Terms links */}
+      {/* ── Links ── */}
       <div className="mt-6 flex justify-center gap-4">
-        <Link to="/privacy" className="text-xs text-gray-500 active:text-gray-400">{i18n.language === 'nl' ? 'Privacybeleid' : 'Privacy Policy'}</Link>
-        <Link to="/terms" className="text-xs text-gray-500 active:text-gray-400">{i18n.language === 'nl' ? 'Gebruiksvoorwaarden' : 'Terms of Use'}</Link>
+        <Link to="/privacy" className="text-xs text-gray-500 active:text-gray-400">{t('profile.privacy')}</Link>
+        <Link to="/terms"   className="text-xs text-gray-500 active:text-gray-400">{t('profile.terms_label')}</Link>
       </div>
 
-      {/* Account verwijderen */}
-      <div className="mt-8 rounded-2xl p-4" style={{background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(239,68,68,0.10)'}}>
-        <h2 className="mb-2 text-sm font-semibold text-red-400">{i18n.language === 'nl' ? 'Gevarenzone' : 'Danger zone'}</h2>
-        
+      {/* ── Account verwijderen ── */}
+      <div className="mt-8 rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(239,68,68,0.10)' }}>
+        <p className="mb-2 text-sm font-bold text-red-400">{t('profile.danger_zone')}</p>
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 text-sm font-medium text-red-400 ring-1 ring-red-500/30 active:bg-red-500/20 transition-colors"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 text-sm font-bold text-red-400 ring-1 ring-red-500/30 active:bg-red-500/20"
           >
             <Trash2 size={16} />
             {t('profile.delete_account')}
           </button>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 rounded-lg bg-red-500/10 p-3">
+            <div className="flex items-start gap-3 rounded-xl bg-red-500/10 p-3">
               <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-400" />
-              <p className="text-sm text-red-300">
-                {i18n.language === 'nl' 
-                  ? 'Dit verwijdert al je trainingsdata, instellingen en je account. Dit kan niet ongedaan worden gemaakt.'
-                  : 'This will delete all your training data, settings and account. This cannot be undone.'}
-              </p>
+              <p className="text-sm text-red-300">{t('profile.delete_confirm_text')}</p>
             </div>
-            
-            {deleteError && (
-              <p className="text-sm text-red-400">{deleteError}</p>
-            )}
-            
+            {deleteError && <p className="text-sm text-red-400">{deleteError}</p>}
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setShowDeleteConfirm(false)
-                  setDeleteError(null)
-                }}
+                onClick={() => { setShowDeleteConfirm(false); setDeleteError(null) }}
                 disabled={deleting}
-                className="flex-1 rounded-xl bg-gray-800 py-3 text-sm font-medium text-gray-300 active:bg-gray-700 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-xl bg-gray-800 py-3 text-sm font-bold text-gray-300 active:bg-gray-700 disabled:opacity-50"
               >
                 {t('common.cancel')}
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting}
-                className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white active:bg-red-600 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white active:bg-red-600 disabled:opacity-50"
               >
-                {deleting 
-                  ? (i18n.language === 'nl' ? 'Verwijderen...' : 'Deleting...') 
-                  : (i18n.language === 'nl' ? 'Ja, verwijder alles' : 'Yes, delete everything')}
+                {deleting ? t('profile.deleting') : t('profile.confirm_delete')}
               </button>
             </div>
           </div>
