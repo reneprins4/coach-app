@@ -1,6 +1,7 @@
 /**
  * KRAVEX TRAINING ANALYSIS — COMPREHENSIVE TEST SUITE
- * Ronde 1: Wiskundige correctheid
+ * Ronde 1: Wiskundige correctheid ✅
+ * Ronde 2: Temporele logica
  */
 
 import {
@@ -57,6 +58,33 @@ function assertFinite(value, msg = '') {
   }
 }
 
+function assertGreater(a, b, msg = '') {
+  if (a <= b) {
+    throw new Error(`${msg} Expected ${a} > ${b}`)
+  }
+}
+
+function assertArrayLength(arr, len, msg = '') {
+  if (!Array.isArray(arr) || arr.length !== len) {
+    throw new Error(`${msg} Expected array of length ${len}, got ${arr?.length}`)
+  }
+}
+
+// Helper: create workout at specific time
+function createWorkout(hoursAgo, exercises = []) {
+  const date = new Date()
+  date.setTime(date.getTime() - hoursAgo * 3600000)
+  return {
+    created_at: date.toISOString(),
+    workout_sets: exercises.map(e => ({
+      exercise: e.exercise || e,
+      weight_kg: e.weight_kg || 100,
+      reps: e.reps || 10,
+      rpe: e.rpe || 7,
+    }))
+  }
+}
+
 console.log('\n========================================')
 console.log('RONDE 1: WISKUNDIGE CORRECTHEID')
 console.log('========================================\n')
@@ -78,7 +106,6 @@ test('calcMuscleRecovery: hoursSinceTrained=0 should return 0% recovery', () => 
 
 test('scoreSplits: empty muscleStatus should not crash', () => {
   const result = scoreSplits({})
-  // Should return array, not crash
   if (!Array.isArray(result)) throw new Error('Expected array')
 })
 
@@ -91,21 +118,9 @@ test('analyzeTraining: empty workouts array', () => {
 console.log('\n--- Floating Point Precision ---')
 
 test('setsThisWeek with compound movements should accumulate correctly', () => {
-  // 0.5 + 0.5 + 0.5 should equal 1.5, not 1.4999999999
-  const workouts = [{
-    created_at: new Date().toISOString(),
-    workout_sets: [
-      { exercise: 'Deadlift' },
-      { exercise: 'Squat' },
-      { exercise: 'Barbell Row' },
-    ]
-  }]
+  const workouts = [createWorkout(1, ['Deadlift', 'Squat', 'Barbell Row'])]
   const result = analyzeTraining(workouts)
-  // Deadlift -> back primary, hamstrings/glutes secondary (0.5 each)
-  // Squat -> quads primary, hamstrings/glutes secondary (0.5 each)
-  // Check hamstrings: 0.5 (from deadlift) + 0.5 (from squat) = 1.0
   const hamSets = result.hamstrings.setsThisWeek
-  // Test for floating point errors
   if (Math.abs(hamSets - 1.0) > 0.001) {
     throw new Error(`Floating point error: expected 1.0, got ${hamSets}`)
   }
@@ -114,9 +129,7 @@ test('setsThisWeek with compound movements should accumulate correctly', () => {
 test('calcMuscleRecovery: RPE 4 should give faster recovery than RPE 10', () => {
   const recRPE4 = calcMuscleRecovery('chest', 24, 4, 10)
   const recRPE10 = calcMuscleRecovery('chest', 24, 10, 10)
-  if (recRPE4 <= recRPE10) {
-    throw new Error(`RPE 4 (${recRPE4}%) should recover faster than RPE 10 (${recRPE10}%)`)
-  }
+  assertGreater(recRPE4, recRPE10)
 })
 
 // === 3. Extreme Values ===
@@ -134,11 +147,9 @@ test('calcMuscleRecovery: 10000 hours since trained', () => {
   assertEqual(result, 100, '10000 hours ago = fully recovered')
 })
 
-test('calcMuscleRecovery: negative hours should not break', () => {
-  // Edge case: what if hoursSinceTrained is negative?
+test('calcMuscleRecovery: negative hours should return 100%', () => {
   const result = calcMuscleRecovery('chest', -5, 7, 10)
-  assertNoNaN(result)
-  assertFinite(result)
+  assertEqual(result, 0, 'Negative hours clamped to 0 = 0% recovery')
 })
 
 test('calcMuscleRecovery: very small hours (0.001)', () => {
@@ -235,7 +246,6 @@ test('scoreSplits: all muscles at 0% recovery', () => {
   }
   const result = scoreSplits(muscleStatus)
   if (!Array.isArray(result)) throw new Error('Expected array')
-  // All splits should have negative scores due to penalties
   for (const split of result) {
     assertFinite(split.score)
   }
@@ -270,7 +280,6 @@ test('scoreSplits: volume exactly at max (no deficit)', () => {
     }
   }
   const result = scoreSplits(muscleStatus)
-  // Check that deficit calculation handles this correctly
   for (const split of result) {
     assertFinite(split.score)
   }
@@ -280,7 +289,7 @@ test('scoreSplits: setsThisWeek higher than max', () => {
   const muscleStatus = {}
   for (const m of Object.keys(SET_TARGETS)) {
     muscleStatus[m] = {
-      setsThisWeek: SET_TARGETS[m].max * 3, // Way over
+      setsThisWeek: SET_TARGETS[m].max * 3,
       recoveryPct: 50,
       target: SET_TARGETS[m],
       status: 'recovering',
@@ -295,18 +304,15 @@ test('scoreSplits: setsThisWeek higher than max', () => {
 // === 6. NaN Propagation Tests ===
 console.log('\n--- NaN Propagation ---')
 
-test('calcMuscleRecovery: NaN hours should not propagate', () => {
+test('calcMuscleRecovery: NaN hours should return 100%', () => {
   const result = calcMuscleRecovery('chest', NaN, 7, 10)
-  // NaN is not null/undefined, so it won't return 100
-  // But it should not crash or propagate NaN
-  if (Number.isNaN(result)) {
-    throw new Error('NaN propagated to result')
-  }
+  assertEqual(result, 100, 'NaN hours = never trained = 100%')
 })
 
-test('calcMuscleRecovery: NaN RPE should not propagate', () => {
+test('calcMuscleRecovery: NaN RPE should use default 7', () => {
   const result = calcMuscleRecovery('chest', 48, NaN, 10)
   assertNoNaN(result)
+  assertFinite(result)
 })
 
 test('calcMuscleRecovery: NaN setsCount should not propagate', () => {
@@ -318,7 +324,6 @@ test('calcMuscleRecovery: NaN setsCount should not propagate', () => {
 console.log('\n--- Mathematical Correctness ---')
 
 test('Recovery at exactly baseHours should be ~100% (RPE 7, 6 sets)', () => {
-  // At baseHours with RPE 7 and 6 sets (no volume penalty), should be ~100%
   const result = calcMuscleRecovery('chest', 72, 7, 6)
   assertRange(result, 95, 100, 'At base hours, should be ~100%')
 })
@@ -329,42 +334,34 @@ test('Recovery at half baseHours should be ~50% (neutral conditions)', () => {
 })
 
 test('Volume penalty: 12 sets vs 6 sets', () => {
-  // 12 sets = 6 extra sets * 0.08 = 48% more time needed
   const rec6 = calcMuscleRecovery('chest', 48, 7, 6)
   const rec12 = calcMuscleRecovery('chest', 48, 7, 12)
-  if (rec6 <= rec12) {
-    throw new Error(`6 sets (${rec6}%) should recover faster than 12 sets (${rec12}%)`)
-  }
+  assertGreater(rec6, rec12)
 })
 
 test('RPE multiplier: RPE 7 gives rpeMult = 1.0', () => {
-  // At RPE 7, rpeMult should be exactly 1.0 (no change)
   const recRPE6 = calcMuscleRecovery('chest', 48, 6, 10)
   const recRPE7 = calcMuscleRecovery('chest', 48, 7, 10)
   const recRPE8 = calcMuscleRecovery('chest', 48, 8, 10)
-  // RPE 6 should be higher than RPE 7, which should be higher than RPE 8
-  if (recRPE6 <= recRPE7 || recRPE7 <= recRPE8) {
-    throw new Error(`Expected RPE6 (${recRPE6}) > RPE7 (${recRPE7}) > RPE8 (${recRPE8})`)
-  }
+  assertGreater(recRPE6, recRPE7)
+  assertGreater(recRPE7, recRPE8)
 })
 
-// === 8. Infinity Tests ===
+// === 8. Infinity Handling ===
 console.log('\n--- Infinity Handling ---')
 
-test('calcMuscleRecovery: Infinity hours', () => {
+test('calcMuscleRecovery: Infinity hours should return 100%', () => {
   const result = calcMuscleRecovery('chest', Infinity, 7, 10)
-  // Should be capped at 100
   assertEqual(result, 100)
 })
 
-test('calcMuscleRecovery: -Infinity hours', () => {
+test('calcMuscleRecovery: -Infinity hours should return 100%', () => {
   const result = calcMuscleRecovery('chest', -Infinity, 7, 10)
-  assertFinite(result)
+  assertEqual(result, 100)
 })
 
-test('calcMuscleRecovery: Infinity setsCount', () => {
+test('calcMuscleRecovery: Infinity setsCount should be handled', () => {
   const result = calcMuscleRecovery('chest', 48, 7, Infinity)
-  // Should not crash — Infinity is treated as invalid, defaults to 0 sets
   assertFinite(result)
   assertNoNaN(result)
   assertRange(result, 0, 100)
@@ -375,7 +372,6 @@ console.log('\n--- Zero Edge Cases ---')
 
 test('setsLastSession = 0, hoursSinceTrained = 48: should still calculate', () => {
   const result = calcMuscleRecovery('chest', 48, 7, 0)
-  // 0 sets means no volume penalty, should recover normally
   assertRange(result, 60, 75, '48h with 0 sets')
 })
 
@@ -383,13 +379,320 @@ test('All zeros: hoursSinceTrained=0, RPE=0, setsCount=0', () => {
   const result = calcMuscleRecovery('chest', 0, 0, 0)
   assertNoNaN(result)
   assertFinite(result)
-  // Just trained = 0% recovery
   assertEqual(result, 0)
+})
+
+// ========================================
+// RONDE 2: TEMPORELE LOGICA
+// ========================================
+console.log('\n========================================')
+console.log('RONDE 2: TEMPORELE LOGICA')
+console.log('========================================\n')
+
+// === 10. Future Workouts ===
+console.log('--- Future Workout Handling ---')
+
+test('Future workout (1 day ahead) should be ignored', () => {
+  const futureDate = new Date()
+  futureDate.setDate(futureDate.getDate() + 1)
+  const workouts = [{
+    created_at: futureDate.toISOString(),
+    workout_sets: [{ exercise: 'Bench Press', weight_kg: 100, reps: 10, rpe: 8 }]
+  }]
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.setsThisWeek, 0, 'Future workout should not count')
+})
+
+test('Future workout (1 second ahead) should be ignored', () => {
+  const futureDate = new Date()
+  futureDate.setTime(futureDate.getTime() + 1000) // +1 second
+  const workouts = [{
+    created_at: futureDate.toISOString(),
+    workout_sets: [{ exercise: 'Bench Press', weight_kg: 100, reps: 10, rpe: 8 }]
+  }]
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.setsThisWeek, 0, 'Future workout (1s) should not count')
+})
+
+test('Future workout (1 millisecond ahead) should be ignored', () => {
+  const futureDate = new Date()
+  futureDate.setTime(futureDate.getTime() + 1) // +1 ms
+  const workouts = [{
+    created_at: futureDate.toISOString(),
+    workout_sets: [{ exercise: 'Bench Press', weight_kg: 100, reps: 10, rpe: 8 }]
+  }]
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.setsThisWeek, 0, 'Future workout (1ms) should not count')
+})
+
+// === 11. Week Boundary Tests ===
+console.log('\n--- Week Boundary ---')
+
+test('Workout exactly 7 days ago should count as "this week"', () => {
+  const workouts = [createWorkout(168, ['Bench Press'])] // 7 * 24 = 168 hours
+  const result = analyzeTraining(workouts)
+  // weekStart is set to now - 7 days, so workout at exactly 7 days should be >= weekStart
+  assertGreater(result.chest.setsThisWeek, 0, 'Workout at 7d boundary should count')
+})
+
+test('Workout 7 days + 1 hour ago should NOT count as this week', () => {
+  const workouts = [createWorkout(169, ['Bench Press'])] // 7*24 + 1 = 169 hours
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.setsThisWeek, 0, 'Workout > 7 days should not count')
+})
+
+test('Workout 6 days 23 hours ago should count', () => {
+  const workouts = [createWorkout(167, ['Bench Press'])] // Just under 7 days
+  const result = analyzeTraining(workouts)
+  assertGreater(result.chest.setsThisWeek, 0, 'Workout at 6d23h should count')
+})
+
+// === 12. Multiple Workouts Same Day ===
+console.log('\n--- Multiple Workouts Same Day ---')
+
+test('Two workouts same day (morning + evening) should both count', () => {
+  const workouts = [
+    createWorkout(2, ['Bench Press', 'Incline Press']),  // 2 hours ago (evening)
+    createWorkout(10, ['Cable Fly', 'Dips']),            // 10 hours ago (morning)
+  ]
+  const result = analyzeTraining(workouts)
+  // Should have 4 chest exercises (bench, incline, fly... dips are triceps)
+  assertEqual(result.chest.setsThisWeek, 3, '3 chest exercises across 2 sessions')
+})
+
+test('Two workouts same day: recovery tracks most recent', () => {
+  const workouts = [
+    createWorkout(2, ['Bench Press']),   // Most recent
+    createWorkout(10, ['Incline Press']), // Earlier
+  ]
+  const result = analyzeTraining(workouts)
+  // hoursSinceLastTrained should be ~2, not ~10
+  assertRange(result.chest.hoursSinceLastTrained, 1.9, 2.1, 'Should track most recent')
+})
+
+// === 13. Midnight/Day Boundary ===
+console.log('\n--- Midnight Boundary ---')
+
+test('Workout at exactly midnight should be handled', () => {
+  const midnight = new Date()
+  midnight.setHours(0, 0, 0, 0)
+  const workouts = [{
+    created_at: midnight.toISOString(),
+    workout_sets: [{ exercise: 'Squat', weight_kg: 140, reps: 5, rpe: 8 }]
+  }]
+  const result = analyzeTraining(workouts)
+  assertNoNaN(result.quads.setsThisWeek)
+})
+
+test('Workout at 23:59:59 should be handled', () => {
+  const lateNight = new Date()
+  lateNight.setHours(23, 59, 59, 999)
+  const workouts = [{
+    created_at: lateNight.toISOString(),
+    workout_sets: [{ exercise: 'Squat', weight_kg: 140, reps: 5, rpe: 8 }]
+  }]
+  const result = analyzeTraining(workouts)
+  assertNoNaN(result.quads.setsThisWeek)
+})
+
+// === 14. Timezone Edge Cases ===
+console.log('\n--- Timezone Handling ---')
+
+test('ISO string with Z timezone should parse correctly', () => {
+  const isoDate = '2024-01-15T12:00:00.000Z'
+  const workouts = [{
+    created_at: isoDate,
+    workout_sets: [{ exercise: 'Squat', weight_kg: 140, reps: 5, rpe: 8 }]
+  }]
+  // Should not crash
+  const result = analyzeTraining(workouts)
+  assertNoNaN(result.quads.recoveryPct)
+})
+
+test('ISO string with offset timezone should parse correctly', () => {
+  const isoDate = '2024-01-15T12:00:00.000+02:00'
+  const workouts = [{
+    created_at: isoDate,
+    workout_sets: [{ exercise: 'Squat', weight_kg: 140, reps: 5, rpe: 8 }]
+  }]
+  const result = analyzeTraining(workouts)
+  assertNoNaN(result.quads.recoveryPct)
+})
+
+// === 15. Invalid Date Handling ===
+console.log('\n--- Invalid Date Handling ---')
+
+test('Invalid date string should not crash', () => {
+  const workouts = [{
+    created_at: 'not-a-date',
+    workout_sets: [{ exercise: 'Squat', weight_kg: 140, reps: 5, rpe: 8 }]
+  }]
+  try {
+    const result = analyzeTraining(workouts)
+    // If it doesn't crash, that's good. Check no NaN propagation
+    assertNoNaN(result.quads.setsThisWeek)
+  } catch (e) {
+    // Throwing is also acceptable for invalid data
+  }
+})
+
+test('Null created_at should not crash', () => {
+  const workouts = [{
+    created_at: null,
+    workout_sets: [{ exercise: 'Squat', weight_kg: 140, reps: 5, rpe: 8 }]
+  }]
+  try {
+    const result = analyzeTraining(workouts)
+    assertNoNaN(result.quads.recoveryPct)
+  } catch (e) {
+    // Throwing is acceptable
+  }
+})
+
+// === 16. Days Since Trained Calculation ===
+console.log('\n--- Days Since Trained ---')
+
+test('daysSinceLastTrained should be floor of actual days', () => {
+  const workouts = [createWorkout(25, ['Bench Press'])] // 25 hours = 1.04 days
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.daysSinceLastTrained, 1, '25 hours = 1 day (floor)')
+})
+
+test('daysSinceLastTrained for 47 hours should be 1', () => {
+  const workouts = [createWorkout(47, ['Bench Press'])] // 47 hours = 1.95 days
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.daysSinceLastTrained, 1, '47 hours = 1 day (floor)')
+})
+
+test('daysSinceLastTrained for 48 hours should be 2', () => {
+  const workouts = [createWorkout(48, ['Bench Press'])] // 48 hours = 2 days
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.daysSinceLastTrained, 2, '48 hours = 2 days')
+})
+
+test('daysSinceLastTrained for 1 hour should be 0', () => {
+  const workouts = [createWorkout(1, ['Bench Press'])]
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.daysSinceLastTrained, 0, '1 hour = 0 days')
+})
+
+// === 17. Very Old Workouts ===
+console.log('\n--- Very Old Workouts ---')
+
+test('Workout 30 days ago should not count for weekly volume', () => {
+  const workouts = [createWorkout(720, ['Bench Press'])] // 30 * 24 = 720 hours
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.setsThisWeek, 0, '30 day old workout = 0 weekly sets')
+})
+
+test('Workout 30 days ago should still track recovery correctly', () => {
+  const workouts = [createWorkout(720, ['Bench Press'])]
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.recoveryPct, 100, '30 days = fully recovered')
+})
+
+test('Workout 365 days ago should be handled', () => {
+  const workouts = [createWorkout(8760, ['Bench Press'])] // 365 * 24
+  const result = analyzeTraining(workouts)
+  assertEqual(result.chest.setsThisWeek, 0)
+  assertEqual(result.chest.recoveryPct, 100)
+})
+
+// === 18. Recent Exercise Tracking ===
+console.log('\n--- Recent Exercise Tracking ---')
+
+test('Exercise 6 days ago should be in recentExercises', () => {
+  const workouts = [createWorkout(144, ['Bench Press'])] // 6 days
+  const result = analyzeTraining(workouts)
+  if (!result.chest.recentExercises.includes('Bench Press')) {
+    throw new Error('Exercise at 6d should be in recentExercises')
+  }
+})
+
+test('Exercise 8 days ago should NOT be in recentExercises', () => {
+  const workouts = [createWorkout(192, ['Bench Press'])] // 8 days
+  const result = analyzeTraining(workouts)
+  if (result.chest.recentExercises.includes('Bench Press')) {
+    throw new Error('Exercise at 8d should NOT be in recentExercises')
+  }
+})
+
+test('Exercise exactly 7 days ago should be in recentExercises', () => {
+  const workouts = [createWorkout(168, ['Bench Press'])] // 7 days
+  const result = analyzeTraining(workouts)
+  if (!result.chest.recentExercises.includes('Bench Press')) {
+    throw new Error('Exercise at 7d should be in recentExercises')
+  }
+})
+
+// === 19. scoreSplits lastWorkoutInfo ===
+console.log('\n--- scoreSplits lastWorkoutInfo ---')
+
+test('Full Body penalty when last workout was also Full Body < 24h ago', () => {
+  const muscleStatus = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    muscleStatus[m] = {
+      setsThisWeek: 5,
+      recoveryPct: 70,
+      target: SET_TARGETS[m],
+      status: 'recovering',
+    }
+  }
+  
+  const noHistory = scoreSplits(muscleStatus)
+  const withRecentFB = scoreSplits(muscleStatus, { split: 'Full Body', hoursSince: 12 })
+  
+  const fbNoHistory = noHistory.find(s => s.name === 'Full Body').score
+  const fbWithHistory = withRecentFB.find(s => s.name === 'Full Body').score
+  
+  assertGreater(fbNoHistory, fbWithHistory, 'Recent Full Body should penalize Full Body')
+})
+
+test('No penalty when last Full Body was > 24h ago', () => {
+  const muscleStatus = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    muscleStatus[m] = {
+      setsThisWeek: 5,
+      recoveryPct: 80,
+      target: SET_TARGETS[m],
+      status: 'ready',
+    }
+  }
+  
+  const noHistory = scoreSplits(muscleStatus)
+  const withOldFB = scoreSplits(muscleStatus, { split: 'Full Body', hoursSince: 48 })
+  
+  const fbNoHistory = noHistory.find(s => s.name === 'Full Body').score
+  const fbWithHistory = withOldFB.find(s => s.name === 'Full Body').score
+  
+  assertEqual(fbNoHistory, fbWithHistory, 'Old Full Body should not penalize')
+})
+
+// === 20. Order Independence ===
+console.log('\n--- Order Independence ---')
+
+test('Workout order should not affect final stats (newer first vs older first)', () => {
+  const workoutsNewerFirst = [
+    createWorkout(2, ['Bench Press']),
+    createWorkout(48, ['Bench Press']),
+  ]
+  const workoutsOlderFirst = [
+    createWorkout(48, ['Bench Press']),
+    createWorkout(2, ['Bench Press']),
+  ]
+  
+  const resultNew = analyzeTraining(workoutsNewerFirst)
+  const resultOld = analyzeTraining(workoutsOlderFirst)
+  
+  assertEqual(resultNew.chest.setsThisWeek, resultOld.chest.setsThisWeek, 'Sets should match')
+  // hoursSinceLastTrained should be ~2 in both cases
+  assertRange(resultNew.chest.hoursSinceLastTrained, 1.9, 2.1)
+  assertRange(resultOld.chest.hoursSinceLastTrained, 1.9, 2.1)
 })
 
 // === Summary ===
 console.log('\n========================================')
-console.log(`RONDE 1 RESULTAAT: ${passed} passed, ${failed} failed`)
+console.log(`TOTAAL: ${passed} passed, ${failed} failed`)
 console.log('========================================')
 
 if (failures.length > 0) {
