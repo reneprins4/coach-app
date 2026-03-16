@@ -555,5 +555,11 @@
     "volume": "Volume",
     "technique": "Techniek",
     "recovery": "Herstel"
+  },
+  "gender": {
+    "label": "Geslacht",
+    "male": "Man",
+    "female": "Vrouw",
+    "other": "Anders"
   }
 }

@@ -176,6 +176,28 @@ export default function Profile() {
         <p className="mt-1 text-xs text-gray-600">{t('profile.weight_hint')}</p>
       </div>
 
+      {/* ── Geslacht ── */}
+      <div className="mb-6">
+        <p className="label-caps mb-2">{t('gender.label')}</p>
+        <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+          {[
+            { value: 'male', label: t('gender.male') },
+            { value: 'female', label: t('gender.female') },
+            { value: 'other', label: t('gender.other') },
+          ].map(g => (
+            <button
+              key={g.value}
+              onClick={() => update('gender', g.value)}
+              className={`flex-1 rounded-xl py-2.5 text-sm font-bold ${
+                settings.gender === g.value ? 'bg-white text-black' : 'text-gray-500 active:text-gray-300'
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ── Ervaringsniveau ── */}
       <div className="mb-6">
         <p className="label-caps mb-2">{t('profile.experience_label')}</p>

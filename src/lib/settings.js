@@ -4,6 +4,7 @@ const SETTINGS_KEY = 'coach-app-settings'
 
 const DEFAULTS = {
   name: '',
+  gender: 'male', // 'male' | 'female' | 'other'
   goal: 'hypertrophy',
   frequency: '4x',
   restTime: 90,

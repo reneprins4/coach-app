@@ -103,8 +103,18 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
     ? `\n## Training Block\n- Phase: ${preferences.trainingPhase} (Week ${preferences.blockWeek}/${preferences.blockTotalWeeks})\n- ${preferences.isDeload ? 'DELOAD WEEK: Reduce volume 40-50%, keep same weight, RPE max 6. No grinding.' : `Target RPE: ${preferences.targetRPE} | Rep range: ${preferences.targetRepRange?.[0]}-${preferences.targetRepRange?.[1]} reps`}\n- Volume note: ${preferences.weekTargetNote || 'standard'}`
     : ''
 
+  // Gender-specific training guidance
+  const genderNote = preferences.gender
+    ? `\nATHLETE GENDER: ${preferences.gender}. Adjust rep ranges and recovery accordingly:
+- Women generally recover faster between sets but may need different volume approaches
+- For strength goals: men typically respond better to higher intensity, women to higher frequency
+- For hypertrophy: women generally benefit from slightly higher rep ranges (12-20) vs men (8-15)
+- Consider hormonal factors affecting recovery and strength output`
+    : ''
+
   const prompt = `## Athlete Profile
 - Name: ${preferences.name || 'athlete'}
+- Gender: ${preferences.gender || 'not specified'}
 - Bodyweight: ${bw}
 - Experience: ${level}
 - Goal: ${preferences.goal || 'hypertrophy'}
@@ -112,7 +122,7 @@ ${knowns.length > 0 ? `Known maxes: ${knowns.join(', ')}` : ''}`
 - Training frequency: ${preferences.frequency || '4x'}/week
 - Energy today: ${preferences.energy || 'medium'}
 - Available time: ${preferences.time || 60} min
-${focusNote}${priorityNote}${mainLiftNote}${trainingGoalNote}${goalRepNote}
+${focusNote}${priorityNote}${mainLiftNote}${trainingGoalNote}${goalRepNote}${genderNote}
 ${periodizationNote}
 
 ${weightGuidance}
