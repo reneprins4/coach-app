@@ -60,6 +60,7 @@
     "recent": "Recent",
     "view_all": "Bekijk alles",
     "no_workouts": "Nog geen trainingen",
+    "no_exercises": "Geen oefeningen",
     "recovery": "Herstel",
     "recovery_ready": "Klaar",
     "recovery_recovering": "Herstellend",
@@ -227,7 +228,8 @@
     "advanced_options": "Geavanceerde opties",
     "analysis_required": "Analyse vereist",
     "recovered": "hersteld",
-    "select_time_first": "Kies een tijd"
+    "select_time_first": "Kies een tijd",
+    "try_later": "Probeer het later opnieuw"
   },
   "progress": {
     "title": "Voortgang",
@@ -333,9 +335,35 @@
     "delete_confirm_sub": "Dit verwijdert alle sets van deze training.",
     "exercises": "Oefeningen",
     "not_found": "Training niet gevonden",
-    "history": "Geschiedenis"
+    "history": "Geschiedenis",
+    "workout": "Training"
   },
   "onboarding": {
+    "beginners": {
+      "welcome_title": "Welkom bij Kravex",
+      "welcome_sub": "AI-gedreven krachttraining. Gebaseerd op sport science.",
+      "begin": "Begin",
+      "how_title": "Hoe het werkt",
+      "step_indicator": "{{current}} van {{total}}",
+      "concept_splits": "Splits",
+      "concept_splits_desc": "Een 'split' bepaalt welke spiergroepen je traint. Push = borst/schouders/triceps. Pull = rug/biceps. Legs = benen.",
+      "concept_rpe": "RPE",
+      "concept_rpe_desc": "RPE staat voor Rate of Perceived Exertion. Hoe zwaar voelde de set? RPE 7 = 3 herhalingen over. RPE 10 = absoluut maximum.",
+      "concept_recovery": "Herstel",
+      "concept_recovery_desc": "De app bijhoudt welke spieren vermoeid zijn en suggereert wanneer je ze weer kunt trainen.",
+      "pref_title": "Jouw voorkeur",
+      "name_label": "Naam",
+      "goal_label": "Trainingsdoel",
+      "goal_muscle": "Spiermassa",
+      "goal_strength": "Kracht",
+      "goal_endurance": "Conditie",
+      "time_label": "Beschikbare tijd",
+      "equipment_label": "Apparatuur",
+      "equip_full": "Full gym",
+      "equip_dumbbells": "Thuis / dumbbells",
+      "equip_barbell": "Barbell thuis",
+      "start_training": "Start trainen"
+    },
     "welcome": "Welkom",
     "get_started": "Aan de slag",
     "goal_question": "Wat wil je bereiken?",

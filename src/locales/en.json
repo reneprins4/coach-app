@@ -60,6 +60,7 @@
     "recent": "Recent",
     "view_all": "View all",
     "no_workouts": "No workouts yet",
+    "no_exercises": "No exercises",
     "recovery": "Recovery",
     "recovery_ready": "Ready",
     "recovery_recovering": "Recovering",
@@ -227,7 +228,8 @@
     "advanced_options": "Advanced options",
     "analysis_required": "Analysis required",
     "recovered": "recovered",
-    "select_time_first": "Select a duration"
+    "select_time_first": "Select a duration",
+    "try_later": "Try again later"
   },
   "progress": {
     "title": "Progress",
@@ -333,9 +335,35 @@
     "delete_confirm_sub": "This will delete all sets from this workout.",
     "exercises": "Exercises",
     "not_found": "Workout not found",
-    "history": "History"
+    "history": "History",
+    "workout": "Workout"
   },
   "onboarding": {
+    "beginners": {
+      "welcome_title": "Welcome to Kravex",
+      "welcome_sub": "AI-powered strength training. Based on sport science.",
+      "begin": "Begin",
+      "how_title": "How it works",
+      "step_indicator": "{{current}} of {{total}}",
+      "concept_splits": "Splits",
+      "concept_splits_desc": "A 'split' determines which muscle groups you train. Push = chest/shoulders/triceps. Pull = back/biceps. Legs = legs.",
+      "concept_rpe": "RPE",
+      "concept_rpe_desc": "RPE stands for Rate of Perceived Exertion. How hard did the set feel? RPE 7 = 3 reps left. RPE 10 = absolute maximum.",
+      "concept_recovery": "Recovery",
+      "concept_recovery_desc": "The app tracks which muscles are fatigued and suggests when you can train them again.",
+      "pref_title": "Your preferences",
+      "name_label": "Name",
+      "goal_label": "Training goal",
+      "goal_muscle": "Muscle mass",
+      "goal_strength": "Strength",
+      "goal_endurance": "Endurance",
+      "time_label": "Available time",
+      "equipment_label": "Equipment",
+      "equip_full": "Full gym",
+      "equip_dumbbells": "Home / dumbbells",
+      "equip_barbell": "Barbell at home",
+      "start_training": "Start training"
+    },
     "welcome": "Welcome",
     "get_started": "Get started",
     "goal_question": "What do you want to achieve?",

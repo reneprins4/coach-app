@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth'
 import { getSettings, saveSettings, mergeSettingsOnLogin } from './lib/settings'
 import Layout from './components/Layout'
 import Login from './pages/Login'
-import Onboarding from './pages/Onboarding'
+import Onboarding from './components/Onboarding'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Logger = lazy(() => import('./pages/Logger'))
