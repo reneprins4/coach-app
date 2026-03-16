@@ -1,32 +1,37 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertCircle, CheckCircle, AlertTriangle, Loader2, RefreshCw } from 'lucide-react'
 import { analyzeFormPatterns, getCachedAnalysis, setCachedAnalysis, clearAnalysisCache } from '../lib/formAnalysis'
 
 const SEVERITY_CONFIG = {
   low: {
     icon: CheckCircle,
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
-    text: 'text-green-400',
-    badge: 'bg-green-500/20 text-green-400'
+    color: 'rgba(16,185,129,0.08)',
+    border: 'rgba(16,185,129,0.2)',
+    text: 'text-emerald-400',
+    badge: { background: 'rgba(16,185,129,0.15)', color: '#34d399' },
+    label: 'Info',
   },
   medium: {
     icon: AlertTriangle,
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/20',
-    text: 'text-yellow-400',
-    badge: 'bg-yellow-500/20 text-yellow-400'
+    color: 'rgba(245,158,11,0.08)',
+    border: 'rgba(245,158,11,0.2)',
+    text: 'text-amber-400',
+    badge: { background: 'rgba(245,158,11,0.15)', color: '#fbbf24' },
+    label: 'Let op',
   },
   high: {
     icon: AlertCircle,
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/20',
+    color: 'rgba(239,68,68,0.08)',
+    border: 'rgba(239,68,68,0.2)',
     text: 'text-red-400',
-    badge: 'bg-red-500/20 text-red-400'
-  }
+    badge: { background: 'rgba(239,68,68,0.15)', color: '#f87171' },
+    label: 'Urgent',
+  },
 }
 
 export default function FormDetective({ workouts, userId }) {
+  const { t } = useTranslation()
   const [insights, setInsights] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -37,35 +42,25 @@ export default function FormDetective({ workouts, userId }) {
       .then(cached => {
         if (!cancelled && cached && cached.length > 0) setInsights(cached)
       })
-      .catch(() => { /* silent - cache miss is fine */ })
+      .catch(() => {})
     return () => { cancelled = true }
   }, [userId])
 
   async function runAnalysis(force = false) {
     if (loading) return
-
     if (!force) {
       const cached = await getCachedAnalysis(userId)
-      if (cached) {
-        setInsights(cached)
-        return
-      }
+      if (cached) { setInsights(cached); return }
     }
-
-    if (workouts.length < 3) {
-      setError('Minimaal 3 trainingen nodig voor analyse')
-      return
-    }
-
+    if (workouts.length < 3) { setError(t('analyse.need_min_workouts')); return }
     setLoading(true)
     setError(null)
-
     try {
       const result = await analyzeFormPatterns(workouts)
       setInsights(result)
       await setCachedAnalysis(userId, result)
     } catch (err) {
-      setError('Analyse mislukt. Probeer het later opnieuw.')
+      setError(t('analyse.failed'))
       console.error(err)
     } finally {
       setLoading(false)
@@ -77,89 +72,115 @@ export default function FormDetective({ workouts, userId }) {
     runAnalysis(true)
   }
 
-  // Geen data state
+  // ── Empty state ────────────────────────────────────────────────────────
   if (!insights && !loading && !error) {
     return (
-      <div className="space-y-4">
-        <div className="rounded-xl border border-dashed border-gray-700 bg-gray-900 p-6 text-center">
-          <AlertCircle size={32} className="mx-auto mb-3 text-gray-600" />
-          <p className="mb-1 text-sm font-medium text-gray-300">AI Trainingsanalyse</p>
-          <p className="mb-4 text-xs text-gray-500">
-            Analyseer je trainingspatronen en krijg inzichten van een virtuele personal trainer
-          </p>
+      <div className="space-y-5">
+        <div>
+          <p className="label-caps mb-1">{t('analyse.title')}</p>
+          <p className="text-2xl font-black tracking-tight text-white">{t('analyse.subtitle')}</p>
+        </div>
+        <div
+          className="rounded-2xl p-6 text-center"
+          style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-800">
+            <AlertCircle size={24} className="text-gray-500" />
+          </div>
+          <p className="mb-1 text-sm font-black tracking-tight text-white">{t('analyse.cta_title')}</p>
+          <p className="mb-5 text-xs text-gray-500">{t('analyse.cta_sub')}</p>
           <button
             onClick={() => runAnalysis(false)}
             disabled={loading || workouts.length < 3}
-            className="rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50 active:bg-cyan-600"
+            className="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40 active:bg-cyan-600"
           >
-            {workouts.length < 3 ? 'Minimaal 3 trainingen nodig' : 'Analyseer mijn training'}
+            {workouts.length < 3 ? t('analyse.need_more') : t('analyse.run_btn')}
           </button>
         </div>
       </div>
     )
   }
 
-  // Loading state
+  // ── Loading ────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 size={32} className="mb-3 animate-spin text-red-500" />
-        <p className="text-sm text-gray-400">Trainingsdata analyseren...</p>
-        <p className="text-xs text-gray-600">Dit kan 10-20 seconden duren</p>
+      <div className="flex flex-col items-center justify-center py-16">
+        <Loader2 size={28} className="mb-3 animate-spin text-cyan-500" />
+        <p className="text-sm font-bold text-gray-300">{t('analyse.loading')}</p>
+        <p className="text-xs text-gray-600">{t('analyse.loading_sub')}</p>
       </div>
     )
   }
 
-  // Error state
+  // ── Error ──────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center">
-        <AlertCircle size={24} className="mx-auto mb-2 text-red-400" />
-        <p className="mb-3 text-sm text-red-400">{error}</p>
-        <button
-          onClick={() => runAnalysis(false)}
-          className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white"
+      <div className="space-y-4">
+        <div
+          className="rounded-2xl p-5 text-center"
+          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
         >
-          Opnieuw proberen
-        </button>
+          <AlertCircle size={22} className="mx-auto mb-2 text-red-400" />
+          <p className="mb-4 text-sm text-red-400">{error}</p>
+          <button
+            onClick={() => runAnalysis(false)}
+            className="rounded-xl bg-gray-800 px-4 py-2 text-sm font-bold text-white active:bg-gray-700"
+          >
+            {t('analyse.retry')}
+          </button>
+        </div>
       </div>
     )
   }
 
-  // Geen inzichten gevonden
+  // ── All clear ──────────────────────────────────────────────────────────
   if (insights && insights.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-4 text-center">
-          <CheckCircle size={24} className="mx-auto mb-2 text-green-400" />
-          <p className="text-sm font-medium text-green-400">Alles ziet er goed uit</p>
-          <p className="text-xs text-gray-500">Geen problemen gedetecteerd in je trainingsdata</p>
+        <div
+          className="rounded-2xl p-5"
+          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+              <CheckCircle size={18} className="text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm font-black tracking-tight text-white">{t('analyse.all_clear')}</p>
+              <p className="text-xs text-gray-500">{t('analyse.all_clear_sub')}</p>
+            </div>
+          </div>
         </div>
         <button
           onClick={handleRefresh}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm text-gray-400"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-4 py-3 text-sm text-gray-400 active:bg-gray-800"
+          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <RefreshCw size={14} />
-          Opnieuw analyseren
+          <RefreshCw size={13} />
+          {t('analyse.reanalyse')}
         </button>
       </div>
     )
   }
 
-  // Inzichten weergeven
+  // ── Results ────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-          {insights.length} inzicht{insights.length !== 1 ? 'en' : ''} gevonden
-        </p>
+        <div>
+          <p className="label-caps mb-0.5">{t('analyse.title')}</p>
+          <p className="text-xl font-black tracking-tight text-white">
+            {insights.length} {insights.length === 1 ? t('analyse.insight_one') : t('analyse.insight_other')}
+          </p>
+        </div>
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="flex items-center gap-1.5 text-xs text-gray-500 transition-colors active:text-gray-400"
+          className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-3 py-2 text-xs font-bold text-gray-400 active:bg-gray-800"
+          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
         >
           <RefreshCw size={12} />
-          Vernieuwen
+          {t('analyse.refresh')}
         </button>
       </div>
 
@@ -170,23 +191,35 @@ export default function FormDetective({ workouts, userId }) {
         return (
           <div
             key={idx}
-            className={`rounded-xl border ${config.border} ${config.bg} p-4`}
+            className="rounded-2xl p-4"
+            style={{ background: config.color, border: `1px solid ${config.border}` }}
           >
-            <div className="mb-2 flex items-start gap-3">
-              <Icon size={18} className={`mt-0.5 shrink-0 ${config.text}`} />
-              <div className="flex-1">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white">{insight.exercise}</span>
-                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${config.badge}`}>
-                    {insight.severity === 'high' ? 'Urgent' : insight.severity === 'medium' ? 'Let op' : 'Info'}
+            <div className="mb-3 flex items-start gap-3">
+              <div
+                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
+                style={{ background: config.badge.background }}
+              >
+                <Icon size={16} style={{ color: config.badge.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-black tracking-tight text-white">{insight.exercise}</span>
+                  <span
+                    className="rounded-lg px-2 py-0.5 text-[10px] font-bold"
+                    style={config.badge}
+                  >
+                    {config.label}
                   </span>
                 </div>
                 <p className="text-sm text-gray-300">{insight.insight}</p>
               </div>
             </div>
-            <div className="ml-7 rounded-lg bg-gray-800/50 px-3 py-2">
+            <div
+              className="ml-11 rounded-xl px-3 py-2.5"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
               <p className="text-xs text-gray-400">
-                <span className="font-medium text-gray-300">Aanbeveling:</span> {insight.recommendation}
+                <span className="font-bold text-gray-300">{t('analyse.rec_label')}</span> {insight.recommendation}
               </p>
             </div>
           </div>

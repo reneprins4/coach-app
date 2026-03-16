@@ -8,6 +8,7 @@ import {
 import { generateScientificWorkout } from '../lib/anthropic'
 import { fetchRecentHistory } from '../hooks/useWorkouts'
 import { analyzeTraining, scoreSplits, getRelevantHistory, calcMuscleRecovery, classifyExercise } from '../lib/training-analysis'
+import { analyzeWeaknesses } from '../lib/weaknessHunter'
 import { getSettings } from '../lib/settings'
 import { supabase } from '../lib/supabase'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
@@ -108,6 +109,16 @@ export default function AICoach() {
         const scores = scoreSplits(analysis, lwInfo, settings.experienceLevel || 'intermediate')
         setSplitScores(scores)
         if (scores.length > 0) setSelectedSplit(scores[0].name)
+
+        // Auto-suggest weak muscles as focus based on imbalance analysis
+        const weakAnalysis = analyzeWeaknesses(history, 4)
+        const weakMuscles = weakAnalysis.imbalances
+          .filter(imb => imb.severity === 'high')
+          .map(imb => imb.weak)
+          .filter(Boolean)
+        if (weakMuscles.length > 0) {
+          setFocusedMuscles(weakMuscles)
+        }
       } catch (err) {
         console.error('Analysis failed:', err)
       }
