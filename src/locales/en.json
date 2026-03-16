@@ -529,7 +529,12 @@
     "current": "Current",
     "target": "Target",
     "days_left": "days to go",
-    "no_goal": "No PR goal set"
+    "no_goal": "No PR goal set",
+    "section_title": "Maxes & Goal",
+    "section_hint": "Enter your current 1RM. Mark your main lift to set a PR target.",
+    "current_max": "Current max",
+    "main_badge": "Main lift",
+    "set_main": "Set main"
   },
   "priority_muscles": {
     "title": "Muscle Focus",

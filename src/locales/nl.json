@@ -529,7 +529,12 @@
     "current": "Huidig",
     "target": "Doel",
     "days_left": "dagen te gaan",
-    "no_goal": "Geen PR doel ingesteld"
+    "no_goal": "Geen PR doel ingesteld",
+    "section_title": "Maxima & Doelstelling",
+    "section_hint": "Voer je huidige 1RM in. Markeer je hoofdlift voor een PR-doel.",
+    "current_max": "Huidig max",
+    "main_badge": "Hoofdlift",
+    "set_main": "Als hoofd"
   },
   "priority_muscles": {
     "title": "Spiergroep focus",

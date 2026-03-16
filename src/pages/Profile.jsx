@@ -250,50 +250,81 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* ── Hoofdlift ── */}
+      {/* ── Maxima & Doelstelling ── */}
       <div className="mb-6">
-        <p className="label-caps mb-2">{t('main_lift.title')}</p>
-        <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+        <p className="label-caps mb-1">{t('main_lift.section_title')}</p>
+        <p className="mb-3 text-xs text-gray-600">{t('main_lift.section_hint')}</p>
+        <div className="space-y-3">
           {[
-            { value: 'squat',    label: t('main_lift.squat') },
-            { value: 'bench',    label: t('main_lift.bench') },
-            { value: 'deadlift', label: t('main_lift.deadlift') },
-            { value: 'ohp',      label: t('main_lift.ohp') },
-          ].map(lift => (
-            <button
-              key={lift.value}
-              onClick={() => update('mainLift', settings.mainLift === lift.value ? null : lift.value)}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold ${
-                settings.mainLift === lift.value ? 'bg-white text-black' : 'text-gray-500 active:text-gray-300'
-              }`}
-            >
-              {lift.label}
-            </button>
-          ))}
+            { value: 'bench',    label: t('main_lift.bench'),    settingsKey: 'benchMax' },
+            { value: 'squat',    label: t('main_lift.squat'),    settingsKey: 'squatMax' },
+            { value: 'deadlift', label: t('main_lift.deadlift'), settingsKey: 'deadliftMax' },
+            { value: 'ohp',      label: t('main_lift.ohp'),      settingsKey: null },
+          ].map(lift => {
+            const isMain = settings.mainLift === lift.value
+            return (
+              <div
+                key={lift.value}
+                className={`rounded-2xl p-4 ${isMain ? 'ring-1 ring-cyan-500' : 'ring-1 ring-gray-800'}`}
+                style={isMain
+                  ? { background: 'linear-gradient(135deg, #0c1f2e 0%, #0d1421 100%)' }
+                  : { background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)' }}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <p className={`text-sm font-black tracking-tight ${isMain ? 'text-cyan-400' : 'text-white'}`}>{lift.label}</p>
+                  <button
+                    onClick={() => update('mainLift', isMain ? null : lift.value)}
+                    className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${
+                      isMain
+                        ? 'bg-cyan-500 text-white'
+                        : 'bg-gray-800 text-gray-500 active:bg-gray-700'
+                    }`}
+                  >
+                    {isMain ? t('main_lift.main_badge') : t('main_lift.set_main')}
+                  </button>
+                </div>
+                <div className={`grid gap-2 ${isMain ? 'grid-cols-3' : 'grid-cols-1'}`}>
+                  <div>
+                    <p className="label-caps mb-1">{t('main_lift.current_max')}</p>
+                    <input
+                      type="number"
+                      value={(lift.settingsKey ? settings[lift.settingsKey] : settings.ohpMax) || ''}
+                      onChange={(e) => {
+                        const key = lift.settingsKey || 'ohpMax'
+                        update(key, e.target.value ? Number(e.target.value) : null)
+                      }}
+                      placeholder="-"
+                      className="h-11 w-full rounded-xl bg-gray-800 px-3 text-center text-white placeholder-gray-600 outline-none focus:ring-1 focus:ring-gray-600"
+                    />
+                  </div>
+                  {isMain && (
+                    <>
+                      <div>
+                        <p className="label-caps mb-1">{t('main_lift.goal_kg')}</p>
+                        <input
+                          type="number"
+                          value={settings.mainLiftGoalKg || ''}
+                          onChange={(e) => update('mainLiftGoalKg', e.target.value ? Number(e.target.value) : null)}
+                          placeholder="100"
+                          className="h-11 w-full rounded-xl bg-gray-800 px-3 text-center text-white placeholder-gray-600 outline-none focus:ring-1 focus:ring-gray-600"
+                        />
+                      </div>
+                      <div>
+                        <p className="label-caps mb-1">{t('main_lift.goal_date')}</p>
+                        <input
+                          type="date"
+                          value={settings.mainLiftGoalDate ? settings.mainLiftGoalDate.split('T')[0] : ''}
+                          onChange={(e) => update('mainLiftGoalDate', e.target.value ? new Date(e.target.value).toISOString() : null)}
+                          className="h-11 w-full rounded-xl bg-gray-800 px-3 text-white placeholder-gray-600 outline-none focus:ring-1 focus:ring-gray-600"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
-        {settings.mainLift && (
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div>
-              <p className="label-caps mb-1">{t('main_lift.goal_kg')}</p>
-              <input
-                type="number"
-                value={settings.mainLiftGoalKg || ''}
-                onChange={(e) => update('mainLiftGoalKg', e.target.value ? Number(e.target.value) : null)}
-                placeholder="100"
-                className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
-              />
-            </div>
-            <div>
-              <p className="label-caps mb-1">{t('main_lift.goal_date')}</p>
-              <input
-                type="date"
-                value={settings.mainLiftGoalDate ? settings.mainLiftGoalDate.split('T')[0] : ''}
-                onChange={(e) => update('mainLiftGoalDate', e.target.value ? new Date(e.target.value).toISOString() : null)}
-                className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
-              />
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── Spiergroep focus ── */}
@@ -355,30 +386,6 @@ export default function Profile() {
             >
               {e.label}
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── 1RM Maxima ── */}
-      <div className="mb-6">
-        <p className="label-caps mb-1">{t('profile.maxes_label')} <span className="normal-case font-normal text-gray-600">({t('profile.optional')})</span></p>
-        <p className="mb-3 text-xs text-gray-600">{t('profile.maxes_hint')}</p>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { key: 'benchMax',    label: 'Bench (kg)' },
-            { key: 'squatMax',    label: 'Squat (kg)' },
-            { key: 'deadliftMax', label: 'Deadlift (kg)' },
-          ].map(({ key, label }) => (
-            <div key={key}>
-              <p className="label-caps mb-1">{label}</p>
-              <input
-                type="number"
-                value={settings[key]}
-                onChange={(e) => update(key, e.target.value)}
-                placeholder="-"
-                className="h-12 w-full rounded-xl bg-gray-900 px-3 text-center text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
-              />
-            </div>
           ))}
         </div>
       </div>
