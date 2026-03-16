@@ -552,6 +552,379 @@ test('getRelevantHistory filters by split muscles', () => {
   assertTrue(history[0].sets.some(s => s.exercise === 'Bench Press'))
 })
 
+// ========================================
+// RONDE 4: SCORING CORRECTHEID ALS PT
+// ========================================
+console.log('\n========================================')
+console.log('RONDE 4: SCORING CORRECTHEID ALS PT')
+console.log('========================================\n')
+
+// === 3 Weeks Rest Scenario ===
+console.log('--- 3 Weeks Rest Scenario ---')
+
+test('After 3 weeks rest: Full Body should score high', () => {
+  // No workouts = all muscles need work
+  const result = analyzeTraining([])
+  const scores = scoreSplits(result)
+  // Full Body should be top recommendation because everything needs work
+  const fbScore = scores.find(s => s.name === 'Full Body')
+  assertTrue(fbScore !== undefined)
+  // Should be a positive score (needs work)
+  assertGreater(fbScore.score, 0, 'Full Body should have positive score after 3 weeks rest')
+})
+
+test('After 3 weeks rest: all muscles have needs_work status', () => {
+  const result = analyzeTraining([])
+  for (const muscle of Object.keys(SET_TARGETS)) {
+    assertEqual(result[muscle].status, 'needs_work', `${muscle} should need work`)
+  }
+})
+
+test('After 3 weeks rest: all muscles have null daysSinceLastTrained', () => {
+  const result = analyzeTraining([])
+  for (const muscle of Object.keys(SET_TARGETS)) {
+    assertEqual(result[muscle].daysSinceLastTrained, null, `${muscle} should have null days`)
+  }
+})
+
+// === Heavy Legs + Light Push Same Day ===
+console.log('\n--- Heavy Legs + Light Push Same Day ---')
+
+test('Heavy Legs RPE 9 + Light Push RPE 5: next day should favor Push', () => {
+  const workouts = [
+    createWorkout(18, [
+      { exercise: 'Squat', rpe: 9 },
+      { exercise: 'Squat', rpe: 9 },
+      { exercise: 'Squat', rpe: 9 },
+      { exercise: 'Squat', rpe: 9 },
+      { exercise: 'Squat', rpe: 9 },  // 5 heavy sets quads
+      { exercise: 'Leg Press', rpe: 9 },
+      { exercise: 'Leg Press', rpe: 9 },
+      { exercise: 'Leg Press', rpe: 9 },
+      { exercise: 'Leg Press', rpe: 9 },
+      { exercise: 'Leg Press', rpe: 9 },  // 10 total quads RPE 9
+      { exercise: 'Bench Press', rpe: 5 },
+      { exercise: 'Bench Press', rpe: 5 },  // Light push
+    ])
+  ]
+  const result = analyzeTraining(workouts)
+  const scores = scoreSplits(result)
+  
+  const legsScore = scores.find(s => s.name === 'Legs').score
+  const pushScore = scores.find(s => s.name === 'Push').score
+  
+  // Push should score higher than Legs because quads are fatigued
+  assertGreater(pushScore, legsScore, 'Push should score higher than Legs after heavy legs')
+})
+
+test('Quads recovery after 15 sets RPE 9 should be < 50%', () => {
+  const workouts = [
+    createWorkout(24, Array(15).fill({ exercise: 'Squat', rpe: 9 }))
+  ]
+  const result = analyzeTraining(workouts)
+  assertTrue(result.quads.recoveryPct < 50, 'Quads should be fatigued after heavy session')
+})
+
+// === Powerlifter Scenario (Only Compounds) ===
+console.log('\n--- Powerlifter Scenario ---')
+
+test('Powerlifter (Squat + Deadlift + Bench only): correct secondary muscle tracking', () => {
+  const workouts = [
+    createWorkout(48, [
+      { exercise: 'Squat' },
+      { exercise: 'Squat' },
+      { exercise: 'Squat' },  // 3 quads + 1.5 hamstrings + 1.5 glutes
+      { exercise: 'Deadlift' },
+      { exercise: 'Deadlift' },
+      { exercise: 'Deadlift' },  // 3 back + 1.5 hamstrings + 1.5 glutes
+      { exercise: 'Bench Press' },
+      { exercise: 'Bench Press' },
+      { exercise: 'Bench Press' },  // 3 chest + 1.5 triceps + 1.5 shoulders
+    ])
+  ]
+  const result = analyzeTraining(workouts)
+  
+  // Primary muscles
+  assertEqual(result.quads.setsThisWeek, 3)
+  assertEqual(result.back.setsThisWeek, 3)
+  assertEqual(result.chest.setsThisWeek, 3)
+  
+  // Secondary muscles from compounds
+  assertEqual(result.hamstrings.setsThisWeek, 3)  // 1.5 from squat + 1.5 from deadlift
+  assertEqual(result.glutes.setsThisWeek, 3)      // 1.5 from squat + 1.5 from deadlift
+  assertEqual(result.triceps.setsThisWeek, 1.5)   // 1.5 from bench
+  assertEqual(result.shoulders.setsThisWeek, 1.5) // 1.5 from bench
+})
+
+test('Powerlifter: biceps get no direct work, should need work', () => {
+  const workouts = [
+    createWorkout(48, [
+      { exercise: 'Squat' },
+      { exercise: 'Deadlift' },
+      { exercise: 'Bench Press' },
+    ])
+  ]
+  const result = analyzeTraining(workouts)
+  // Deadlift does NOT hit biceps (that's rows/pullups)
+  // Powerlifter doing only SBD gets 0 bicep work
+  assertEqual(result.biceps.setsThisWeek, 0, 'Biceps get no work from SBD')
+  assertEqual(result.biceps.status, 'needs_work', 'Biceps should need work')
+})
+
+// === Never Trained Muscle ===
+console.log('\n--- Never Trained Muscle ---')
+
+test('Muscle never trained: always needs_work status', () => {
+  // Only train chest, check that biceps shows needs_work
+  const workouts = [
+    createWorkout(24, ['Bench Press', 'Incline Press', 'Cable Fly'])
+  ]
+  const result = analyzeTraining(workouts)
+  assertEqual(result.biceps.status, 'needs_work')
+  assertEqual(result.biceps.daysSinceLastTrained, null)
+})
+
+// === Volume Target Reached ===
+console.log('\n--- Volume Target Reached ---')
+
+test('Volume at max: deficit should be 0 (no boost)', () => {
+  const muscleStatus = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    muscleStatus[m] = {
+      setsThisWeek: SET_TARGETS[m].max, // At max
+      recoveryPct: 100,
+      target: SET_TARGETS[m],
+      status: 'ready',
+    }
+  }
+  const scores = scoreSplits(muscleStatus)
+  // Scores should be lower than when at 0 sets
+  const lowVolumeStatus = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    lowVolumeStatus[m] = {
+      setsThisWeek: 0, // No volume
+      recoveryPct: 100,
+      target: SET_TARGETS[m],
+      status: 'ready',
+    }
+  }
+  const lowScores = scoreSplits(lowVolumeStatus)
+  
+  // Scores with 0 volume should be higher due to deficit bonus
+  const pushMax = scores.find(s => s.name === 'Push').score
+  const pushLow = lowScores.find(s => s.name === 'Push').score
+  assertGreater(pushLow, pushMax, 'Low volume should score higher than max volume')
+})
+
+test('Volume over max: still no crash and valid scores', () => {
+  const muscleStatus = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    muscleStatus[m] = {
+      setsThisWeek: SET_TARGETS[m].max * 2, // Double max
+      recoveryPct: 50,
+      target: SET_TARGETS[m],
+      status: 'recovering',
+    }
+  }
+  const scores = scoreSplits(muscleStatus)
+  for (const split of scores) {
+    assertFinite(split.score)
+    assertNoNaN(split.score)
+  }
+})
+
+// === Experience Level ===
+console.log('\n--- Experience Level ---')
+
+test('Advanced athlete: Full Body penalized', () => {
+  const muscleStatus = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    muscleStatus[m] = {
+      setsThisWeek: 5,
+      recoveryPct: 100,
+      target: SET_TARGETS[m],
+      status: 'ready',
+    }
+  }
+  
+  const intermediate = scoreSplits(muscleStatus, null, 'intermediate')
+  const advanced = scoreSplits(muscleStatus, null, 'advanced')
+  
+  const fbInt = intermediate.find(s => s.name === 'Full Body').score
+  const fbAdv = advanced.find(s => s.name === 'Full Body').score
+  
+  assertGreater(fbInt, fbAdv, 'Advanced should penalize Full Body')
+})
+
+test('Beginner (default): Full Body not extra penalized', () => {
+  const muscleStatus = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    muscleStatus[m] = {
+      setsThisWeek: 0,
+      recoveryPct: 100,
+      target: SET_TARGETS[m],
+      status: 'ready',
+    }
+  }
+  
+  const def = scoreSplits(muscleStatus)
+  const beginner = scoreSplits(muscleStatus, null, 'beginner')
+  
+  const fbDef = def.find(s => s.name === 'Full Body').score
+  const fbBeg = beginner.find(s => s.name === 'Full Body').score
+  
+  assertEqual(fbDef, fbBeg, 'Beginner and default should have same FB score')
+})
+
+// === Recovery Status Transitions ===
+console.log('\n--- Recovery Status Transitions ---')
+
+test('recoveryStatus: 90% = ready', () => {
+  assertEqual(recoveryStatus(90), 'ready')
+})
+
+test('recoveryStatus: 89% = recovering', () => {
+  assertEqual(recoveryStatus(89), 'recovering')
+})
+
+test('recoveryStatus: 50% = recovering', () => {
+  assertEqual(recoveryStatus(50), 'recovering')
+})
+
+test('recoveryStatus: 49% = fatigued', () => {
+  assertEqual(recoveryStatus(49), 'fatigued')
+})
+
+test('recoveryStatus: 0% = fatigued', () => {
+  assertEqual(recoveryStatus(0), 'fatigued')
+})
+
+test('recoveryStatus: 100% = ready', () => {
+  assertEqual(recoveryStatus(100), 'ready')
+})
+
+// === Fatigued Primary Muscle Penalty ===
+console.log('\n--- Fatigued Primary Penalty ---')
+
+test('Push with fatigued chest: heavy penalty', () => {
+  const fatigued = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    fatigued[m] = {
+      setsThisWeek: 5,
+      recoveryPct: 100,
+      target: SET_TARGETS[m],
+      status: 'ready',
+    }
+  }
+  // Make chest fatigued
+  fatigued.chest.recoveryPct = 30
+  fatigued.chest.status = 'fatigued'
+  
+  const scores = scoreSplits(fatigued)
+  const pushScore = scores.find(s => s.name === 'Push').score
+  
+  // Pull should score much higher than Push
+  const pullScore = scores.find(s => s.name === 'Pull').score
+  assertGreater(pullScore, pushScore, 'Pull should beat Push when chest is fatigued')
+})
+
+test('Multiple fatigued primary muscles: bigger penalty', () => {
+  const oneFatigued = {}
+  const twoFatigued = {}
+  for (const m of Object.keys(SET_TARGETS)) {
+    oneFatigued[m] = { setsThisWeek: 5, recoveryPct: 100, target: SET_TARGETS[m], status: 'ready' }
+    twoFatigued[m] = { setsThisWeek: 5, recoveryPct: 100, target: SET_TARGETS[m], status: 'ready' }
+  }
+  
+  oneFatigued.chest.recoveryPct = 30
+  oneFatigued.chest.status = 'fatigued'
+  
+  twoFatigued.chest.recoveryPct = 30
+  twoFatigued.chest.status = 'fatigued'
+  twoFatigued.shoulders.recoveryPct = 30
+  twoFatigued.shoulders.status = 'fatigued'
+  
+  const oneScore = scoreSplits(oneFatigued).find(s => s.name === 'Push').score
+  const twoScore = scoreSplits(twoFatigued).find(s => s.name === 'Push').score
+  
+  assertGreater(oneScore, twoScore, 'More fatigued muscles = lower score')
+})
+
+// === Split Comparison Logic ===
+console.log('\n--- Split Comparison Logic ---')
+
+test('Upper vs Lower: opposite muscle groups', () => {
+  // Train lower body heavily
+  const workouts = [
+    createWorkout(12, Array(15).fill({ exercise: 'Squat', rpe: 9 }))
+  ]
+  const result = analyzeTraining(workouts)
+  const scores = scoreSplits(result)
+  
+  const upperScore = scores.find(s => s.name === 'Upper').score
+  const lowerScore = scores.find(s => s.name === 'Lower').score
+  
+  assertGreater(upperScore, lowerScore, 'Upper should win after heavy legs')
+})
+
+test('Push vs Pull vs Legs: rotation logic', () => {
+  // Train push heavily
+  const workouts = [
+    createWorkout(12, Array(10).fill({ exercise: 'Bench Press', rpe: 9 }))
+  ]
+  const result = analyzeTraining(workouts)
+  const scores = scoreSplits(result)
+  
+  const pushScore = scores.find(s => s.name === 'Push').score
+  const pullScore = scores.find(s => s.name === 'Pull').score
+  const legsScore = scores.find(s => s.name === 'Legs').score
+  
+  // Pull and Legs should both beat Push
+  assertGreater(pullScore, pushScore, 'Pull should beat Push after heavy push')
+  assertGreater(legsScore, pushScore, 'Legs should beat Push after heavy push')
+})
+
+// === Realistic Training Scenarios ===
+console.log('\n--- Realistic Training Scenarios ---')
+
+test('PPL: Day after Push = Pull recommended', () => {
+  const workouts = [
+    createWorkout(20, [
+      { exercise: 'Bench Press', rpe: 8 },
+      { exercise: 'Bench Press', rpe: 8 },
+      { exercise: 'Bench Press', rpe: 8 },
+      { exercise: 'Incline Press', rpe: 8 },
+      { exercise: 'Incline Press', rpe: 8 },
+      { exercise: 'Shoulder Press', rpe: 7 },
+      { exercise: 'Shoulder Press', rpe: 7 },
+      { exercise: 'Tricep Pushdown', rpe: 7 },
+      { exercise: 'Tricep Pushdown', rpe: 7 },
+    ])
+  ]
+  const result = analyzeTraining(workouts)
+  const scores = scoreSplits(result)
+  
+  // Pull should rank higher than Push
+  const pushRank = scores.findIndex(s => s.name === 'Push')
+  const pullRank = scores.findIndex(s => s.name === 'Pull')
+  assertTrue(pullRank < pushRank, 'Pull should rank higher than Push')
+})
+
+test('Deload week (all RPE 5): faster recovery', () => {
+  const deloadWorkouts = [
+    createWorkout(24, Array(10).fill({ exercise: 'Bench Press', rpe: 5 }))
+  ]
+  const heavyWorkouts = [
+    createWorkout(24, Array(10).fill({ exercise: 'Bench Press', rpe: 9 }))
+  ]
+  
+  const deloadResult = analyzeTraining(deloadWorkouts)
+  const heavyResult = analyzeTraining(heavyWorkouts)
+  
+  assertGreater(deloadResult.chest.recoveryPct, heavyResult.chest.recoveryPct, 
+    'Deload (RPE 5) should recover faster than heavy (RPE 9)')
+})
+
 // === Summary ===
 console.log('\n========================================')
 console.log(`TOTAAL: ${passed} passed, ${failed} failed`)
