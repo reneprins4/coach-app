@@ -42,6 +42,8 @@ export function workoutCacheKey({ split, muscleStatus, preferences }) {
     trainingPhase: preferences.trainingPhase,
     blockWeek: preferences.blockWeek,
     focusedMuscles: (preferences.focusedMuscles || []).sort(),
+    // Include date so cache resets daily — no identical workouts two days in a row
+    date: new Date().toISOString().slice(0, 10),
   }
   return `workout_${hashObject(relevant)}`
 }

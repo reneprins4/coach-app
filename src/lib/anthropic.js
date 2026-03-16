@@ -106,6 +106,11 @@ VOLUME RULES (strict):
 - For focused muscles: add 1-2 extra exercises or sets vs normal
 ${preferences.isDeload ? '- DELOAD: 2-3 sets max per exercise, RPE never above 6' : preferences.trainingPhase ? `- This is ${preferences.trainingPhase} Week ${preferences.blockWeek}: strictly follow the target RPE ${preferences.targetRPE} — do not go heavier even if the athlete feels good` : ''}
 
+EXERCISE VARIETY (important):
+- Check the recent training history above. Do NOT repeat the exact same exercise selection as the most recent session for this split.
+- Swap at least 1-2 exercises for alternatives that hit the same muscle group differently (e.g. if last session had Barbell Row → use Cable Row or Dumbbell Row today).
+- Rotate between compound variations to prevent adaptation (e.g. alternate Squat / Front Squat / Hack Squat across sessions).
+
 PROGRESSIVE OVERLOAD:
 - RPE <8 last time → add 2.5-5kg
 - RPE 8-9 → same weight
