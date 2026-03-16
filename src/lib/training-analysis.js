@@ -202,10 +202,14 @@ export function calcMuscleRecovery(muscle, hoursSinceTrained, avgRPE, setsCount)
   const baseHours = RECOVERY_HOURS[muscle] || 72
   // Volume penalty: each set above 6 adds 8% more recovery time needed
   const volumeMult = 1 + Math.max(0, ((setsCount || 0) - 6) * 0.08)
-  // Intensity penalty: RPE above 7 slows recovery
+  // Intensity modifier: RPE affects recovery bidirectionally
+  // - RPE > 7: slower recovery (more demanding)
+  // - RPE < 7: faster recovery (easier session, e.g., deload)
   // Clamp RPE to valid range 1-10, default to 7 if null/undefined
   const clampedRPE = avgRPE != null ? Math.max(1, Math.min(10, avgRPE)) : 7
-  const rpeMult = 1 + Math.max(0, (clampedRPE - 7) * 0.15)
+  // rpeMult scales from 0.55 (RPE 4) to 1.45 (RPE 10), with 1.0 at RPE 7
+  // Floor at 0.5 to prevent unrealistically fast recovery at very low RPE
+  const rpeMult = Math.max(0.5, 1 + (clampedRPE - 7) * 0.15)
   const adjustedHours = baseHours * volumeMult * rpeMult
   return Math.min(100, Math.round((hoursSinceTrained / adjustedHours) * 100))
 }
