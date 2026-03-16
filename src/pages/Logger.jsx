@@ -9,7 +9,7 @@ import { useTemplates } from '../hooks/useTemplates'
 import { getExerciseHistory, fetchRecentHistory } from '../hooks/useWorkouts'
 import { getExerciseSubstitute, generateScientificWorkout } from '../lib/anthropic'
 import { getSubstituteOptions } from '../lib/exerciseSubstitutes'
-import { getSettings } from '../lib/settings'
+import { getSettings, saveSettings } from '../lib/settings'
 import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
 import { calculateMomentum } from '../lib/momentumCalculator'
@@ -206,6 +206,7 @@ export default function Logger() {
       estimatedDuration: null,
       exerciseCount: null,
       cachedAt: null,
+      availableTime: getSettings().time || 60,
     }
   })
   
@@ -371,15 +372,18 @@ export default function Logger() {
   }, [user?.id, aw.isActive])
 
   // Generate workout for a different split
-  const generateForSplit = useCallback(async (splitName) => {
+  const generateForSplit = useCallback(async (splitName, overrideTime = null) => {
     if (!user?.id || !startFlowState.muscleStatus) {
       setStartFlowState(prev => ({ ...prev, error: t('logger.analysis_required') }))
       return
     }
     
+    const timeToUse = overrideTime ?? startFlowState.availableTime ?? getSettings().time ?? 60
+    
     setStartFlowState(prev => ({
       ...prev,
       selectedSplit: splitName,
+      availableTime: timeToUse,
       generating: true,
       generatedWorkout: null,
       error: null,
@@ -400,7 +404,7 @@ export default function Logger() {
         equipment: settings.equipment,
         goal: settings.goal,
         frequency: settings.frequency,
-        time: settings.time || 60,
+        time: timeToUse,
         energy: 'medium',
         benchMax: settings.benchMax,
         squatMax: settings.squatMax,
@@ -461,6 +465,7 @@ export default function Logger() {
           recommendedSplit: startFlowState.recommendedSplit,
           selectedSplit: splitName,
           recoveredMuscles: startFlowState.recoveredMuscles,
+          availableTime: timeToUse,
           userId: user.id, // Store userId for cache isolation
           ...newState,
         }
@@ -477,7 +482,31 @@ export default function Logger() {
         error: err.message,
       }))
     }
-  }, [user?.id, startFlowState.muscleStatus, startFlowState.splits, startFlowState.recommendedSplit, startFlowState.recoveredMuscles])
+  }, [user?.id, startFlowState.muscleStatus, startFlowState.splits, startFlowState.recommendedSplit, startFlowState.recoveredMuscles, startFlowState.availableTime])
+
+  // Handle time change
+  const handleTimeChange = useCallback((newTime) => {
+    // Save to settings
+    const current = getSettings()
+    saveSettings({ ...current, time: newTime })
+    // Update state + clear cache (time change = new workout needed)
+    setStartFlowState(prev => ({
+      ...prev,
+      availableTime: newTime,
+      generatedWorkout: null,
+      exerciseCount: null,
+      estimatedDuration: null,
+      error: null,
+      loading: false,
+    }))
+    // Clear sessionStorage cache so next generation uses new time
+    try {
+      const cacheKey = getSessionCacheKey(user?.id)
+      sessionStorage.removeItem(cacheKey)
+    } catch {}
+    // Re-trigger generation with new time
+    generateForSplit(startFlowState.selectedSplit || 'Full Body', newTime)
+  }, [startFlowState.selectedSplit, generateForSplit, user?.id])
 
   // Start the AI-generated workout
   const handleStartAIWorkout = useCallback(() => {
@@ -606,6 +635,26 @@ export default function Logger() {
                 {t('common.retry')}
               </span>
             )}
+          </div>
+
+          {/* Duration picker */}
+          <div className="mb-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/60">{t('logger.available_time')}</p>
+            <div className="flex gap-2">
+              {[30, 45, 60, 75, 90].map(min => (
+                <button
+                  key={min}
+                  onClick={() => handleTimeChange(min)}
+                  className={`rounded-xl px-3 py-1.5 text-sm font-bold transition-all active:scale-[0.97] ${
+                    startFlowState.availableTime === min
+                      ? 'bg-white text-cyan-600'
+                      : 'bg-white/20 text-white'
+                  }`}
+                >
+                  {min}m
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Recovery context */}

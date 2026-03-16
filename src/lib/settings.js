@@ -18,6 +18,7 @@ const DEFAULTS = {
   deadliftMax: '',
   onboardingCompleted: false,
   language: 'auto',
+  time: 60, // beschikbare workout tijd in minuten
   // Feature 1: Training Goal + Phase
   trainingGoal: 'hypertrophy', // 'hypertrophy' | 'strength' | 'powerbuilding' | 'conditioning'
   trainingPhase: 'build', // 'build' | 'strength' | 'peak' | 'deload'
