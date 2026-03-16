@@ -925,7 +925,219 @@ test('Deload week (all RPE 5): faster recovery', () => {
     'Deload (RPE 5) should recover faster than heavy (RPE 9)')
 })
 
-// === Summary ===
+// ========================================
+// RONDE 5: FINALE REGRESSION SUITE
+// ========================================
+console.log('\n========================================')
+console.log('RONDE 5: FINALE REGRESSION SUITE')
+console.log('========================================\n')
+
+// Re-verify all critical functionality from previous rounds
+
+// --- Ronde 1 Regression: Wiskundige correctheid ---
+console.log('--- Ronde 1 Regression ---')
+
+test('R1: NaN hours still returns 100%', () => assertEqual(calcMuscleRecovery('back', NaN, 8, 12), 100))
+test('R1: -Infinity hours still returns 100%', () => assertEqual(calcMuscleRecovery('quads', -Infinity, 7, 10), 100))
+test('R1: Infinity setsCount still finite', () => assertFinite(calcMuscleRecovery('shoulders', 48, 7, Infinity)))
+test('R1: 0 hours = 0% recovery', () => assertEqual(calcMuscleRecovery('hamstrings', 0, 7, 10), 0))
+test('R1: null hours = 100%', () => assertEqual(calcMuscleRecovery('glutes', null, 7, 10), 100))
+test('R1: Volume penalty works (6 < 12 sets)', () => {
+  assertGreater(calcMuscleRecovery('biceps', 48, 7, 6), calcMuscleRecovery('biceps', 48, 7, 12))
+})
+test('R1: RPE bidirectional (RPE4 > RPE10)', () => {
+  assertGreater(calcMuscleRecovery('triceps', 24, 4, 10), calcMuscleRecovery('triceps', 24, 10, 10))
+})
+test('R1: Empty workouts returns valid object', () => {
+  const r = analyzeTraining([])
+  assertTrue(typeof r === 'object' && r.chest !== undefined)
+})
+
+// --- Ronde 2 Regression: Temporele logica ---
+console.log('\n--- Ronde 2 Regression ---')
+
+test('R2: Future workout (10s ahead) ignored', () => {
+  const d = new Date(Date.now() + 10000)
+  assertEqual(analyzeTraining([{ created_at: d.toISOString(), workout_sets: [{ exercise: 'Squat' }] }]).quads.setsThisWeek, 0)
+})
+test('R2: 7d+2h ago = NOT this week', () => {
+  assertEqual(analyzeTraining([createWorkout(170, ['Deadlift'])]).back.setsThisWeek, 0)
+})
+test('R2: 6d ago = this week', () => {
+  assertGreater(analyzeTraining([createWorkout(144, ['Deadlift'])]).back.setsThisWeek, 0)
+})
+test('R2: Multiple workouts same day track most recent', () => {
+  const r = analyzeTraining([createWorkout(3, ['Bench']), createWorkout(15, ['Bench'])])
+  assertRange(r.chest.hoursSinceLastTrained, 2.9, 3.1)
+})
+test('R2: 30 days ago = 100% recovery', () => {
+  assertEqual(analyzeTraining([createWorkout(720, ['Squat'])]).quads.recoveryPct, 100)
+})
+test('R2: daysSinceLastTrained floor (49h = 2d)', () => {
+  assertEqual(analyzeTraining([createWorkout(49, ['Leg Press'])]).quads.daysSinceLastTrained, 2)
+})
+
+// --- Ronde 3 Regression: Data integriteit ---
+console.log('\n--- Ronde 3 Regression ---')
+
+test('R3: classifyExercise(null) = null', () => assertEqual(classifyExercise(null), null))
+test('R3: classifyExercise("") = null', () => assertEqual(classifyExercise(''), null))
+test('R3: CAPS exercise: "PULL-UP"', () => assertEqual(classifyExercise('PULL-UP'), 'back'))
+test('R3: Mixed case: "lAtErAl RaIsE"', () => assertEqual(classifyExercise('lAtErAl RaIsE'), 'shoulders'))
+test('R3: Parentheses: "Dumbbell Row (one arm)"', () => assertEqual(classifyExercise('Dumbbell Row (one arm)'), 'back'))
+test('R3: 200 sets in workout', () => {
+  const r = analyzeTraining([createWorkout(24, Array(200).fill('Bench Press'))])
+  assertEqual(r.chest.setsThisWeek, 200)
+})
+test('R3: Workout without workout_sets key', () => {
+  try {
+    const r = analyzeTraining([{ created_at: new Date().toISOString() }])
+    assertEqual(r.chest.setsThisWeek, 0)
+  } catch { throw new Error('Should not crash') }
+})
+test('R3: Glute Ham Raise → hamstrings', () => assertEqual(classifyExercise('Glute Ham Raise'), 'hamstrings'))
+test('R3: Reverse Pec Deck → shoulders', () => assertEqual(classifyExercise('Reverse Pec Deck'), 'shoulders'))
+test('R3: Chest Dip → chest', () => assertEqual(classifyExercise('Chest Dip'), 'chest'))
+test('R3: Close Grip Bench → triceps', () => assertEqual(classifyExercise('Close Grip Bench'), 'triceps'))
+
+// --- Ronde 4 Regression: PT Scoring ---
+console.log('\n--- Ronde 4 Regression ---')
+
+test('R4: After rest, all status = needs_work', () => {
+  const r = analyzeTraining([])
+  for (const m of ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']) {
+    assertEqual(r[m].status, 'needs_work')
+  }
+})
+test('R4: recoveryStatus boundaries (90=ready, 89=recovering, 49=fatigued)', () => {
+  assertEqual(recoveryStatus(90), 'ready')
+  assertEqual(recoveryStatus(89), 'recovering')
+  assertEqual(recoveryStatus(49), 'fatigued')
+})
+test('R4: Heavy session = fatigued', () => {
+  const r = analyzeTraining([createWorkout(12, Array(15).fill({ exercise: 'Squat', rpe: 10 }))])
+  assertEqual(r.quads.status, 'fatigued')
+})
+test('R4: Light session = recovering/ready', () => {
+  const r = analyzeTraining([createWorkout(36, Array(6).fill({ exercise: 'Bench Press', rpe: 5 }))])
+  assertTrue(['recovering', 'ready'].includes(r.chest.status))
+})
+test('R4: Advanced FB penalty', () => {
+  const ms = {}
+  for (const m of Object.keys(SET_TARGETS)) ms[m] = { setsThisWeek: 0, recoveryPct: 100, target: SET_TARGETS[m], status: 'ready' }
+  const advFB = scoreSplits(ms, null, 'advanced').find(s => s.name === 'Full Body').score
+  const intFB = scoreSplits(ms, null, 'intermediate').find(s => s.name === 'Full Body').score
+  assertGreater(intFB, advFB)
+})
+test('R4: Recent FB penalty', () => {
+  const ms = {}
+  for (const m of Object.keys(SET_TARGETS)) ms[m] = { setsThisWeek: 5, recoveryPct: 80, target: SET_TARGETS[m], status: 'ready' }
+  const noHist = scoreSplits(ms).find(s => s.name === 'Full Body').score
+  const recentFB = scoreSplits(ms, { split: 'Full Body', hoursSince: 10 }).find(s => s.name === 'Full Body').score
+  assertGreater(noHist, recentFB)
+})
+
+// --- Compound Movement Verification ---
+console.log('\n--- Compound Movement Verification ---')
+
+test('Deadlift secondary: hamstrings + glutes', () => {
+  const r = classifyExerciseFull('Conventional Deadlift')
+  assertTrue(r.secondary.includes('hamstrings') && r.secondary.includes('glutes'))
+})
+test('Squat secondary: hamstrings + glutes', () => {
+  const r = classifyExerciseFull('Back Squat')
+  assertTrue(r.secondary.includes('hamstrings') && r.secondary.includes('glutes'))
+})
+test('Bench secondary: triceps + shoulders', () => {
+  const r = classifyExerciseFull('Flat Bench Press')
+  assertTrue(r.secondary.includes('triceps') && r.secondary.includes('shoulders'))
+})
+test('RDL secondary: glutes', () => {
+  const r = classifyExerciseFull('RDL')
+  assertEqual(r.primary, 'hamstrings')
+  assertTrue(r.secondary.includes('glutes'))
+})
+test('OHP secondary: triceps', () => {
+  const r = classifyExerciseFull('OHP')
+  assertEqual(r.primary, 'shoulders')
+  assertTrue(r.secondary.includes('triceps'))
+})
+test('Pull-up secondary: biceps', () => {
+  const r = classifyExerciseFull('Wide Grip Pull-up')
+  assertEqual(r.primary, 'back')
+  assertTrue(r.secondary.includes('biceps'))
+})
+
+// --- Edge Exercise Classification ---
+console.log('\n--- Edge Exercise Classification ---')
+
+test('Sumo Deadlift → glutes (not back)', () => assertEqual(classifyExercise('Sumo Deadlift'), 'glutes'))
+test('Stiff-Leg Deadlift → hamstrings', () => assertEqual(classifyExercise('Stiff-Leg Deadlift'), 'hamstrings'))
+test('Romanian Deadlift → hamstrings', () => assertEqual(classifyExercise('Romanian Deadlift'), 'hamstrings'))
+test('Hip Thrust → glutes', () => assertEqual(classifyExercise('Hip Thrust'), 'glutes'))
+test('Good Morning → hamstrings', () => assertEqual(classifyExercise('Good Morning'), 'hamstrings'))
+test('Nordic Curl → hamstrings', () => assertEqual(classifyExercise('Nordic Curl'), 'hamstrings'))
+test('Leg Curl → hamstrings', () => assertEqual(classifyExercise('Leg Curl'), 'hamstrings'))
+test('Leg Extension → quads', () => assertEqual(classifyExercise('Leg Extension'), 'quads'))
+test('Hack Squat → quads', () => assertEqual(classifyExercise('Hack Squat'), 'quads'))
+test('Bulgarian Split Squat → quads', () => assertEqual(classifyExercise('Bulgarian Split Squat'), 'quads'))
+
+// --- Split Muscle Mapping ---
+console.log('\n--- Split Muscle Mapping ---')
+
+test('Push muscles: chest, shoulders, triceps', () => {
+  assertTrue(SPLIT_MUSCLES.Push.includes('chest'))
+  assertTrue(SPLIT_MUSCLES.Push.includes('shoulders'))
+  assertTrue(SPLIT_MUSCLES.Push.includes('triceps'))
+})
+test('Pull muscles: back, biceps', () => {
+  assertTrue(SPLIT_MUSCLES.Pull.includes('back'))
+  assertTrue(SPLIT_MUSCLES.Pull.includes('biceps'))
+})
+test('Legs muscles: quads, hamstrings, glutes, core', () => {
+  assertTrue(SPLIT_MUSCLES.Legs.includes('quads'))
+  assertTrue(SPLIT_MUSCLES.Legs.includes('hamstrings'))
+  assertTrue(SPLIT_MUSCLES.Legs.includes('glutes'))
+  assertTrue(SPLIT_MUSCLES.Legs.includes('core'))
+})
+test('Full Body has all major muscles', () => {
+  const fb = SPLIT_MUSCLES['Full Body']
+  for (const m of ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps']) {
+    assertTrue(fb.includes(m), `Full Body should include ${m}`)
+  }
+})
+
+// --- Recovery Hours Sanity ---
+console.log('\n--- Recovery Hours Sanity ---')
+
+test('Quads slowest (96h)', () => assertEqual(RECOVERY_HOURS.quads, 96))
+test('Core fastest (24h)', () => assertEqual(RECOVERY_HOURS.core, 24))
+test('Small muscles fast (48h): biceps, triceps, shoulders', () => {
+  assertEqual(RECOVERY_HOURS.biceps, 48)
+  assertEqual(RECOVERY_HOURS.triceps, 48)
+  assertEqual(RECOVERY_HOURS.shoulders, 48)
+})
+test('Large muscles medium (72h): chest, back, hamstrings, glutes', () => {
+  assertEqual(RECOVERY_HOURS.chest, 72)
+  assertEqual(RECOVERY_HOURS.back, 72)
+  assertEqual(RECOVERY_HOURS.hamstrings, 72)
+  assertEqual(RECOVERY_HOURS.glutes, 72)
+})
+
+// --- Volume Targets Sanity ---
+console.log('\n--- Volume Targets Sanity ---')
+
+test('Hypertrophy targets exist for all muscles', () => {
+  for (const m of Object.keys(RECOVERY_HOURS)) {
+    assertTrue(SET_TARGETS[m] !== undefined, `SET_TARGETS should have ${m}`)
+    assertTrue(SET_TARGETS[m].min !== undefined)
+    assertTrue(SET_TARGETS[m].max !== undefined)
+    assertTrue(SET_TARGETS[m].mev !== undefined)
+    assertGreater(SET_TARGETS[m].max, SET_TARGETS[m].min)
+  }
+})
+
+// === Final Summary ===
 console.log('\n========================================')
 console.log(`TOTAAL: ${passed} passed, ${failed} failed`)
 console.log('========================================')
