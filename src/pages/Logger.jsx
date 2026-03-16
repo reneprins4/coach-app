@@ -225,7 +225,7 @@ export default function Logger() {
       }
     } catch {}
   }, [user?.id])
-  const generateAbortRef = useRef(null)
+  const generationIdRef = useRef(0)
   const hasWorkoutRef = useRef(false)
   const availableTimeRef = useRef(null)
   
@@ -387,6 +387,9 @@ export default function Logger() {
       return
     }
     
+    // Increment generation ID to track this specific generation
+    const myGenerationId = ++generationIdRef.current
+    
     const timeToUse = overrideTime ?? startFlowState.availableTime ?? getSettings().time ?? 60
     
     setStartFlowState(prev => ({
@@ -401,6 +404,9 @@ export default function Logger() {
     
     try {
       const history = await fetchRecentHistory(user.id, 20)
+      
+      // Check if a newer generation was started
+      if (generationIdRef.current !== myGenerationId) return
       const settings = getSettings()
       const block = getCurrentBlock()
       const recentHistory = getRelevantHistory(history, splitName)
@@ -436,6 +442,9 @@ export default function Logger() {
         preferences,
         userId: user.id,
       })
+      
+      // Check if a newer generation was started
+      if (generationIdRef.current !== myGenerationId) return
       
       const workoutExercises = result.exercises.map(ex => ({
         name: ex.name,

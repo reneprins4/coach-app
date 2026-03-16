@@ -12,7 +12,7 @@ export default function History() {
   const { t, i18n } = useTranslation()
   const { user } = useAuthContext()
   const nav = useNavigate()
-  const { workouts, loading, deleteWorkout } = useWorkouts(user?.id)
+  const { workouts, loading, loadingMore, hasMore, loadMore, deleteWorkout } = useWorkouts(user?.id)
   const [query, setQuery] = useState('')
   const [deleteId, setDeleteId] = useState(null)
 
@@ -112,6 +112,24 @@ export default function History() {
             </div>
           )
         })}
+        
+        {/* Load more button */}
+        {hasMore && !query && (
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="w-full rounded-xl bg-gray-900 py-3 text-sm font-medium text-gray-400 ring-1 ring-gray-800 active:bg-gray-800 disabled:opacity-50"
+          >
+            {loadingMore ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-700 border-t-cyan-500" />
+                {t('common.loading')}
+              </span>
+            ) : (
+              t('history.load_more')
+            )}
+          </button>
+        )}
       </div>
 
       {/* Delete confirmation */}

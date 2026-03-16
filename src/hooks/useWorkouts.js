@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
+const PAGE_SIZE = 50
+
 export function useWorkouts(userId) {
   const [workouts, setWorkouts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(0)
 
-  const fetchWorkouts = useCallback(async () => {
+  const fetchWorkouts = useCallback(async (pageNum = 0, append = false) => {
     // Early return when no userId to prevent fetching all workouts
     if (!userId) {
       setWorkouts([])
@@ -14,16 +19,23 @@ export function useWorkouts(userId) {
       return
     }
 
-    setLoading(true)
+    if (append) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+    }
     setError(null)
+    
     try {
-      let query = supabase
+      const from = pageNum * PAGE_SIZE
+      const to = from + PAGE_SIZE - 1
+      
+      const { data, error: err, count } = await supabase
         .from('workouts')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .select('*', { count: 'exact' })
         .eq('user_id', userId)
-
-      const { data, error: err } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to)
 
       if (err) throw err
 
@@ -51,15 +63,30 @@ export function useWorkouts(userId) {
         exerciseNames: [...new Set((setsMap[w.id] || []).map(s => s.exercise))],
       }))
 
-      setWorkouts(enriched)
+      if (append) {
+        setWorkouts(prev => [...prev, ...enriched])
+      } else {
+        setWorkouts(enriched)
+      }
+      
+      // Check if there are more pages
+      setHasMore(count > (pageNum + 1) * PAGE_SIZE)
+      setPage(pageNum)
     } catch (err) {
       setError(err.message)
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }, [userId])
 
-  useEffect(() => { fetchWorkouts() }, [fetchWorkouts])
+  useEffect(() => { fetchWorkouts(0, false) }, [fetchWorkouts])
+
+  const loadMore = useCallback(() => {
+    if (!loadingMore && hasMore) {
+      fetchWorkouts(page + 1, true)
+    }
+  }, [fetchWorkouts, page, loadingMore, hasMore])
 
   const deleteWorkout = useCallback(async (id) => {
     // Snapshot for reliable rollback
@@ -75,7 +102,7 @@ export function useWorkouts(userId) {
     }
   }, [workouts])
 
-  return { workouts, loading, error, refetch: fetchWorkouts, deleteWorkout }
+  return { workouts, loading, loadingMore, error, hasMore, refetch: () => fetchWorkouts(0, false), loadMore, deleteWorkout }
 }
 
 export function useWorkoutDetail(id, userId) {

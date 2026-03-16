@@ -13,9 +13,20 @@ export function useAuth() {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
+      
+      // Clear session caches on logout to prevent data leakage
+      if (event === 'SIGNED_OUT') {
+        try {
+          for (const key of Object.keys(sessionStorage)) {
+            if (key.startsWith('__kravex_')) {
+              sessionStorage.removeItem(key)
+            }
+          }
+        } catch {}
+      }
     })
 
     return () => subscription.unsubscribe()

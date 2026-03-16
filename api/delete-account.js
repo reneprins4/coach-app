@@ -9,7 +9,41 @@
 
 import { createClient } from '@supabase/supabase-js'
 
+// Allowed origins for CORS
+const ALLOWED_ORIGINS = [
+  'https://kravex.app',
+  'https://coach-app.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+]
+
+function getAllowedOrigin(origin) {
+  if (!origin) return null
+  if (ALLOWED_ORIGINS.includes(origin)) return origin
+  // Allow any vercel preview URLs for the project
+  if (origin.includes('coach-app') && origin.endsWith('.vercel.app')) return origin
+  return null
+}
+
 export default async function handler(req, res) {
+  const origin = req.headers.origin
+  const allowedOrigin = getAllowedOrigin(origin)
+  
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    if (allowedOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    return res.status(204).end()
+  }
+
+  // Set CORS header for all responses
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+  }
+
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -24,8 +58,9 @@ export default async function handler(req, res) {
   const token = authHeader.replace('Bearer ', '')
   
   // Verify the user with the anon client
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
   const anonClient = createClient(
-    process.env.VITE_SUPABASE_URL,
+    supabaseUrl,
     process.env.VITE_SUPABASE_ANON_KEY
   )
   
@@ -37,7 +72,7 @@ export default async function handler(req, res) {
   
   // Create admin client with service role key
   const adminClient = createClient(
-    process.env.VITE_SUPABASE_URL,
+    supabaseUrl,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   

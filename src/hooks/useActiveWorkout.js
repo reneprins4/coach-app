@@ -36,6 +36,18 @@ export function useActiveWorkout(userId) {
   // Persist on change
   useEffect(() => { save(STORAGE_KEY, workout) }, [workout])
 
+  // Warn user before leaving page with active workout
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (workout) {
+        e.preventDefault()
+        e.returnValue = '' // Shows browser's default "Leave page?" dialog
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [workout])
+
   // Elapsed timer
   useEffect(() => {
     if (!workout?.startedAt) { setElapsed(0); return }

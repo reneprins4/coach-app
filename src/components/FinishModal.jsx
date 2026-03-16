@@ -85,23 +85,38 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
       }
 
       try {
-        // Check for PRs
         const workoutDate = new Date().toISOString()
         const exerciseNames = [...new Set(result.workout_sets?.map(s => s.exercise) || [])]
         
-        if (exerciseNames.length > 0) {
-          const { data: history, error: historyError } = await supabase
-            .from('workout_sets')
-            .select('exercise, weight_kg, reps')
+        // Run both queries in parallel
+        const [historyResult, workoutsResult] = await Promise.all([
+          // Query 1: Get exercise history for PR detection
+          exerciseNames.length > 0
+            ? supabase
+                .from('workout_sets')
+                .select('exercise, weight_kg, reps')
+                .eq('user_id', user.id)
+                .lt('created_at', workoutDate)
+                .in('exercise', exerciseNames)
+            : Promise.resolve({ data: [], error: null }),
+          // Query 2: Get recent workouts for next recommendation
+          supabase
+            .from('workouts')
+            .select('id, created_at, workout_sets(*)')
             .eq('user_id', user.id)
-            .lt('created_at', workoutDate)
-            .in('exercise', exerciseNames)
-          
-          if (historyError) throw historyError
-          if (cancelled) return
-          
+            .order('created_at', { ascending: false })
+            .limit(20)
+        ])
+
+        if (cancelled) return
+        
+        const { data: history, error: historyError } = historyResult
+        const { data: workouts, error: workoutsError } = workoutsResult
+
+        // Process PRs
+        if (!historyError && history && history.length > 0) {
           const bestByExercise = {}
-          for (const h of (history || [])) {
+          for (const h of history) {
             const vol = (h.weight_kg || 0) * (h.reps || 0)
             if (!bestByExercise[h.exercise] || vol > bestByExercise[h.exercise].volume) {
               bestByExercise[h.exercise] = {
@@ -134,54 +149,44 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
           if (!cancelled) setPrs(newPrs)
         }
 
-        if (cancelled) return
-
-        // Get next workout recommendation
-        const { data: workouts, error: workoutsError } = await supabase
-          .from('workouts')
-          .select('id, created_at, workout_sets(*)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(20)
-
-        if (workoutsError) throw workoutsError
-        if (cancelled) return
-
-        // Add current workout to analysis
-        const currentWorkout = {
-          id: result.id,
-          created_at: new Date().toISOString(),
-          workout_sets: result.workout_sets || [],
-        }
-        const allWorkouts = [currentWorkout, ...(workouts || [])]
-        
-        const muscleStatus = analyzeTraining(allWorkouts)
-        const splits = scoreSplits(muscleStatus)
-        
-        if (splits.length > 0 && !cancelled) {
-          const best = splits[0]
-          
-          // Find when the slowest recovering muscle of this split is 80%+ ready
-          const splitMuscles = SPLIT_MUSCLES[best.name] || []
-          let maxHoursNeeded = 0
-          
-          for (const muscle of splitMuscles) {
-            const hours = RECOVERY_HOURS[muscle] || 72
-            // 80% recovery = hours * 0.8
-            const hoursFor80 = hours * 0.8
-            if (hoursFor80 > maxHoursNeeded) {
-              maxHoursNeeded = hoursFor80
-            }
+        // Process next workout recommendation
+        if (!workoutsError && !cancelled) {
+          // Add current workout to analysis
+          const currentWorkout = {
+            id: result.id,
+            created_at: new Date().toISOString(),
+            workout_sets: result.workout_sets || [],
           }
+          const allWorkouts = [currentWorkout, ...(workouts || [])]
           
-          const bestDate = new Date(Date.now() + maxHoursNeeded * 3600000)
+          const muscleStatus = analyzeTraining(allWorkouts)
+          const splits = scoreSplits(muscleStatus)
           
-          setNextWorkout({
-            split: best.name,
-            reasoning: best.reasoning,
-            bestDate,
-            hoursUntil: maxHoursNeeded,
-          })
+          if (splits.length > 0) {
+            const best = splits[0]
+            
+            // Find when the slowest recovering muscle of this split is 80%+ ready
+            const splitMuscles = SPLIT_MUSCLES[best.name] || []
+            let maxHoursNeeded = 0
+            
+            for (const muscle of splitMuscles) {
+              const hours = RECOVERY_HOURS[muscle] || 72
+              // 80% recovery = hours * 0.8
+              const hoursFor80 = hours * 0.8
+              if (hoursFor80 > maxHoursNeeded) {
+                maxHoursNeeded = hoursFor80
+              }
+            }
+            
+            const bestDate = new Date(Date.now() + maxHoursNeeded * 3600000)
+            
+            setNextWorkout({
+              split: best.name,
+              reasoning: best.reasoning,
+              bestDate,
+              hoursUntil: maxHoursNeeded,
+            })
+          }
         }
       } catch (err) {
         console.error('Failed to load finish data:', err)
