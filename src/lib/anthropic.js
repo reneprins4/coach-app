@@ -2,6 +2,20 @@ import { supabase } from './supabase'
 import { workoutCacheKey, substituteCacheKey, cacheGet, cacheSet } from './aiCache'
 import { getExerciseSubstituteLocal } from './exerciseSubstitutes'
 
+/** Get auth headers for API calls — includes Supabase JWT if logged in */
+async function getAuthHeaders() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.access_token) {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      }
+    }
+  } catch {}
+  return { 'Content-Type': 'application/json' }
+}
+
 // Robust JSON extractor — handles markdown fences and surrounding text
 function extractJSON(raw) {
   if (!raw || typeof raw !== 'string') throw new Error('Empty response from AI')
@@ -176,9 +190,10 @@ Return ONLY valid JSON (no markdown, no code fences, no comments):
   "volume_notes": "total sets/muscle this week after this workout"
 }`
 
+  const authHeaders = await getAuthHeaders()
   const response = await fetch('/api/generate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
     body: JSON.stringify({ prompt }),
   })
 
@@ -274,9 +289,10 @@ Return ONLY this JSON (no markdown):
   "why": "one sentence explaining why this works as a substitute"
 }`
 
+  const authHeaders = await getAuthHeaders()
   const response = await fetch('/api/generate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
     body: JSON.stringify({ prompt }),
   })
 
@@ -315,9 +331,10 @@ Regels:
 - Tip: max 15 woorden, impactvol
 - Alles in het Nederlands`
 
+  const authHeaders = await getAuthHeaders()
   const response = await fetch('/api/generate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
     body: JSON.stringify({ prompt }),
   })
 

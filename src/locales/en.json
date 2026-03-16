@@ -36,8 +36,25 @@
     "arms": "Arms",
     "legs": "Legs"
   },
+  "calendar": {
+    "overview": "Overview",
+    "calendar": "Calendar",
+    "this_month": "this month",
+    "this_year": "this year",
+    "view_full_workout": "View full workout",
+    "tap_day_hint": "Tap on a day with training to see details",
+    "no_workouts": "No workouts logged yet",
+    "start_first": "Start your first workout",
+    "more": "more"
+  },
   "dashboard": {
     "title": "Today",
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "start_training": "Start training",
+    "free_training": "Free training",
+    "time_to_start": "Time to get started.",
     "workouts": "Workouts",
     "streak": "Streak",
     "recent": "Recent",
@@ -191,7 +208,21 @@
     "ai_suggest": "More options",
     "swap_no_options": "No alternative found for your equipment",
     "swap_already_in_workout": "This is already in your workout",
-    "swap_ai_failed": "Could not find an alternative"
+    "swap_ai_failed": "Could not find an alternative",
+    "analyzing": "Analyzing...",
+    "ai_generating": "AI working...",
+    "ready": "Ready",
+    "loading_workout": "Loading workout...",
+    "generation_failed": "Generation failed",
+    "empty_training": "Empty workout",
+    "choose_exercises": "Choose exercises manually",
+    "template": "Template",
+    "templates_saved": "{{count}} saved",
+    "change_split": "Change split",
+    "choose_split": "Choose split",
+    "advanced_options": "Advanced options",
+    "analysis_required": "Analysis required",
+    "recovered": "recovered"
   },
   "progress": {
     "title": "Progress",

@@ -36,8 +36,25 @@
     "arms": "Armen",
     "legs": "Benen"
   },
+  "calendar": {
+    "overview": "Overzicht",
+    "calendar": "Kalender",
+    "this_month": "deze maand",
+    "this_year": "dit jaar",
+    "view_full_workout": "Bekijk volledige workout",
+    "tap_day_hint": "Tap op een dag met training om details te zien",
+    "no_workouts": "Nog geen trainingen gelogd",
+    "start_first": "Start je eerste training",
+    "more": "meer"
+  },
   "dashboard": {
     "title": "Vandaag",
+    "greeting_morning": "Goedemorgen",
+    "greeting_afternoon": "Goedemiddag",
+    "greeting_evening": "Goedenavond",
+    "start_training": "Start training",
+    "free_training": "Vrije training",
+    "time_to_start": "Tijd om te beginnen.",
     "workouts": "Trainingen",
     "streak": "Streak",
     "recent": "Recent",
@@ -191,7 +208,21 @@
     "ai_suggest": "Ander voorstel",
     "swap_no_options": "Geen alternatief gevonden voor jouw equipment",
     "swap_already_in_workout": "Dit zit al in je workout",
-    "swap_ai_failed": "Kon geen alternatief vinden"
+    "swap_ai_failed": "Kon geen alternatief vinden",
+    "analyzing": "Analyseren...",
+    "ai_generating": "AI bezig...",
+    "ready": "Klaar",
+    "loading_workout": "Workout laden...",
+    "generation_failed": "Genereren mislukt",
+    "empty_training": "Lege training",
+    "choose_exercises": "Zelf oefeningen kiezen",
+    "template": "Template",
+    "templates_saved": "{{count}} opgeslagen",
+    "change_split": "Andere split kiezen",
+    "choose_split": "Kies split",
+    "advanced_options": "Geavanceerde opties",
+    "analysis_required": "Analyse vereist",
+    "recovered": "hersteld"
   },
   "progress": {
     "title": "Voortgang",

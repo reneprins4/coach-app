@@ -37,7 +37,7 @@ function getSessionCacheKey(userId) {
 }
 
 export default function Logger() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const nav = useNavigate()
   const { user } = useAuthContext()
   const aw = useActiveWorkout(user?.id)
@@ -74,7 +74,7 @@ export default function Logger() {
       } catch {}
       localStorage.removeItem('coach-pending-workout')
     }
-  }, [])
+  }, [aw.isActive])
 
   function handleFinishClick() {
     setShowConfirmFinish(true)
@@ -372,7 +372,10 @@ export default function Logger() {
 
   // Generate workout for a different split
   const generateForSplit = useCallback(async (splitName) => {
-    if (!user?.id || !startFlowState.muscleStatus) return
+    if (!user?.id || !startFlowState.muscleStatus) {
+      setStartFlowState(prev => ({ ...prev, error: t('logger.analysis_required') }))
+      return
+    }
     
     setStartFlowState(prev => ({
       ...prev,
@@ -512,15 +515,11 @@ export default function Logger() {
     const block = getCurrentBlock()
     const phase = block ? PHASES[block.phase] : null
     const today = new Date()
-    const dateStr = today.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })
+    const dateStr = today.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
     const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
 
-    // Muscle name translations
-    const MUSCLE_NL = {
-      chest: 'Borst', back: 'Rug', shoulders: 'Schouders',
-      quads: 'Bovenbenen', hamstrings: 'Hamstrings', glutes: 'Billen',
-      biceps: 'Biceps', triceps: 'Triceps', core: 'Core',
-    }
+    // Muscle name translations - use i18n
+    const getMuscleLabel = (muscle) => t(`muscles.${muscle}`)
 
     const { loading, generating, error, selectedSplit, generatedWorkout, recoveredMuscles, showSplitPicker, estimatedDuration, exerciseCount } = startFlowState
     const isReady = !loading && !generating && generatedWorkout && !error
@@ -587,24 +586,24 @@ export default function Logger() {
             {loading && (
               <span className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
                 <Loader2 size={12} className="animate-spin" />
-                Analyseren...
+                {t('logger.analyzing')}
               </span>
             )}
             {generating && !loading && (
               <span className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
                 <Loader2 size={12} className="animate-spin" />
-                AI bezig...
+                {t('logger.ai_generating')}
               </span>
             )}
             {isReady && (
               <span className="flex items-center gap-1.5 rounded-lg bg-white/30 px-2.5 py-1 text-xs font-bold text-white">
                 <Check size={12} />
-                Klaar
+                {t('logger.ready')}
               </span>
             )}
             {error && (
               <span className="rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
-                Fout
+                {t('common.retry')}
               </span>
             )}
           </div>
@@ -617,7 +616,7 @@ export default function Logger() {
                   key={muscle}
                   className="rounded-lg bg-white/20 px-2 py-0.5 text-xs font-medium text-white"
                 >
-                  {MUSCLE_NL[muscle] || muscle} hersteld
+                  {getMuscleLabel(muscle)} {t('logger.recovered')}
                 </span>
               ))}
             </div>
@@ -643,10 +642,10 @@ export default function Logger() {
             {loading || generating ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 size={18} className="animate-spin" />
-                Workout laden...
+                {t('logger.loading_workout')}
               </span>
             ) : error ? (
-              'Genereren mislukt'
+              t('logger.generation_failed')
             ) : (
               `Start ${selectedSplit}`
             )}
@@ -686,8 +685,8 @@ export default function Logger() {
             className="rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-gray-800 active:scale-[0.97] transition-transform"
           >
             <Dumbbell size={20} className="mb-2 text-gray-500" />
-            <p className="text-sm font-bold text-white">Lege training</p>
-            <p className="text-xs text-gray-500">Zelf oefeningen kiezen</p>
+            <p className="text-sm font-bold text-white">{t('logger.empty_training')}</p>
+            <p className="text-xs text-gray-500">{t('logger.choose_exercises')}</p>
           </button>
 
           <button
@@ -695,8 +694,8 @@ export default function Logger() {
             className="rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-gray-800 active:scale-[0.97] transition-transform"
           >
             <BookOpen size={20} className="mb-2 text-gray-500" />
-            <p className="text-sm font-bold text-white">Template</p>
-            <p className="text-xs text-gray-500">{templates.templates.length} opgeslagen</p>
+            <p className="text-sm font-bold text-white">{t('logger.template')}</p>
+            <p className="text-xs text-gray-500">{t('logger.templates_saved', { count: templates.templates.length })}</p>
           </button>
         </div>
 
@@ -707,11 +706,11 @@ export default function Logger() {
               onClick={() => setStartFlowState(prev => ({ ...prev, showSplitPicker: true }))}
               className="w-full text-center text-sm text-gray-500 active:text-gray-400"
             >
-              Andere split kiezen
+              {t('logger.change_split')}
             </button>
           ) : (
             <div className="space-y-3">
-              <p className="text-center label-caps">Kies split</p>
+              <p className="text-center label-caps">{t('logger.choose_split')}</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {splitOptions.map(split => (
                   <button
@@ -732,7 +731,7 @@ export default function Logger() {
                 onClick={() => setStartFlowState(prev => ({ ...prev, showSplitPicker: false }))}
                 className="w-full text-center text-xs text-gray-600 active:text-gray-500"
               >
-                Annuleren
+                {t('common.cancel')}
               </button>
             </div>
           )}
@@ -743,7 +742,7 @@ export default function Logger() {
           onClick={() => nav('/coach')}
           className="mt-6 w-full text-center text-xs text-gray-600 active:text-gray-500"
         >
-          Geavanceerde opties
+          {t('logger.advanced_options')}
         </button>
 
         {showTemplates && (

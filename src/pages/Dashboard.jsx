@@ -53,21 +53,21 @@ export default function Dashboard() {
   if (workouts.length === 0) {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
-        <h1 className="mb-3 text-3xl font-black tracking-tight text-white">{getGreeting(i18n.language)}</h1>
+        <h1 className="mb-3 text-3xl font-black tracking-tight text-white">{t(getGreetingKey())}</h1>
         <p className="mb-8 text-sm text-gray-500">
-          {i18n.language === 'nl' ? 'Tijd om te beginnen.' : 'Time to get started.'}
+          {t('dashboard.time_to_start')}
         </p>
         <button
           onClick={() => nav('/coach')}
           className="btn-primary mb-4 max-w-xs"
         >
-          {i18n.language === 'nl' ? 'Start training' : 'Start training'}
+          {t('dashboard.start_training')}
         </button>
         <button
           onClick={() => nav('/log')}
           className="btn-secondary max-w-xs"
         >
-          {i18n.language === 'nl' ? 'Vrije training' : 'Free training'}
+          {t('dashboard.free_training')}
         </button>
       </div>
     )
@@ -80,7 +80,7 @@ export default function Dashboard() {
       <div className="mb-6">
         <p className="label-caps">{getDayName(i18n.language)}</p>
         <h1 className="text-3xl font-black tracking-tight text-white">
-          {getGreeting(i18n.language)}{settings.name ? `, ${settings.name}` : ''}
+          {t(getGreetingKey())}{settings.name ? `, ${settings.name}` : ''}
         </h1>
       </div>
 
@@ -228,7 +228,7 @@ export default function Dashboard() {
         onClick={() => nav('/coach')}
         className="btn-primary mb-3"
       >
-        {i18n.language === 'nl' ? 'Start training' : 'Start training'}
+        {t('dashboard.start_training')}
       </button>
 
       {/* Secondary CTA */}
@@ -236,7 +236,7 @@ export default function Dashboard() {
         onClick={() => nav('/log')}
         className="btn-secondary mb-6"
       >
-        {i18n.language === 'nl' ? 'Vrije training' : 'Free training'}
+        {t('dashboard.free_training')}
       </button>
 
       {/* Recent workouts - clean list style */}
@@ -275,22 +275,13 @@ export default function Dashboard() {
   )
 }
 
-function getGreeting(lang = 'nl') {
+function getGreetingKey() {
   const h = new Date().getHours()
-  if (lang === 'en') {
-    if (h < 12) return 'Good morning'
-    if (h < 17) return 'Good afternoon'
-    return 'Good evening'
-  }
-  if (h < 12) return 'Goedemorgen'
-  if (h < 17) return 'Goedemiddag'
-  return 'Goedenavond'
+  if (h < 12) return 'dashboard.greeting_morning'
+  if (h < 17) return 'dashboard.greeting_afternoon'
+  return 'dashboard.greeting_evening'
 }
 
-function getDayName(lang = 'nl') {
-  const day = new Date().getDay()
-  if (lang === 'en') {
-    return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][day]
-  }
-  return ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'][day]
+function getDayName(language) {
+  return new Intl.DateTimeFormat(language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'long' }).format(new Date())
 }

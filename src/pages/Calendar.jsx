@@ -1,21 +1,27 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Flame, Calendar as CalendarIcon, Trophy } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 
-const DAYS_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']
-const MONTHS_NL = [
-  'Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni',
-  'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December'
-]
+function formatDate(date, language) {
+  return new Date(date).toLocaleDateString(language === 'nl' ? 'nl-NL' : 'en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'long'
+  })
+}
 
-function formatDate(date) {
-  const d = new Date(date)
-  const day = DAYS_NL[(d.getDay() + 6) % 7]
-  const dayNum = d.getDate()
-  const month = MONTHS_NL[d.getMonth()].toLowerCase()
-  return `${day} ${dayNum} ${month}`
+function getWeekdayShort(dayIndex, language) {
+  // dayIndex: 0=Mon, 1=Tue, ..., 6=Sun
+  const d = new Date(2024, 0, dayIndex + 1) // Jan 1 2024 = Monday
+  return new Intl.DateTimeFormat(language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'short' }).format(d)
+}
+
+function getMonthName(monthIndex, language) {
+  const d = new Date(2024, monthIndex, 1)
+  return new Intl.DateTimeFormat(language === 'nl' ? 'nl-NL' : 'en-GB', { month: 'long' }).format(d)
 }
 
 function isSameDay(d1, d2) {
@@ -100,8 +106,15 @@ function calculateStreak(workouts) {
 }
 
 export default function Calendar() {
+  const { t, i18n } = useTranslation()
   const { user } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
+  
+  // Generate day abbreviations dynamically based on language
+  const DAYS = useMemo(() => 
+    [0, 1, 2, 3, 4, 5, 6].map(i => getWeekdayShort(i, i18n.language)),
+    [i18n.language]
+  )
   
   const today = new Date()
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
@@ -181,8 +194,8 @@ export default function Calendar() {
   return (
     <div className="px-4 py-6 pb-32">
       <div className="mb-6">
-        <p className="label-caps mb-1">Overzicht</p>
-        <h1 className="text-3xl font-black tracking-tight text-white">Kalender</h1>
+        <p className="label-caps mb-1">{t('calendar.overview')}</p>
+        <h1 className="text-3xl font-black tracking-tight text-white">{t('calendar.calendar')}</h1>
       </div>
 
       {/* Stats strip */}
@@ -190,17 +203,17 @@ export default function Calendar() {
         <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
           <CalendarIcon size={15} className="mb-1.5 text-gray-500" />
           <span className="text-xl font-black text-white tabular-nums">{stats.thisMonth}</span>
-          <span className="label-caps mt-0.5">deze maand</span>
+          <span className="label-caps mt-0.5">{t('calendar.this_month')}</span>
         </div>
         <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
           <Flame size={15} className="mb-1.5 text-cyan-500" />
           <span className="text-xl font-black text-white tabular-nums">{stats.streak}</span>
-          <span className="label-caps mt-0.5">streak</span>
+          <span className="label-caps mt-0.5">{t('dashboard.streak')}</span>
         </div>
         <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
           <Trophy size={15} className="mb-1.5 text-yellow-500" />
           <span className="text-xl font-black text-white tabular-nums">{stats.thisYear}</span>
-          <span className="label-caps mt-0.5">dit jaar</span>
+          <span className="label-caps mt-0.5">{t('calendar.this_year')}</span>
         </div>
       </div>
       
@@ -213,7 +226,7 @@ export default function Calendar() {
           <ChevronLeft size={22} />
         </button>
         <h2 className="text-base font-bold text-white">
-          {MONTHS_NL[currentMonth]} {currentYear}
+          {getMonthName(currentMonth, i18n.language)} {currentYear}
         </h2>
         <button 
           onClick={nextMonth}
@@ -225,7 +238,7 @@ export default function Calendar() {
       
       {/* Day headers */}
       <div className="mb-2 grid grid-cols-7 gap-1">
-        {DAYS_NL.map(day => (
+        {DAYS.map(day => (
           <div key={day} className="py-2 text-center label-caps">
             {day}
           </div>
@@ -270,7 +283,7 @@ export default function Calendar() {
       {selectedDate && selectedWorkouts.length > 0 && (
         <div className="mt-6 rounded-2xl bg-gray-900 p-4">
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
-            {formatDate(selectedDate)}
+            {formatDate(selectedDate, i18n.language)}
           </p>
           
           {selectedWorkouts.map(workout => (
@@ -291,14 +304,14 @@ export default function Calendar() {
                     <div key={name} className="flex items-center justify-between text-sm">
                       <span className="text-gray-400">{name}</span>
                       <span className="text-gray-600">
-                        {sets.length} sets {maxWeight > 0 ? `/ ${maxWeight}kg` : ''}
+                        {sets.length} {t('common.sets')} {maxWeight > 0 ? `/ ${maxWeight}kg` : ''}
                       </span>
                     </div>
                   )
                 })}
                 {workout.exerciseNames?.length > 4 && (
                   <p className="text-xs text-gray-600">
-                    +{workout.exerciseNames.length - 4} meer
+                    +{workout.exerciseNames.length - 4} {t('calendar.more')}
                   </p>
                 )}
               </div>
@@ -306,7 +319,7 @@ export default function Calendar() {
               {/* Volume */}
               {workout.totalVolume > 0 && (
                 <p className="mt-3 text-sm text-gray-500">
-                  Totaal volume: <span className="font-semibold text-white">{workout.totalVolume.toLocaleString('nl-NL')} kg</span>
+                  {t('common.volume')}: <span className="font-semibold text-white">{workout.totalVolume.toLocaleString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB')} kg</span>
                 </p>
               )}
               
@@ -315,7 +328,7 @@ export default function Calendar() {
                 to={`/history/${workout.id}`}
                 className="mt-4 flex h-10 items-center justify-center rounded-lg text-sm font-medium text-cyan-500 ring-1 ring-cyan-500/30 active:bg-cyan-500/10"
               >
-                Bekijk volledige workout
+                {t('calendar.view_full_workout')}
               </Link>
             </div>
           ))}
@@ -325,19 +338,19 @@ export default function Calendar() {
       {/* Empty state when no date selected */}
       {!selectedDate && workouts.length > 0 && (
         <p className="mt-6 text-center text-sm text-gray-600">
-          Tap op een dag met training om details te zien
+          {t('calendar.tap_day_hint')}
         </p>
       )}
       
       {/* Empty state when no workouts */}
       {workouts.length === 0 && (
         <div className="mt-8 text-center">
-          <p className="text-gray-500">Nog geen trainingen gelogd</p>
+          <p className="text-gray-500">{t('calendar.no_workouts')}</p>
           <Link 
             to="/log"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-cyan-500 px-6 text-sm font-semibold text-white"
           >
-            Start je eerste training
+            {t('calendar.start_first')}
           </Link>
         </div>
       )}
