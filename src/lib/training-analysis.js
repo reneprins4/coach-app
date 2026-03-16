@@ -198,20 +198,26 @@ export function classifyExerciseFull(exerciseName) {
  * Accounts for: time elapsed, avg RPE, number of sets trained
  */
 export function calcMuscleRecovery(muscle, hoursSinceTrained, avgRPE, setsCount) {
-  if (hoursSinceTrained === null || hoursSinceTrained === undefined) return 100
+  // Handle null, undefined, NaN, or invalid hours — treat as never trained = 100%
+  if (hoursSinceTrained == null || !Number.isFinite(hoursSinceTrained)) return 100
+  // Negative hours shouldn't happen but clamp to 0 just in case
+  const safeHours = Math.max(0, hoursSinceTrained)
   const baseHours = RECOVERY_HOURS[muscle] || 72
   // Volume penalty: each set above 6 adds 8% more recovery time needed
-  const volumeMult = 1 + Math.max(0, ((setsCount || 0) - 6) * 0.08)
+  // Handle NaN/Infinity setsCount by defaulting to 0
+  const safeSets = Number.isFinite(setsCount) ? setsCount : 0
+  const volumeMult = 1 + Math.max(0, (safeSets - 6) * 0.08)
   // Intensity modifier: RPE affects recovery bidirectionally
   // - RPE > 7: slower recovery (more demanding)
   // - RPE < 7: faster recovery (easier session, e.g., deload)
-  // Clamp RPE to valid range 1-10, default to 7 if null/undefined
-  const clampedRPE = avgRPE != null ? Math.max(1, Math.min(10, avgRPE)) : 7
+  // Clamp RPE to valid range 1-10, default to 7 if null/undefined/NaN
+  const safeRPE = (avgRPE != null && Number.isFinite(avgRPE)) ? avgRPE : 7
+  const clampedRPE = Math.max(1, Math.min(10, safeRPE))
   // rpeMult scales from 0.55 (RPE 4) to 1.45 (RPE 10), with 1.0 at RPE 7
   // Floor at 0.5 to prevent unrealistically fast recovery at very low RPE
   const rpeMult = Math.max(0.5, 1 + (clampedRPE - 7) * 0.15)
   const adjustedHours = baseHours * volumeMult * rpeMult
-  return Math.min(100, Math.round((hoursSinceTrained / adjustedHours) * 100))
+  return Math.min(100, Math.round((safeHours / adjustedHours) * 100))
 }
 
 export function recoveryStatus(pct) {
