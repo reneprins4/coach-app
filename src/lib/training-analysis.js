@@ -68,40 +68,43 @@ const SPLIT_MUSCLES = {
 
 // Map exercise names → muscle groups
 const EXERCISE_MUSCLE_MAP = {
-  // Chest
-  'bench':              'chest', 'press.*chest': 'chest', 'dumbbell.*press': 'chest',
-  'incline.*press':     'chest', 'fly':          'chest', 'pec':             'chest',
-  'push-up':            'chest', 'push up':      'chest', 'cable.*fly':      'chest',
-  // Back
-  'row':                'back',  'pull-up':       'back',  'pullup':          'back',
-  'chin-up':            'back',  'chinup':        'back',  'pulldown':        'back',
-  'lat.*pull':          'back',  'hyperextension':'back',  'deadlift(?!.*(romanian|rdl|sumo))': 'back',
-  // Shoulders
-  'overhead.*press':    'shoulders', 'ohp':       'shoulders', 'lateral.*raise': 'shoulders',
-  'face.*pull':         'shoulders', 'rear.*delt':'shoulders', 'arnold':         'shoulders',
-  'upright.*row':       'shoulders', 'shoulder.*press': 'shoulders',
-  'cable.*lateral':     'shoulders',
-  // Quads
-  'squat':              'quads', 'leg.*press':  'quads', 'hack':          'quads',
-  'lunge':              'quads', 'leg.*extension': 'quads', 'split.*squat':'quads',
-  'front.*squat':       'quads', 'bulgarian':   'quads',
-  // Hamstrings
-  'romanian':           'hamstrings', 'rdl':     'hamstrings', 'leg.*curl':  'hamstrings',
-  'nordic':             'hamstrings', 'good.*morning': 'hamstrings',
-  // Glutes
+  // Hamstrings — MUST come before back (romanian/stiff-leg deadlifts contain "dead" which matches back)
+  'romanian':           'hamstrings', 'rdl':          'hamstrings', 'leg.*curl':      'hamstrings',
+  'nordic':             'hamstrings', 'good.*morning':'hamstrings', 'stiff.?leg':     'hamstrings',
+  'hamstring':          'hamstrings',
+  // Glutes — before back (hip thrust can confuse)
   'hip.*thrust':        'glutes', 'glute.*bridge': 'glutes', 'sumo.*deadlift': 'glutes',
   'kickback':           'glutes', 'abductor':   'glutes',
-  // Biceps
-  'curl(?!.*leg)':      'biceps', 'hammer':    'biceps', 'preacher':     'biceps',
-  'concentration':      'biceps', 'ez.*bar.*curl': 'biceps',
-  // Triceps
-  'pushdown':           'triceps', 'skull.*crush': 'triceps', 'close.*grip': 'triceps',
-  'overhead.*extension':'triceps', 'tricep':   'triceps', 'dip':          'triceps',
+  // Shoulders — before chest: "reverse fly" would match 'fly'→chest if chest comes first
+  // Also: "military press" and "front raise" were missing
+  'overhead.*press':    'shoulders', 'ohp':          'shoulders', 'lateral.*raise': 'shoulders',
+  'face.*pull':         'shoulders', 'rear.*delt':   'shoulders', 'arnold':         'shoulders',
+  'upright.*row':       'shoulders', 'shoulder.*press': 'shoulders', 'cable.*lateral': 'shoulders',
+  'military.*press':    'shoulders', 'front.*raise': 'shoulders', 'reverse.*fly':   'shoulders',
+  'side.*raise':        'shoulders', 'delt.*raise':  'shoulders',
+  // Triceps — before chest: "close grip bench press" should be triceps
+  'close.*grip.*bench': 'triceps', 'pushdown':      'triceps', 'skull.*crush':    'triceps',
+  'overhead.*extension':'triceps',  'tricep':        'triceps', 'dip':             'triceps',
   'cable.*extension':   'triceps',
+  // Chest
+  'bench':              'chest',  'press.*chest':  'chest',  'incline.*press':  'chest',
+  'cable.*cross':       'chest',  'crossover':     'chest',  'fly(?!.*reverse)':'chest',
+  'pec':                'chest',  'push.?up':      'chest',  'cable.*fly':      'chest',
+  // Back — after hamstrings/glutes (deadlift pattern now simple since special cases handled above)
+  'deadlift':           'back',   'row(?!.*upright)': 'back', 'pull.?up':       'back',
+  'pullup':             'back',   'chin.?up':      'back',   'pulldown':        'back',
+  'lat.*pull':          'back',   'hyperextension':'back',
+  // Quads
+  'squat':              'quads',  'leg.*press':    'quads',  'hack':            'quads',
+  'lunge':              'quads',  'leg.*extension':'quads',  'split.*squat':    'quads',
+  'front.*squat':       'quads',  'bulgarian':     'quads',
+  // Biceps
+  'curl(?!.*leg)':      'biceps', 'hammer':        'biceps', 'preacher':        'biceps',
+  'concentration':      'biceps', 'ez.*bar.*curl': 'biceps',
   // Core
-  'plank':              'core',  'crunch':      'core',  'ab.*wheel':     'core',
-  'leg.*raise':         'core',  'pallof':      'core',  'dead.*bug':     'core',
-  'russian.*twist':     'core',  'sit.?up':     'core',
+  'plank':              'core',   'crunch':        'core',   'ab.*wheel':       'core',
+  'leg.*raise':         'core',   'pallof':        'core',   'dead.*bug':       'core',
+  'russian.*twist':     'core',   'sit.?up':       'core',
 }
 
 export function classifyExercise(exerciseName) {
