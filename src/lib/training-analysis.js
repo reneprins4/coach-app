@@ -232,7 +232,10 @@ export function recoveryStatus(pct) {
  * @param {string} goal - Training goal: 'hypertrophy', 'strength', or 'endurance'
  */
 export function analyzeTraining(workouts, goal = 'hypertrophy') {
-  const targets = SET_TARGETS_BY_GOAL[goal] || SET_TARGETS_BY_GOAL.hypertrophy
+  // Validate goal: must be a known goal, not a prototype method like 'toString' or '__proto__'
+  const validGoals = ['hypertrophy', 'strength', 'endurance']
+  const safeGoal = validGoals.includes(goal) ? goal : 'hypertrophy'
+  const targets = SET_TARGETS_BY_GOAL[safeGoal]
   const now = new Date()
   const weekStart = new Date(now)
   weekStart.setDate(now.getDate() - 7)
