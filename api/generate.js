@@ -1,5 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Simple in-memory rate limiter (resets on cold start, good enough for Vercel serverless)
+const rateLimitMap = new Map() // userId -> { count, resetAt }
+const RATE_LIMIT = 20         // max requests
+const RATE_WINDOW = 60 * 60 * 1000 // per hour (ms)
+
+function checkRateLimit(userId) {
+  const now = Date.now()
+  const entry = rateLimitMap.get(userId) || { count: 0, resetAt: now + RATE_WINDOW }
+  if (now > entry.resetAt) {
+    entry.count = 0
+    entry.resetAt = now + RATE_WINDOW
+  }
+  if (entry.count >= RATE_LIMIT) return false
+  entry.count++
+  rateLimitMap.set(userId, entry)
+  return true
+}
+
 // Allowed origins for CORS
 const ALLOWED_ORIGINS = [
   'https://kravex.app',
@@ -60,6 +78,12 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized: Invalid token' })
   }
   // === END AUTH CHECK ===
+
+  // === RATE LIMITING ===
+  if (!checkRateLimit(user.id)) {
+    return res.status(429).json({ error: 'Rate limit exceeded. Try again later.' })
+  }
+  // === END RATE LIMITING ===
 
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {

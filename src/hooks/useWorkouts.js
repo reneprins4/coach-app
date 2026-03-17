@@ -51,7 +51,7 @@ export function useWorkouts(userId) {
           .order('created_at', { ascending: true })
 
         if (setsErr) {
-          console.error('Failed to fetch sets:', setsErr)
+          if (import.meta.env.DEV) console.error('Failed to fetch sets:', setsErr)
           // Continue with empty sets rather than failing completely
         }
 
@@ -184,7 +184,7 @@ export async function fetchRecentHistory(userId, days = 30) {
     .order('created_at', { ascending: false })
 
   if (wErr) {
-    console.error('Failed to fetch recent history:', wErr)
+    if (import.meta.env.DEV) console.error('Failed to fetch recent history:', wErr)
     return []
   }
 
@@ -198,7 +198,7 @@ export async function fetchRecentHistory(userId, days = 30) {
     .eq('user_id', userId)
 
   if (sErr) {
-    console.error('Failed to fetch sets for history:', sErr)
+    if (import.meta.env.DEV) console.error('Failed to fetch sets for history:', sErr)
     // Return workouts without sets rather than failing completely
   }
 
@@ -224,7 +224,7 @@ export async function getExerciseHistory(exerciseName, userId) {
     .limit(50)
 
   if (error) {
-    console.error('Failed to fetch exercise history:', error)
+    if (import.meta.env.DEV) console.error('Failed to fetch exercise history:', error)
     return []
   }
 
