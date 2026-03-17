@@ -2,6 +2,7 @@ import { lazy, Suspense, createContext, useContext, useState, useEffect } from '
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { getSettings, saveSettings, mergeSettingsOnLogin } from './lib/settings'
+import { supabase } from './lib/supabase'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Onboarding from './components/Onboarding'
@@ -80,6 +81,18 @@ export default function App() {
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
+  // Clear session cache on sign-out to prevent stale data leaking between users
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        Object.keys(sessionStorage)
+          .filter(k => k.startsWith('__kravex_start_flow_cache_'))
+          .forEach(k => sessionStorage.removeItem(k))
+      }
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   // Show loader while checking auth OR while loading cloud settings for logged-in user

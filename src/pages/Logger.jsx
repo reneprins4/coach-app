@@ -32,6 +32,9 @@ import MomentumIndicator from '../components/MomentumIndicator'
 // Session cache key - will be combined with userId for isolation
 const SESSION_CACHE_PREFIX = '__kravex_start_flow_cache_'
 
+// Locale map for date formatting
+const LOCALE_MAP = { nl: 'nl-NL', en: 'en-GB' }
+
 // Get user-specific cache key
 function getSessionCacheKey(userId) {
   return `${SESSION_CACHE_PREFIX}${userId || 'anonymous'}__`
@@ -260,6 +263,7 @@ export default function Logger() {
     } catch {}
   }, [user?.id])
   const generationIdRef = useRef(0)
+  const abortControllerRef = useRef(null)
   const hasWorkoutRef = useRef(false)
   const availableTimeRef = useRef(null)
   
@@ -394,17 +398,17 @@ export default function Logger() {
           }
           sessionStorage.setItem(getSessionCacheKey(user.id), JSON.stringify(cacheData))
         } catch (e) {
-          console.warn('Failed to save session cache:', e)
+          if (import.meta.env.DEV) console.warn('Failed to save session cache:', e)
         }
         
       } catch (err) {
         if (cancelled) return
-        console.error('Workout generation failed:', err)
+        if (import.meta.env.DEV) console.error('Workout generation failed:', err)
         setStartFlowState(prev => ({
           ...prev,
           loading: false,
           generating: false,
-          error: err.message,
+          error: err.name === 'AbortError' ? null : err.message,
         }))
       }
     }
@@ -421,6 +425,11 @@ export default function Logger() {
       return
     }
     
+    // Abort any previous in-flight Gemini request
+    abortControllerRef.current?.abort()
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     // Increment generation ID to track this specific generation
     const myGenerationId = ++generationIdRef.current
     
@@ -475,6 +484,7 @@ export default function Logger() {
         recentHistory,
         preferences,
         userId: user.id,
+        signal: controller.signal,
       })
       
       // Check if a newer generation was started
@@ -523,19 +533,23 @@ export default function Logger() {
         }
         sessionStorage.setItem(getSessionCacheKey(user.id), JSON.stringify(cacheData))
       } catch (e) {
-        console.warn('Failed to save session cache:', e)
+        if (import.meta.env.DEV) console.warn('Failed to save session cache:', e)
       }
       
     } catch (err) {
-      console.error('Workout generation failed:', err)
+      if (err.name === 'AbortError') return // New request started, silently ignore this one
+      if (import.meta.env.DEV) console.error('Workout generation failed:', err)
+      const message = err.message === 'SESSION_EXPIRED'
+        ? t('auth.session_expired', 'Je sessie is verlopen, log opnieuw in')
+        : err.message
       setStartFlowState(prev => ({
         ...prev,
         generating: false,
-        error: err.message,
+        error: message,
         retryCount: (prev.retryCount || 0) + 1,
       }))
     }
-  }, [user?.id, startFlowState.muscleStatus, startFlowState.splits, startFlowState.recommendedSplit, startFlowState.recoveredMuscles, startFlowState.availableTime])
+  }, [user?.id, startFlowState.muscleStatus, startFlowState.splits, startFlowState.recommendedSplit, startFlowState.recoveredMuscles, startFlowState.availableTime, t])
 
   // Handle time change
   const handleTimeChange = useCallback((newTime) => {
@@ -571,7 +585,7 @@ export default function Logger() {
     try {
       localStorage.setItem('coach-pending-workout', JSON.stringify(startFlowState.generatedWorkout))
     } catch (e) {
-      console.warn('Failed to save pending workout to localStorage:', e)
+      if (import.meta.env.DEV) console.warn('Failed to save pending workout to localStorage:', e)
     }
     // Trigger the existing useEffect that handles coach-pending-workout
     const plan = startFlowState.generatedWorkout
@@ -597,7 +611,7 @@ export default function Logger() {
     const block = getCurrentBlock()
     const phase = block ? PHASES[block.phase] : null
     const today = new Date()
-    const dateStr = today.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+    const dateStr = today.toLocaleDateString(LOCALE_MAP[i18n.language] || 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
     const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
 
     // Muscle name translations - use i18n
@@ -759,7 +773,7 @@ export default function Logger() {
           {/* Exercise count + duration when ready */}
           {isReady && (
             <p className="mt-2 text-center text-sm font-medium text-white/70">
-              {exerciseCount} oefeningen · ~{estimatedDuration} min
+              {exerciseCount} {t('common.exercises')} · ~{estimatedDuration} min
             </p>
           )}
 

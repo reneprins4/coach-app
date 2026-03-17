@@ -130,7 +130,7 @@ export default function AICoach() {
           setFocusedMuscles(weakMuscles)
         }
       } catch (err) {
-        console.error('Analysis failed:', err)
+        if (import.meta.env.DEV) console.error('Analysis failed:', err)
       }
       if (!cancelled) setTimeout(() => setAnalyzing(false), 800)
     }
@@ -207,7 +207,10 @@ export default function AICoach() {
       setResult(workout)
       setRetryCount(0) // Reset retry count on success
     } catch (err) {
-      setError(err.message)
+      const message = err.message === 'SESSION_EXPIRED'
+        ? t('auth.session_expired', 'Je sessie is verlopen, log opnieuw in')
+        : err.message
+      setError(message)
       setRetryCount(prev => prev + 1)
     } finally {
       setGenerating(false)

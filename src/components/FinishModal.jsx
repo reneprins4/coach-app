@@ -25,6 +25,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
   const [templateName, setTemplateName] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [templateError, setTemplateError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [prs, setPrs] = useState([])
   const [nextWorkout, setNextWorkout] = useState(null)
@@ -195,7 +196,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
           }
         }
       } catch (err) {
-        console.error('Failed to load finish data:', err)
+        if (import.meta.env.DEV) console.error('Failed to load finish data:', err)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -209,12 +210,14 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
   async function handleSaveTemplate() {
     if (!templateName.trim() || saving) return
     setSaving(true)
+    setTemplateError(null)
     try {
       await onSaveTemplate(templateName.trim())
       setSaved(true)
       setShowTemplateInput(false)
     } catch (err) {
-      console.error('Failed to save template:', err)
+      if (import.meta.env.DEV) console.error('Failed to save template:', err)
+      setTemplateError(t('finish_modal.template_save_error', 'Opslaan mislukt, probeer opnieuw'))
     } finally {
       setSaving(false)
     }
@@ -376,6 +379,9 @@ export default function FinishModal({ result, onClose, onSaveTemplate }) {
                       {t('finish_modal.save')}
                     </button>
                   </div>
+                  {templateError && (
+                    <p className="mt-2 text-center text-xs text-red-400">{templateError}</p>
+                  )}
                 </div>
               )}
             </div>

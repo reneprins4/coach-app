@@ -58,13 +58,16 @@ export function useActiveWorkout(userId) {
   }, [workout?.startedAt])
 
   const startWorkout = useCallback((preloadedExercises) => {
-    const w = {
-      tempId: crypto.randomUUID(),
-      startedAt: new Date().toISOString(),
-      exercises: preloadedExercises || [],
-      notes: '',
-    }
-    setWorkout(w)
+    setWorkout(prev => {
+      // Guard: don't overwrite an active workout
+      if (prev) return prev
+      return {
+        tempId: crypto.randomUUID(),
+        startedAt: new Date().toISOString(),
+        exercises: preloadedExercises || [],
+        notes: '',
+      }
+    })
     setError(null)
   }, [])
 
@@ -139,6 +142,18 @@ export function useActiveWorkout(userId) {
     if (!workout || !userId) return null
     setSaving(true)
     setError(null)
+
+    // Pre-build sets data so it's available for offline queue on failure
+    const pendingSets = workout.exercises.flatMap(ex =>
+      ex.sets.map(s => ({
+        user_id: userId,
+        exercise: ex.name,
+        weight_kg: s.weight_kg,
+        reps: s.reps,
+        rpe: s.rpe,
+      }))
+    )
+
     try {
       const { data: row, error: wErr } = await supabase
         .from('workouts')
@@ -147,16 +162,7 @@ export function useActiveWorkout(userId) {
         .single()
       if (wErr) throw wErr
 
-      const allSets = workout.exercises.flatMap(ex =>
-        ex.sets.map(s => ({
-          workout_id: row.id,
-          user_id: userId,
-          exercise: ex.name,
-          weight_kg: s.weight_kg,
-          reps: s.reps,
-          rpe: s.rpe,
-        }))
-      )
+      const allSets = pendingSets.map(s => ({ ...s, workout_id: row.id }))
       if (allSets.length > 0) {
         const { error: sErr } = await supabase.from('sets').insert(allSets)
         if (sErr) {
@@ -177,6 +183,23 @@ export function useActiveWorkout(userId) {
       setWorkout(null)
       return result
     } catch (err) {
+      // Queue workout for later sync when back online
+      try {
+        const offlineQueue = JSON.parse(localStorage.getItem('coach-offline-queue') || '[]')
+        offlineQueue.push({
+          type: 'workout',
+          workout: {
+            user_id: userId,
+            notes: workout.notes || null,
+            created_at: workout.startedAt,
+          },
+          sets: pendingSets,
+          duration: elapsed,
+          exercises: workout.exercises,
+          timestamp: Date.now(),
+        })
+        localStorage.setItem('coach-offline-queue', JSON.stringify(offlineQueue))
+      } catch {}
       setError(err.message)
       return null
     } finally {

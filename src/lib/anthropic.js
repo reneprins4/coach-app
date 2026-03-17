@@ -69,19 +69,19 @@ function extractJSON(raw) {
     try { return JSON.parse(text.slice(start, end + 1)) } catch {}
   }
   // Give up
-  console.error('Raw AI response that failed to parse:', raw.slice(0, 500))
+  if (import.meta.env.DEV) console.error('Raw AI response that failed to parse:', raw.slice(0, 500))
   throw new Error('Failed to parse AI response. Please try again.')
 }
 
-export async function generateScientificWorkout({ muscleStatus, recommendedSplit, recentHistory, preferences, userId = null }) {
+export async function generateScientificWorkout({ muscleStatus, recommendedSplit, recentHistory, preferences, userId = null, signal = null }) {
   // --- Cache check ---
   const cacheKey = workoutCacheKey({ split: recommendedSplit, muscleStatus, preferences })
   const cached = await cacheGet(cacheKey, userId)
   if (cached) {
-    console.log('[aiCache] Workout cache HIT:', cacheKey)
+    if (import.meta.env.DEV) console.log('[aiCache] Workout cache HIT:', cacheKey)
     return cached
   }
-  console.log('[aiCache] Workout cache MISS — calling Gemini')
+  if (import.meta.env.DEV) console.log('[aiCache] Workout cache MISS — calling Gemini')
   // --- End cache check ---
 
   const muscleStatusText = Object.entries(muscleStatus)
@@ -244,9 +244,11 @@ Return ONLY valid JSON (no markdown, no code fences, no comments):
     method: 'POST',
     headers: authHeaders,
     body: JSON.stringify({ prompt }),
+    signal,
   })
 
   if (!response.ok) {
+    if (response.status === 401) throw new Error('SESSION_EXPIRED')
     const err = await response.text()
     throw new Error(`API error ${response.status}: ${err}`)
   }
@@ -291,23 +293,23 @@ export async function getExerciseSubstitute({ exercise, reason, equipment, exper
   try {
     const local = getExerciseSubstituteLocal({ exercise, reason, equipment, experienceLevel, bodyweight })
     if (local && local.name !== exercise.name) {
-      console.log('[exerciseSubstitutes] Static HIT for:', exercise.name)
+      if (import.meta.env.DEV) console.log('[exerciseSubstitutes] Static HIT for:', exercise.name)
       return local
     }
   } catch (e) {
-    console.warn('[exerciseSubstitutes] Static lookup failed:', e.message)
+    if (import.meta.env.DEV) console.warn('[exerciseSubstitutes] Static lookup failed:', e.message)
   }
   // --- Fallback: LLM (for unknown exercises) ---
-  console.log('[exerciseSubstitutes] LLM fallback for:', exercise.name)
+  if (import.meta.env.DEV) console.log('[exerciseSubstitutes] LLM fallback for:', exercise.name)
 
   // --- Cache check (global, 30-day TTL) ---
   const subKey = substituteCacheKey({ exercise, reason, equipment })
   const cachedSub = await cacheGet(subKey, null)  // null = global cache
   if (cachedSub) {
-    console.log('[aiCache] Substitute cache HIT:', subKey)
+    if (import.meta.env.DEV) console.log('[aiCache] Substitute cache HIT:', subKey)
     return cachedSub
   }
-  console.log('[aiCache] Substitute cache MISS — calling Gemini')
+  if (import.meta.env.DEV) console.log('[aiCache] Substitute cache MISS — calling Gemini')
   // --- End cache check ---
 
   const prompt = `Suggest ONE substitute exercise for: "${exercise.name}" (targets: ${exercise.muscle_group || 'same muscle group'})
@@ -346,6 +348,7 @@ Return ONLY this JSON (no markdown):
   })
 
   if (!response.ok) {
+    if (response.status === 401) throw new Error('SESSION_EXPIRED')
     const err = await response.text()
     throw new Error(`API error ${response.status}: ${err}`)
   }
@@ -387,7 +390,10 @@ Regels:
     body: JSON.stringify({ prompt }),
   })
 
-  if (!response.ok) throw new Error(`API error ${response.status}`)
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('SESSION_EXPIRED')
+    throw new Error(`API error ${response.status}`)
+  }
   const data = await response.json()
   if (data.error) throw new Error(data.error)
   return extractJSON(data.content)
