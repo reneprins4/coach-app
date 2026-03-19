@@ -366,13 +366,16 @@ export function scoreSplits(muscleStatus, lastWorkoutInfo = null, experienceLeve
       const recoveryWeight = isPrimary ? 0.3 : 0.1
       // Recovery score: higher recovery = better time to train
       score += ms.recoveryPct * recoveryWeight
-      // Volume deficit: need to hit weekly targets (alleen primaire spieren)
-      if (isPrimary) {
+      // Volume deficit: only counts when muscle is sufficiently recovered (≥75%)
+      // Prevents volume debt from overriding recovery status
+      if (isPrimary && ms.recoveryPct >= 75) {
         const deficit = Math.max(0, ms.target.min - ms.setsThisWeek)
         score += deficit * 2
       }
-      // Penalize muscles that are still fatigued — harder for primary muscles
+      // Penalize muscles that are still fatigued
       if (ms.recoveryPct < 50) score -= isPrimary ? 40 : 10
+      // Medium penalty for partially recovered primary muscles (50–74%)
+      else if (ms.recoveryPct < 75 && isPrimary) score -= 20
     }
 
     // NORMALIZE: divide by number of primary muscles to compare splits fairly

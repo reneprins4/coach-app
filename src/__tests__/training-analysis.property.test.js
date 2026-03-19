@@ -382,7 +382,7 @@ describe('scoreSplits', () => {
     fc.assert(
       fc.property(muscleStatusArb, lastWorkoutInfoArb, experienceLevelArb, (status, lastWorkout, level) => {
         const result = scoreSplits(status, lastWorkout, level)
-        return result.length === 6
+        return result.length === 7
       }),
       { numRuns: 300 }
     )
