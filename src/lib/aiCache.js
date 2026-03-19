@@ -103,12 +103,16 @@ export async function cacheSet(cacheKey, userId = null, response, ttlHours = 4) 
         .from('ai_response_cache')
         .insert({ cache_key: cacheKey, user_id: null, response, expires_at })
     } else {
+      // PostgREST can't resolve conflicts on partial indexes, so use delete-then-insert
       await supabase
         .from('ai_response_cache')
-        .upsert(
-          { cache_key: cacheKey, user_id: userId, response, expires_at },
-          { onConflict: 'cache_key,user_id' }
-        )
+        .delete()
+        .eq('cache_key', cacheKey)
+        .eq('user_id', userId)
+
+      await supabase
+        .from('ai_response_cache')
+        .insert({ cache_key: cacheKey, user_id: userId, response, expires_at })
     }
   } catch {
     // Cache write failure is non-fatal — just log
