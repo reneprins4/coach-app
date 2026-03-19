@@ -57,6 +57,30 @@ export default function ExerciseGuide({ exercise, onClose }) {
           </button>
         </div>
 
+        {/* Exercise images — shown if available */}
+        {(exercise.image_url_0 || exercise.image_url_1) && (
+          <div className="mb-5 flex gap-2 overflow-hidden rounded-2xl">
+            {exercise.image_url_0 && (
+              <img
+                src={exercise.image_url_0}
+                alt={`${exercise.name} start position`}
+                className="w-1/2 rounded-xl object-cover bg-gray-800"
+                loading="lazy"
+                onError={e => { e.currentTarget.style.display = 'none' }}
+              />
+            )}
+            {exercise.image_url_1 && (
+              <img
+                src={exercise.image_url_1}
+                alt={`${exercise.name} end position`}
+                className="w-1/2 rounded-xl object-cover bg-gray-800"
+                loading="lazy"
+                onError={e => { e.currentTarget.style.display = 'none' }}
+              />
+            )}
+          </div>
+        )}
+
         {/* YouTube button - always visible */}
         <a
           href={youtubeUrl}
