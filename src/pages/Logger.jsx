@@ -677,9 +677,8 @@ export default function Logger() {
 
         {/* Primary AI Workout Card */}
         <div className="rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-6">
-          {/* Split name + status badge */}
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-lg font-black text-white">{selectedSplit || 'Workout'}</p>
+          {/* Status badge */}
+          <div className="flex items-center justify-end mb-3">
             {loading && (
               <span className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
                 <Loader2 size={12} className="animate-spin" />
