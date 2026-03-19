@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Youtube, ChevronRight, AlertCircle, Lightbulb, Dumbbell } from 'lucide-react'
 import { getExerciseGuide } from '../lib/anthropic'
@@ -8,6 +8,8 @@ export default function ExerciseGuide({ exercise, onClose }) {
   const [guide, setGuide] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [activeImg, setActiveImg] = useState(0)
+  const flipRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -30,6 +32,16 @@ export default function ExerciseGuide({ exercise, onClose }) {
   }, [exercise.name])
 
   const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name + ' uitvoering techniek')}`
+  const hasBothImages = exercise.image_url_0 && exercise.image_url_1
+
+  // Flip animation: alternate between start and end position every 1.5s
+  useEffect(() => {
+    if (!hasBothImages) return
+    flipRef.current = setInterval(() => {
+      setActiveImg(prev => prev === 0 ? 1 : 0)
+    }, 1500)
+    return () => clearInterval(flipRef.current)
+  }, [hasBothImages])
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end" onClick={onClose}>
@@ -57,27 +69,40 @@ export default function ExerciseGuide({ exercise, onClose }) {
           </button>
         </div>
 
-        {/* Exercise images — shown if available */}
+        {/* Exercise images — animated flip between start and end position */}
         {(exercise.image_url_0 || exercise.image_url_1) && (
-          <div className="mb-5 flex gap-2 overflow-hidden rounded-2xl">
+          <div className="mb-5 relative overflow-hidden rounded-2xl bg-gray-800 aspect-video">
+            {/* Start position */}
             {exercise.image_url_0 && (
               <img
                 src={exercise.image_url_0}
-                alt={`${exercise.name} start position`}
-                className="w-1/2 rounded-xl object-cover bg-gray-800"
-                loading="lazy"
+                alt={`${exercise.name} start`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${activeImg === 0 ? 'opacity-100' : 'opacity-0'}`}
                 onError={e => { e.currentTarget.style.display = 'none' }}
               />
             )}
+            {/* End position */}
             {exercise.image_url_1 && (
               <img
                 src={exercise.image_url_1}
-                alt={`${exercise.name} end position`}
-                className="w-1/2 rounded-xl object-cover bg-gray-800"
-                loading="lazy"
+                alt={`${exercise.name} end`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${activeImg === 1 ? 'opacity-100' : 'opacity-0'}`}
                 onError={e => { e.currentTarget.style.display = 'none' }}
               />
             )}
+            {/* Position indicator */}
+            {hasBothImages && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${activeImg === 0 ? 'bg-white' : 'bg-white/40'}`} />
+                <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${activeImg === 1 ? 'bg-white' : 'bg-white/40'}`} />
+              </div>
+            )}
+            {/* Label */}
+            <div className="absolute top-2 left-2 rounded-md bg-black/50 px-2 py-0.5">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/70">
+                {activeImg === 0 ? 'Start' : 'Eind'}
+              </span>
+            </div>
           </div>
         )}
 

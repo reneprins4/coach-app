@@ -1503,8 +1503,15 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
             </div>
           </div>
           
-          {/* 3-dot menu */}
-          <div className="relative shrink-0" ref={menuRef}>
+          {/* Form button + 3-dot menu */}
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => setShowGuide(true)}
+              className="flex items-center gap-1 rounded-lg border border-gray-700 px-2.5 py-1.5 text-xs font-semibold text-gray-400 active:bg-gray-800 active:text-white transition-colors"
+            >
+              Form
+            </button>
+          <div className="relative" ref={menuRef}>
             <button
               onClick={() => setShowMenu(!showMenu)}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 active:text-gray-400"
@@ -1535,6 +1542,7 @@ function ExerciseBlock({ exercise, userId, onAddSet, onRemoveSet, onRemove, onSw
                 </button>
               </div>
             )}
+          </div>
           </div>
         </div>
       </div>
