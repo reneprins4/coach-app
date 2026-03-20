@@ -121,7 +121,7 @@ describe('WorkoutReview', () => {
     // Exercise count and duration in summary area
     const summaryHtml = container.innerHTML
     expect(summaryHtml).toContain('common.exercises')
-    expect(summaryHtml).toContain('aicoach.min')
+    expect(summaryHtml).toContain('~60 min')
   })
 
   it('renders all exercises with name, sets, reps, weight', () => {

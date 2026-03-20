@@ -539,7 +539,7 @@ export default function Logger() {
               {supersetMode && (
                 <button
                   onClick={handleExitSupersetMode}
-                  className="h-8 rounded-lg bg-cyan-500/20 px-2.5 text-xs font-semibold text-cyan-400 ring-1 ring-cyan-500/40"
+                  className="h-8 rounded-lg bg-cyan-500/20 px-2.5 text-xs font-semibold text-cyan-400 border border-cyan-500/30"
                 >
                   {t('logger.superset_active')}
                 </button>
@@ -552,7 +552,7 @@ export default function Logger() {
               <button
                 onClick={handleFinishClick}
                 disabled={aw.saving || aw.totalSets === 0}
-                className="h-10 rounded-xl bg-cyan-500 px-4 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.97] transition-transform"
+                className="h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(6,182,212,0.3)] disabled:opacity-40 active:scale-[0.97] transition-transform"
               >
                 {aw.saving ? t('logger.saving') : t('logger.finish')}
               </button>
@@ -664,7 +664,7 @@ export default function Logger() {
         )}
 
         {/* Notes */}
-        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
+        <div className="card">
           <label className="mb-2 block label-caps">{t('logger.notes')}</label>
           <textarea
             value={workout.notes}
@@ -680,7 +680,7 @@ export default function Logger() {
       <div className="fixed bottom-24 left-0 right-0 z-30 px-4 pb-4 pb-safe pt-3 bg-gradient-to-t from-gray-950 via-gray-950/80 to-transparent">
         <button
           onClick={() => setShowPicker(true)}
-          className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 font-semibold text-white ring-1 ring-gray-700 active:bg-gray-800"
+          className="btn-secondary h-13"
         >
           <Plus size={18} strokeWidth={2.5} />
           {t('logger.add_exercise')}
@@ -698,20 +698,20 @@ export default function Logger() {
       )}
 
       {showDiscard && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="discard-dialog-title" className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 id="discard-dialog-title" className="mb-2 text-lg font-bold text-white">{t('logger.stop_confirm')}</h3>
-            <p className="mb-6 text-sm text-gray-400">{t('logger.stop_confirm_sub')}</p>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5">
+          <div role="dialog" aria-modal="true" aria-labelledby="discard-dialog-title" className="card w-full max-w-sm text-center">
+            <h3 id="discard-dialog-title" className="text-title mb-2">{t('logger.stop_confirm')}</h3>
+            <p className="mb-6 text-sm text-gray-500">{t('logger.stop_confirm_sub')}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDiscard(false)}
-                className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
+                className="btn-secondary h-12 flex-1 text-sm"
               >
                 {t('common.cancel')}
               </button>
               <button
                 onClick={() => { aw.discardWorkout(); setShowDiscard(false) }}
-                className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white active:bg-cyan-700"
+                className="btn-primary h-12 flex-1 text-sm"
               >
                 {t('logger.stop')}
               </button>
@@ -747,21 +747,15 @@ export default function Logger() {
       )}
 
       {showConfirmFinish && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="confirm-finish-title" className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 id="confirm-finish-title" className="mb-2 text-lg font-bold text-white">{t('logger.confirm_finish')}</h3>
-            <p className="mb-6 text-sm text-gray-400">{t('logger.confirm_finish_sub')}</p>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5">
+          <div role="dialog" aria-modal="true" aria-labelledby="confirm-finish-title" className="card w-full max-w-sm text-center">
+            <h3 id="confirm-finish-title" className="text-title mb-2">{t('logger.confirm_finish')}</h3>
+            <p className="mb-6 text-sm text-gray-500">{t('logger.confirm_finish_sub')}</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirmFinish(false)}
-                className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700 active:bg-gray-800"
-              >
+              <button onClick={() => setShowConfirmFinish(false)} className="btn-secondary h-12 flex-1 text-sm">
                 {t('common.cancel')}
               </button>
-              <button
-                onClick={handleFinish}
-                className="h-12 flex-1 rounded-xl bg-cyan-500 font-semibold text-white active:bg-cyan-600"
-              >
+              <button onClick={handleFinish} className="btn-primary h-12 flex-1 text-sm">
                 {t('logger.finish')}
               </button>
             </div>
