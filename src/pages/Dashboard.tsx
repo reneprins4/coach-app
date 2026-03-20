@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Play, Dumbbell } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
@@ -37,7 +37,6 @@ export default function Dashboard() {
     const now = new Date()
     const weekStart = new Date(now)
     weekStart.setDate(now.getDate() - 7)
-
     const thisWeek = workouts.filter(w => new Date(w.created_at) >= weekStart)
 
     let streak = 0
@@ -60,7 +59,7 @@ export default function Dashboard() {
 
   const todaysWorkout = useMemo(() => generateTodaysWorkout(workouts), [workouts])
 
-  // Training Story: compute for previous month
+  // Training Story
   const storyContext = useMemo(() => {
     const now = new Date()
     const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1
@@ -70,12 +69,7 @@ export default function Dashboard() {
 
   const storyData = useMemo(() => {
     if (workouts.length < 3) return null
-    const data = computeTrainingStory(
-      workouts,
-      storyContext.prevMonth,
-      storyContext.prevYear,
-      parseInt(settings.frequency) || 4,
-    )
+    const data = computeTrainingStory(workouts, storyContext.prevMonth, storyContext.prevYear, parseInt(settings.frequency) || 4)
     if (!data.hasEnoughData) return null
     return data
   }, [workouts, storyContext.prevMonth, storyContext.prevYear, settings.frequency])
@@ -93,10 +87,7 @@ export default function Dashboard() {
     if (!storyData) return
     const text = buildStoryShareText(storyData, i18n.language)
     if (navigator.share) {
-      navigator.share({ text }).catch(() => {
-        // User cancelled or share failed, copy to clipboard instead
-        navigator.clipboard?.writeText(text)
-      })
+      navigator.share({ text }).catch(() => { navigator.clipboard?.writeText(text) })
     } else {
       navigator.clipboard?.writeText(text)
     }
@@ -104,300 +95,171 @@ export default function Dashboard() {
 
   const handleStartTodaysWorkout = useCallback(() => {
     if (!todaysWorkout) return
-    // Convert AIExercise[] to ActiveExercise[] format the Logger expects
     const pending = todaysWorkout.exercises.map((ex: AIExercise) => ({
       name: ex.name,
       muscle_group: ex.muscle_group,
       sets: [],
       plan: {
-        sets: ex.sets,
-        reps_min: ex.reps_min,
-        reps_max: ex.reps_max,
-        weight_kg: ex.weight_kg,
-        rpe_target: ex.rpe_target,
-        rest_seconds: ex.rest_seconds,
-        notes: ex.notes || '',
+        sets: ex.sets, reps_min: ex.reps_min, reps_max: ex.reps_max,
+        weight_kg: ex.weight_kg, rpe_target: ex.rpe_target,
+        rest_seconds: ex.rest_seconds, notes: ex.notes || '',
       },
     }))
     localStorage.setItem('coach-pending-workout', JSON.stringify(pending))
     nav('/log')
   }, [todaysWorkout, nav])
 
-  const recentWorkouts = workouts.slice(0, 2)
+  const recentWorkouts = workouts.slice(0, 3)
 
-  if (loading) {
-    return <DashboardSkeleton />
-  }
+  if (loading) return <DashboardSkeleton />
 
-  // Empty state for new users
+  // Empty state
   if (workouts.length === 0) {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
-        <h1 className="mb-3 text-3xl font-black tracking-tight text-white">{t(getGreetingKey())}</h1>
-        <p className="mb-8 text-sm text-gray-500">
-          {t('dashboard.time_to_start')}
-        </p>
-        <button
-          onClick={() => nav('/coach')}
-          className="btn-primary mb-4 max-w-xs"
-        >
-          {t('dashboard.start_training')}
-        </button>
-        <button
-          onClick={() => nav('/log')}
-          className="btn-secondary max-w-xs"
-        >
-          {t('dashboard.free_training')}
-        </button>
+        <h1 className="text-display mb-3">{t(getGreetingKey())}</h1>
+        <p className="mb-8 text-sm text-gray-500">{t('dashboard.time_to_start')}</p>
+        <button onClick={() => nav('/coach')} className="btn-primary mb-3 max-w-xs">{t('dashboard.start_training')}</button>
+        <button onClick={() => nav('/log')} className="btn-secondary max-w-xs">{t('dashboard.free_training')}</button>
       </div>
     )
   }
 
-  return (
-    <div className="px-4 py-6 pb-28">
+  // ── Muscle recovery data ──
+  const MUSCLE_DISPLAY: Record<string, string> = {
+    chest: t('muscles.chest'), back: t('muscles.back'), shoulders: t('muscles.shoulders'),
+    quads: t('muscles.quads'), hamstrings: t('muscles.hamstrings'), glutes: t('muscles.glutes'),
+    biceps: t('muscles.biceps'), triceps: t('muscles.triceps'), core: t('muscles.core'),
+  }
+  const muscles = muscleStatus
+    ? Object.entries(muscleStatus)
+        .filter(([, ms]) => ms.setsThisWeek > 0 || ms.daysSinceLastTrained != null)
+        .sort(([, a], [, b]) => (a.recoveryPct ?? 100) - (b.recoveryPct ?? 100))
+    : []
 
-      {/* Header */}
-      <div className="mb-6">
-        <p className="label-caps">{getDayName(i18n.language)}</p>
-        <h1 className="text-3xl font-black tracking-tight text-white">
+  const liftMax = settings.mainLift
+    ? Number((settings as unknown as Record<string, unknown>)[`${settings.mainLift}Max`]) || 0
+    : 0
+
+  return (
+    <div className="px-5 pt-6 pb-28">
+
+      {/* ━━ Greeting + inline stats ━━ */}
+      <div className="mb-7">
+        <p className="label-caps mb-1">{getDayName(i18n.language)}</p>
+        <h1 className="text-display">
           {t(getGreetingKey())}{settings.name ? `, ${settings.name}` : ''}
         </h1>
+        <div className="mt-3 flex items-center gap-4">
+          <span className="text-sm text-gray-500">
+            <span className="font-bold tabular text-white">{stats.thisWeekCount}</span> {t('dashboard.workouts').toLowerCase()}
+          </span>
+          {stats.streak > 0 && (
+            <span className="text-sm text-gray-500">
+              <span className="font-bold tabular text-white">{stats.streak}</span> {t('dashboard.streak').toLowerCase()}
+            </span>
+          )}
+          {block && phase && (
+            <span className="text-sm text-gray-500">
+              {phase.label} <span className="text-gray-600">Wk {progress?.currentWeek}/{progress?.totalWeeks}</span>
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Stats - 2 columns with visual weight */}
-      <div className="mb-5 grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-gray-900 p-4 text-center">
-          <p className="text-3xl font-bold tabular text-white">{stats.thisWeekCount}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">{t('dashboard.workouts')}</p>
-        </div>
-        <div className="rounded-xl bg-gray-900 p-4 text-center">
-          <p className="text-3xl font-bold tabular text-white">{stats.streak}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">{t('dashboard.streak')}</p>
-        </div>
-      </div>
-
-      {/* Training Story Banner */}
+      {/* ━━ Training Story Banner ━━ */}
       {showBanner && (
-        <TrainingStoryBanner
-          monthLabel={storyMonthLabel}
-          onOpen={() => setShowStory(true)}
-          onDismiss={handleStoryDismiss}
-        />
+        <div className="mb-4">
+          <TrainingStoryBanner
+            monthLabel={storyMonthLabel}
+            onOpen={() => setShowStory(true)}
+            onDismiss={handleStoryDismiss}
+          />
+        </div>
       )}
 
-      {/* Injury Banner */}
+      {/* ━━ Injury Banner ━━ */}
       {activeInjuries.length > 0 && (
-        <InjuryBanner
-          injuries={activeInjuries}
-          onCheckIn={(injury) => setCheckInInjury(injury)}
-          onResolve={(injury) => resolve(injury.id)}
-        />
+        <div className="mb-4">
+          <InjuryBanner
+            injuries={activeInjuries}
+            onCheckIn={(injury) => setCheckInInjury(injury)}
+            onResolve={(injury) => resolve(injury.id)}
+          />
+        </div>
       )}
 
-      {/* Today's Workout — 1-tap start */}
+      {/* ━━ Hero: Today's Workout ━━ */}
       {todaysWorkout && (
-        <div
-          className="mb-5 rounded-2xl p-4"
-          style={{ background: 'linear-gradient(135deg, #0c1a2e 0%, #0d1421 100%)', border: '1px solid rgba(6,182,212,0.15)' }}
+        <button
+          onClick={handleStartTodaysWorkout}
+          className="card-accent mb-5 w-full text-left active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
-              <p className="label-caps text-cyan-400">{t('dashboard.todays_workout')}</p>
-              <h3 className="text-lg font-black tracking-tight text-white">{todaysWorkout.split}</h3>
-              <p className="text-xs text-gray-400">
+              <p className="label-caps text-cyan-500 mb-1">{t('dashboard.todays_workout')}</p>
+              <p className="text-title">{todaysWorkout.split}</p>
+              <p className="mt-1 text-sm text-gray-500">
                 {todaysWorkout.exerciseCount} {t('common.exercises')} · ~{todaysWorkout.estimatedDuration} min
               </p>
             </div>
-            <button
-              onClick={handleStartTodaysWorkout}
-              className="ml-3 shrink-0 rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-bold text-black active:bg-cyan-600"
-            >
-              {t('dashboard.start_now')}
-            </button>
+            <div className="ml-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-500 glow-cyan">
+              <Play size={20} className="text-white ml-0.5" fill="white" />
+            </div>
           </div>
-        </div>
+        </button>
       )}
 
-      {/* Training Goal + Phase status card */}
-      {settings.trainingGoal && (
+      {/* ━━ Main Lift Progress ━━ */}
+      {settings.mainLift && settings.mainLiftGoalKg && liftMax > 0 && (
         <div
-          onClick={() => nav('/profile')}
-          className="mb-5 flex cursor-pointer items-center justify-between rounded-2xl p-4 active:opacity-80"
-          style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <div>
-            <p className="label-caps mb-1">{t('training_goal.title')}</p>
-            <p className="text-sm font-black tracking-tight text-white">
-              {t(`training_goal.${settings.trainingGoal}`)}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-cyan-500/20 px-2 py-1 text-xs font-bold text-cyan-400">
-              {t(`training_goal.phase_${settings.trainingPhase || 'build'}`)}
-            </span>
-            <ChevronRight size={16} className="text-gray-600" />
-          </div>
-        </div>
-      )}
-
-      {/* Main Lift PR Progress card */}
-      {settings.mainLift && settings.mainLiftGoalKg && (
-        <div
-          onClick={() => nav('/profile')}
-          className="mb-5 cursor-pointer rounded-2xl p-4 active:opacity-80"
-          style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+          onClick={() => nav('/progress')}
+          className="card mb-4 cursor-pointer active:scale-[0.98] transition-transform"
         >
           <p className="label-caps mb-3">{t(`main_lift.${settings.mainLift}`)} PR</p>
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black tabular-nums text-white">
-                  {String((settings as unknown as Record<string, unknown>)[`${settings.mainLift}Max`] ?? '?') || '?'}
-                </span>
-                <span className="text-sm text-gray-500">kg</span>
-                <span className="text-gray-600 mx-1">&rarr;</span>
-                <span className="text-2xl font-black tabular-nums text-cyan-400">
-                  {settings.mainLiftGoalKg}
-                </span>
-                <span className="text-sm text-gray-500">kg</span>
-              </div>
+          <div className="flex items-end justify-between mb-3">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-black tabular text-white">{liftMax}</span>
+              <span className="text-xs text-gray-600">kg</span>
+              <span className="text-gray-700 mx-1">/</span>
+              <span className="text-2xl font-black tabular text-cyan-400">{settings.mainLiftGoalKg}</span>
+              <span className="text-xs text-gray-600">kg</span>
             </div>
             {settings.mainLiftGoalDate && (
-              <div className="text-right">
-                <p className="text-xl font-black tabular-nums text-white">
-                  {Math.max(0, Math.ceil((new Date(settings.mainLiftGoalDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))}
-                </p>
-                <p className="text-xs text-gray-500">{t('main_lift.days_left')}</p>
-              </div>
+              <p className="text-xs text-gray-600">
+                {Math.max(0, Math.ceil((new Date(settings.mainLiftGoalDate).getTime() - Date.now()) / 86400000))}d
+              </p>
             )}
           </div>
-          {(() => {
-            const liftMax = Number((settings as unknown as Record<string, unknown>)[`${settings.mainLift}Max`]) || 0
-            return liftMax > 0 && settings.mainLiftGoalKg ? (
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-800">
-                <div
-                  className="h-full rounded-full bg-cyan-500 transition-all"
-                  style={{ width: `${Math.min(100, Math.round((liftMax / settings.mainLiftGoalKg) * 100))}%` }}
-                />
-              </div>
-            ) : null
-          })()}
-        </div>
-      )}
-
-      {/* Active block - with subtle cyan gradient and glowing progress */}
-      {block && phase && (
-        <div className="card-premium mb-5 p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-white">{phase.label}</span>
-            <span className="text-xs text-gray-500">Week {progress?.currentWeek}/{progress?.totalWeeks}</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
+          <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full rounded-full bg-cyan-500 transition-all shadow-[0_0_8px_rgba(6,182,212,0.5)]"
-              style={{ width: `${progress?.pct || 0}%` }}
+              className="h-full rounded-full bg-cyan-500 transition-all duration-700"
+              style={{ width: `${Math.min(100, Math.round((liftMax / settings.mainLiftGoalKg) * 100))}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* Muscle Recovery */}
-      {workouts.length > 0 && muscleStatus && (() => {
-        const MUSCLE_DISPLAY = {
-          chest: t('muscles.chest'), back: t('muscles.back'), shoulders: t('muscles.shoulders'),
-          quads: t('muscles.quads'), hamstrings: t('muscles.hamstrings'), glutes: t('muscles.glutes'),
-          biceps: t('muscles.biceps'), triceps: t('muscles.triceps'), core: t('muscles.core'),
-        }
-        const muscles = Object.entries(muscleStatus)
-          .filter(([, ms]) => ms.setsThisWeek > 0 || ms.daysSinceLastTrained != null)
-          .sort(([, a], [, b]) => (a.recoveryPct ?? 100) - (b.recoveryPct ?? 100))
-
-        if (muscles.length === 0) return null
-
-        return (
-          <div className="mb-6 rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <p className="label-caps mb-4">{t('dashboard.recovery')}</p>
-            <div className="space-y-3">
-              {muscles.map(([muscle, ms]) => {
-                const pct = ms.recoveryPct ?? 100
-                const barColor = pct < 40 ? '#ef4444' : pct < 75 ? '#f97316' : '#22c55e'
-                const statusKey = pct < 40 ? 'dashboard.recovery_fatigued' : pct < 75 ? 'dashboard.recovery_recovering' : 'dashboard.recovery_ready'
-                const days = ms.daysSinceLastTrained
-                return (
-                  <div key={muscle}>
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-black tracking-tight text-white">{(MUSCLE_DISPLAY as Record<string, string>)[muscle] || muscle}</span>
-                        <span className="rounded-md px-1.5 py-0.5 text-[10px] font-bold" style={{ color: barColor, background: `${barColor}22` }}>{t(statusKey)}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-right">
-                        <span className="text-xs text-gray-600">
-                          {days === 0 ? t('dashboard.trained_today') : days === 1 ? t('dashboard.trained_yesterday') : days != null ? t('dashboard.trained_days_ago', { days }) : ''}
-                        </span>
-                        <span className="tabular-nums text-sm font-black" style={{ color: barColor }}>{Math.round(pct)}%</span>
-                      </div>
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: barColor }} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* Primary CTA */}
-      <button
-        onClick={() => nav('/coach')}
-        className="btn-primary mb-3"
-      >
-        {t('dashboard.start_training')}
-      </button>
-
-      {/* Secondary CTA */}
-      <button
-        onClick={() => nav('/log')}
-        className="btn-secondary mb-3"
-      >
-        {t('dashboard.free_training')}
-      </button>
-
-      {/* Report Injury link */}
-      <button
-        onClick={() => setShowReportModal(true)}
-        className="mb-6 w-full py-2 text-xs font-medium text-gray-500 active:text-gray-300"
-      >
-        {t('injury.report_injury')}
-      </button>
-
-      {/* Recent workouts - clean list style */}
-      {recentWorkouts.length > 0 && (
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <p className="label-caps">{t('dashboard.recent')}</p>
-            <button onClick={() => nav('/history')} className="text-xs font-medium text-gray-500 active:text-white">{t('dashboard.view_all')}</button>
-          </div>
-          <div className="divide-y divide-gray-800/50">
-            {recentWorkouts.map(w => {
-              const date = new Date(w.created_at)
-              const exercises = [...new Set((w.workout_sets || []).map(s => s.exercise))].slice(0, 4)
+      {/* ━━ Muscle Recovery ━━ */}
+      {muscles.length > 0 && (
+        <div className="card mb-4">
+          <p className="label-caps mb-4">{t('dashboard.recovery')}</p>
+          <div className="space-y-3">
+            {muscles.map(([muscle, ms]) => {
+              const pct = ms.recoveryPct ?? 100
+              const color = pct < 40 ? '#ef4444' : pct < 75 ? '#f97316' : '#22c55e'
               return (
-                <div
-                  key={w.id}
-                  onClick={() => nav(`/history/${w.id}`)}
-                  className="flex cursor-pointer items-center justify-between py-3 active:opacity-70"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-gray-400">
-                      {date.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
-                    </p>
-                    <p className="truncate text-sm text-white">
-                      {exercises.length > 0 ? exercises.join(', ') : t('dashboard.no_exercises')}
-                    </p>
+                <div key={muscle}>
+                  <div className="mb-1.5 flex items-baseline justify-between">
+                    <span className="text-sm font-semibold text-white">{MUSCLE_DISPLAY[muscle] || muscle}</span>
+                    <span className="tabular text-xs font-bold" style={{ color }}>{Math.round(pct)}%</span>
                   </div>
-                  <ChevronRight size={16} className="ml-2 shrink-0 text-gray-600" />
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${pct}%`, backgroundColor: color }}
+                    />
+                  </div>
                 </div>
               )
             })}
@@ -405,38 +267,90 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Injury Report Modal */}
+      {/* ━━ CTAs ━━ */}
+      {!todaysWorkout && (
+        <>
+          <button onClick={() => nav('/coach')} className="btn-primary mb-3">{t('dashboard.start_training')}</button>
+          <button onClick={() => nav('/log')} className="btn-secondary mb-4">{t('dashboard.free_training')}</button>
+        </>
+      )}
+      {todaysWorkout && (
+        <button onClick={() => nav('/log')} className="btn-secondary mb-4">
+          <Dumbbell size={16} />
+          {t('dashboard.free_training')}
+        </button>
+      )}
+
+      {/* ━━ Recent Workouts ━━ */}
+      {recentWorkouts.length > 0 && (
+        <div className="mb-4">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="label-caps">{t('dashboard.recent')}</p>
+            <button onClick={() => nav('/history')} className="text-xs font-medium text-gray-600 active:text-white">{t('dashboard.view_all')}</button>
+          </div>
+          <div className="space-y-2">
+            {recentWorkouts.map(w => {
+              const date = new Date(w.created_at)
+              const exercises = [...new Set((w.workout_sets || []).map(s => s.exercise))].slice(0, 3)
+              const vol = (w.workout_sets || []).reduce((sum, s) => sum + (s.weight_kg || 0) * (s.reps || 0), 0)
+              return (
+                <div
+                  key={w.id}
+                  onClick={() => nav(`/history/${w.id}`)}
+                  className="card flex cursor-pointer items-center justify-between active:scale-[0.98] transition-transform"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-gray-600">
+                      {date.toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    </p>
+                    <p className="mt-0.5 truncate text-sm font-semibold text-white">
+                      {exercises.length > 0 ? exercises.join(', ') : t('dashboard.no_exercises')}
+                    </p>
+                  </div>
+                  <div className="ml-3 flex items-center gap-3 shrink-0">
+                    {vol > 0 && (
+                      <span className="text-xs tabular font-bold text-gray-600">
+                        {vol >= 1000 ? `${(vol / 1000).toFixed(1)}t` : `${Math.round(vol)}kg`}
+                      </span>
+                    )}
+                    <ChevronRight size={14} className="text-gray-700" />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ━━ Blessure melden (subtle) ━━ */}
+      <button
+        onClick={() => setShowReportModal(true)}
+        className="w-full py-3 text-xs font-medium text-gray-700 active:text-gray-400 transition-colors"
+      >
+        {t('injury.report_injury')}
+      </button>
+
+      {/* ━━ Modals ━━ */}
       <InjuryReport
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
-        onReport={(area, severity, side) => {
-          addInjury(area, severity, side)
-          setShowReportModal(false)
-        }}
+        onReport={(area, severity, side) => { addInjury(area, severity, side); setShowReportModal(false) }}
       />
 
-      {/* Injury Check-In Modal */}
       {checkInInjury && (
         <InjuryCheckIn
           isOpen={!!checkInInjury}
           onClose={() => setCheckInInjury(null)}
-          onCheckIn={(feeling) => {
-            checkIn(checkInInjury.id, feeling)
-          }}
+          onCheckIn={(feeling) => { checkIn(checkInInjury.id, feeling) }}
           injuryArea={checkInInjury.bodyArea}
         />
       )}
 
-      {/* Training Story Overlay */}
       {showStory && storyData && (
         <Suspense fallback={null}>
           <TrainingStory
             data={storyData}
-            onClose={() => {
-              setShowStory(false)
-              markStoryViewed(storyContext.prevMonth, storyContext.prevYear)
-              setStoryDismissed(true)
-            }}
+            onClose={() => { setShowStory(false); markStoryViewed(storyContext.prevMonth, storyContext.prevYear); setStoryDismissed(true) }}
             onShare={handleStoryShare}
           />
         </Suspense>
