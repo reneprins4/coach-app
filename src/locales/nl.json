@@ -46,7 +46,14 @@
     "tap_day_hint": "Tap op een dag met training om details te zien",
     "no_workouts": "Nog geen trainingen gelogd",
     "start_first": "Start je eerste training",
-    "more": "meer"
+    "more": "meer",
+    "heatmap_title": "Activiteit",
+    "less": "Minder",
+    "more_label": "Meer",
+    "volume_label": "volume",
+    "rest_day": "Rustdag",
+    "legend": "Legenda",
+    "workouts_count": "{{count}} training(en)"
   },
   "dashboard": {
     "title": "Vandaag",

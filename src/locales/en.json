@@ -46,7 +46,14 @@
     "tap_day_hint": "Tap on a day with training to see details",
     "no_workouts": "No workouts logged yet",
     "start_first": "Start your first workout",
-    "more": "more"
+    "more": "more",
+    "heatmap_title": "Activity",
+    "less": "Less",
+    "more_label": "More",
+    "volume_label": "volume",
+    "rest_day": "Rest day",
+    "legend": "Legend",
+    "workouts_count": "{{count}} workout(s)"
   },
   "dashboard": {
     "title": "Today",
