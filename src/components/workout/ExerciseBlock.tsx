@@ -191,7 +191,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         {/* Row 1: Image + Name + Menu */}
         <div className="flex items-center gap-3 mb-1">
           {exercise.image_url_0 && (
-            <img src={exercise.image_url_0} alt="" className="h-9 w-9 shrink-0 rounded-xl bg-white/[0.04] object-cover" loading="lazy" />
+            <img src={exercise.image_url_0} alt="" className="h-12 w-12 shrink-0 rounded-xl bg-white/[0.04] object-cover" loading="lazy" />
           )}
           <h3 className={`flex-1 min-w-0 font-black tracking-tight text-white ${compact ? 'text-base' : 'text-lg leading-tight'}`}>
             {exercise.name}
@@ -320,32 +320,34 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
       )}
 
       {/* ━━ Controls zone ━━ */}
-      <div className="px-5 pt-4 pb-5 space-y-4">
+      <div className="px-4 pt-4 pb-5 space-y-4">
         {/* Weight + Reps */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex h-5 items-center justify-between">
               <span className="label-caps">{t('logger.weight')}</span>
               <button type="button" onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)} className="label-caps text-cyan-500 active:text-cyan-400">{t('logger.plates')}</button>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <button type="button" onClick={() => adjustWeight(-2.5)} aria-label={t('logger.weight') + ' -2.5kg'}
-                className="flex h-12 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
               <input type="number" inputMode="decimal" step="0.5" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="\u2014" aria-label={t('logger.weight')}
                 className="h-12 min-w-0 flex-1 rounded-xl px-1 text-center text-xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700" />
               <button type="button" onClick={() => adjustWeight(2.5)} aria-label={t('logger.weight') + ' +2.5kg'}
-                className="flex h-12 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
             </div>
           </div>
           <div>
-            <div className="mb-2"><span className="label-caps">{t('logger.reps_label')}</span></div>
-            <div className="flex items-center gap-1">
+            <div className="mb-2 flex h-5 items-center">
+              <span className="label-caps">{t('logger.reps_label')}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
               <button type="button" onClick={() => adjustReps(-1)} aria-label={t('logger.reps_label') + ' -1'}
-                className="flex h-12 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
               <input type="number" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} placeholder="\u2014" aria-label={t('logger.reps_label')}
                 className="h-12 min-w-0 flex-1 rounded-xl px-1 text-center text-xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700" />
               <button type="button" onClick={() => adjustReps(1)} aria-label={t('logger.reps_label') + ' +1'}
-                className="flex h-12 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
             </div>
           </div>
         </div>
