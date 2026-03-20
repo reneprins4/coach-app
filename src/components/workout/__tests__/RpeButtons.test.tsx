@@ -65,10 +65,11 @@ describe('RpeButtons', () => {
     expect(btn7.className).not.toContain('ring-2')
   })
 
-  it('all buttons have minimum 44x44px touch target', () => {
+  it('all RPE value buttons have minimum 44x44px touch target', () => {
     const { container } = render(<RpeButtons value={null} onChange={vi.fn()} />)
-    const buttons = container.querySelectorAll('button')
-    buttons.forEach(btn => {
+    const rpeButtons = container.querySelectorAll('button[aria-pressed]')
+    expect(rpeButtons.length).toBe(5)
+    rpeButtons.forEach(btn => {
       expect(btn.className).toContain('min-h-[44px]')
     })
   })

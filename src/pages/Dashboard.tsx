@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +8,8 @@ import { DashboardSkeleton } from '../components/Skeleton'
 
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
 import { analyzeTraining } from '../lib/training-analysis'
+import { generateTodaysWorkout } from '../lib/todaysWorkout'
+import type { AIExercise } from '../types'
 
 
 export default function Dashboard() {
@@ -40,6 +42,29 @@ export default function Dashboard() {
   const block = getCurrentBlock()
   const progress = block ? getBlockProgress(block) : null
   const phase = block ? PHASES[block.phase] : null
+
+  const todaysWorkout = useMemo(() => generateTodaysWorkout(workouts), [workouts])
+
+  const handleStartTodaysWorkout = useCallback(() => {
+    if (!todaysWorkout) return
+    // Convert AIExercise[] to ActiveExercise[] format the Logger expects
+    const pending = todaysWorkout.exercises.map((ex: AIExercise) => ({
+      name: ex.name,
+      muscle_group: ex.muscle_group,
+      sets: [],
+      plan: {
+        sets: ex.sets,
+        reps_min: ex.reps_min,
+        reps_max: ex.reps_max,
+        weight_kg: ex.weight_kg,
+        rpe_target: ex.rpe_target,
+        rest_seconds: ex.rest_seconds,
+        notes: ex.notes || '',
+      },
+    }))
+    localStorage.setItem('coach-pending-workout', JSON.stringify(pending))
+    nav('/log')
+  }, [todaysWorkout, nav])
 
   const recentWorkouts = workouts.slice(0, 2)
 
@@ -93,6 +118,30 @@ export default function Dashboard() {
           <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">{t('dashboard.streak')}</p>
         </div>
       </div>
+
+      {/* Today's Workout — 1-tap start */}
+      {todaysWorkout && (
+        <div
+          className="mb-5 rounded-2xl p-4"
+          style={{ background: 'linear-gradient(135deg, #0c1a2e 0%, #0d1421 100%)', border: '1px solid rgba(6,182,212,0.15)' }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="label-caps text-cyan-400">{t('dashboard.todays_workout')}</p>
+              <h3 className="text-lg font-black tracking-tight text-white">{todaysWorkout.split}</h3>
+              <p className="text-xs text-gray-400">
+                {todaysWorkout.exerciseCount} {t('common.exercises')} · ~{todaysWorkout.estimatedDuration} min
+              </p>
+            </div>
+            <button
+              onClick={handleStartTodaysWorkout}
+              className="ml-3 shrink-0 rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-bold text-black active:bg-cyan-600"
+            >
+              {t('dashboard.start_now')}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Training Goal + Phase status card */}
       {settings.trainingGoal && (

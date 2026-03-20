@@ -67,7 +67,10 @@
     "recovery_fatigued": "Fatigued",
     "trained_today": "today",
     "trained_yesterday": "yesterday",
-    "trained_days_ago": "{{days}}d ago"
+    "trained_days_ago": "{{days}}d ago",
+    "todays_workout": "Today's workout",
+    "start_now": "Start",
+    "based_on_recovery": "Based on your recovery"
   },
   "history": {
     "title": "History",
@@ -187,6 +190,7 @@
     "last_session": "Last session",
     "try": "Try",
     "repeat_last": "Repeat last workout",
+    "repeat_set": "Repeat",
     "rpe_scale_hint": "RPE 7 = 3 reps left · 10 = max effort",
     "add_rpe": "+ Add RPE",
     "skip_exercise": "Skip",
@@ -524,7 +528,15 @@
     "ok": "OK",
     "hard": "Hard",
     "very_hard": "Very Hard",
-    "max": "Max"
+    "max": "Max",
+    "info": "What is RPE?",
+    "explanation_title": "How hard was your set?",
+    "explanation_6": "You could do 4+ more reps",
+    "explanation_7": "You could do 3 more reps",
+    "explanation_8": "You could do 2 more reps",
+    "explanation_9": "You could do 1 more rep",
+    "explanation_10": "You couldn't do any more",
+    "explanation_summary": "RPE helps the app understand how hard you train"
   },
   "rest_timer": {
     "heavy_set": "Heavy set — rest longer",

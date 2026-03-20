@@ -67,7 +67,10 @@
     "recovery_fatigued": "Vermoeid",
     "trained_today": "vandaag",
     "trained_yesterday": "gisteren",
-    "trained_days_ago": "{{days}}d geleden"
+    "trained_days_ago": "{{days}}d geleden",
+    "todays_workout": "Vandaag's training",
+    "start_now": "Start",
+    "based_on_recovery": "Gebaseerd op je herstel"
   },
   "history": {
     "title": "Geschiedenis",
@@ -187,6 +190,7 @@
     "last_session": "Vorige sessie",
     "try": "Probeer",
     "repeat_last": "Herhaal laatste workout",
+    "repeat_set": "Herhaal",
     "rpe_scale_hint": "RPE 7 = 3 reps over · 10 = max",
     "add_rpe": "+ RPE toevoegen",
     "skip_exercise": "Sla over",
@@ -524,7 +528,15 @@
     "ok": "OK",
     "hard": "Zwaar",
     "very_hard": "Heel zwaar",
-    "max": "Max"
+    "max": "Max",
+    "info": "Wat is RPE?",
+    "explanation_title": "Hoe zwaar was je set?",
+    "explanation_6": "Je kunt nog 4+ herhalingen doen",
+    "explanation_7": "Je kunt nog 3 herhalingen doen",
+    "explanation_8": "Je kunt nog 2 herhalingen doen",
+    "explanation_9": "Je kunt nog 1 herhaling doen",
+    "explanation_10": "Je kon er echt niet meer uit",
+    "explanation_summary": "RPE helpt de app begrijpen hoe zwaar je traint"
   },
   "rest_timer": {
     "heavy_set": "Zware set — lang rusten",

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, MoreVertical, X, ChevronDown, Trophy } from 'lucide-react'
+import { Check, MoreVertical, X, ChevronDown, Trophy, RotateCcw } from 'lucide-react'
 import { getExerciseHistory, type ExerciseHistorySet } from '../../hooks/useWorkouts'
 import { detectPR } from '../../lib/prDetector'
 import { hapticFeedback } from '../../lib/native'
@@ -361,6 +361,22 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         </div>
       )}
 
+      {/* Repeat last set button */}
+      {exercise.sets.length > 0 && (() => {
+        const lastSet = exercise.sets[exercise.sets.length - 1]!
+        return (
+          <div className="px-4 pt-3">
+            <button
+              onClick={() => onAddSet({ weight_kg: lastSet.weight_kg, reps: lastSet.reps, rpe: lastSet.rpe })}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-600 text-sm font-medium text-gray-400 active:bg-gray-800 active:text-white min-h-[44px]"
+            >
+              <RotateCcw size={14} />
+              {t('logger.repeat_set')} {lastSet.weight_kg}kg {'\u00D7'} {lastSet.reps}
+            </button>
+          </div>
+        )
+      })()}
+
       {/* PR Banner */}
       {prBanner && (
         <div role="status" aria-live="polite" className="mx-4 mt-3 flex items-center justify-between rounded-xl bg-cyan-500/10 border border-cyan-500/20 px-3 py-2">
@@ -479,10 +495,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         )}
 
         {/* RPE buttons */}
-        <div>
-          <span className="label-caps mb-1.5 block">RPE</span>
-          <RpeButtons value={rpe} onChange={setRpe} />
-        </div>
+        <RpeButtons value={rpe} onChange={setRpe} />
 
         {/* Done state banner */}
         {isDone ? (
