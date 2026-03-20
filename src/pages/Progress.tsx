@@ -255,21 +255,23 @@ export default function Progress() {
         )}
       </div>
 
-      {/* Tab bar */}
-      <div className="mb-6 flex gap-1 rounded-2xl bg-gray-900 p-1">
-        {TABS.map(tabItem => (
-          <button
-            key={tabItem.id}
-            onClick={() => setTab(tabItem.id)}
-            className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-colors ${
-              tab === tabItem.id
-                ? 'bg-white text-black shadow-sm'
-                : 'text-gray-500 active:text-gray-300'
-            }`}
-          >
-            {tabItem.label}
-          </button>
-        ))}
+      {/* Tab bar — horizontally scrollable */}
+      <div className="mb-6 -mx-4 px-4">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+          {TABS.map(tabItem => (
+            <button
+              key={tabItem.id}
+              onClick={() => setTab(tabItem.id)}
+              className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+                tab === tabItem.id
+                  ? 'bg-white text-black shadow-sm'
+                  : 'bg-gray-900 text-gray-500 active:text-gray-300'
+              }`}
+            >
+              {tabItem.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Encouragement message for beginners with few workouts */}

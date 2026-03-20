@@ -59,15 +59,13 @@ describe('InjuryReport Modal', () => {
     }
   })
 
-  it('each area shows localized name and icon', () => {
+  it('each area shows localized name and label badge', () => {
     renderModal()
-    // Each area card should contain both icon and name
     expect(screen.getByText('Shoulder')).toBeDefined()
     expect(screen.getByText('Knee')).toBeDefined()
-    // Lucide icons render as SVG elements
-    const dialog = screen.getByRole('dialog')
-    const svgs = dialog.querySelectorAll('svg')
-    expect(svgs.length).toBeGreaterThanOrEqual(8)
+    // Each area card has a short label badge (SCH, KNI, etc.)
+    expect(screen.getByText('SCH')).toBeDefined()
+    expect(screen.getByText('KNI')).toBeDefined()
   })
 
   it('selecting area advances to severity step', async () => {

@@ -1,17 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  X,
-  ChevronLeft,
-  Dumbbell,
-  Footprints,
-  Undo2,
-  Hand,
-  Bone,
-  Frown,
-  CircleDot,
-  type LucideIcon,
-} from 'lucide-react'
+import { X, ChevronLeft } from 'lucide-react'
 import { useModalA11y } from '../hooks/useModalA11y'
 import type { InjuryArea, InjurySeverity, InjurySide } from '../lib/injuryRecovery'
 
@@ -21,15 +10,15 @@ interface InjuryReportProps {
   onReport: (area: InjuryArea, severity: InjurySeverity, side: InjurySide) => void
 }
 
-const BODY_AREAS: { key: InjuryArea; icon: LucideIcon }[] = [
-  { key: 'shoulder', icon: Dumbbell },
-  { key: 'knee', icon: Footprints },
-  { key: 'lower_back', icon: Undo2 },
-  { key: 'elbow', icon: Dumbbell },
-  { key: 'wrist', icon: Hand },
-  { key: 'hip', icon: Bone },
-  { key: 'neck', icon: Frown },
-  { key: 'ankle', icon: CircleDot },
+const BODY_AREAS: { key: InjuryArea; label: string; color: string }[] = [
+  { key: 'shoulder', label: 'SCH', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' },
+  { key: 'knee', label: 'KNI', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
+  { key: 'lower_back', label: 'RUG', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
+  { key: 'elbow', label: 'ELB', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  { key: 'wrist', label: 'PLS', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+  { key: 'hip', label: 'HEP', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+  { key: 'neck', label: 'NEK', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+  { key: 'ankle', label: 'ENK', color: 'bg-pink-500/20 text-pink-400 border-pink-500/30' },
 ]
 
 const SEVERITIES: { key: InjurySeverity; color: string; bg: string }[] = [
@@ -93,12 +82,12 @@ export default function InjuryReport({ isOpen, onClose, onReport }: InjuryReport
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="injury-report-title"
-        className="w-full max-w-md rounded-2xl bg-gray-900 max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md rounded-2xl bg-gray-900 max-h-[85vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between border-b border-gray-800 bg-gray-900 p-4">
@@ -128,13 +117,15 @@ export default function InjuryReport({ isOpen, onClose, onReport }: InjuryReport
             <div>
               <h2 className="mb-4 text-lg font-bold text-white">{t('injury.select_area')}</h2>
               <div className="grid grid-cols-2 gap-3">
-                {BODY_AREAS.map(({ key, icon: Icon }) => (
+                {BODY_AREAS.map(({ key, label, color }) => (
                   <button
                     key={key}
                     onClick={() => handleSelectArea(key)}
-                    className="flex flex-col items-center gap-2 rounded-xl border border-gray-800 bg-gray-800/50 p-4 text-center active:border-cyan-500 active:bg-cyan-500/10"
+                    className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-800/50 p-4 text-left active:border-cyan-500 active:bg-cyan-500/10"
                   >
-                    <Icon size={24} className="text-gray-400" aria-hidden="true" />
+                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-xs font-black ${color}`}>
+                      {label}
+                    </span>
                     <span className="text-sm font-medium text-white">{t(`injury.area_${key}`)}</span>
                   </button>
                 ))}
