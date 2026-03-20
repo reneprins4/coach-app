@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TrendingDown, Minus, TrendingUp, CheckCircle, type LucideIcon } from 'lucide-react'
 import { useModalA11y } from '../hooks/useModalA11y'
 import type { CheckInFeeling, InjuryArea } from '../lib/injuryRecovery'
 
@@ -10,11 +11,11 @@ interface InjuryCheckInProps {
   injuryArea: InjuryArea
 }
 
-const FEELINGS: { key: CheckInFeeling; emoji: string }[] = [
-  { key: 'worse', emoji: '😟' },
-  { key: 'same', emoji: '😐' },
-  { key: 'better', emoji: '😊' },
-  { key: 'recovered', emoji: '🎉' },
+const FEELINGS: { key: CheckInFeeling; icon: LucideIcon; color: string }[] = [
+  { key: 'worse', icon: TrendingDown, color: 'text-red-400' },
+  { key: 'same', icon: Minus, color: 'text-gray-400' },
+  { key: 'better', icon: TrendingUp, color: 'text-green-400' },
+  { key: 'recovered', icon: CheckCircle, color: 'text-cyan-400' },
 ]
 
 const FEEDBACK_KEYS: Record<CheckInFeeling, string> = {
@@ -29,7 +30,7 @@ export default function InjuryCheckIn({ isOpen, onClose, onCheckIn, injuryArea }
   const [selectedFeeling, setSelectedFeeling] = useState<CheckInFeeling | null>(null)
   useModalA11y(isOpen, onClose)
 
-  // Suppress unused variable warning — injuryArea available for future use
+  // Suppress unused variable warning -- injuryArea available for future use
   void injuryArea
 
   // Reset on open
@@ -55,6 +56,8 @@ export default function InjuryCheckIn({ isOpen, onClose, onCheckIn, injuryArea }
     onCheckIn(feeling)
   }
 
+  const selectedConfig = FEELINGS.find(f => f.key === selectedFeeling)
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <div
@@ -69,22 +72,22 @@ export default function InjuryCheckIn({ isOpen, onClose, onCheckIn, injuryArea }
 
         {!selectedFeeling ? (
           <div className="grid grid-cols-2 gap-3">
-            {FEELINGS.map(({ key, emoji }) => (
+            {FEELINGS.map(({ key, icon: Icon, color }) => (
               <button
                 key={key}
                 onClick={() => handleSelect(key)}
                 className="flex flex-col items-center gap-2 rounded-xl border border-gray-800 bg-gray-800/50 p-4 active:border-cyan-500 active:bg-cyan-500/10"
               >
-                <span aria-hidden="true" className="text-3xl">{emoji}</span>
+                <Icon size={28} className={color} aria-hidden="true" />
                 <span className="text-sm font-medium text-white">{t(`injury.feeling_${key}`)}</span>
               </button>
             ))}
           </div>
         ) : (
           <div className="py-6 text-center">
-            <span className="mb-3 block text-4xl">
-              {FEELINGS.find(f => f.key === selectedFeeling)?.emoji}
-            </span>
+            {selectedConfig && (
+              <selectedConfig.icon size={40} className={`mx-auto mb-3 ${selectedConfig.color}`} aria-hidden="true" />
+            )}
             <p className="text-sm text-gray-300">
               {t(FEEDBACK_KEYS[selectedFeeling])}
             </p>

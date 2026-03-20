@@ -1,6 +1,17 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import {
+  X,
+  Dumbbell,
+  Footprints,
+  Undo2,
+  Hand,
+  Bone,
+  Frown,
+  CircleDot,
+  Bandage,
+  type LucideIcon,
+} from 'lucide-react'
 import type { ActiveInjury } from '../lib/injuryRecovery'
 import { isCheckInDue, daysSinceInjury } from '../lib/injuryRecovery'
 
@@ -10,15 +21,15 @@ interface InjuryBannerProps {
   onResolve: (injury: ActiveInjury) => void
 }
 
-const AREA_EMOJIS: Record<string, string> = {
-  shoulder: '💪',
-  knee: '🦵',
-  lower_back: '🔙',
-  elbow: '💪',
-  wrist: '✋',
-  hip: '🦴',
-  neck: '🫠',
-  ankle: '🦶',
+const AREA_ICONS: Record<string, LucideIcon> = {
+  shoulder: Dumbbell,
+  knee: Footprints,
+  lower_back: Undo2,
+  elbow: Dumbbell,
+  wrist: Hand,
+  hip: Bone,
+  neck: Frown,
+  ankle: CircleDot,
 }
 
 const SEVERITY_BORDER: Record<string, string> = {
@@ -64,6 +75,7 @@ export default function InjuryBanner({ injuries, onCheckIn, onResolve }: InjuryB
         const borderClass = SEVERITY_BORDER[injury.severity] ?? 'border-orange-500/40'
         const bgClass = SEVERITY_BG[injury.severity] ?? 'bg-orange-500/5'
         const isConfirming = confirmingResolveId === injury.id
+        const AreaIcon = AREA_ICONS[injury.bodyArea] ?? Bandage
 
         return (
           <div
@@ -72,9 +84,7 @@ export default function InjuryBanner({ injuries, onCheckIn, onResolve }: InjuryB
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span aria-hidden="true" className="text-lg shrink-0">
-                  {AREA_EMOJIS[injury.bodyArea] ?? '🩹'}
-                </span>
+                <AreaIcon size={18} className="shrink-0 text-gray-400" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-semibold text-white">

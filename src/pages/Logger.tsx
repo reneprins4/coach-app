@@ -260,6 +260,21 @@ export default function Logger() {
   }, [user?.id, aw.isActive, exerciseNames.join(',')])
 
   const momentum = useMemo(() => aw.workout ? calculateMomentum(aw.workout) : null, [aw.workout])
+
+  // Enrich workout exercises with image URLs from exercise library
+  const enrichedWorkout = useMemo(() => {
+    if (!aw.workout) return null
+    const imageMap = new Map(exercises.map(e => [e.name.toLowerCase(), { image_url_0: e.image_url_0, image_url_1: e.image_url_1 }]))
+    return {
+      ...aw.workout,
+      exercises: aw.workout.exercises.map((ex: ActiveExercise) => {
+        if (ex.image_url_0) return ex // already has images
+        const images = imageMap.get(ex.name.toLowerCase())
+        if (images?.image_url_0) return { ...ex, ...images }
+        return ex
+      })
+    }
+  }, [aw.workout, exercises])
   const hasLoggedSets = aw.workout?.exercises?.some((e: ActiveExercise) => e.sets.length > 0) || false
 
   // Load pending workout from localStorage (from AICoach accept)
@@ -501,7 +516,7 @@ export default function Logger() {
 
   // ---- Active Workout View ----
   // At this point aw.isActive is true, so workout is always non-null
-  const workout = aw.workout!
+  const workout = enrichedWorkout || aw.workout!
   const workoutType = getWorkoutType(workout.exercises)
 
   return (

@@ -52,13 +52,17 @@ describe('InjuryCheckIn', () => {
     expect(screen.getByText('Recovered')).toBeDefined()
   })
 
-  it('each option has emoji and label', () => {
+  it('each option has icon and label', () => {
     render(<InjuryCheckIn {...defaultProps} />)
     const dialog = screen.getByRole('dialog')
-    expect(dialog.textContent).toContain('😟')
-    expect(dialog.textContent).toContain('😐')
-    expect(dialog.textContent).toContain('😊')
-    expect(dialog.textContent).toContain('🎉')
+    // Lucide icons render as SVGs; verify all four labels are present
+    expect(dialog.textContent).toContain('Worse')
+    expect(dialog.textContent).toContain('Same')
+    expect(dialog.textContent).toContain('Better')
+    expect(dialog.textContent).toContain('Recovered')
+    // Icons render as SVG elements
+    const svgs = dialog.querySelectorAll('svg')
+    expect(svgs.length).toBeGreaterThanOrEqual(4)
   })
 
   it('tapping option calls onCheckIn with feeling', () => {

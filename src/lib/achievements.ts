@@ -35,7 +35,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   // Consistency
   {
     id: 'first_workout',
-    icon: '\uD83C\uDFAF',
+    icon: 'Target',
     nameKey: 'achievements.first_workout',
     descriptionKey: 'achievements.first_workout_desc',
     category: 'consistency',
@@ -43,7 +43,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'streak_3',
-    icon: '\uD83D\uDD25',
+    icon: 'Flame',
     nameKey: 'achievements.streak_3',
     descriptionKey: 'achievements.streak_3_desc',
     category: 'consistency',
@@ -51,7 +51,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'streak_7',
-    icon: '\uD83D\uDCAA',
+    icon: 'Zap',
     nameKey: 'achievements.streak_7',
     descriptionKey: 'achievements.streak_7_desc',
     category: 'consistency',
@@ -59,7 +59,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'streak_30',
-    icon: '\uD83D\uDC51',
+    icon: 'Crown',
     nameKey: 'achievements.streak_30',
     descriptionKey: 'achievements.streak_30_desc',
     category: 'consistency',
@@ -67,7 +67,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'ten_workouts',
-    icon: '\uD83C\uDFCB\uFE0F',
+    icon: 'Dumbbell',
     nameKey: 'achievements.ten_workouts',
     descriptionKey: 'achievements.ten_workouts_desc',
     category: 'consistency',
@@ -75,7 +75,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'fifty_workouts',
-    icon: '\u2B50',
+    icon: 'Star',
     nameKey: 'achievements.fifty_workouts',
     descriptionKey: 'achievements.fifty_workouts_desc',
     category: 'consistency',
@@ -85,7 +85,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   // Strength
   {
     id: 'first_pr',
-    icon: '\uD83C\uDFC6',
+    icon: 'Trophy',
     nameKey: 'achievements.first_pr',
     descriptionKey: 'achievements.first_pr_desc',
     category: 'strength',
@@ -93,7 +93,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'ten_prs',
-    icon: '\uD83E\uDD47',
+    icon: 'Medal',
     nameKey: 'achievements.ten_prs',
     descriptionKey: 'achievements.ten_prs_desc',
     category: 'strength',
@@ -101,7 +101,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'bodyweight_bench',
-    icon: '\uD83D\uDC8E',
+    icon: 'Diamond',
     nameKey: 'achievements.bw_bench',
     descriptionKey: 'achievements.bw_bench_desc',
     category: 'strength',
@@ -109,7 +109,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'plate_club',
-    icon: '\uD83D\uDD31',
+    icon: 'Shield',
     nameKey: 'achievements.plate_club',
     descriptionKey: 'achievements.plate_club_desc',
     category: 'strength',
@@ -119,7 +119,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   // Volume
   {
     id: 'volume_10k',
-    icon: '\uD83D\uDCCA',
+    icon: 'BarChart3',
     nameKey: 'achievements.vol_10k',
     descriptionKey: 'achievements.vol_10k_desc',
     category: 'volume',
@@ -127,7 +127,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'volume_100k',
-    icon: '\uD83D\uDE80',
+    icon: 'Rocket',
     nameKey: 'achievements.vol_100k',
     descriptionKey: 'achievements.vol_100k_desc',
     category: 'volume',
@@ -135,7 +135,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'volume_1m',
-    icon: '\uD83D\uDCAB',
+    icon: 'Sparkles',
     nameKey: 'achievements.vol_1m',
     descriptionKey: 'achievements.vol_1m_desc',
     category: 'volume',

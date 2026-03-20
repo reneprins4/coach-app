@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, ChevronLeft } from 'lucide-react'
+import {
+  X,
+  ChevronLeft,
+  Dumbbell,
+  Footprints,
+  Undo2,
+  Hand,
+  Bone,
+  Frown,
+  CircleDot,
+  type LucideIcon,
+} from 'lucide-react'
 import { useModalA11y } from '../hooks/useModalA11y'
 import type { InjuryArea, InjurySeverity, InjurySide } from '../lib/injuryRecovery'
 
@@ -10,15 +21,15 @@ interface InjuryReportProps {
   onReport: (area: InjuryArea, severity: InjurySeverity, side: InjurySide) => void
 }
 
-const BODY_AREAS: { key: InjuryArea; emoji: string }[] = [
-  { key: 'shoulder', emoji: '💪' },
-  { key: 'knee', emoji: '🦵' },
-  { key: 'lower_back', emoji: '🔙' },
-  { key: 'elbow', emoji: '💪' },
-  { key: 'wrist', emoji: '✋' },
-  { key: 'hip', emoji: '🦴' },
-  { key: 'neck', emoji: '🫠' },
-  { key: 'ankle', emoji: '🦶' },
+const BODY_AREAS: { key: InjuryArea; icon: LucideIcon }[] = [
+  { key: 'shoulder', icon: Dumbbell },
+  { key: 'knee', icon: Footprints },
+  { key: 'lower_back', icon: Undo2 },
+  { key: 'elbow', icon: Dumbbell },
+  { key: 'wrist', icon: Hand },
+  { key: 'hip', icon: Bone },
+  { key: 'neck', icon: Frown },
+  { key: 'ankle', icon: CircleDot },
 ]
 
 const SEVERITIES: { key: InjurySeverity; color: string; bg: string }[] = [
@@ -117,13 +128,13 @@ export default function InjuryReport({ isOpen, onClose, onReport }: InjuryReport
             <div>
               <h2 className="mb-4 text-lg font-bold text-white">{t('injury.select_area')}</h2>
               <div className="grid grid-cols-2 gap-3">
-                {BODY_AREAS.map(({ key, emoji }) => (
+                {BODY_AREAS.map(({ key, icon: Icon }) => (
                   <button
                     key={key}
                     onClick={() => handleSelectArea(key)}
                     className="flex flex-col items-center gap-2 rounded-xl border border-gray-800 bg-gray-800/50 p-4 text-center active:border-cyan-500 active:bg-cyan-500/10"
                   >
-                    <span aria-hidden="true" className="text-2xl">{emoji}</span>
+                    <Icon size={24} className="text-gray-400" aria-hidden="true" />
                     <span className="text-sm font-medium text-white">{t(`injury.area_${key}`)}</span>
                   </button>
                 ))}

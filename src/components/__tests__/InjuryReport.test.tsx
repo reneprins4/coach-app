@@ -59,15 +59,15 @@ describe('InjuryReport Modal', () => {
     }
   })
 
-  it('each area shows localized name and icon/emoji', () => {
+  it('each area shows localized name and icon', () => {
     renderModal()
-    // Each area card should contain both emoji and name
+    // Each area card should contain both icon and name
     expect(screen.getByText('Shoulder')).toBeDefined()
     expect(screen.getByText('Knee')).toBeDefined()
-    // Emojis are rendered in aria-hidden spans
+    // Lucide icons render as SVG elements
     const dialog = screen.getByRole('dialog')
-    expect(dialog.textContent).toContain('💪')
-    expect(dialog.textContent).toContain('🦵')
+    const svgs = dialog.querySelectorAll('svg')
+    expect(svgs.length).toBeGreaterThanOrEqual(8)
   })
 
   it('selecting area advances to severity step', async () => {
