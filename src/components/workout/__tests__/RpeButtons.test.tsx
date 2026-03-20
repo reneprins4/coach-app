@@ -33,7 +33,7 @@ describe('RpeButtons', () => {
     const buttons = container.querySelectorAll('button')
     buttons.forEach(btn => {
       // None should have the active/selected ring styling
-      expect(btn.className).not.toContain('ring-2')
+      expect(btn.className).not.toContain('border-2')
     })
   })
 
@@ -54,15 +54,15 @@ describe('RpeButtons', () => {
   it('selected button has active/highlighted styling', () => {
     render(<RpeButtons value={8} onChange={vi.fn()} />)
     const btn8 = screen.getByRole('button', { name: /^8/i })
-    expect(btn8.className).toContain('ring-2')
+    expect(btn8.className).toContain('border-2')
   })
 
   it('unselected buttons have inactive styling', () => {
     render(<RpeButtons value={8} onChange={vi.fn()} />)
     const btn6 = screen.getByRole('button', { name: /^6/i })
     const btn7 = screen.getByRole('button', { name: /^7/i })
-    expect(btn6.className).not.toContain('ring-2')
-    expect(btn7.className).not.toContain('ring-2')
+    expect(btn6.className).not.toContain('border-2')
+    expect(btn7.className).not.toContain('border-2')
   })
 
   it('all RPE value buttons have minimum 44x44px touch target', () => {

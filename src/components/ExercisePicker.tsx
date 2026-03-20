@@ -53,7 +53,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             placeholder={t('exercise_picker.search_placeholder')}
             aria-label={t('exercise_picker.search_placeholder')}
             autoFocus
-            className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+            className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none border border-gray-800 focus:border-gray-600"
           />
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               (mg === 'all' && !muscleFilter) || mg === muscleFilter
                 ? 'bg-cyan-500 text-white'
-                : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                : 'bg-gray-900 text-gray-400 border border-gray-800'
             }`}
           >
             {mg === 'all' ? t('exercise_picker.all') : t(`muscles.${mg}`)}
@@ -84,7 +84,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               equipmentFilter === eq.value
                 ? 'bg-cyan-500 text-white'
-                : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                : 'bg-gray-900 text-gray-400 border border-gray-800'
             }`}
           >
             {eq.labelKey ? t(eq.labelKey) : eq.label}

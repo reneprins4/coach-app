@@ -93,8 +93,7 @@ export default function SupersetModal({ exercises, onApply, onClose }: SupersetM
               <div className="flex gap-3">
                 <button
                   onClick={() => setConfirmed(false)}
-                  className="btn-secondary flex-1"
-                  style={{ height: '3rem' }}
+                  className="btn-secondary flex-1 h-12"
                 >
                   {t('superset_modal.back')}
                 </button>

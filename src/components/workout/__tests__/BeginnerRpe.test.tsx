@@ -77,7 +77,7 @@ describe('RPE in Beginner Mode', () => {
   it('selected button shows active styling', () => {
     render(<RpeButtons value={6} onChange={vi.fn()} beginnerMode={true} />)
     const easyButton = screen.getByText('Easy').closest('button')!
-    expect(easyButton.className).toContain('ring-2')
+    expect(easyButton.className).toContain('border-2')
   })
 
   it('buttons have minimum 44px touch target', () => {

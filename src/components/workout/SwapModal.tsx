@@ -79,8 +79,7 @@ export default function SwapModal({
               <button
                 key={idx}
                 onClick={() => onAccept(opt)}
-                className="flex w-full items-center justify-between rounded-2xl px-4 py-3.5 text-left active:scale-[0.98] transition-transform"
-                style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+                className="card flex w-full items-center justify-between p-4 text-left active:scale-[0.98] transition-transform"
               >
                 <div>
                   <p className="font-black tracking-tight text-white">{opt.name}</p>

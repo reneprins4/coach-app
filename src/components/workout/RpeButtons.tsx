@@ -22,17 +22,17 @@ const RPE_LABELS: Record<RpeValue, string> = {
 }
 
 const RPE_COLORS: Record<RpeValue, { bg: string; ring: string; text: string }> = {
-  6:  { bg: 'bg-green-500/15', ring: 'ring-green-500', text: 'text-green-400' },
-  7:  { bg: 'bg-green-500/15', ring: 'ring-green-500', text: 'text-green-400' },
-  8:  { bg: 'bg-yellow-500/15', ring: 'ring-yellow-500', text: 'text-yellow-400' },
-  9:  { bg: 'bg-orange-500/15', ring: 'ring-orange-500', text: 'text-orange-400' },
-  10: { bg: 'bg-red-500/15', ring: 'ring-red-500', text: 'text-red-400' },
+  6:  { bg: 'bg-green-500/15', ring: 'border-green-500', text: 'text-green-400' },
+  7:  { bg: 'bg-green-500/15', ring: 'border-green-500', text: 'text-green-400' },
+  8:  { bg: 'bg-yellow-500/15', ring: 'border-yellow-500', text: 'text-yellow-400' },
+  9:  { bg: 'bg-orange-500/15', ring: 'border-orange-500', text: 'text-orange-400' },
+  10: { bg: 'bg-red-500/15', ring: 'border-red-500', text: 'text-red-400' },
 }
 
 const SIMPLE_RPE_OPTIONS: { key: SimpleRpe; numericValue: number; color: { bg: string; ring: string; text: string } }[] = [
-  { key: 'easy',   numericValue: 6,   color: { bg: 'bg-green-500/15', ring: 'ring-green-500', text: 'text-green-400' } },
-  { key: 'medium', numericValue: 7.5, color: { bg: 'bg-yellow-500/15', ring: 'ring-yellow-500', text: 'text-yellow-400' } },
-  { key: 'hard',   numericValue: 9,   color: { bg: 'bg-red-500/15', ring: 'ring-red-500', text: 'text-red-400' } },
+  { key: 'easy',   numericValue: 6,   color: { bg: 'bg-green-500/15', ring: 'border-green-500', text: 'text-green-400' } },
+  { key: 'medium', numericValue: 7.5, color: { bg: 'bg-yellow-500/15', ring: 'border-yellow-500', text: 'text-yellow-400' } },
+  { key: 'hard',   numericValue: 9,   color: { bg: 'bg-red-500/15', ring: 'border-red-500', text: 'text-red-400' } },
 ]
 
 export default function RpeButtons({ value, onChange, beginnerMode = false }: RpeButtonsProps) {
@@ -133,7 +133,7 @@ export default function RpeButtons({ value, onChange, beginnerMode = false }: Rp
                 aria-pressed={isSelected}
                 className={`flex flex-1 flex-col items-center justify-center rounded-xl py-3 min-h-[44px] text-center transition-colors ${
                   isSelected
-                    ? `${opt.color.bg} ring-2 ${opt.color.ring} ${opt.color.text}`
+                    ? `${opt.color.bg} border-2 ${opt.color.ring} ${opt.color.text}`
                     : 'bg-gray-800 text-gray-400 active:bg-gray-700'
                 }`}
               >
@@ -158,7 +158,7 @@ export default function RpeButtons({ value, onChange, beginnerMode = false }: Rp
                 aria-pressed={isSelected}
                 className={`flex flex-1 flex-col items-center justify-center rounded-xl py-2 min-h-[44px] text-center transition-colors ${
                   isSelected
-                    ? `${colors.bg} ring-2 ${colors.ring} ${colors.text}`
+                    ? `${colors.bg} border-2 ${colors.ring} ${colors.text}`
                     : 'bg-gray-800 text-gray-400 active:bg-gray-700'
                 }`}
               >

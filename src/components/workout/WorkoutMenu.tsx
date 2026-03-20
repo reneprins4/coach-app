@@ -26,7 +26,7 @@ export default function WorkoutMenu({ canSuperset, onSuperset, onStop }: Workout
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 ring-1 ring-gray-700 active:bg-gray-900"
+        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 border border-gray-700 active:bg-gray-900"
       >
         <MoreVertical size={18} />
       </button>

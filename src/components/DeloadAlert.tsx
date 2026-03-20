@@ -123,7 +123,7 @@ export default function DeloadAlert({ workouts, settings, updateSettings }: Delo
         </button>
         <button
           onClick={handleDismiss}
-          className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-400 ring-1 ring-gray-700 active:bg-gray-800"
+          className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-400 border border-gray-700 active:bg-gray-800"
         >
           {t('deload.later')}
         </button>

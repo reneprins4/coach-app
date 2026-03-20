@@ -54,7 +54,7 @@ export default function PlateauAlert({ workouts, maxItems = 3 }: PlateauAlertPro
           return (
             <div
               key={idx}
-              className={`rounded-lg border ${config.border} ${config.bg} p-3`}
+              className={`rounded-xl border ${config.border} ${config.bg} p-3`}
             >
               <div className="flex items-start gap-3">
                 <TrendingDown size={16} className={`mt-0.5 shrink-0 ${config.text}`} />
@@ -100,7 +100,7 @@ export default function PlateauAlert({ workouts, maxItems = 3 }: PlateauAlertPro
       {hasMore && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-gray-800 py-2 text-xs text-gray-400 transition-colors active:bg-gray-700"
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-gray-800 py-2 text-xs text-gray-400 transition-colors active:bg-gray-700"
         >
           {expanded ? (
             <>
