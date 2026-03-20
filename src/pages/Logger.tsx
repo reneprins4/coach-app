@@ -230,7 +230,7 @@ export default function Logger() {
 
   const [showPicker, setShowPicker] = useState(false)
   const [showFinish, setShowFinish] = useState(false)
-  const [finishResult, setFinishResult] = useState<(FinishModalResult & { trainingIntent?: string | null }) | null>(null)
+  const [finishResult, setFinishResult] = useState<FinishModalResult | null>(null)
   const [showDiscard, setShowDiscard] = useState(false)
   const [showConfirmFinish, setShowConfirmFinish] = useState(false)
   const [swapTarget, setSwapTarget] = useState<ActiveExercise | null>(null)
@@ -241,7 +241,6 @@ export default function Logger() {
   const [lastWorkout, setLastWorkout] = useState<LastWorkoutPreview | null>(null)
   const [supersetMode, setSupersetMode] = useState<SupersetModeState | null>(null)
   const [junkWarning, setJunkWarning] = useState<JunkVolumeWarning | null>(null)
-  const [trainingIntent, setTrainingIntent] = useState<string | null>(null)
   const [showReview, setShowReview] = useState(false)
   const [exerciseHistoryMap, setExerciseHistoryMap] = useState<Map<string, ExerciseHistorySet[]>>(new Map())
 
@@ -275,7 +274,6 @@ export default function Logger() {
       })
     }
   }, [aw.workout, exercises])
-  const hasLoggedSets = aw.workout?.exercises?.some((e: ActiveExercise) => e.sets.length > 0) || false
 
   // Load pending workout from localStorage (from AICoach accept)
   useEffect(() => {
@@ -330,10 +328,10 @@ export default function Logger() {
     const result = await aw.finishWorkout()
     if (result) {
       hapticFeedback('medium')
-      setFinishResult({ ...result, trainingIntent })
+      setFinishResult(result as unknown as FinishModalResult)
       setShowFinish(true)
     }
-  }, [aw, trainingIntent])
+  }, [aw])
 
   const handleRemoveSet = useCallback((exerciseName: string, setId: string, setData: { weight_kg: number; reps: number; rpe: number | null }) => {
     aw.removeSet(exerciseName, setId)
@@ -578,35 +576,6 @@ export default function Logger() {
         {momentum && (
           <div className="px-4 pb-3">
             <MomentumIndicator momentum={momentum} />
-          </div>
-        )}
-        {/* Training Intent Picker */}
-        {!hasLoggedSets && !trainingIntent && (
-          <div className="px-4 pb-3">
-            <p className="label-caps mb-2">{t('session_intent.title')}</p>
-            <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
-              {[
-                { value: 'strength', label: t('session_intent.strength') },
-                { value: 'volume', label: t('session_intent.volume') },
-                { value: 'technique', label: t('session_intent.technique') },
-                { value: 'recovery', label: t('session_intent.recovery') },
-              ].map(intent => (
-                <button
-                  key={intent.value}
-                  onClick={() => setTrainingIntent(intent.value)}
-                  className="flex-1 rounded-lg py-2 text-xs font-bold text-gray-500 active:text-gray-300 active:bg-gray-800"
-                >
-                  {intent.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        {trainingIntent && (
-          <div className="px-4 pb-3">
-            <span className="inline-flex items-center rounded-lg bg-cyan-500/20 px-2.5 py-1 text-xs font-bold text-cyan-400">
-              {t(`session_intent.${trainingIntent}`)}
-            </span>
           </div>
         )}
       </header>
