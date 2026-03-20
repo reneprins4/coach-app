@@ -778,6 +778,19 @@
     "vol_1m": "1 million kg",
     "vol_1m_desc": "Move a total of 1,000,000 kg"
   },
+  "story": {
+    "banner_title": "Your {{month}} story is ready!",
+    "banner_subtitle": "View your monthly recap",
+    "view_now": "View now",
+    "view_story": "View Story",
+    "share": "Share",
+    "share_copied": "Copied to clipboard",
+    "personality_consistent": "The Consistent One",
+    "personality_powerhouse": "The Powerhouse",
+    "personality_volume": "The Volume Machine",
+    "personality_allrounder": "The Allrounder",
+    "personality_persistent": "The Persistent One"
+  },
   "injury": {
     "report_title": "Report Injury",
     "select_area": "Select area",
@@ -851,5 +864,101 @@
     "rehab_clamshell": "Lying on side, open knee with band",
     "risky": "Injury risk",
     "modified": "Modified for injury"
+  },
+  "story": {
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "title_card": {
+      "your_month": "Your {{month}}",
+      "in_review": "in review"
+    },
+    "overview": {
+      "title": "Overview",
+      "workouts": "workouts",
+      "volume": "volume",
+      "sets": "sets",
+      "time": "time"
+    },
+    "consistency": {
+      "title": "Consistency",
+      "days_streak": "day streak",
+      "longest_streak": "Longest streak",
+      "score": "Consistency score"
+    },
+    "strength": {
+      "title": "Strength",
+      "new_prs": "{{count}} new records this month",
+      "no_prs": "No new records",
+      "no_prs_sub": "Next month you'll crush them!"
+    },
+    "volume_trend": {
+      "title": "Volume",
+      "volume_up": "vs last month",
+      "volume_down": "vs last month",
+      "volume_stable": "Stable vs last month",
+      "vs_last_month": "vs last month"
+    },
+    "favorite": {
+      "title": "Favorite",
+      "total_sets": "sets this month",
+      "most_trained_muscle": "Most trained muscle group"
+    },
+    "split": {
+      "title": "Split distribution"
+    },
+    "fun_stats": {
+      "title": "Fun stats",
+      "heaviest_set": "Heaviest set",
+      "most_reps": "Most reps",
+      "longest_workout": "Longest workout",
+      "shortest_workout": "Shortest workout",
+      "minutes": "minutes"
+    },
+    "personality": {
+      "subtitle": "Your training type",
+      "consistent": {
+        "name": "The Consistent",
+        "description": "You show up every week. Consistency is your strength."
+      },
+      "powerhouse": {
+        "name": "The Powerhouse",
+        "description": "Breaking records is what drives you. Pure strength."
+      },
+      "volume": {
+        "name": "The Volume Machine",
+        "description": "More sets, more growth. You don't stop easily."
+      },
+      "allrounder": {
+        "name": "The Allrounder",
+        "description": "A bit of everything, good at all. Balanced and strong."
+      },
+      "persistent": {
+        "name": "The Persistent",
+        "description": "Pushing through when it gets tough. That's your strength."
+      }
+    },
+    "final": {
+      "title": "See you next month",
+      "share": "Share your story"
+    },
+    "banner": {
+      "title": "Your {{month}} story is ready!",
+      "subtitle": "View your monthly recap",
+      "cta": "View now"
+    },
+    "view_story": "View Story",
+    "share_copied": "Copied to clipboard"
   }
 }

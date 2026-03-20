@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from 'react'
+import { useMemo, useCallback, useState, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -8,14 +8,19 @@ import { DashboardSkeleton } from '../components/Skeleton'
 import InjuryBanner from '../components/InjuryBanner'
 import InjuryCheckIn from '../components/InjuryCheckIn'
 import InjuryReport from '../components/InjuryReport'
+import TrainingStoryBanner from '../components/TrainingStoryBanner'
 import { useInjuries } from '../hooks/useInjuries'
 import type { ActiveInjury } from '../lib/injuryRecovery'
 
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
 import { analyzeTraining } from '../lib/training-analysis'
 import { generateTodaysWorkout } from '../lib/todaysWorkout'
+import { computeTrainingStory, isStoryViewed, markStoryViewed } from '../lib/trainingStory'
+import { getMonthName } from '../lib/trainingStoryShare'
+import { buildStoryShareText } from '../lib/trainingStoryShare'
 import type { AIExercise } from '../types'
 
+const TrainingStory = lazy(() => import('../components/TrainingStory'))
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation()
@@ -25,6 +30,8 @@ export default function Dashboard() {
   const { activeInjuries, addInjury, checkIn, resolve } = useInjuries()
   const [checkInInjury, setCheckInInjury] = useState<ActiveInjury | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
+  const [showStory, setShowStory] = useState(false)
+  const [storyDismissed, setStoryDismissed] = useState(false)
 
   const stats = useMemo(() => {
     const now = new Date()
@@ -52,6 +59,48 @@ export default function Dashboard() {
   const phase = block ? PHASES[block.phase] : null
 
   const todaysWorkout = useMemo(() => generateTodaysWorkout(workouts), [workouts])
+
+  // Training Story: compute for previous month
+  const storyContext = useMemo(() => {
+    const now = new Date()
+    const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1
+    const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
+    return { prevMonth, prevYear }
+  }, [])
+
+  const storyData = useMemo(() => {
+    if (workouts.length < 3) return null
+    const data = computeTrainingStory(
+      workouts,
+      storyContext.prevMonth,
+      storyContext.prevYear,
+      parseInt(settings.frequency) || 4,
+    )
+    if (!data.hasEnoughData) return null
+    return data
+  }, [workouts, storyContext.prevMonth, storyContext.prevYear, settings.frequency])
+
+  const storyViewed = isStoryViewed(storyContext.prevMonth, storyContext.prevYear)
+  const showBanner = storyData !== null && !storyViewed && !storyDismissed
+  const storyMonthLabel = getMonthName(storyContext.prevMonth, i18n.language)
+
+  const handleStoryDismiss = useCallback(() => {
+    markStoryViewed(storyContext.prevMonth, storyContext.prevYear)
+    setStoryDismissed(true)
+  }, [storyContext.prevMonth, storyContext.prevYear])
+
+  const handleStoryShare = useCallback(() => {
+    if (!storyData) return
+    const text = buildStoryShareText(storyData, i18n.language)
+    if (navigator.share) {
+      navigator.share({ text }).catch(() => {
+        // User cancelled or share failed, copy to clipboard instead
+        navigator.clipboard?.writeText(text)
+      })
+    } else {
+      navigator.clipboard?.writeText(text)
+    }
+  }, [storyData, i18n.language])
 
   const handleStartTodaysWorkout = useCallback(() => {
     if (!todaysWorkout) return
@@ -127,6 +176,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Training Story Banner */}
+      {showBanner && (
+        <TrainingStoryBanner
+          monthLabel={storyMonthLabel}
+          onOpen={() => setShowStory(true)}
+          onDismiss={handleStoryDismiss}
+        />
+      )}
+
       {/* Injury Banner */}
       {activeInjuries.length > 0 && (
         <InjuryBanner
@@ -197,7 +255,7 @@ export default function Dashboard() {
                   {String((settings as unknown as Record<string, unknown>)[`${settings.mainLift}Max`] ?? '?') || '?'}
                 </span>
                 <span className="text-sm text-gray-500">kg</span>
-                <span className="text-gray-600 mx-1">→</span>
+                <span className="text-gray-600 mx-1">&rarr;</span>
                 <span className="text-2xl font-black tabular-nums text-cyan-400">
                   {settings.mainLiftGoalKg}
                 </span>
@@ -367,6 +425,21 @@ export default function Dashboard() {
           }}
           injuryArea={checkInInjury.bodyArea}
         />
+      )}
+
+      {/* Training Story Overlay */}
+      {showStory && storyData && (
+        <Suspense fallback={null}>
+          <TrainingStory
+            data={storyData}
+            onClose={() => {
+              setShowStory(false)
+              markStoryViewed(storyContext.prevMonth, storyContext.prevYear)
+              setStoryDismissed(true)
+            }}
+            onShare={handleStoryShare}
+          />
+        </Suspense>
       )}
     </div>
   )

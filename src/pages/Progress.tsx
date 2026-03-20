@@ -1,6 +1,6 @@
-import { useState, useMemo, lazy, Suspense } from 'react'
+import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Award, TrendingUp, Trophy, ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { Search, Award, TrendingUp, Trophy, ArrowUp, ArrowDown, Minus, Sparkles } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
@@ -14,11 +14,14 @@ import { MEASUREMENT_TYPES, groupByType, calculateTrend, formatMeasurement } fro
 import type { MeasurementType } from '../lib/measurements'
 import MeasurementInput from '../components/MeasurementInput'
 import MeasurementChart from '../components/MeasurementChart'
+import { computeTrainingStory, markStoryViewed } from '../lib/trainingStory'
+import { buildStoryShareText } from '../lib/trainingStoryShare'
 
 // Lazy load heavy analysis components (only rendered when their tab is active)
 const FormDetective = lazy(() => import('../components/FormDetective'))
 const WeaknessHunter = lazy(() => import('../components/WeaknessHunter'))
 const PerformanceForecast = lazy(() => import('../components/PerformanceForecast'))
+const TrainingStory = lazy(() => import('../components/TrainingStory'))
 
 function e1rm(weight: number, reps: number): number {
   if (reps <= 0 || weight <= 0) return 0
@@ -57,6 +60,39 @@ export default function Progress() {
   const [volumePeriod, setVolumePeriod] = useState('12w')
   const { measurements, addMeasurement } = useMeasurements(user?.id)
   const [selectedMeasurementType, setSelectedMeasurementType] = useState<MeasurementType>('weight')
+  const [showStory, setShowStory] = useState(false)
+
+  // Training Story for previous month
+  const storyContext = useMemo(() => {
+    const now = new Date()
+    const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1
+    const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
+    return { prevMonth, prevYear }
+  }, [])
+
+  const storyData = useMemo(() => {
+    if (workouts.length < 3) return null
+    const data = computeTrainingStory(
+      workouts,
+      storyContext.prevMonth,
+      storyContext.prevYear,
+      parseInt(settings.frequency) || 4,
+    )
+    if (!data.hasEnoughData) return null
+    return data
+  }, [workouts, storyContext.prevMonth, storyContext.prevYear, settings.frequency])
+
+  const handleStoryShare = useCallback(() => {
+    if (!storyData) return
+    const text = buildStoryShareText(storyData, i18n.language)
+    if (navigator.share) {
+      navigator.share({ text }).catch(() => {
+        navigator.clipboard?.writeText(text)
+      })
+    } else {
+      navigator.clipboard?.writeText(text)
+    }
+  }, [storyData, i18n.language])
 
   const remainingForAnalysis = workoutsUntilAnalysis(workouts.length)
 
@@ -203,9 +239,20 @@ export default function Progress() {
   return (
     <div className="px-4 py-6 pb-28">
       {/* Header */}
-      <div className="mb-6">
-        <p className="label-caps mb-1">{t('progress.stats')}</p>
-        <h1 className="text-3xl font-black tracking-tight text-white">{t('progress.title')}</h1>
+      <div className="mb-6 flex items-end justify-between">
+        <div>
+          <p className="label-caps mb-1">{t('progress.stats')}</p>
+          <h1 className="text-3xl font-black tracking-tight text-white">{t('progress.title')}</h1>
+        </div>
+        {storyData && (
+          <button
+            onClick={() => setShowStory(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-cyan-500/10 px-3 py-1.5 text-xs font-bold text-cyan-400 active:bg-cyan-500/20"
+          >
+            <Sparkles size={14} />
+            {t('story.view_story')}
+          </button>
+        )}
       </div>
 
       {/* Tab bar */}
@@ -671,6 +718,20 @@ export default function Progress() {
       {tab === 'balans' && (
         <Suspense fallback={<div className="space-y-3"><Skeleton className="h-24 w-full rounded-2xl" /><Skeleton className="h-24 w-full rounded-2xl" /></div>}>
           <WeaknessHunter workouts={workouts} priorityMuscles={settings?.priorityMuscles || []} />
+        </Suspense>
+      )}
+
+      {/* Training Story Overlay */}
+      {showStory && storyData && (
+        <Suspense fallback={null}>
+          <TrainingStory
+            data={storyData}
+            onClose={() => {
+              setShowStory(false)
+              markStoryViewed(storyContext.prevMonth, storyContext.prevYear)
+            }}
+            onShare={handleStoryShare}
+          />
         </Suspense>
       )}
     </div>

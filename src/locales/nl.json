@@ -851,5 +851,101 @@
     "rehab_clamshell": "Op zij liggend, knie openen met band",
     "risky": "Blessurerisico",
     "modified": "Aangepast voor blessure"
+  },
+  "story": {
+    "months": {
+      "january": "Januari",
+      "february": "Februari",
+      "march": "Maart",
+      "april": "April",
+      "may": "Mei",
+      "june": "Juni",
+      "july": "Juli",
+      "august": "Augustus",
+      "september": "September",
+      "october": "Oktober",
+      "november": "November",
+      "december": "December"
+    },
+    "title_card": {
+      "your_month": "Jouw {{month}}",
+      "in_review": "in review"
+    },
+    "overview": {
+      "title": "Overzicht",
+      "workouts": "trainingen",
+      "volume": "volume",
+      "sets": "sets",
+      "time": "tijd"
+    },
+    "consistency": {
+      "title": "Consistentie",
+      "days_streak": "dagen streak",
+      "longest_streak": "Langste streak",
+      "score": "Consistentie score"
+    },
+    "strength": {
+      "title": "Kracht",
+      "new_prs": "{{count}} nieuwe records deze maand",
+      "no_prs": "Geen nieuwe records",
+      "no_prs_sub": "Volgende maand pak je ze!"
+    },
+    "volume_trend": {
+      "title": "Volume",
+      "volume_up": "vs vorige maand",
+      "volume_down": "vs vorige maand",
+      "volume_stable": "Stabiel vs vorige maand",
+      "vs_last_month": "vs vorige maand"
+    },
+    "favorite": {
+      "title": "Favoriet",
+      "total_sets": "sets deze maand",
+      "most_trained_muscle": "Meest getrainde spiergroep"
+    },
+    "split": {
+      "title": "Split verdeling"
+    },
+    "fun_stats": {
+      "title": "Fun stats",
+      "heaviest_set": "Zwaarste set",
+      "most_reps": "Meeste reps",
+      "longest_workout": "Langste training",
+      "shortest_workout": "Kortste training",
+      "minutes": "minuten"
+    },
+    "personality": {
+      "subtitle": "Jouw trainingstype",
+      "consistent": {
+        "name": "De Consistente",
+        "description": "Elke week sta je er. Regelmaat is jouw kracht."
+      },
+      "powerhouse": {
+        "name": "De Powerhouse",
+        "description": "Records breken is wat je drijft. Pure kracht."
+      },
+      "volume": {
+        "name": "De Volume Machine",
+        "description": "Meer sets, meer groei. Jij stopt niet snel."
+      },
+      "allrounder": {
+        "name": "De Allrounder",
+        "description": "Alles een beetje, overal goed. Gebalanceerd en sterk."
+      },
+      "persistent": {
+        "name": "De Volhouder",
+        "description": "Doorgaan als het lastig wordt. Dat is jouw kracht."
+      }
+    },
+    "final": {
+      "title": "Tot volgende maand",
+      "share": "Deel je story"
+    },
+    "banner": {
+      "title": "Jouw {{month}} story is klaar!",
+      "subtitle": "Bekijk je maandoverzicht",
+      "cta": "Bekijk nu"
+    },
+    "view_story": "Bekijk Story",
+    "share_copied": "Gekopieerd naar klembord"
   }
 }

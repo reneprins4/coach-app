@@ -229,3 +229,63 @@ input[type="range"]::-webkit-slider-thumb {
   transform: translateY(0);
   transition: opacity 200ms ease-out, transform 200ms ease-out;
 }
+
+/* ── Training Story Animations ── */
+@keyframes story-fade-in {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes story-slide-up {
+  from { opacity: 0; transform: translateY(24px) }
+  to { opacity: 1; transform: translateY(0) }
+}
+
+@keyframes story-scale-in {
+  from { opacity: 0; transform: scale(0.85) }
+  to { opacity: 1; transform: scale(1) }
+}
+
+@keyframes story-slide-right {
+  from { opacity: 0; transform: translateX(40px) }
+  to { opacity: 1; transform: translateX(0) }
+}
+
+@keyframes story-progress {
+  from { width: 0% }
+  to { width: 100% }
+}
+
+@keyframes story-glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.3) }
+  50% { box-shadow: 0 0 50px rgba(6, 182, 212, 0.6) }
+}
+
+@keyframes story-bar-grow {
+  from { width: 0% }
+  to { width: var(--bar-width) }
+}
+
+@keyframes story-dot-pop {
+  from { opacity: 0; transform: scale(0) }
+  to { opacity: 1; transform: scale(1) }
+}
+
+.story-fade-in { animation: story-fade-in 0.4s ease-out forwards }
+.story-slide-up { animation: story-slide-up 0.5s ease-out forwards }
+.story-scale-in { animation: story-scale-in 0.5s ease-out forwards }
+.story-slide-right { animation: story-slide-right 0.5s ease-out forwards }
+.story-glow { animation: story-glow-pulse 2s ease-in-out infinite }
+.story-bar { animation: story-bar-grow 1s ease-out forwards }
+.story-dot { animation: story-dot-pop 0.3s ease-out forwards }
+
+/* Stagger delays */
+.story-delay-1 { animation-delay: 150ms }
+.story-delay-2 { animation-delay: 300ms }
+.story-delay-3 { animation-delay: 450ms }
+.story-delay-4 { animation-delay: 600ms }
+.story-delay-5 { animation-delay: 750ms }
+.story-delay-6 { animation-delay: 900ms }
+
+/* Initially hidden for stagger animations */
+.story-stagger { opacity: 0 }
