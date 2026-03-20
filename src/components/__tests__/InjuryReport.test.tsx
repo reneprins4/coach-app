@@ -59,14 +59,13 @@ describe('InjuryReport Modal', () => {
     }
   })
 
-  it('each area shows localized name with arrow indicator', () => {
+  it('each area is a clickable button with localized name', () => {
     renderModal()
+    const buttons = screen.getAllByRole('button')
+    // 8 area buttons + 1 close button = 9
+    expect(buttons.length).toBeGreaterThanOrEqual(9)
     expect(screen.getByText('Shoulder')).toBeDefined()
     expect(screen.getByText('Knee')).toBeDefined()
-    // Each area card has an arrow icon for navigation
-    const dialog = screen.getByRole('dialog')
-    const svgs = dialog.querySelectorAll('svg')
-    expect(svgs.length).toBeGreaterThanOrEqual(8)
   })
 
   it('selecting area advances to severity step', async () => {
