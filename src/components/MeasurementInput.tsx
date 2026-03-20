@@ -31,22 +31,21 @@ export default function MeasurementInput({ onSave }: MeasurementInputProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl bg-gray-900 p-4">
+    <form onSubmit={handleSubmit} className="card">
       <p className="label-caps mb-3">{t('measurements.add')}</p>
 
-      <div className="flex gap-2">
-        {/* Type selector */}
+      {/* Row 1: Type + Value */}
+      <div className="flex gap-2 mb-2">
         <select
           value={type}
           onChange={(e) => { setType(e.target.value as MeasurementType); setError(null) }}
-          className="h-11 flex-1 rounded-xl bg-gray-800 px-3 text-sm text-white outline-none ring-1 ring-gray-700 focus:ring-gray-600"
+          className="h-11 flex-1 rounded-xl bg-gray-800 px-3 text-sm text-white outline-none border border-gray-700 focus:border-gray-600"
         >
           {MEASUREMENT_TYPES.map(m => (
             <option key={m.type} value={m.type}>{t(m.labelKey)}</option>
           ))}
         </select>
 
-        {/* Value input */}
         <div className="relative flex-1">
           <input
             type="number"
@@ -55,26 +54,26 @@ export default function MeasurementInput({ onSave }: MeasurementInputProps) {
             onChange={(e) => { setValue(e.target.value); setError(null) }}
             placeholder="0"
             aria-label={`${t(selectedType?.labelKey ?? 'measurements.weight')} (${unit})`}
-            className="h-11 w-full rounded-xl bg-gray-800 px-3 pr-10 text-sm text-white placeholder-gray-600 outline-none ring-1 ring-gray-700 focus:ring-gray-600"
+            className="h-11 w-full rounded-xl bg-gray-800 px-3 pr-10 text-sm text-white placeholder-gray-600 outline-none border border-gray-700 focus:border-gray-600"
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">
             {unit}
           </span>
         </div>
+      </div>
 
-        {/* Date */}
+      {/* Row 2: Date + Save */}
+      <div className="flex gap-2">
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="h-11 rounded-xl bg-gray-800 px-2 text-xs text-white outline-none ring-1 ring-gray-700 focus:ring-gray-600"
+          className="h-11 flex-1 rounded-xl bg-gray-800 px-3 text-sm text-white outline-none border border-gray-700 focus:border-gray-600"
         />
-
-        {/* Save */}
         <button
           type="submit"
           aria-label={t('measurements.save')}
-          className="h-11 rounded-xl bg-cyan-500 px-4 text-sm font-bold text-white active:bg-cyan-600"
+          className="btn-primary h-11 px-6 text-sm"
         >
           {t('measurements.save')}
         </button>

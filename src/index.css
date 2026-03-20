@@ -289,3 +289,20 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* Initially hidden for stagger animations */
 .story-stagger { opacity: 0 }
+
+/* ---- Achievement / gold card ---- */
+.card-gold {
+  background: linear-gradient(135deg, #1a1a0a 0%, #0d1421 100%);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+/* ---- Bottom sheet slide-up animation ---- */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}

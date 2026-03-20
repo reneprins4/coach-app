@@ -59,7 +59,7 @@ describe('WorkoutCardSkeleton', () => {
     const { container } = render(<WorkoutCardSkeleton />)
     const card = container.firstElementChild!
     expect(card.className).toContain('border')
-    expect(card.className).toContain('rounded-xl')
+    expect(card.className).toContain('rounded-2xl')
   })
 })
 
@@ -83,7 +83,7 @@ describe('StatCardSkeleton', () => {
     const { container } = render(<StatCardSkeleton />)
     const card = container.firstElementChild!
     expect(card.className).toContain('border')
-    expect(card.className).toContain('rounded-xl')
+    expect(card.className).toContain('rounded-2xl')
   })
 })
 

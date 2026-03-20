@@ -119,7 +119,7 @@ export function WorkoutReview({
       {/* Exercises grouped by muscle */}
       {exercisesByMuscle.map(({ muscle, exercises: groupExercises }) => (
         <div key={muscle} className="mb-5">
-          <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
+          <h3 className="mb-2 flex items-center gap-2 label-caps">
             <span className="h-px flex-1 bg-gray-800" />
             {t(`muscles.${muscle}`)}
             <span className="h-px flex-1 bg-gray-800" />
@@ -128,7 +128,7 @@ export function WorkoutReview({
             {groupExercises.map(({ exercise: ex, globalIndex }) => (
               <div
                 key={globalIndex}
-                className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-900 px-4 py-3"
+                className="card flex items-center justify-between !p-3"
               >
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white truncate">{ex.name}</p>
@@ -140,7 +140,7 @@ export function WorkoutReview({
                 </div>
                 <button
                   onClick={() => setSwapTarget({ index: globalIndex, exercise: ex })}
-                  className="ml-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-400 ring-1 ring-gray-700 active:bg-gray-800"
+                  className="ml-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-400 border border-gray-700 active:bg-gray-800"
                   aria-label={t('logger.swap_exercise')}
                 >
                   <ArrowRightLeft size={14} />
@@ -157,7 +157,7 @@ export function WorkoutReview({
         <div className="mb-6">
           <button
             onClick={() => setShowReasoning(!showReasoning)}
-            className="flex w-full items-center justify-between rounded-xl bg-gray-900 px-4 py-3 text-sm text-gray-400 ring-1 ring-gray-800"
+            className="flex w-full items-center justify-between rounded-xl bg-gray-900 px-4 py-3 text-sm text-gray-400 border border-gray-800"
           >
             <span>{t('aicoach.why_this_training')}</span>
             {showReasoning ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -173,7 +173,7 @@ export function WorkoutReview({
       {/* Start Workout button */}
       <button
         onClick={onStart}
-        className="w-full rounded-xl bg-cyan-500 py-4 text-base font-black text-white active:scale-[0.97] transition-transform"
+        className="btn-primary"
         aria-label={t('aicoach.start_workout')}
       >
         {t('aicoach.start_workout')}

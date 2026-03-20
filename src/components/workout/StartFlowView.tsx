@@ -97,7 +97,7 @@ export default function StartFlowView({
         {templates.templates.length > 0 && (
           <button
             onClick={() => onSetShowTemplates(true)}
-            className="mt-4 w-full rounded-2xl bg-gray-900 p-4 text-center text-sm font-medium text-gray-400 ring-1 ring-gray-800 active:bg-gray-800"
+            className="mt-4 w-full rounded-2xl bg-gray-900 p-4 text-center text-sm font-medium text-gray-400 border border-gray-800 active:bg-gray-800"
           >
             {t('logger.choose_template')}
           </button>
@@ -268,7 +268,7 @@ export default function StartFlowView({
       {lastWorkout && (
         <button
           onClick={onRepeatLastWorkout}
-          className="w-full rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-white/10 active:bg-gray-800 active:scale-[0.97] transition-transform mt-3"
+          className="w-full rounded-2xl bg-gray-900 p-4 text-left border border-white/10 active:bg-gray-800 active:scale-[0.97] transition-transform mt-3"
         >
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1">{t('logger.repeat_last')}</p>
           <p className="text-sm font-bold text-white truncate">{lastWorkout.preview}</p>
@@ -290,7 +290,7 @@ export default function StartFlowView({
             {/* Templates */}
             <button
               onClick={() => onSetShowTemplates(true)}
-              className="flex w-full items-center gap-3 rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-gray-800 active:scale-[0.97] transition-transform"
+              className="flex w-full items-center gap-3 rounded-2xl bg-gray-900 p-4 text-left border border-gray-800 active:scale-[0.97] transition-transform"
             >
               <BookOpen size={20} className="shrink-0 text-gray-500" />
               <div>
@@ -302,7 +302,7 @@ export default function StartFlowView({
             {/* Empty training */}
             <button
               onClick={onStartEmpty}
-              className="flex w-full items-center gap-3 rounded-2xl bg-gray-900 p-4 text-left ring-1 ring-gray-800 active:scale-[0.97] transition-transform"
+              className="flex w-full items-center gap-3 rounded-2xl bg-gray-900 p-4 text-left border border-gray-800 active:scale-[0.97] transition-transform"
             >
               <Dumbbell size={20} className="shrink-0 text-gray-500" />
               <div>
@@ -332,7 +332,7 @@ export default function StartFlowView({
                         className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
                           selectedSplit === split
                             ? 'bg-cyan-500 text-white'
-                            : 'bg-gray-900 text-gray-400 ring-1 ring-gray-700 active:bg-gray-800'
+                            : 'bg-gray-900 text-gray-400 border border-gray-700 active:bg-gray-800'
                         } ${generating ? 'opacity-50' : ''}`}
                       >
                         {split}

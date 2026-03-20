@@ -100,7 +100,7 @@ export default function SupersetModal({ exercises, onApply, onClose }: SupersetM
                 </button>
                 <button
                   onClick={handleApply}
-                  className="flex-1 h-12 rounded-2xl bg-cyan-500 font-bold text-white active:scale-[0.97] transition-transform"
+                  className="btn-primary flex-1"
                 >
                   {t('superset_modal.confirm')}
                 </button>

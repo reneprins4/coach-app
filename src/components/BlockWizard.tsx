@@ -160,7 +160,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 backdrop-blur-sm">
       <div role="dialog" aria-modal="true" aria-labelledby="block-wizard-title" className="w-full max-w-md rounded-2xl bg-gray-900 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between border-b border-gray-800 bg-gray-900 p-4">
@@ -226,11 +226,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
               <button
                 onClick={handleNext}
                 disabled={!selectedGoal}
-                className={`mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold transition-colors ${
-                  selectedGoal
-                    ? 'bg-cyan-500 text-white active:bg-cyan-600'
-                    : 'bg-gray-800 text-gray-600'
-                }`}
+                className={`btn-primary mt-6 ${!selectedGoal ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
                 {t('common.next')}
                 <ChevronRight size={18} />
@@ -253,7 +249,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full rounded-lg bg-gray-900 px-4 py-3 text-white outline-none ring-1 ring-gray-700 focus:ring-cyan-500"
+                  className="w-full rounded-lg bg-gray-900 px-4 py-3 text-white outline-none border border-gray-700 focus:border-cyan-500"
                 />
               </div>
 
@@ -272,7 +268,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
 
               <button
                 onClick={handleNext}
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-semibold text-white active:bg-cyan-600"
+                className="btn-primary mt-6"
               >
                 {t('block_wizard.view_program')}
                 <ChevronRight size={18} />
@@ -335,7 +331,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
               <button
                 onClick={handleConfirm}
                 disabled={loading}
-                className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-bold text-white active:bg-cyan-600 disabled:opacity-50"
+                className="btn-primary disabled:opacity-50"
               >
                 {loading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />

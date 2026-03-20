@@ -7,8 +7,8 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
   const { t } = useTranslation()
   useModalA11y(true, onClose)
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70">
-      <div role="dialog" aria-modal="true" aria-labelledby="template-library-title" className="w-full max-w-lg animate-slide-up rounded-t-3xl bg-gray-900 pb-8">
+    <div className="fixed inset-0 z-[60] flex items-end bg-black/70 backdrop-blur-sm">
+      <div role="dialog" aria-modal="true" aria-labelledby="template-library-title" className="w-full max-w-lg animate-slide-up rounded-t-2xl bg-gray-900 pb-8">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between border-b border-gray-800 bg-gray-900 px-5 py-4">
           <h2 id="template-library-title" className="text-lg font-bold text-white">{t('template_library.title')}</h2>
@@ -43,7 +43,7 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
                 return (
                   <div
                     key={template.id}
-                    className="rounded-xl border border-gray-800 bg-gray-800/50 p-4"
+                    className="card"
                   >
                     <div className="mb-2 flex items-start justify-between">
                       <div>
@@ -82,7 +82,7 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
 
                     <button
                       onClick={() => onLoad(template)}
-                      className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-cyan-500 font-semibold text-white active:scale-[0.97] transition-transform"
+                      className="btn-primary h-11 text-sm"
                     >
                       <Play size={16} />
                       {t('template_library.load')}
@@ -95,15 +95,6 @@ export default function TemplateLibrary({ templates, onLoad, onDelete, onClose }
         </div>
       </div>
 
-      <style>{`
-        @keyframes slide-up {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
-        }
-      `}</style>
     </div>
   )
 }

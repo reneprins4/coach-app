@@ -57,7 +57,7 @@ export default function ExerciseGuide({ exercise, onClose }: ExerciseGuideProps)
         role="dialog"
         aria-modal="true"
         aria-labelledby="exercise-guide-title"
-        className="relative w-full rounded-t-3xl bg-gray-950 border-t border-gray-800 px-5 pb-10 pt-5 max-h-[85dvh] overflow-y-auto"
+        className="relative w-full rounded-t-2xl bg-gray-950 border-t border-gray-800 px-5 pb-10 pt-5 max-h-[85dvh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Handle */}
@@ -106,7 +106,7 @@ export default function ExerciseGuide({ exercise, onClose }: ExerciseGuideProps)
             )}
             {/* Label */}
             <div className="absolute top-2 left-2 rounded-md bg-black/50 px-2 py-0.5">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-white/70">
+              <span className="label-caps text-white/70">
                 {activeImg === 0 ? 'Start' : 'Eind'}
               </span>
             </div>
@@ -145,7 +145,7 @@ export default function ExerciseGuide({ exercise, onClose }: ExerciseGuideProps)
           <div className="space-y-5">
             {/* Steps */}
             <div>
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('exercise_guide.execution')}</p>
+              <p className="mb-3 label-caps">{t('exercise_guide.execution')}</p>
               <div className="space-y-2">
                 {guide.steps.map((step, i) => (
                   <div key={i} className="flex gap-3">
@@ -161,7 +161,7 @@ export default function ExerciseGuide({ exercise, onClose }: ExerciseGuideProps)
             {/* Muscles */}
             {guide.muscles?.length > 0 && (
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('exercise_guide.muscles')}</p>
+                <p className="mb-2 label-caps">{t('exercise_guide.muscles')}</p>
                 <div className="flex flex-wrap gap-2">
                   {guide.muscles.map((m, i) => (
                     <span key={i} className="rounded-lg bg-gray-800 px-3 py-1 text-xs text-gray-300 flex items-center gap-1.5">
@@ -176,7 +176,7 @@ export default function ExerciseGuide({ exercise, onClose }: ExerciseGuideProps)
             {/* Mistakes */}
             {guide.mistakes?.length > 0 && (
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('exercise_guide.common_mistakes')}</p>
+                <p className="mb-2 label-caps">{t('exercise_guide.common_mistakes')}</p>
                 <div className="space-y-1.5">
                   {guide.mistakes.map((m, i) => (
                     <div key={i} className="flex items-start gap-2">

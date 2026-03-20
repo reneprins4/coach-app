@@ -72,7 +72,7 @@ export default function PlateCalculator({ targetWeight, onClose }: PlateCalculat
         role="dialog"
         aria-modal="true"
         aria-labelledby="plate-calc-title"
-        className="relative w-full rounded-t-3xl border-t border-gray-800 bg-gray-950 px-5 pb-10 pt-5"
+        className="relative w-full rounded-t-2xl border-t border-gray-800 bg-gray-950 px-5 pb-10 pt-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle */}
@@ -100,7 +100,7 @@ export default function PlateCalculator({ targetWeight, onClose }: PlateCalculat
             value={customWeight}
             onChange={(e) => setCustomWeight(e.target.value)}
             placeholder="0"
-            className="h-14 w-full rounded-xl bg-gray-900 px-4 text-center text-2xl font-bold text-white outline-none ring-1 ring-gray-800 focus:ring-cyan-500"
+            className="h-14 w-full rounded-xl bg-gray-900 px-4 text-center text-2xl font-bold text-white outline-none border border-gray-800 focus:border-cyan-500"
           />
         </div>
         
@@ -117,7 +117,7 @@ export default function PlateCalculator({ targetWeight, onClose }: PlateCalculat
                 className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
                   barWeight === w
                     ? 'bg-cyan-500 text-white'
-                    : 'bg-gray-900 text-gray-400 ring-1 ring-gray-800'
+                    : 'bg-gray-900 text-gray-400 border border-gray-800'
                 }`}
               >
                 {w}kg
@@ -128,7 +128,7 @@ export default function PlateCalculator({ targetWeight, onClose }: PlateCalculat
         
         {/* Result */}
         {weight > 0 && (
-          <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
+          <div className="card">
             {weight < barWeight ? (
               <p className="text-center text-sm text-gray-400">
                 {t('plate_calc.too_light')} ({barWeight}kg)

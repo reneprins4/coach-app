@@ -20,9 +20,9 @@ export default function RehabCard({ exercises, injuryLabel }: RehabCardProps) {
   const hasMore = exercises.length > INITIAL_VISIBLE
 
   return (
-    <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4">
+    <div className="card">
       <div className="mb-3 flex items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-widest text-cyan-400">
+        <span className="label-caps text-cyan-400">
           {t('injury.rehab_exercises')}
         </span>
         <span className="text-xs text-gray-500">{injuryLabel}</span>

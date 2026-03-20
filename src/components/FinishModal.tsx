@@ -363,19 +363,10 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
           {/* Celebratory Header */}
           <div className="mb-8 flex flex-col items-center text-center">
             <div
-              className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-full"
-              style={{
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.25) 0%, rgba(6,182,212,0.08) 100%)',
-                boxShadow: '0 0 40px rgba(6,182,212,0.3), 0 0 80px rgba(6,182,212,0.15)',
-              }}
+              className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/25 to-cyan-500/8 glow-cyan"
             >
               <div
-                className="flex h-14 w-14 items-center justify-center rounded-full"
-                style={{
-                  background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-                  boxShadow: '0 4px 24px rgba(6,182,212,0.4)',
-                  animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                }}
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-[0_4px_24px_rgba(6,182,212,0.4)] animate-pulse"
               >
                 <CheckCircle size={28} className="text-white" strokeWidth={2.5} aria-hidden="true" />
               </div>
@@ -420,13 +411,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
 
           {/* PRs Section */}
           {!loading && prs.length > 0 && (
-            <div
-              className="mb-4 rounded-2xl p-4"
-              style={{
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.03) 100%)',
-                border: '1px solid rgba(6,182,212,0.25)',
-              }}
-            >
+            <div className="card-accent mb-4">
               <div className="mb-3 flex items-center gap-2">
                 <Trophy size={16} className="text-cyan-400" aria-hidden="true" />
                 <h3 className="label-caps text-cyan-400">{t('finish_modal.new_pr')}</h3>
@@ -451,13 +436,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
 
           {/* New Achievements */}
           {!loading && newAchievements.length > 0 && (
-            <div
-              className="mb-4 rounded-2xl p-4"
-              style={{
-                background: 'linear-gradient(135deg, rgba(234,179,8,0.10) 0%, rgba(234,179,8,0.02) 100%)',
-                border: '1px solid rgba(234,179,8,0.3)',
-              }}
-            >
+            <div className="card-gold mb-4">
               <div className="mb-3 flex items-center gap-2">
                 <Star size={16} className="text-yellow-500" aria-hidden="true" />
                 <h3 className="label-caps text-yellow-500">{t('achievements.unlocked')}</h3>
@@ -539,13 +518,13 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
                     onChange={(e) => setTemplateName(e.target.value)}
                     placeholder={t('finish_modal.template_name_placeholder')}
                     aria-label={t('finish_modal.template_name_placeholder')}
-                    className="h-10 w-full rounded-xl bg-gray-800 px-4 text-sm text-white placeholder-gray-500 outline-none ring-1 ring-gray-700 focus:ring-cyan-500"
+                    className="h-10 w-full rounded-xl bg-gray-800 px-4 text-sm text-white placeholder-gray-500 outline-none border border-gray-700 focus:border-cyan-500"
                     autoFocus
                   />
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowTemplateInput(false)}
-                      className="h-10 flex-1 rounded-xl text-sm font-medium text-gray-400 ring-1 ring-gray-700 active:scale-[0.97]"
+                      className="h-10 flex-1 rounded-xl text-sm font-medium text-gray-400 border border-gray-700 active:scale-[0.97]"
                     >
                       {t('common.cancel')}
                     </button>

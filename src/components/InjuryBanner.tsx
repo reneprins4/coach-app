@@ -80,7 +80,7 @@ export default function InjuryBanner({ injuries, onCheckIn, onResolve }: InjuryB
         return (
           <div
             key={injury.id}
-            className={`rounded-xl border p-3 ${borderClass} ${bgClass}`}
+            className={`rounded-2xl border p-4 ${borderClass} ${bgClass}`}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">

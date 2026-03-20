@@ -12,12 +12,7 @@ export default function TrainingStoryBanner({ monthLabel, onOpen, onDismiss }: T
 
   return (
     <div
-      className="relative mb-5 overflow-hidden rounded-2xl p-4"
-      style={{
-        background: 'linear-gradient(135deg, #0c1a2e 0%, #0d1421 100%)',
-        border: '1px solid rgba(6,182,212,0.25)',
-        boxShadow: '0 0 20px rgba(6,182,212,0.08)',
-      }}
+      className="card-accent relative mb-5 overflow-hidden"
     >
       {/* Dismiss button */}
       <button

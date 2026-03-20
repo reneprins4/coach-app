@@ -16,7 +16,7 @@ export default function AchievementBadge({ achievement, unlocked }: AchievementB
     <div
       className={`flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center transition-all ${
         unlocked
-          ? 'bg-gray-900 ring-1 ring-yellow-500/30'
+          ? 'bg-gray-900 border border-yellow-500/30'
           : 'bg-gray-900/50 opacity-40'
       }`}
     >
@@ -25,7 +25,7 @@ export default function AchievementBadge({ achievement, unlocked }: AchievementB
         className={unlocked ? 'text-yellow-500' : 'text-gray-600'}
         aria-hidden="true"
       />
-      <span className={`text-[11px] font-bold leading-tight ${unlocked ? 'text-white' : 'text-gray-600'}`}>
+      <span className={`text-[10px] font-bold leading-tight ${unlocked ? 'text-white' : 'text-gray-600'}`}>
         {unlocked ? t(achievement.nameKey) : '???'}
       </span>
     </div>

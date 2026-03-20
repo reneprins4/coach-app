@@ -209,7 +209,7 @@ describe('WorkoutReview', () => {
   it('shows sets x reps format for each exercise', () => {
     render(<WorkoutReview {...defaultProps} />)
     // Bench Press row should contain sets x reps info
-    const benchRow = screen.getByText('Bench Press').closest('div[class*="rounded-xl"]')!
+    const benchRow = screen.getByText('Bench Press').closest('div[class*="card"]')!
     expect(benchRow.textContent).toContain('8')
     expect(benchRow.textContent).toContain('10')
   })

@@ -55,7 +55,7 @@ export default function RestTimerBar({ remaining, total, onStop, onSetDuration, 
             type="button"
             onClick={() => onSetDuration?.(seconds)}
             aria-label={`${seconds}s`}
-            className="flex-1 rounded-lg bg-gray-800 py-2 text-xs font-medium text-gray-300 active:bg-gray-700 min-h-[44px] transition-colors"
+            className="flex-1 rounded-xl bg-gray-800 py-2 text-xs font-medium text-gray-300 active:bg-gray-700 min-h-[44px] transition-colors"
           >
             {seconds}s
           </button>
@@ -64,7 +64,7 @@ export default function RestTimerBar({ remaining, total, onStop, onSetDuration, 
           type="button"
           onClick={() => onAddTime?.(30)}
           aria-label="+30s"
-          className="flex-1 rounded-lg bg-gray-800 py-2 text-xs font-medium text-cyan-400 active:bg-gray-700 min-h-[44px] transition-colors"
+          className="flex-1 rounded-xl bg-gray-800 py-2 text-xs font-medium text-cyan-400 active:bg-gray-700 min-h-[44px] transition-colors"
         >
           +30s
         </button>
@@ -72,7 +72,7 @@ export default function RestTimerBar({ remaining, total, onStop, onSetDuration, 
           type="button"
           onClick={onStop}
           aria-label={t('rest_timer.skip') || 'Skip'}
-          className="flex-1 rounded-lg bg-gray-800 py-2 text-xs font-medium text-gray-500 active:bg-gray-700 min-h-[44px] transition-colors"
+          className="flex-1 rounded-xl bg-gray-800 py-2 text-xs font-medium text-gray-500 active:bg-gray-700 min-h-[44px] transition-colors"
         >
           {t('rest_timer.skip')}
         </button>

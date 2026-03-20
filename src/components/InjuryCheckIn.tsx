@@ -59,7 +59,7 @@ export default function InjuryCheckIn({ isOpen, onClose, onCheckIn, injuryArea }
   const selectedConfig = FEELINGS.find(f => f.key === selectedFeeling)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
       <div
         role="dialog"
         aria-modal="true"
