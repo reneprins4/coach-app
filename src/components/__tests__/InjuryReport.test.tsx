@@ -59,13 +59,14 @@ describe('InjuryReport Modal', () => {
     }
   })
 
-  it('each area shows localized name and label badge', () => {
+  it('each area shows localized name with arrow indicator', () => {
     renderModal()
     expect(screen.getByText('Shoulder')).toBeDefined()
     expect(screen.getByText('Knee')).toBeDefined()
-    // Each area card has a short label badge (SCH, KNI, etc.)
-    expect(screen.getByText('SCH')).toBeDefined()
-    expect(screen.getByText('KNI')).toBeDefined()
+    // Each area card has an arrow icon for navigation
+    const dialog = screen.getByRole('dialog')
+    const svgs = dialog.querySelectorAll('svg')
+    expect(svgs.length).toBeGreaterThanOrEqual(8)
   })
 
   it('selecting area advances to severity step', async () => {
