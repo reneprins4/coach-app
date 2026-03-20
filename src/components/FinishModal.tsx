@@ -1,7 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { BookmarkPlus, Loader2, Calendar, CheckCircle, Trophy, Star } from 'lucide-react'
+import { BookmarkPlus, Loader2, Calendar, CheckCircle, Trophy, Star, Share2 } from 'lucide-react'
+import ShareCard from './ShareCard'
+import { generateShareCardData, buildShareText } from '../lib/shareCard'
+import type { ShareCardData } from '../lib/shareCard'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useModalA11y } from '../hooks/useModalA11y'
@@ -36,6 +39,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
   const [prs, setPrs] = useState<Array<{ exercise: string; weight: number | null; reps: number | null; isWeightPr: boolean; prevWeight?: number | null }>>([])
   const [nextWorkout, setNextWorkout] = useState<{ split: string; reasoning: string; bestDate: Date; hoursUntil: number } | null>(null)
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([])
+  const [showShareCard, setShowShareCard] = useState(false)
 
   // Detect split from exercises
   const detectedSplit = useMemo(() => {
@@ -319,6 +323,36 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
     return 'bg-green-400'
   }
 
+  // Build share card data
+  const shareCardData: ShareCardData | null = useMemo(() => {
+    if (!showShareCard) return null
+    return generateShareCardData(result, {
+      locale: i18n.language,
+      prs: prs.map(p => ({ exercise: p.exercise, weight: p.weight ?? 0 })),
+      streak: 0, // streak is non-critical for share
+      split: detectedSplit,
+    })
+  }, [showShareCard, result, i18n.language, prs, detectedSplit])
+
+  const handleShare = useCallback(async () => {
+    if (!shareCardData) return
+    const text = buildShareText(shareCardData, t)
+    if (navigator.share) {
+      try {
+        await navigator.share({ text })
+      } catch {
+        // User cancelled or share failed — no action needed
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text)
+        // Could show a toast here in the future
+      } catch {
+        // Clipboard not available
+      }
+    }
+  }, [shareCardData, t])
+
   useModalA11y(true, onClose)
 
   return (
@@ -538,6 +572,19 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
             </div>
           )}
 
+          {/* Share Card Button */}
+          {!loading && (
+            <div className="mb-4">
+              <button
+                onClick={() => setShowShareCard(true)}
+                className="btn-secondary"
+              >
+                <Share2 size={16} aria-hidden="true" />
+                {t('share.title')}
+              </button>
+            </div>
+          )}
+
           {/* CTA Buttons */}
           <div className="mt-8 space-y-3">
             <button onClick={onClose} className="btn-primary">
@@ -551,6 +598,15 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
 
         </div>
       </div>
+
+      {/* Share Card Overlay */}
+      {showShareCard && shareCardData && (
+        <ShareCard
+          data={shareCardData}
+          onClose={() => setShowShareCard(false)}
+          onShare={handleShare}
+        />
+      )}
     </div>
   )
 }

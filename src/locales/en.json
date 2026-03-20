@@ -503,6 +503,7 @@
     "save_template": "Save as template",
     "template_saved": "Template saved",
     "template_name_placeholder": "Template name...",
+    "template_save_error": "Save failed, please try again",
     "save": "Save",
     "done": "Done",
     "next_workout": "Next workout",
@@ -512,6 +513,16 @@
     "plan_next": "Plan next workout",
     "ready_on": "Ready on",
     "days": "days"
+  },
+  "share": {
+    "title": "Share your workout",
+    "share_button": "Share",
+    "screenshot_hint": "Take a screenshot to share",
+    "copied": "Copied to clipboard",
+    "new_records": "New records",
+    "streak": "day streak",
+    "more_exercises": "+{{count}} more",
+    "branding": "kravex.app"
   },
   "exercise_picker": {
     "search_placeholder": "Search exercises...",

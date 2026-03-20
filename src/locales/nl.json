@@ -503,6 +503,7 @@
     "save_template": "Opslaan als template",
     "template_saved": "Template opgeslagen",
     "template_name_placeholder": "Naam voor template...",
+    "template_save_error": "Opslaan mislukt, probeer opnieuw",
     "save": "Opslaan",
     "done": "Klaar",
     "next_workout": "Volgende training",
@@ -512,6 +513,16 @@
     "plan_next": "Volgende workout plannen",
     "ready_on": "Klaar op",
     "days": "dagen"
+  },
+  "share": {
+    "title": "Deel je training",
+    "share_button": "Delen",
+    "screenshot_hint": "Maak een screenshot om te delen",
+    "copied": "Gekopieerd naar klipbord",
+    "new_records": "Nieuwe records",
+    "streak": "dagen streak",
+    "more_exercises": "+{{count}} meer",
+    "branding": "kravex.app"
   },
   "exercise_picker": {
     "search_placeholder": "Zoek oefeningen...",
