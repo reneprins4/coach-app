@@ -30,12 +30,13 @@ interface StartFlowViewProps {
   onGenerateForSplit: (split: string) => void
   onToggleSplitPicker: (show: boolean) => void
   onNavigateToCoach: () => void
+  onShowReview?: () => void
 }
 
 export default function StartFlowView({
   state, user, formattedDate, lastWorkout, templates, showTemplates, toast,
   onStartEmpty, onStartAIWorkout, onRepeatLastWorkout, onLoadTemplate, onDeleteTemplate,
-  onSetShowTemplates, onSetToast, onTimeChange, onGenerateForSplit, onToggleSplitPicker, onNavigateToCoach,
+  onSetShowTemplates, onSetToast, onTimeChange, onGenerateForSplit, onToggleSplitPicker, onNavigateToCoach, onShowReview,
 }: StartFlowViewProps) {
   const { t } = useTranslation()
   const [moreOptionsOpen, setMoreOptionsOpen] = useState(false)
@@ -173,9 +174,16 @@ export default function StartFlowView({
         </button>
 
         {isReady && (
-          <p className="mt-2 text-center text-sm text-gray-500">
-            {exerciseCount} {t('common.exercises')} · ~{estimatedDuration} min
-          </p>
+          <div className="mt-2 text-center">
+            <p className="text-sm text-gray-500">
+              {exerciseCount} {t('common.exercises')} · ~{estimatedDuration} min
+            </p>
+            {onShowReview && (
+              <button onClick={onShowReview} className="mt-1 text-xs font-medium text-cyan-500/70 active:text-cyan-400">
+                {t('logger.view_details')}
+              </button>
+            )}
+          </div>
         )}
 
         {error && (

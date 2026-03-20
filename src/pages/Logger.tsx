@@ -404,7 +404,19 @@ export default function Logger() {
 
   const handleStartAIWorkout = useCallback(() => {
     if (!startFlow.state.generatedWorkout) return
-    // Show review screen instead of immediately starting
+    // Start immediately (skip review for speed)
+    startFlow.clearSessionCache()
+    try {
+      localStorage.setItem('coach-pending-workout', JSON.stringify(startFlow.state.generatedWorkout))
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn('Failed to save pending workout:', e)
+    }
+    aw.startWorkout(startFlow.state.generatedWorkout)
+    localStorage.removeItem('coach-pending-workout')
+  }, [startFlow, aw])
+
+  const handleShowReview = useCallback(() => {
+    if (!startFlow.state.generatedWorkout) return
     setShowReview(true)
   }, [startFlow.state.generatedWorkout])
 
@@ -510,6 +522,7 @@ export default function Logger() {
         onGenerateForSplit={startFlow.generateForSplit}
         onToggleSplitPicker={(show) => startFlow.dispatch({ type: 'TOGGLE_SPLIT_PICKER', payload: { show } })}
         onNavigateToCoach={() => nav('/coach')}
+        onShowReview={startFlow.state.generatedWorkout ? handleShowReview : undefined}
       />
     )
   }

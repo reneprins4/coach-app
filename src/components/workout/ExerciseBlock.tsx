@@ -184,45 +184,32 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
   const isDone = plannedSets !== null && loggedSets >= plannedSets
 
   return (
-    <div className={`rounded-2xl border min-w-0 w-full transition-colors ${
-      isDone
-        ? (compact ? 'border-green-500/30 bg-gray-800/50' : 'border-green-500/25 bg-gray-900')
-        : (compact ? 'border-gray-700 bg-gray-800/50' : 'border-gray-800 bg-gray-900')
+    <div className={`card min-w-0 w-full p-0 overflow-hidden transition-colors ${
+      isDone ? 'border-green-500/20' : ''
     }`}>
       {/* Header */}
-      <div className={`border-b border-gray-800 px-4 ${compact ? 'py-3' : 'py-4'}`}>
-        <div className="flex items-start justify-between gap-2">
-          {/* Exercise thumbnail */}
+      <div className={`border-b border-white/[0.04] px-5 ${compact ? 'py-3' : 'py-4'}`}>
+        <div className="flex items-start justify-between gap-3">
           {exercise.image_url_0 && (
-            <img
-              src={exercise.image_url_0}
-              alt=""
-              className="h-10 w-10 shrink-0 rounded-lg bg-gray-800 object-cover"
-              loading="lazy"
-            />
+            <img src={exercise.image_url_0} alt="" className="h-10 w-10 shrink-0 rounded-xl bg-white/[0.04] object-cover" loading="lazy" />
           )}
           <div className="flex-1 min-w-0">
-            <h3 className={`font-black tracking-tight text-white truncate ${compact ? 'text-base' : 'text-xl'}`}>{exercise.name}</h3>
+            <h3 className={`font-black tracking-tight text-white truncate ${compact ? 'text-base' : 'text-lg'}`}>{exercise.name}</h3>
             <div className="mt-0.5 flex items-center gap-2 flex-wrap">
-              {exercise.muscle_group && (
-                <span className="label-caps">{exercise.muscle_group}</span>
-              )}
-              {aiTarget && (
-                <span className="label-caps text-cyan-500">{aiTarget}</span>
-              )}
+              {exercise.muscle_group && <span className="label-caps">{exercise.muscle_group}</span>}
+              {aiTarget && <span className="label-caps text-cyan-500">{aiTarget}</span>}
               {plannedSets !== null && (
-                <span className={`label-caps font-bold ${isDone ? 'text-green-400' : 'text-gray-500'}`}>
-                  {isDone ? `\u2713 ${loggedSets}/${plannedSets} sets` : `${loggedSets}/${plannedSets} sets`}
+                <span className={`label-caps font-bold ${isDone ? 'text-green-400' : 'text-gray-600'}`}>
+                  {isDone ? `\u2713 ${loggedSets}/${plannedSets}` : `${loggedSets}/${plannedSets} sets`}
                 </span>
               )}
             </div>
           </div>
 
-          {/* Form button + 3-dot menu */}
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => setShowGuide(true)}
-              className="flex items-center gap-1 rounded-lg border border-gray-700 px-2.5 py-1.5 text-xs font-semibold text-gray-400 active:bg-gray-800 active:text-white transition-colors"
+              className="flex items-center gap-1 rounded-xl bg-white/[0.04] border border-white/[0.06] px-2.5 py-1.5 text-xs font-semibold text-gray-500 active:bg-white/[0.08] active:text-white transition-colors"
             >
               {t('logger.technique')}
             </button>
@@ -231,32 +218,16 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
                 onClick={() => setShowMenu(!showMenu)}
                 aria-label={t('logger.menu') || 'Menu'}
                 aria-expanded={showMenu}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 active:text-gray-400 min-h-[44px] min-w-[44px]"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-700 active:text-gray-400 min-h-[44px] min-w-[44px]"
               >
                 <MoreVertical size={18} aria-hidden="true" />
               </button>
-
               {showMenu && (
-                <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-2xl border border-gray-700/60 bg-gray-900 shadow-2xl">
-                  <button
-                    onClick={() => { setShowGuide(true); setShowMenu(false) }}
-                    className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-gray-800"
-                  >
-                    {t('logger.explain')}
-                  </button>
-                  <button
-                    onClick={() => { onSwap(); setShowMenu(false) }}
-                    className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-gray-800"
-                  >
-                    {t('logger.swap_exercise')}
-                  </button>
-                  <div className="mx-4 border-t border-gray-800" />
-                  <button
-                    onClick={() => { onRemove(); setShowMenu(false) }}
-                    className="block w-full px-4 py-3 text-left text-sm font-medium text-red-400 active:bg-gray-800"
-                  >
-                    {t('logger.remove')}
-                  </button>
+                <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-2xl border border-white/[0.06] bg-gray-900 shadow-2xl">
+                  <button onClick={() => { setShowGuide(true); setShowMenu(false) }} className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-white/[0.04]">{t('logger.explain')}</button>
+                  <button onClick={() => { onSwap(); setShowMenu(false) }} className="block w-full px-4 py-3 text-left text-sm font-medium text-white active:bg-white/[0.04]">{t('logger.swap_exercise')}</button>
+                  <div className="mx-4 border-t border-white/[0.04]" />
+                  <button onClick={() => { onRemove(); setShowMenu(false) }} className="block w-full px-4 py-3 text-left text-sm font-medium text-red-400 active:bg-white/[0.04]">{t('logger.remove')}</button>
                 </div>
               )}
             </div>
@@ -341,36 +312,36 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
 
       {/* Logged sets */}
       {exercise.sets.length > 0 && (
-        <div className="border-b border-gray-800 px-4 py-3 space-y-1.5">
+        <div className="border-b border-white/[0.04] px-5 py-3 space-y-1.5">
           {exercise.sets.map((s, i) => (
             <button
               key={s.id}
               onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-              className="flex w-full items-center justify-between rounded-xl bg-gray-800/70 px-4 py-2.5 active:bg-gray-700/80"
+              className="flex w-full items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-2.5 active:bg-white/[0.06] transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="label-caps w-8 text-right">{i + 1}</span>
+                <span className="label-caps w-6 text-right text-gray-700">{i + 1}</span>
                 <span className="text-base font-bold tracking-tight text-white tabular">
-                  {s.weight_kg}<span className="text-sm font-normal text-gray-500">kg</span>
-                  <span className="mx-1.5 text-gray-600">{'\u00D7'}</span>
-                  {s.reps}<span className="text-sm font-normal text-gray-500"> reps</span>
+                  {s.weight_kg}<span className="text-xs font-normal text-gray-600">kg</span>
+                  <span className="mx-1.5 text-gray-700">{'\u00D7'}</span>
+                  {s.reps}
                 </span>
-                {s.rpe && <span className="label-caps">RPE {s.rpe}</span>}
+                {s.rpe && <span className="label-caps text-gray-600">RPE {s.rpe}</span>}
               </div>
-              <Check size={14} className="text-green-400 shrink-0" />
+              <Check size={14} className="text-green-400/80 shrink-0" />
             </button>
           ))}
         </div>
       )}
 
-      {/* Repeat last set button */}
+      {/* Repeat last set */}
       {exercise.sets.length > 0 && (() => {
         const lastSet = exercise.sets[exercise.sets.length - 1]!
         return (
-          <div className="px-4 pt-3">
+          <div className="px-5 pt-3">
             <button
               onClick={() => onAddSet({ weight_kg: lastSet.weight_kg, reps: lastSet.reps, rpe: lastSet.rpe })}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-600 text-sm font-medium text-gray-400 active:bg-gray-800 active:text-white min-h-[44px]"
+              className="btn-secondary h-11 w-full text-sm"
             >
               <RotateCcw size={14} />
               {t('logger.repeat_set')} {lastSet.weight_kg}kg {'\u00D7'} {lastSet.reps}
@@ -381,155 +352,85 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
 
       {/* PR Banner */}
       {prBanner && (
-        <div role="status" aria-live="polite" className="mx-4 mt-3 flex items-center justify-between rounded-xl bg-cyan-500/10 border border-cyan-500/20 px-3 py-2">
+        <div role="status" aria-live="polite" className="card-accent mx-5 mt-3 flex items-center justify-between p-3 glow-cyan">
           <div className="flex items-center gap-2">
             <Trophy size={16} className="text-cyan-400 shrink-0" />
             <span className="text-sm font-bold text-cyan-400">
-              {t('pr.new_record')}: {prBanner.weight}kg {'\u00B7'} {prBanner.reps} reps
+              {t('pr.new_record')}: {prBanner.weight}kg · {prBanner.reps} reps
               {prBanner.improvement > 0 && (
                 <span className="ml-2 text-cyan-300">+{prBanner.improvement}kg</span>
               )}
             </span>
           </div>
-          <button
-            onClick={() => setPrBanner(null)}
-            className="p-1 text-cyan-500 active:text-cyan-300"
-          >
+          <button onClick={() => setPrBanner(null)} className="p-1 text-cyan-600 active:text-cyan-400">
             <X size={14} />
           </button>
         </div>
       )}
 
       {/* Input section */}
-      <div className="px-4 py-4 space-y-4">
-        {/* Weight + Reps side by side */}
+      <div className="px-5 py-5 space-y-4">
+        {/* Weight + Reps */}
         <div className="grid grid-cols-2 gap-3">
-          {/* Weight */}
           <div>
             <div className="mb-2 flex h-5 items-center justify-between">
               <span className="label-caps">{t('logger.weight')}</span>
-              <button
-                type="button"
-                onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
-                className="label-caps text-cyan-500 active:text-cyan-400"
-              >
-                {t('logger.plates')}
-              </button>
+              <button type="button" onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)} className="label-caps text-cyan-500 active:text-cyan-400">{t('logger.plates')}</button>
             </div>
             <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => adjustWeight(-2.5)}
-                aria-label={t('logger.weight') + ' -2.5kg'}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700 min-h-[44px] min-w-[44px]"
-              >
-                {'\u2212'}
-              </button>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.5"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                placeholder="\u2014"
-                aria-label={t('logger.weight')}
-                className="h-11 min-w-0 flex-1 rounded-xl bg-gray-800 px-2 text-center text-lg font-black tracking-tight text-white tabular outline-none placeholder-gray-700"
-              />
-              <button
-                type="button"
-                onClick={() => adjustWeight(2.5)}
-                aria-label={t('logger.weight') + ' +2.5kg'}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700 min-h-[44px] min-w-[44px]"
-              >
-                +
-              </button>
+              <button type="button" onClick={() => adjustWeight(-2.5)} aria-label={t('logger.weight') + ' -2.5kg'}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-lg text-gray-400 active:bg-white/[0.08] min-h-[44px] min-w-[44px]">{'\u2212'}</button>
+              <input type="number" inputMode="decimal" step="0.5" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="\u2014" aria-label={t('logger.weight')}
+                className="h-12 min-w-0 flex-1 rounded-xl px-2 text-center text-xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700" />
+              <button type="button" onClick={() => adjustWeight(2.5)} aria-label={t('logger.weight') + ' +2.5kg'}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-lg text-gray-400 active:bg-white/[0.08] min-h-[44px] min-w-[44px]">+</button>
             </div>
           </div>
-
-          {/* Reps */}
           <div>
             <div className="mb-2 flex h-5 items-center">
               <span className="label-caps">{t('logger.reps_label')}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => adjustReps(-1)}
-                aria-label={t('logger.reps_label') + ' -1'}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700 min-h-[44px] min-w-[44px]"
-              >
-                {'\u2212'}
-              </button>
-              <input
-                type="number"
-                inputMode="numeric"
-                value={reps}
-                onChange={(e) => setReps(e.target.value)}
-                placeholder="\u2014"
-                aria-label={t('logger.reps_label')}
-                className="h-11 min-w-0 flex-1 rounded-xl bg-gray-800 px-2 text-center text-lg font-black tracking-tight text-white tabular outline-none placeholder-gray-700"
-              />
-              <button
-                type="button"
-                onClick={() => adjustReps(1)}
-                aria-label={t('logger.reps_label') + ' +1'}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-800 text-lg font-light text-gray-400 active:bg-gray-700 min-h-[44px] min-w-[44px]"
-              >
-                +
-              </button>
+              <button type="button" onClick={() => adjustReps(-1)} aria-label={t('logger.reps_label') + ' -1'}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-lg text-gray-400 active:bg-white/[0.08] min-h-[44px] min-w-[44px]">{'\u2212'}</button>
+              <input type="number" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} placeholder="\u2014" aria-label={t('logger.reps_label')}
+                className="h-12 min-w-0 flex-1 rounded-xl px-2 text-center text-xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700" />
+              <button type="button" onClick={() => adjustReps(1)} aria-label={t('logger.reps_label') + ' +1'}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-lg text-gray-400 active:bg-white/[0.08] min-h-[44px] min-w-[44px]">+</button>
             </div>
           </div>
         </div>
 
-        {/* Previous session hint with progressive overload suggestion */}
+        {/* Previous session hint */}
         {prevData && (
-          <p className="text-center label-caps">
-            {t('logger.last_session')}: <span className="text-gray-400">{prevData.weight}kg {'\u00D7'} {prevData.reps}</span>
+          <div className="rounded-xl bg-white/[0.02] border border-white/[0.04] px-4 py-2.5 text-center">
+            <span className="label-caps">{t('logger.last_session')}: </span>
+            <span className="text-xs font-semibold tabular text-gray-400">{prevData.weight}kg {'\u00D7'} {prevData.reps}</span>
             {suggestNextWeight(prevData.weight) && (
-              <span className="text-cyan-400 font-medium"> {'\u2014'} {t('logger.try')}: {suggestNextWeight(prevData.weight)}kg</span>
+              <span className="text-xs font-bold tabular text-cyan-400"> — {t('logger.try')}: {suggestNextWeight(prevData.weight)}kg</span>
             )}
-          </p>
+          </div>
         )}
 
-        {/* RPE hint for junk volume analysis */}
         {exercise.sets.length >= 3 && !exercise.sets.some(s => s.rpe) && (
           <p className="text-center text-[10px] text-gray-700">{t('logger.rpe_hint')}</p>
         )}
 
-        {/* RPE buttons */}
         <RpeButtons value={rpe} onChange={setRpe} beginnerMode={beginnerMode} />
 
-        {/* Done state banner */}
+        {/* Done or Log Set */}
         {isDone ? (
-          <div className="flex items-center justify-between rounded-xl border border-green-500/25 bg-green-500/10 px-4 py-3">
+          <div className="flex items-center justify-between rounded-2xl border border-green-500/20 bg-green-500/5 px-5 py-3">
             <div className="flex items-center gap-2">
               <Check size={15} className="text-green-400 shrink-0" />
               <span className="text-sm font-semibold text-green-400">{t('logger.exercise_done')}</span>
             </div>
-            <button
-              onClick={handleAdd}
-              className="text-xs font-medium text-gray-500 active:text-gray-300"
-            >
-              {t('logger.extra_set')}
-            </button>
+            <button onClick={handleAdd} className="text-xs font-medium text-gray-600 active:text-gray-400">{t('logger.extra_set')}</button>
           </div>
         ) : (
           <>
-            {/* Add set button */}
-            <button
-              onClick={handleAdd}
-              className="btn-primary"
-            >
-              {t('logger.log_set')}
-            </button>
-
-            {/* Skip */}
-            <button
-              onClick={onRemove}
-              className="w-full py-1 text-xs font-medium text-gray-600 active:text-gray-400"
-            >
-              {t('common.skip')}
-            </button>
+            <button onClick={handleAdd} className="btn-primary">{t('logger.log_set')}</button>
+            <button onClick={onRemove} className="w-full py-1 text-xs font-medium text-gray-700 active:text-gray-500">{t('common.skip')}</button>
           </>
         )}
       </div>

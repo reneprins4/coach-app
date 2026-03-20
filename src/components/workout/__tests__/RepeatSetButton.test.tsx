@@ -135,7 +135,8 @@ describe('Repeat Set Button', () => {
     const set1 = makeSet()
     renderBlock({ exercise: makeExercise([set1]) })
     const btn = screen.getByRole('button', { name: /repeat/i })
-    expect(btn.className).toContain('min-h-[44px]')
+    // btn-secondary has height: 3.5rem (56px) > 44px touch target
+    expect(btn.className).toContain('btn-secondary')
   })
 
   it('can repeat multiple times in succession', () => {

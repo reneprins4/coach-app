@@ -187,6 +187,7 @@
     "superset_exit": "Superset mode disabled",
     "superset_mode_active": "Superset mode active",
     "replacing": "Replacing",
+    "view_details": "View details",
     "template_loaded": "Template loaded",
     "template_deleted": "Template deleted",
     "template_delete_error": "Could not delete template",
