@@ -923,3 +923,9 @@ export interface InjuryRisk {
   type: InjuryRiskType
   reason: string
 }
+
+// ---- Injury Recovery System Types ----
+// Re-exported from src/lib/injuryRecovery.ts for convenience
+
+export type { InjuryArea, InjurySeverity, InjurySide, InjuryStatus, CheckInFeeling } from '../lib/injuryRecovery'
+export type { ActiveInjury, InjuryCheckIn, RehabExercise, InjuryAreaConfig, RecoveryGuidance, FilteredExercise } from '../lib/injuryRecovery'

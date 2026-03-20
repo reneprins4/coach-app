@@ -4,6 +4,7 @@ import { getExerciseSubstituteLocal } from './exerciseSubstitutes'
 import { getVolumeCeiling } from './training-analysis'
 import { generateLocalWorkout } from './localWorkoutGenerator'
 import { logWarn } from './logger'
+import { loadInjuries, filterWorkoutForInjuries } from './injuryRecovery'
 import type {
   MuscleStatusMap, MuscleGroup, ExperienceLevel, AIWorkoutResponse,
   ExerciseSubstituteInput, ExerciseSubstituteResponse, ExerciseGuideResponse,
@@ -219,7 +220,15 @@ export async function generateScientificWorkout({
 
   const genderNote = preferences.gender ? `\nGender:${preferences.gender}` : ''
 
-  const prompt = `Athlete: ${preferences.gender || '?'}/${bw}/${level}, goal:${preferences.goal || 'hypertrophy'}, equip:${equipment}, freq:${preferences.frequency || '4x'}/wk, energy:${preferences.energy || 'medium'}, time:${preferences.time || 60}min${focusNote}${priorityNote}${mainLiftNote}${trainingGoalNote}${goalRepNote}${genderNote ? `\nGender note: ${preferences.gender} — adjust volume/recovery accordingly` : ''}
+  // Injury context for AI prompt
+  const activeInjuries = loadInjuries().filter(i => i.status !== 'resolved')
+  const injuryNote = activeInjuries.length > 0
+    ? `\nINJURIES:\n${activeInjuries.map(i =>
+        `INJURY: ${i.bodyArea} (${i.severity}, ${i.status}) — AVOID exercises that stress this area. ${i.status === 'recovering' ? 'Use 70% weight for affected area.' : 'DO NOT include exercises for this area.'}`
+      ).join('\n')}`
+    : ''
+
+  const prompt = `Athlete: ${preferences.gender || '?'}/${bw}/${level}, goal:${preferences.goal || 'hypertrophy'}, equip:${equipment}, freq:${preferences.frequency || '4x'}/wk, energy:${preferences.energy || 'medium'}, time:${preferences.time || 60}min${focusNote}${priorityNote}${mainLiftNote}${trainingGoalNote}${goalRepNote}${genderNote ? `\nGender note: ${preferences.gender} — adjust volume/recovery accordingly` : ''}${injuryNote}
 ${periodizationNote}
 ${weightGuidance}
 
@@ -288,6 +297,30 @@ Return JSON:{"split":"","reasoning":"2-3 sentences","exercises":[{"name":"","mus
           ? (fallbacks[ex.muscle_group] ?? 20)
           : ex.weight_kg,
       }))
+    }
+
+    // --- Injury safety net: filter AI result for active injuries ---
+    if (activeInjuries.length > 0 && result.exercises) {
+      const filtered = filterWorkoutForInjuries(
+        result.exercises as unknown as Array<{ name: string; muscle_group: string; [key: string]: unknown }>,
+        activeInjuries,
+      )
+      result.exercises = filtered.map(fe => {
+        const existing = result.exercises.find(e => e.name === fe.name)
+        if (existing) return existing
+        return {
+          name: fe.name,
+          muscle_group: fe.muscle_group as typeof result.exercises[0]['muscle_group'],
+          sets: fe.isRehab ? 3 : 3,
+          reps_min: fe.isRehab ? 12 : 8,
+          reps_max: fe.isRehab ? 15 : 12,
+          weight_kg: 0,
+          rpe_target: fe.isRehab ? 5 : 7,
+          rest_seconds: fe.isRehab ? 60 : 90,
+          notes: fe.isRehab ? 'Rehab exercise' : `Alternative for ${fe.originalExercise || 'excluded exercise'}`,
+          vs_last_session: 'new' as const,
+        }
+      })
     }
 
     // --- Cache write (2h TTL) ---

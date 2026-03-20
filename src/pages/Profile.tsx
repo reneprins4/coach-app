@@ -7,6 +7,11 @@ import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
 import { ACHIEVEMENTS, buildAchievementContext, getUnlockedAchievements, syncAchievements } from '../lib/achievements'
 import AchievementBadge from '../components/AchievementBadge'
+import InjuryBanner from '../components/InjuryBanner'
+import InjuryReport from '../components/InjuryReport'
+import InjuryCheckIn from '../components/InjuryCheckIn'
+import { useInjuries } from '../hooks/useInjuries'
+import type { ActiveInjury } from '../lib/injuryRecovery'
 
 export default function Profile() {
   const { t, i18n } = useTranslation()
@@ -22,6 +27,11 @@ export default function Profile() {
 
   const [tab, setTab] = useState('personal')
   const [showSaved, setShowSaved] = useState(false)
+
+  // Injury management
+  const { activeInjuries, addInjury, checkIn, resolve } = useInjuries()
+  const [showInjuryReport, setShowInjuryReport] = useState(false)
+  const [checkInInjury, setCheckInInjury] = useState<ActiveInjury | null>(null)
 
   const settings = localSettings
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -272,6 +282,28 @@ export default function Profile() {
           ══════════════════════════════════════════════════════════════════════ */}
       {tab === 'training' && (
         <div className="space-y-6">
+          {/* Blessures */}
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="label-caps">{t('injury.injuries_title')}</p>
+              <button
+                onClick={() => setShowInjuryReport(true)}
+                className="text-xs font-medium text-cyan-400 active:text-cyan-300"
+              >
+                {t('injury.report_injury')}
+              </button>
+            </div>
+            {activeInjuries.length > 0 ? (
+              <InjuryBanner
+                injuries={activeInjuries}
+                onCheckIn={(injury) => setCheckInInjury(injury)}
+                onResolve={(injury) => resolve(injury.id)}
+              />
+            ) : (
+              <p className="text-xs text-gray-600">{t('injury.no_injuries')}</p>
+            )}
+          </div>
+
           {/* Trainingsdoel */}
           <div>
             <p className="label-caps mb-2">{t('training_goal.title')}</p>
@@ -633,6 +665,28 @@ export default function Profile() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Injury Report Modal */}
+      <InjuryReport
+        isOpen={showInjuryReport}
+        onClose={() => setShowInjuryReport(false)}
+        onReport={(area, severity, side) => {
+          addInjury(area, severity, side)
+          setShowInjuryReport(false)
+        }}
+      />
+
+      {/* Injury Check-In Modal */}
+      {checkInInjury && (
+        <InjuryCheckIn
+          isOpen={!!checkInInjury}
+          onClose={() => setCheckInInjury(null)}
+          onCheckIn={(feeling) => {
+            checkIn(checkInInjury.id, feeling)
+          }}
+          injuryArea={checkInInjury.bodyArea}
+        />
       )}
     </div>
   )

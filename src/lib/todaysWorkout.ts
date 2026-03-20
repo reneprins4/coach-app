@@ -73,6 +73,11 @@ export function generateTodaysWorkout(workouts: Workout[]): TodaysWorkoutSuggest
     },
   })
 
+  // generateLocalWorkout already handles injury filtering internally,
+  // so no second filter pass is needed here. A second pass would risk
+  // duplicating rehab exercises or excluding rehab exercises that match
+  // their own injury's exclusion patterns.
+
   return {
     split: bestSplit.name,
     exercises: workout.exercises,

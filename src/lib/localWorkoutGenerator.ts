@@ -15,6 +15,8 @@ import type {
 } from '../types'
 import { SET_TARGETS_BY_GOAL, getVolumeCeiling } from './training-analysis'
 import { calculateProgression } from './progressiveOverload'
+import { loadInjuries, filterWorkoutForInjuries, getRecoveryGuidance, INJURY_AREAS } from './injuryRecovery'
+import type { ActiveInjury } from './injuryRecovery'
 
 // --- Exercise Templates ---
 
@@ -408,7 +410,73 @@ export function generateLocalWorkout({
     volumeLines.push(`${muscle}: ${currentSets + addedSets}/${target.min}-${target.max} sets`)
   }
 
-  const reasoning = `Template-based ${split} workout. ${isDeload ? 'Deload week: reduced volume and intensity.' : `Progressive overload applied from last ${Object.keys(historyMap).length} tracked exercises.`} ${focusedMuscles.size > 0 ? `Extra volume for: ${[...focusedMuscles].join(', ')}.` : ''}`
+  let reasoning = `Template-based ${split} workout. ${isDeload ? 'Deload week: reduced volume and intensity.' : `Progressive overload applied from last ${Object.keys(historyMap).length} tracked exercises.`} ${focusedMuscles.size > 0 ? `Extra volume for: ${[...focusedMuscles].join(', ')}.` : ''}`
+
+  // --- Injury filtering ---
+  const activeInjuries = loadInjuries().filter((i: ActiveInjury) => i.status !== 'resolved')
+  if (activeInjuries.length > 0) {
+    const filtered = filterWorkoutForInjuries(
+      exercises as unknown as Array<{ name: string; muscle_group: string; [key: string]: unknown }>,
+      activeInjuries,
+    )
+
+    // Apply weight modifiers for recovering injuries — only to exercises
+    // whose muscle group is affected by the injury
+    const recoveringInjuries = activeInjuries.filter(i => i.status === 'recovering')
+    if (recoveringInjuries.length > 0) {
+      for (const ex of filtered) {
+        if (!ex.isRehab && !ex.isAlternative) {
+          for (const injury of recoveringInjuries) {
+            const config = INJURY_AREAS[injury.bodyArea]
+            if (!config) continue
+            const affectedMuscles = config.affectedMuscles
+            // Only reduce weight if the exercise targets a muscle affected by this injury
+            if (!affectedMuscles.includes(ex.muscle_group)) continue
+            const guidance = getRecoveryGuidance(injury)
+            if (guidance.weightModifier < 1 && guidance.weightModifier > 0) {
+              const weight = (ex as unknown as AIExercise).weight_kg
+              if (typeof weight === 'number' && weight > 0) {
+                ;(ex as unknown as AIExercise).weight_kg = Math.round(weight * guidance.weightModifier / 2.5) * 2.5
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Map filtered exercises back to AIExercise format
+    const injuryExercises: AIExercise[] = filtered.map(fe => {
+      // Check if this was an existing exercise with full AIExercise fields
+      const existing = exercises.find(e => e.name === fe.name)
+      if (existing) {
+        return { ...existing }
+      }
+      // Alternative or rehab exercise — build minimal AIExercise
+      return {
+        name: fe.name,
+        muscle_group: fe.muscle_group as MuscleGroup,
+        sets: fe.isRehab ? 3 : 3,
+        reps_min: fe.isRehab ? 12 : 8,
+        reps_max: fe.isRehab ? 15 : 12,
+        weight_kg: 0,
+        rpe_target: fe.isRehab ? 5 : 7,
+        rest_seconds: fe.isRehab ? 60 : 90,
+        notes: fe.isRehab ? 'Rehab exercise' : `Alternative for ${fe.originalExercise || 'excluded exercise'}`,
+        vs_last_session: 'new' as AIExercise['vs_last_session'],
+      }
+    })
+
+    const injuryAreas = activeInjuries.map(i => i.bodyArea).join(', ')
+    reasoning += ` Modified for injury: ${injuryAreas}.`
+
+    return {
+      split,
+      reasoning,
+      exercises: injuryExercises,
+      estimated_duration_min: estimatedDuration,
+      volume_notes: volumeLines.join(', '),
+    }
+  }
 
   return {
     split,

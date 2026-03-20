@@ -1,10 +1,15 @@
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { DashboardSkeleton } from '../components/Skeleton'
+import InjuryBanner from '../components/InjuryBanner'
+import InjuryCheckIn from '../components/InjuryCheckIn'
+import InjuryReport from '../components/InjuryReport'
+import { useInjuries } from '../hooks/useInjuries'
+import type { ActiveInjury } from '../lib/injuryRecovery'
 
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
 import { analyzeTraining } from '../lib/training-analysis'
@@ -17,6 +22,9 @@ export default function Dashboard() {
   const { user, settings } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
   const nav = useNavigate()
+  const { activeInjuries, addInjury, checkIn, resolve } = useInjuries()
+  const [checkInInjury, setCheckInInjury] = useState<ActiveInjury | null>(null)
+  const [showReportModal, setShowReportModal] = useState(false)
 
   const stats = useMemo(() => {
     const now = new Date()
@@ -118,6 +126,15 @@ export default function Dashboard() {
           <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">{t('dashboard.streak')}</p>
         </div>
       </div>
+
+      {/* Injury Banner */}
+      {activeInjuries.length > 0 && (
+        <InjuryBanner
+          injuries={activeInjuries}
+          onCheckIn={(injury) => setCheckInInjury(injury)}
+          onResolve={(injury) => resolve(injury.id)}
+        />
+      )}
 
       {/* Today's Workout — 1-tap start */}
       {todaysWorkout && (
@@ -284,9 +301,17 @@ export default function Dashboard() {
       {/* Secondary CTA */}
       <button
         onClick={() => nav('/log')}
-        className="btn-secondary mb-6"
+        className="btn-secondary mb-3"
       >
         {t('dashboard.free_training')}
+      </button>
+
+      {/* Report Injury link */}
+      <button
+        onClick={() => setShowReportModal(true)}
+        className="mb-6 w-full py-2 text-xs font-medium text-gray-500 active:text-gray-300"
+      >
+        {t('injury.report_injury')}
       </button>
 
       {/* Recent workouts - clean list style */}
@@ -320,6 +345,28 @@ export default function Dashboard() {
             })}
           </div>
         </div>
+      )}
+
+      {/* Injury Report Modal */}
+      <InjuryReport
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onReport={(area, severity, side) => {
+          addInjury(area, severity, side)
+          setShowReportModal(false)
+        }}
+      />
+
+      {/* Injury Check-In Modal */}
+      {checkInInjury && (
+        <InjuryCheckIn
+          isOpen={!!checkInInjury}
+          onClose={() => setCheckInInjury(null)}
+          onCheckIn={(feeling) => {
+            checkIn(checkInInjury.id, feeling)
+          }}
+          injuryArea={checkInInjury.bodyArea}
+        />
       )}
     </div>
   )

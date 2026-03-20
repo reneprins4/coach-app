@@ -1,0 +1,632 @@
+/**
+ * Injury Recovery System
+ *
+ * Manages active injuries, exercise exclusions, safe alternatives,
+ * rehab exercises, and recovery progression tracking.
+ */
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type InjuryArea = 'shoulder' | 'knee' | 'lower_back' | 'elbow' | 'wrist' | 'hip' | 'neck' | 'ankle'
+export type InjurySeverity = 'mild' | 'moderate' | 'severe'
+export type InjurySide = 'left' | 'right' | 'both'
+export type InjuryStatus = 'active' | 'recovering' | 'resolved'
+export type CheckInFeeling = 'worse' | 'same' | 'better' | 'recovered'
+
+export interface ActiveInjury {
+  id: string
+  bodyArea: InjuryArea
+  side: InjurySide
+  severity: InjurySeverity
+  reportedDate: string
+  status: InjuryStatus
+  checkIns: InjuryCheckIn[]
+}
+
+export interface InjuryCheckIn {
+  date: string
+  feeling: CheckInFeeling
+}
+
+export interface RehabExercise {
+  name: string
+  description: string
+  sets: number
+  reps: string
+  frequency: string
+}
+
+export interface InjuryAreaConfig {
+  nameKey: string
+  affectedMuscles: string[]
+  excludedPatterns: string[]
+  /** Additional patterns only excluded when severity is 'severe' */
+  severeOnlyExclusions: string[]
+  alternatives: Record<string, string>
+  rehabExercises: RehabExercise[]
+}
+
+export interface RecoveryGuidance {
+  weightModifier: number
+  message: string
+}
+
+export interface FilteredExercise {
+  name: string
+  muscle_group: string
+  isRehab?: boolean
+  isAlternative?: boolean
+  originalExercise?: string
+  [key: string]: unknown
+}
+
+// ---------------------------------------------------------------------------
+// Injury Area Configuration
+// ---------------------------------------------------------------------------
+
+export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
+  shoulder: {
+    nameKey: 'injury.area.shoulder',
+    affectedMuscles: ['shoulders', 'chest', 'triceps'],
+    excludedPatterns: [
+      'overhead press', 'ohp', 'military press', 'lateral raise',
+      'front raise', 'upright row', 'arnold press', 'behind neck',
+      'shoulder press',
+    ],
+    severeOnlyExclusions: [
+      'bench press', 'push.?up', 'dip', 'chest fly', 'cable fly',
+      'pec deck', 'incline.*press', 'decline.*press', 'floor press',
+    ],
+    alternatives: {
+      'Overhead Press': 'Landmine Press',
+      'Barbell Overhead Press': 'Landmine Press',
+      'Dumbbell Overhead Press': 'Landmine Press',
+      'Lateral Raise': 'Cable Lateral Raise (light)',
+      'Arnold Press': 'Landmine Press',
+      'Upright Row': 'Face Pull',
+      'Military Press': 'Landmine Press',
+      'Flat Barbell Bench Press': 'Floor Press',
+      'Incline Barbell Bench Press': 'Floor Press',
+      'Incline Dumbbell Press': 'Floor Press',
+    },
+    rehabExercises: [
+      { name: 'Band Pull-Aparts', description: 'Houd band op schouderbreedte, trek uit elkaar', sets: 3, reps: '15-20', frequency: 'dagelijks' },
+      { name: 'External Rotation', description: 'Elleboog langs zij, draai onderarm naar buiten', sets: 3, reps: '12-15', frequency: 'dagelijks' },
+      { name: 'Face Pulls', description: 'Cable op gezichtshoogte, trek naar gezicht', sets: 3, reps: '15-20', frequency: '3x per week' },
+      { name: 'Wall Slides', description: 'Rug tegen muur, armen omhoog schuiven', sets: 2, reps: '10-12', frequency: 'dagelijks' },
+    ],
+  },
+
+  knee: {
+    nameKey: 'injury.area.knee',
+    affectedMuscles: ['quads', 'hamstrings', 'glutes'],
+    excludedPatterns: [
+      'back squat', 'front squat', 'goblet squat', 'barbell squat',
+      'bodyweight squat', 'air squat', 'zercher squat', 'overhead squat',
+      'box squat', 'safety bar squat', 'cyclist squat', 'pendulum squat',
+      'belt squat', 'sissy squat', 'jump squat',
+      'lunge', 'leg extension', 'jump', 'box jump',
+      'pistol', 'split squat', 'bulgarian', 'step.?up',
+    ],
+    severeOnlyExclusions: [
+      'leg press', 'hack squat', 'smith.*squat', 'leg curl', 'hip thrust',
+      'deadlift', 'calf raise',
+    ],
+    alternatives: {
+      'Back Squat': 'Leg Press (Limited ROM)',
+      'Front Squat': 'Leg Press (Limited ROM)',
+      'Hack Squat': 'Leg Press (Limited ROM)',
+      'Walking Lunges': 'Glute Bridge',
+      'Bulgarian Split Squat': 'Glute Bridge',
+      'Leg Extension': 'Straight Leg Raise (isometric)',
+      'Barbell Squat': 'Leg Press (Limited ROM)',
+    },
+    rehabExercises: [
+      { name: 'Straight Leg Raise', description: 'Op rug liggend, gestrekt been optillen', sets: 3, reps: '12-15', frequency: 'dagelijks' },
+      { name: 'Wall Sit', description: 'Rug tegen muur, knieen 90 graden', sets: 3, reps: '20-30s hold', frequency: 'dagelijks' },
+      { name: 'Terminal Knee Extension', description: 'Band achter knie, strek volledig', sets: 3, reps: '15-20', frequency: 'dagelijks' },
+      { name: 'Step-Up (low box)', description: 'Lage box, langzaam en gecontroleerd', sets: 2, reps: '10-12', frequency: '3x per week' },
+    ],
+  },
+
+  lower_back: {
+    nameKey: 'injury.area.lower_back',
+    affectedMuscles: ['back', 'core', 'glutes'],
+    excludedPatterns: [
+      'deadlift', 'good morning', 'barbell row', 'pendlay row',
+      'bent.?over', 'hyperextension', 't.?bar row',
+    ],
+    severeOnlyExclusions: [
+      'squat', 'overhead press', 'hip thrust', 'romanian',
+      'stiff.?leg',
+    ],
+    alternatives: {
+      'Conventional Deadlift': 'Hyperextension (bodyweight)',
+      'Romanian Deadlift': 'Lying Leg Curl',
+      'Barbell Row': 'Chest Supported Row',
+      'Pendlay Row': 'Chest Supported Row',
+      'T-Bar Row': 'Chest Supported Row',
+      'Good Morning': 'Glute Bridge',
+    },
+    rehabExercises: [
+      { name: 'Cat-Cow Stretch', description: 'Op handen en knieen, rug ronden en hollen', sets: 2, reps: '10-12', frequency: 'dagelijks' },
+      { name: 'Bird Dog', description: 'Op handen en knieen, tegenovergestelde arm en been strekken', sets: 3, reps: '10 per kant', frequency: 'dagelijks' },
+      { name: 'Dead Bug', description: 'Op rug liggend, tegenovergestelde arm/been bewegen', sets: 3, reps: '10 per kant', frequency: 'dagelijks' },
+      { name: 'Glute Bridge', description: 'Op rug liggend, heupen optillen', sets: 3, reps: '12-15', frequency: 'dagelijks' },
+    ],
+  },
+
+  elbow: {
+    nameKey: 'injury.area.elbow',
+    affectedMuscles: ['biceps', 'triceps'],
+    excludedPatterns: [
+      'bicep curl', 'barbell curl', 'dumbbell curl', 'ez.?bar curl',
+      'preacher curl', 'concentration curl', 'hammer curl', 'cable curl',
+      'incline.*curl', 'machine.*curl', 'spider curl', 'bayesian.*curl',
+      'reverse.*curl', '21s.*curl', 'band curl',
+      'skull crush', 'close grip bench', 'preacher',
+      'concentration', 'overhead.*extension', 'pushdown',
+      'tricep kickback',
+    ],
+    severeOnlyExclusions: [
+      'bench press', 'row', 'pull.?up', 'chin.?up', 'pulldown',
+      'dip',
+    ],
+    alternatives: {
+      'Barbell Curl': 'Hammer Curl (light)',
+      'EZ-Bar Curl': 'Hammer Curl (light)',
+      'Skull Crusher': 'Tricep Pushdown (light)',
+      'Close Grip Bench Press': 'Diamond Push-up',
+      'Preacher Curl': 'Hammer Curl (light)',
+    },
+    rehabExercises: [
+      { name: 'Wrist Flexor Stretch', description: 'Arm gestrekt, hand naar beneden trekken', sets: 3, reps: '30s hold', frequency: 'dagelijks' },
+      { name: 'Wrist Extensor Stretch', description: 'Arm gestrekt, hand naar boven trekken', sets: 3, reps: '30s hold', frequency: 'dagelijks' },
+      { name: 'Pronation/Supination', description: 'Onderarm draaien met licht gewicht', sets: 2, reps: '15 per richting', frequency: 'dagelijks' },
+      { name: 'Eccentric Wrist Curl', description: 'Langzaam zakken met licht gewicht', sets: 3, reps: '12-15', frequency: '3x per week' },
+    ],
+  },
+
+  wrist: {
+    nameKey: 'injury.area.wrist',
+    affectedMuscles: ['biceps', 'triceps'],
+    excludedPatterns: [
+      'wrist curl', 'reverse.*curl', 'barbell curl',
+      'clean', 'snatch', 'front squat',
+    ],
+    severeOnlyExclusions: [
+      'bench press', 'push.?up', 'overhead press', 'deadlift',
+      'row',
+    ],
+    alternatives: {
+      'Barbell Curl': 'Machine Bicep Curl',
+      'Front Squat': 'Back Squat',
+      'Push-up': 'Machine Chest Press',
+    },
+    rehabExercises: [
+      { name: 'Wrist Circles', description: 'Langzame cirkels met de pols', sets: 2, reps: '10 per richting', frequency: 'dagelijks' },
+      { name: 'Finger Extensions', description: 'Vingers spreiden tegen weerstand (elastiek)', sets: 3, reps: '15-20', frequency: 'dagelijks' },
+      { name: 'Rice Bucket Grabs', description: 'Hand in rijstemmer openen en sluiten', sets: 2, reps: '30s', frequency: 'dagelijks' },
+    ],
+  },
+
+  hip: {
+    nameKey: 'injury.area.hip',
+    affectedMuscles: ['glutes', 'quads', 'hamstrings'],
+    excludedPatterns: [
+      'hip thrust', 'sumo', 'abductor', 'adductor',
+      'kickback', 'cossack', 'lateral.*walk',
+    ],
+    severeOnlyExclusions: [
+      'squat', 'lunge', 'deadlift', 'leg press',
+      'split squat', 'step.?up',
+    ],
+    alternatives: {
+      'Hip Thrust': 'Glute Bridge (bodyweight)',
+      'Sumo Deadlift': 'Conventional Deadlift',
+      'Bulgarian Split Squat': 'Leg Extension',
+    },
+    rehabExercises: [
+      { name: 'Clamshell', description: 'Op zij liggend, knie openen met band', sets: 3, reps: '15 per kant', frequency: 'dagelijks' },
+      { name: 'Hip Flexor Stretch', description: 'Halve kniebuiging, heup naar voren', sets: 2, reps: '30s hold per kant', frequency: 'dagelijks' },
+      { name: 'Glute Bridge', description: 'Op rug liggend, heupen optillen', sets: 3, reps: '12-15', frequency: 'dagelijks' },
+      { name: 'Fire Hydrant', description: 'Op handen en knieen, knie opzij heffen', sets: 3, reps: '12 per kant', frequency: '3x per week' },
+    ],
+  },
+
+  neck: {
+    nameKey: 'injury.area.neck',
+    affectedMuscles: ['shoulders', 'back'],
+    excludedPatterns: [
+      'shrug', 'upright row', 'behind neck',
+      'overhead press', 'military press',
+    ],
+    severeOnlyExclusions: [
+      'deadlift', 'barbell row', 'pull.?up', 'lat pulldown',
+      'bench press',
+    ],
+    alternatives: {
+      'Barbell Shrug': 'Face Pull',
+      'Upright Row': 'Lateral Raise',
+      'Barbell Overhead Press': 'Landmine Press',
+    },
+    rehabExercises: [
+      { name: 'Chin Tucks', description: 'Kin naar borst trekken, houd 5s', sets: 3, reps: '10-12', frequency: 'dagelijks' },
+      { name: 'Neck Isometrics', description: 'Handdruk tegen hoofd, houd 10s elke richting', sets: 2, reps: '10s per richting', frequency: 'dagelijks' },
+      { name: 'Upper Trap Stretch', description: 'Hoofd zijwaarts kantelen, schouder laag houden', sets: 2, reps: '30s per kant', frequency: 'dagelijks' },
+    ],
+  },
+
+  ankle: {
+    nameKey: 'injury.area.ankle',
+    affectedMuscles: ['quads', 'hamstrings', 'glutes'],
+    excludedPatterns: [
+      'calf raise', 'jump', 'box jump', 'lunge',
+      'walking', 'step.?up', 'pistol',
+    ],
+    severeOnlyExclusions: [
+      'squat', 'deadlift', 'leg press', 'split squat',
+      'bulgarian',
+    ],
+    alternatives: {
+      'Standing Calf Raise': 'Seated Calf Raise (limited ROM)',
+      'Walking Lunges': 'Leg Extension',
+      'Box Jump': 'Leg Press',
+    },
+    rehabExercises: [
+      { name: 'Ankle Circles', description: 'Voet optillen, langzame cirkels draaien', sets: 2, reps: '10 per richting', frequency: 'dagelijks' },
+      { name: 'Towel Scrunches', description: 'Handdoek met tenen naar je toe trekken', sets: 3, reps: '15-20', frequency: 'dagelijks' },
+      { name: 'Single Leg Balance', description: 'Op een been staan, ogen open/dicht', sets: 3, reps: '30s per been', frequency: 'dagelijks' },
+      { name: 'Calf Stretch', description: 'Tegen muur leunen, achterste been gestrekt', sets: 2, reps: '30s per kant', frequency: 'dagelijks' },
+    ],
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const STORAGE_KEY = 'kravex_injuries'
+
+// ---------------------------------------------------------------------------
+// Core Functions
+// ---------------------------------------------------------------------------
+
+/**
+ * Get all excluded exercise patterns for an injury area and severity.
+ * Returns an array of regex-compatible pattern strings.
+ */
+export function getExcludedExercises(area: InjuryArea, severity: InjurySeverity): string[] {
+  const config = INJURY_AREAS[area]
+  if (!config) return []
+
+  const patterns = [...config.excludedPatterns]
+  if (severity === 'severe') {
+    patterns.push(...config.severeOnlyExclusions)
+  }
+  return patterns
+}
+
+/**
+ * Find a safe alternative for a given exercise in the context of an injury.
+ * Uses substring matching against the alternatives map.
+ */
+export function getSafeAlternative(area: InjuryArea, exerciseName: string): string | null {
+  const config = INJURY_AREAS[area]
+  if (!config) return null
+
+  // Direct lookup
+  if (config.alternatives[exerciseName]) {
+    return config.alternatives[exerciseName]!
+  }
+
+  // Fuzzy lookup: find the best matching key
+  const lowerName = exerciseName.toLowerCase()
+  for (const [key, value] of Object.entries(config.alternatives)) {
+    if (lowerName.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerName)) {
+      return value
+    }
+  }
+
+  return null
+}
+
+/**
+ * Get rehab exercises for an injury area, adjusted for severity.
+ * Mild: full sets, all exercises. Severe: reduced sets, fewer exercises.
+ */
+export function getRehabExercises(area: InjuryArea, severity: InjurySeverity): RehabExercise[] {
+  const config = INJURY_AREAS[area]
+  if (!config) return []
+
+  const exercises = [...config.rehabExercises]
+
+  if (severity === 'severe') {
+    // Severe: limit to first 3, reduce sets
+    return exercises.slice(0, 3).map(ex => ({
+      ...ex,
+      sets: Math.max(1, ex.sets - 1),
+    }))
+  }
+
+  if (severity === 'mild') {
+    // Mild: full exercises
+    return exercises.map(ex => ({ ...ex }))
+  }
+
+  // Moderate: standard rehab
+  return exercises.map(ex => ({ ...ex }))
+}
+
+/**
+ * Check if an exercise is safe to perform given a list of active injuries.
+ * Only considers injuries with status 'active' or 'recovering'.
+ */
+export function isExerciseSafe(exerciseName: string, injuries: ActiveInjury[]): boolean {
+  const lowerName = exerciseName.toLowerCase()
+
+  for (const injury of injuries) {
+    if (injury.status === 'resolved') continue
+
+    const excluded = getExcludedExercises(injury.bodyArea, injury.severity)
+    for (const pattern of excluded) {
+      try {
+        if (new RegExp(pattern, 'i').test(lowerName)) {
+          return false
+        }
+      } catch {
+        // Invalid regex, fall back to substring
+        if (lowerName.includes(pattern.toLowerCase())) {
+          return false
+        }
+      }
+    }
+  }
+
+  return true
+}
+
+/**
+ * Filter a workout's exercises for active injuries.
+ * - Removes excluded exercises (replaces with alternatives when available)
+ * - Appends rehab exercises at the end
+ */
+export function filterWorkoutForInjuries(
+  exercises: Array<{ name: string; muscle_group: string; [key: string]: unknown }>,
+  injuries: ActiveInjury[],
+): FilteredExercise[] {
+  const active = injuries.filter(i => i.status !== 'resolved')
+  if (active.length === 0) {
+    return exercises.map(e => ({ ...e }))
+  }
+
+  const result: FilteredExercise[] = []
+
+  // Process each exercise
+  // Skip safety check for exercises already flagged as rehab — they are prescribed
+  // specifically for the injury and may match their own exclusion patterns
+  for (const ex of exercises) {
+    if ((ex as FilteredExercise).isRehab || isExerciseSafe(ex.name, active)) {
+      result.push({ ...ex })
+    } else {
+      // Try to find an alternative from the first matching injury
+      for (const injury of active) {
+        const excluded = getExcludedExercises(injury.bodyArea, injury.severity)
+        const isExcluded = excluded.some(p => {
+          try {
+            return new RegExp(p, 'i').test(ex.name.toLowerCase())
+          } catch {
+            return ex.name.toLowerCase().includes(p.toLowerCase())
+          }
+        })
+
+        if (isExcluded) {
+          const alt = getSafeAlternative(injury.bodyArea, ex.name)
+          if (alt) {
+            result.push({
+              name: alt,
+              muscle_group: ex.muscle_group,
+              isAlternative: true,
+              originalExercise: ex.name,
+            })
+          }
+          break // Only replace once per exercise
+        }
+      }
+    }
+  }
+
+  // Append rehab exercises for each active injury
+  // Rehab exercises are marked with isRehab: true and skip the safety check
+  // because they may match their own injury's excluded patterns (e.g. "Step-Up (low box)" matches step.?up)
+  const seenRehabNames = new Set<string>()
+  for (const injury of active) {
+    const rehab = getRehabExercises(injury.bodyArea, injury.severity)
+    for (const ex of rehab) {
+      if (!seenRehabNames.has(ex.name)) {
+        seenRehabNames.add(ex.name)
+        result.push({
+          name: ex.name,
+          muscle_group: 'rehab',
+          isRehab: true,
+        })
+      }
+    }
+  }
+
+  // Remove any workout exercises that duplicate a rehab exercise name
+  // (rehab exercises take precedence and should not be filtered out)
+  const rehabNames = new Set(result.filter(e => e.isRehab).map(e => e.name))
+  const filtered = result.filter(e => e.isRehab || !rehabNames.has(e.name))
+
+  return filtered
+}
+
+// ---------------------------------------------------------------------------
+// Injury State Management
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new active injury record.
+ */
+export function addInjury(input: {
+  bodyArea: InjuryArea
+  side: InjurySide
+  severity: InjurySeverity
+}): ActiveInjury {
+  return {
+    id: crypto.randomUUID(),
+    bodyArea: input.bodyArea,
+    side: input.side,
+    severity: input.severity,
+    reportedDate: new Date().toISOString(),
+    status: 'active',
+    checkIns: [],
+  }
+}
+
+/**
+ * Record a check-in for an injury and update its status accordingly.
+ *
+ * Status transitions:
+ * - 'recovered' feeling -> 'resolved'
+ * - 'worse' feeling -> 'active'
+ * - Two consecutive 'better' feelings -> 'recovering'
+ * - Otherwise status unchanged
+ */
+export function addCheckIn(injury: ActiveInjury, feeling: CheckInFeeling): ActiveInjury {
+  const checkIn: InjuryCheckIn = {
+    date: new Date().toISOString(),
+    feeling,
+  }
+
+  const updated: ActiveInjury = {
+    ...injury,
+    checkIns: [...injury.checkIns, checkIn],
+  }
+
+  // Determine new status
+  if (feeling === 'recovered') {
+    updated.status = 'resolved'
+  } else if (feeling === 'worse') {
+    updated.status = 'active'
+  } else if (feeling === 'better') {
+    // Check for two consecutive 'better' check-ins
+    const checkIns = updated.checkIns
+    if (checkIns.length >= 2) {
+      const last = checkIns[checkIns.length - 1]
+      const secondLast = checkIns[checkIns.length - 2]
+      if (last?.feeling === 'better' && secondLast?.feeling === 'better') {
+        updated.status = 'recovering'
+      }
+    }
+  }
+
+  return updated
+}
+
+/**
+ * Return only active and recovering injuries (exclude resolved).
+ */
+export function getActiveInjuries(injuries: ActiveInjury[]): ActiveInjury[] {
+  return injuries.filter(i => i.status === 'active' || i.status === 'recovering')
+}
+
+// ---------------------------------------------------------------------------
+// Recovery Guidance
+// ---------------------------------------------------------------------------
+
+/**
+ * Get weight modification guidance based on injury status.
+ *
+ * - active: avoid affected exercises entirely (weightModifier = 0)
+ * - recovering: use 70% of normal weight
+ * - resolved: normal training (weightModifier = 1)
+ */
+export function getRecoveryGuidance(injury: ActiveInjury): RecoveryGuidance {
+  switch (injury.status) {
+    case 'active':
+      return {
+        weightModifier: 0,
+        message: 'injury.guidance.avoid',
+      }
+    case 'recovering':
+      return {
+        weightModifier: 0.7,
+        message: 'injury.guidance.reduced',
+      }
+    case 'resolved':
+      return {
+        weightModifier: 1,
+        message: 'injury.guidance.normal',
+      }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Persistence
+// ---------------------------------------------------------------------------
+
+/**
+ * Save injuries to localStorage.
+ */
+export function saveInjuries(injuries: ActiveInjury[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(injuries))
+  } catch {
+    // Storage full or unavailable
+  }
+}
+
+/**
+ * Load injuries from localStorage. Returns empty array on failure.
+ */
+export function loadInjuries(): ActiveInjury[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed as ActiveInjury[]
+  } catch {
+    return []
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Legacy compatibility exports
+// ---------------------------------------------------------------------------
+
+/** @deprecated Use addInjury instead */
+export function reportInjury(area: InjuryArea, severity: InjurySeverity, side: InjurySide): ActiveInjury {
+  return addInjury({ bodyArea: area, side, severity })
+}
+
+/** @deprecated Use addCheckIn instead */
+export function recordCheckIn(injury: ActiveInjury, feeling: CheckInFeeling): ActiveInjury {
+  return addCheckIn(injury, feeling)
+}
+
+/** Mark an injury as resolved. */
+export function resolveInjury(injury: ActiveInjury): ActiveInjury {
+  return { ...injury, status: 'resolved' }
+}
+
+/** Check if a check-in is due (3+ days since last check-in or report). */
+export function isCheckInDue(injury: ActiveInjury): boolean {
+  if (injury.status === 'resolved') return false
+  if (injury.checkIns.length === 0) {
+    const daysSinceReport = (Date.now() - new Date(injury.reportedDate).getTime()) / (1000 * 60 * 60 * 24)
+    return daysSinceReport >= 3
+  }
+  const lastCheckIn = injury.checkIns[injury.checkIns.length - 1]!
+  const daysSince = (Date.now() - new Date(lastCheckIn.date).getTime()) / (1000 * 60 * 60 * 24)
+  return daysSince >= 3
+}
+
+/** Calculate days since injury was reported. */
+export function daysSinceInjury(injury: ActiveInjury): number {
+  return Math.floor((Date.now() - new Date(injury.reportedDate).getTime()) / (1000 * 60 * 60 * 24))
+}

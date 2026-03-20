@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Search } from 'lucide-react'
 import { useFilteredExercises } from '../hooks/useExercises'
 import { useModalA11y } from '../hooks/useModalA11y'
+import { loadInjuries, isExerciseSafe } from '../lib/injuryRecovery'
 import type { ExercisePickerProps } from '../types'
 
 const MUSCLE_FILTERS = ['all', 'chest', 'back', 'legs', 'shoulders', 'arms', 'core']
@@ -31,6 +32,9 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
   const filtered = useFilteredExercises(exercises as Parameters<typeof useFilteredExercises>[0], query, muscleFilter, equipmentFilter)
   const available = filtered.filter(e => !addedNames.includes(e.name))
   useModalA11y(true, onClose)
+
+  // Load active injuries for safety warnings
+  const activeInjuries = useMemo(() => loadInjuries().filter(i => i.status !== 'resolved'), [])
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="exercise-picker-title" className="fixed inset-0 z-50 flex flex-col bg-gray-950">
@@ -135,6 +139,11 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
                 {exercise.category === 'compound' && (
                   <span className="rounded bg-cyan-500/15 px-1.5 py-0.5 text-[10px] text-cyan-400">
                     compound
+                  </span>
+                )}
+                {activeInjuries.length > 0 && !isExerciseSafe(exercise.name, activeInjuries) && (
+                  <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                    {t('injury.risky')}
                   </span>
                 )}
               </div>
