@@ -210,13 +210,14 @@
     "try_other": "Try another",
     "use_this": "Use this",
     "explain": "Explain",
+    "technique": "Technique",
     "remove": "Remove",
     "ai_suggest": "More options",
     "swap_no_options": "No alternative found for your equipment",
     "swap_already_in_workout": "This is already in your workout",
     "swap_ai_failed": "Could not find an alternative",
     "analyzing": "Analyzing...",
-    "ai_generating": "AI working...",
+    "ai_generating": "Building your workout...",
     "ready": "Ready",
     "loading_workout": "Loading workout...",
     "generation_failed": "Generation failed",
@@ -226,6 +227,8 @@
     "templates_saved": "{{count}} saved",
     "change_split": "Change split",
     "choose_split": "Choose split",
+    "generate_workout": "Generate Workout",
+    "more_options": "More options",
     "advanced_options": "Advanced options",
     "analysis_required": "Analysis required",
     "recovered": "recovered",
@@ -342,7 +345,7 @@
   "onboarding": {
     "beginners": {
       "welcome_title": "Welcome to Kravex",
-      "welcome_sub": "AI-powered strength training. Based on sport science.",
+      "welcome_sub": "Smart strength training. Based on sport science.",
       "begin": "Begin",
       "how_title": "How it works",
       "step_indicator": "{{current}} of {{total}}",
@@ -516,11 +519,20 @@
     "per_side": "Per side of bar",
     "not_exact": "Exact weight not achievable"
   },
+  "rpe": {
+    "easy": "Easy",
+    "ok": "OK",
+    "hard": "Hard",
+    "very_hard": "Very Hard",
+    "max": "Max"
+  },
   "rest_timer": {
     "heavy_set": "Heavy set — rest longer",
     "intense_set": "Intense set — extra rest",
     "light_set": "Light set — short rest",
-    "rest": "Rest"
+    "rest": "Rest",
+    "skip": "Skip",
+    "add_time": "+30s"
   },
   "superset_modal": {
     "title": "Superset mode",
@@ -674,5 +686,8 @@
     "no_data": "No training data yet",
     "total_volume": "Total volume",
     "sets_label": "sets"
+  },
+  "review": {
+    "your_ai_workout": "Your Workout"
   }
 }

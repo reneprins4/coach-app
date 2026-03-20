@@ -24,3 +24,10 @@ Thumbs.db
 npm-debug.log*
 .vercel
 .env*.local
+
+# Supabase
+supabase/.temp/
+
+# Capacitor native platforms
+ios/
+android/

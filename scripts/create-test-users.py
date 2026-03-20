@@ -1,14 +1,17 @@
-import os
 #!/usr/bin/env python3
 """Create diverse Kravex test users in Supabase"""
 
 import json
+import os
 import urllib.request
 import urllib.error
 import time
 
-SUPABASE_URL = "https://wbccpqklrbswnumwhpgq.supabase.co"
-SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+
+if not SUPABASE_URL or not SERVICE_ROLE_KEY:
+    raise RuntimeError("Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY")
 
 HEADERS = {
     "apikey": SERVICE_ROLE_KEY,

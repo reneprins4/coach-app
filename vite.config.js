@@ -4,6 +4,10 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'child_process'
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 function getGitInfo() {
   try {
@@ -19,14 +23,26 @@ const git = getGitInfo()
 
 // https://vite.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
   define: {
     __GIT_HASH__: JSON.stringify(git.hash),
     __GIT_DATE__: JSON.stringify(git.date),
   },
   test: {
     globals: false,
-    environment: 'node',
-    include: ['src/__tests__/**/*.test.js'],
+    environment: 'jsdom',
+    include: ['src/**/*.test.{js,ts,jsx,tsx}'],
+    exclude: ['src/lib/training-analysis.test.js'],
+    setupFiles: ['src/__tests__/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/lib/**/*.ts'],
+      exclude: ['src/lib/__tests__/**', 'src/lib/supabase.ts'],
+    },
   },
   plugins: [
     react(),
@@ -68,6 +84,8 @@ export default defineConfig({
         manualChunks: {
           recharts: ['recharts'],
           supabase: ['@supabase/supabase-js'],
+          router: ['react-router-dom'],
+          i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
         },
       },
     },

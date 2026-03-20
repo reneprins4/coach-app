@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Seed additional exercises into Supabase exercises table."""
-import json, urllib.request, urllib.error, sys
+import json, os, urllib.request, urllib.error, sys
 
-SUPABASE_URL = "https://wbccpqklrbswnumwhpgq.supabase.co"
-ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2NwcWtscmJzd251bXdocGdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjU5NTcsImV4cCI6MjA4ODkwMTk1N30.wDMTD2RTIUd4AdvugPwgtE1TEEY6ws0VtMUvHXQdVC0"
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+
+if not SUPABASE_URL or not ANON_KEY:
+    raise RuntimeError("Missing required environment variables: SUPABASE_URL, SUPABASE_ANON_KEY")
 
 NEW_EXERCISES = [
     # ── CHEST ──────────────────────────────────────────────────────────────

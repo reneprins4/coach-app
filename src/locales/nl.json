@@ -210,13 +210,14 @@
     "try_other": "Probeer ander",
     "use_this": "Gebruik dit",
     "explain": "Uitleg",
+    "technique": "Techniek",
     "remove": "Verwijderen",
     "ai_suggest": "Ander voorstel",
     "swap_no_options": "Geen alternatief gevonden voor jouw equipment",
     "swap_already_in_workout": "Dit zit al in je workout",
     "swap_ai_failed": "Kon geen alternatief vinden",
     "analyzing": "Analyseren...",
-    "ai_generating": "AI bezig...",
+    "ai_generating": "Workout wordt samengesteld...",
     "ready": "Klaar",
     "loading_workout": "Workout laden...",
     "generation_failed": "Genereren mislukt",
@@ -226,6 +227,8 @@
     "templates_saved": "{{count}} opgeslagen",
     "change_split": "Andere split kiezen",
     "choose_split": "Kies split",
+    "generate_workout": "Genereer Workout",
+    "more_options": "Meer opties",
     "advanced_options": "Geavanceerde opties",
     "analysis_required": "Analyse vereist",
     "recovered": "hersteld",
@@ -342,7 +345,7 @@
   "onboarding": {
     "beginners": {
       "welcome_title": "Welkom bij Kravex",
-      "welcome_sub": "AI-gedreven krachttraining. Gebaseerd op sport science.",
+      "welcome_sub": "Slimme krachttraining. Gebaseerd op sport science.",
       "begin": "Begin",
       "how_title": "Hoe het werkt",
       "step_indicator": "{{current}} van {{total}}",
@@ -516,11 +519,20 @@
     "per_side": "Per kant van de stang",
     "not_exact": "Exacte gewicht niet haalbaar"
   },
+  "rpe": {
+    "easy": "Makkelijk",
+    "ok": "OK",
+    "hard": "Zwaar",
+    "very_hard": "Heel zwaar",
+    "max": "Max"
+  },
   "rest_timer": {
     "heavy_set": "Zware set — lang rusten",
     "intense_set": "Intensieve set — extra rust",
     "light_set": "Lichte set — korte rust",
-    "rest": "Rust"
+    "rest": "Rust",
+    "skip": "Sla over",
+    "add_time": "+30s"
   },
   "superset_modal": {
     "title": "Superset modus",
@@ -674,5 +686,8 @@
     "no_data": "Nog geen trainingsdata",
     "total_volume": "Totaal volume",
     "sets_label": "sets"
+  },
+  "review": {
+    "your_ai_workout": "Jouw Training"
   }
 }
