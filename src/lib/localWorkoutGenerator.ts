@@ -147,6 +147,7 @@ interface LocalWorkoutInput {
 // --- Helper Functions ---
 
 const LEVEL_MULTIPLIERS: Record<ExperienceLevel, number> = {
+  complete_beginner: 0.45,
   beginner: 0.6,
   intermediate: 1.0,
   advanced: 1.3,

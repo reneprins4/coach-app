@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { useAuth } from './hooks/useAuth'
 import { getSettings, saveSettings, mergeSettingsOnLogin } from './lib/settings'
+import { isBeginnerMode as checkBeginnerMode } from './lib/beginnerMode'
 import { supabase } from './lib/supabase'
 import { logError } from './lib/logger'
 import type { AuthContextValue, UserSettings } from './types'
@@ -144,7 +145,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <AuthContext.Provider value={{ ...auth, settings, updateSettings, settingsLoaded }}>
+      <AuthContext.Provider value={{ ...auth, settings, updateSettings, settingsLoaded, isBeginnerMode: checkBeginnerMode(settings.experienceLevel) }}>
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>

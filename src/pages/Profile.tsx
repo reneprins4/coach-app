@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
+import { ACHIEVEMENTS, buildAchievementContext, getUnlockedAchievements, syncAchievements } from '../lib/achievements'
+import AchievementBadge from '../components/AchievementBadge'
 
 export default function Profile() {
   const { t, i18n } = useTranslation()
@@ -42,6 +44,7 @@ export default function Profile() {
   }, [])
 
   const LEVELS = [
+    { value: 'complete_beginner', label: t('profile.experience_complete_beginner'), sub: t('profile.experience_complete_beginner_sub') },
     { value: 'beginner',     label: t('profile.experience_beginner'),     sub: '< 1 jaar' },
     { value: 'intermediate', label: t('profile.experience_intermediate'), sub: '1–3 jaar' },
     { value: 'advanced',     label: t('profile.experience_advanced'),     sub: '3+ jaar' },
@@ -100,6 +103,15 @@ export default function Profile() {
       : t('profile.unknown')
     return { totalWorkouts, totalVol, memberSince }
   }, [workouts, settings.memberSince, i18n.language, t])
+
+  // Compute and sync achievements
+  const unlockedIds = useMemo(() => {
+    if (workouts.length === 0) return getUnlockedAchievements()
+    const bodyweight = parseFloat(settings.bodyweight) || 0
+    const ctx = buildAchievementContext(workouts, bodyweight, settings.memberSince)
+    syncAchievements(ctx)
+    return getUnlockedAchievements()
+  }, [workouts, settings.bodyweight, settings.memberSince])
 
   function exportWorkoutsCSV() {
     const headers = ['Datum', 'Training ID', 'Oefening', 'Gewicht (kg)', 'Herhalingen', 'RPE', 'Volume (kg)']
@@ -518,6 +530,20 @@ export default function Profile() {
                 <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
               </div>
             ))}
+          </div>
+
+          {/* Achievements */}
+          <div>
+            <p className="label-caps mb-3">{t('achievements.title')}</p>
+            <div className="grid grid-cols-4 gap-2">
+              {ACHIEVEMENTS.map(a => (
+                <AchievementBadge
+                  key={a.id}
+                  achievement={a}
+                  unlocked={unlockedIds.includes(a.id)}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Taal */}

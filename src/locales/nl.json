@@ -100,6 +100,8 @@
     "rest_label": "Standaard rusttijd",
     "rest_hint": "De app past dit automatisch aan op basis van jouw inspanning — dit is je startwaarde.",
     "experience_label": "Ervaringsniveau",
+    "experience_complete_beginner": "Helemaal nieuw",
+    "experience_complete_beginner_sub": "Nog nooit getraind",
     "experience_beginner": "Beginner",
     "experience_intermediate": "Gemiddeld",
     "experience_advanced": "Gevorderd",
@@ -255,7 +257,8 @@
     "volume_per_muscle": "Volume per spiergroep — laatste 4 weken",
     "workouts_stat": "Trainingen",
     "volume_stat": "Volume",
-    "favorite_stat": "Favoriet"
+    "favorite_stat": "Favoriet",
+    "workouts_until_analysis": "Nog {{count}} trainingen voor je analyse"
   },
   "plan": {
     "title": "Trainingsplan",
@@ -536,8 +539,16 @@
     "explanation_8": "Je kunt nog 2 herhalingen doen",
     "explanation_9": "Je kunt nog 1 herhaling doen",
     "explanation_10": "Je kon er echt niet meer uit",
-    "explanation_summary": "RPE helpt de app begrijpen hoe zwaar je traint"
+    "explanation_summary": "RPE helpt de app begrijpen hoe zwaar je traint",
+    "beginner_explanation_title": "Hoe zwaar was je set?",
+    "beginner_explanation_easy": "Je kon makkelijk nog meer doen",
+    "beginner_explanation_medium": "Het was uitdagend maar haalbaar",
+    "beginner_explanation_hard": "Je kon het maar net afmaken",
+    "beginner_explanation_summary": "Dit helpt de app je volgende training aan te passen"
   },
+  "rpe_simple_easy": "Makkelijk",
+  "rpe_simple_medium": "Gemiddeld",
+  "rpe_simple_hard": "Zwaar",
   "rest_timer": {
     "heavy_set": "Zware set — lang rusten",
     "intense_set": "Intensieve set — extra rust",
@@ -699,7 +710,53 @@
     "total_volume": "Totaal volume",
     "sets_label": "sets"
   },
+  "measurements": {
+    "title": "Lichaam",
+    "weight": "Gewicht",
+    "waist": "Taille",
+    "chest": "Borst",
+    "arms": "Armen",
+    "hips": "Heupen",
+    "thighs": "Bovenbenen",
+    "add": "Meting toevoegen",
+    "trend_up": "Stijgend",
+    "trend_down": "Dalend",
+    "trend_stable": "Stabiel",
+    "no_data": "Nog geen metingen",
+    "save": "Opslaan",
+    "latest": "Laatste meting"
+  },
   "review": {
     "your_ai_workout": "Jouw Training"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "unlocked": "Achievement behaald!",
+    "first_workout": "Eerste training",
+    "first_workout_desc": "Voltooi je eerste training",
+    "streak_3": "3 dagen streak",
+    "streak_3_desc": "Train 3 dagen achter elkaar",
+    "streak_7": "Weekstreak",
+    "streak_7_desc": "Train 7 dagen achter elkaar",
+    "streak_30": "Maandstreak",
+    "streak_30_desc": "Train 30 dagen achter elkaar",
+    "ten_workouts": "10 trainingen",
+    "ten_workouts_desc": "Voltooi 10 trainingen",
+    "fifty_workouts": "50 trainingen",
+    "fifty_workouts_desc": "Voltooi 50 trainingen",
+    "first_pr": "Eerste PR",
+    "first_pr_desc": "Vestig je eerste persoonlijk record",
+    "ten_prs": "PR machine",
+    "ten_prs_desc": "Vestig 10 persoonlijke records",
+    "bw_bench": "Bodyweight bench",
+    "bw_bench_desc": "Bench press je eigen lichaamsgewicht",
+    "plate_club": "Plate club",
+    "plate_club_desc": "Til 100kg op een oefening",
+    "vol_10k": "10.000 kg volume",
+    "vol_10k_desc": "Verplaats in totaal 10.000 kg",
+    "vol_100k": "100.000 kg volume",
+    "vol_100k_desc": "Verplaats in totaal 100.000 kg",
+    "vol_1m": "1 miljoen kg",
+    "vol_1m_desc": "Verplaats in totaal 1.000.000 kg"
   }
 }

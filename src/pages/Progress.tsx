@@ -8,6 +8,12 @@ import VolumeChart from '../components/VolumeChart'
 import { Skeleton } from '../components/Skeleton'
 import { computeAllPRs, sortPRsForDisplay } from '../lib/prDetector'
 import { groupVolumeByWeek, groupVolumeByMonth, groupVolumeByMuscle, calcTrend, calcAvgWeeklyVolume, findBestWeek } from '../lib/volumeTracker'
+import { getVisibleTabs, workoutsUntilAnalysis } from './progressHelpers'
+import { useMeasurements } from '../hooks/useMeasurements'
+import { MEASUREMENT_TYPES, groupByType, calculateTrend, formatMeasurement } from '../lib/measurements'
+import type { MeasurementType } from '../lib/measurements'
+import MeasurementInput from '../components/MeasurementInput'
+import MeasurementChart from '../components/MeasurementChart'
 
 // Lazy load heavy analysis components (only rendered when their tab is active)
 const FormDetective = lazy(() => import('../components/FormDetective'))
@@ -42,22 +48,35 @@ const CHART_TOOLTIP_STYLE = {
 
 export default function Progress() {
   const { t, i18n } = useTranslation()
-  const { user, settings } = useAuthContext()
+  const { user, settings, updateSettings } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
   const [tab, setTab] = useState('exercise')
   const [query, setQuery] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null)
   const [volumePeriod, setVolumePeriod] = useState('12w')
+  const { measurements, addMeasurement } = useMeasurements(user?.id)
+  const [selectedMeasurementType, setSelectedMeasurementType] = useState<MeasurementType>('weight')
 
-  const TABS = [
-    { id: 'exercise', label: t('progress.tab_exercise') },
-    { id: 'volume',   label: t('volume.tab') },
-    { id: 'muscle',   label: t('progress.tab_muscle') },
-    { id: 'records',  label: t('pr.tab') },
-    { id: 'analyse',  label: t('progress.tab_analyse') },
-    { id: 'balans',   label: t('progress.tab_balance') },
-  ]
+  const remainingForAnalysis = workoutsUntilAnalysis(workouts.length)
+
+  // Body measurements grouped by type
+  const measurementsByType = useMemo(() => groupByType(measurements), [measurements])
+
+  // Sync weight measurement with profile bodyweight
+  const handleAddMeasurement = async (type: MeasurementType, value: number, date: string) => {
+    await addMeasurement(type, value, date)
+    if (type === 'weight' && settings) {
+      updateSettings({ bodyweight: String(value) })
+    }
+  }
+
+  const TABS = useMemo(() =>
+    getVisibleTabs(workouts.length).map(tab => ({
+      id: tab.id,
+      label: t(tab.labelKey),
+    })),
+  [workouts.length, t])
 
   const exerciseNames = useMemo(() => {
     const names = new Set<string>()
@@ -205,6 +224,15 @@ export default function Progress() {
           </button>
         ))}
       </div>
+
+      {/* Encouragement message for beginners with few workouts */}
+      {remainingForAnalysis > 0 && (
+        <div className="mb-4 rounded-2xl border border-cyan-500/20 bg-cyan-500/8 p-4 text-center">
+          <p className="text-sm text-cyan-400 font-semibold">
+            {t('progress.workouts_until_analysis', { count: remainingForAnalysis })}
+          </p>
+        </div>
+      )}
 
       {/* ── Per oefening ──────────────────────────────────────────── */}
       {tab === 'exercise' && (
@@ -559,6 +587,76 @@ export default function Progress() {
               ))}
             </>
           )}
+        </div>
+      )}
+
+      {/* ── Lichaam (Body Measurements) ────────────────────────────── */}
+      {tab === 'lichaam' && (
+        <div className="space-y-4">
+          {/* Input form */}
+          <MeasurementInput onSave={handleAddMeasurement} />
+
+          {/* Latest values summary */}
+          <div className="grid grid-cols-3 gap-2">
+            {MEASUREMENT_TYPES.map(({ type, labelKey }) => {
+              const entries = measurementsByType[type]
+              const latest = entries.length > 0 ? entries[entries.length - 1] : null
+              const trend = calculateTrend(entries.map(e => e.value))
+              const isSelected = selectedMeasurementType === type
+
+              return (
+                <button
+                  key={type}
+                  onClick={() => setSelectedMeasurementType(type)}
+                  className={`rounded-2xl p-3 text-center transition-colors ${
+                    isSelected
+                      ? 'ring-1 ring-cyan-500'
+                      : 'ring-1 ring-gray-800/50'
+                  }`}
+                  style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)' }}
+                >
+                  <p className="label-caps mb-1">{t(labelKey)}</p>
+                  {latest ? (
+                    <>
+                      <p className="text-lg font-black tabular-nums text-white">
+                        {formatMeasurement(type, latest.value)}
+                      </p>
+                      <div className="mt-1 flex items-center justify-center gap-0.5">
+                        {trend === 'up' && <ArrowUp size={12} className="text-emerald-400" />}
+                        {trend === 'down' && <ArrowDown size={12} className="text-red-400" />}
+                        {trend === 'stable' && <Minus size={12} className="text-gray-400" />}
+                        <span className="text-[10px] text-gray-500">
+                          {trend === 'up' && t('measurements.trend_up')}
+                          {trend === 'down' && t('measurements.trend_down')}
+                          {trend === 'stable' && t('measurements.trend_stable')}
+                          {!trend && '—'}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-600">—</p>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Chart for selected type */}
+          <div
+            className="rounded-2xl p-4"
+            style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <TrendingUp size={15} className="text-cyan-400" />
+              <p className="label-caps">
+                {t(MEASUREMENT_TYPES.find(m => m.type === selectedMeasurementType)?.labelKey ?? 'measurements.weight')}
+              </p>
+            </div>
+            <MeasurementChart
+              data={measurementsByType[selectedMeasurementType]}
+              type={selectedMeasurementType}
+            />
+          </div>
         </div>
       )}
 

@@ -12,6 +12,10 @@ import {
   RECOVERY_HOURS,
   SPLIT_MUSCLES,
 } from '../lib/training-analysis'
+import { buildAchievementContext, syncAchievements } from '../lib/achievements'
+import type { Achievement } from '../lib/achievements'
+import AchievementToast from './AchievementToast'
+import { getSettings } from '../lib/settings'
 import type { FinishModalProps } from '../types'
 
 export default function FinishModal({ result, onClose, onSaveTemplate }: FinishModalProps) {
@@ -31,6 +35,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
   const [loading, setLoading] = useState(true)
   const [prs, setPrs] = useState<Array<{ exercise: string; weight: number | null; reps: number | null; isWeightPr: boolean }>>([])
   const [nextWorkout, setNextWorkout] = useState<{ split: string; reasoning: string; bestDate: Date; hoursUntil: number } | null>(null)
+  const [newAchievements, setNewAchievements] = useState<Achievement[]>([])
 
   // Detect split from exercises
   const detectedSplit = useMemo(() => {
@@ -197,6 +202,63 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
             })
           }
         }
+        // Check for new achievements
+        if (!cancelled) {
+          try {
+            const settings = getSettings()
+            const bodyweight = parseFloat(settings.bodyweight) || 0
+            const allWorkoutsForAchievements = [
+              {
+                id: result.id || 'current',
+                user_id: user.id,
+                split: '',
+                created_at: new Date().toISOString(),
+                completed_at: new Date().toISOString(),
+                notes: null,
+                workout_sets: (result.workout_sets || []).map(s => ({
+                  id: '',
+                  workout_id: result.id || 'current',
+                  user_id: user.id,
+                  exercise: s.exercise,
+                  weight_kg: s.weight_kg,
+                  reps: s.reps,
+                  rpe: s.rpe ?? null,
+                  created_at: new Date().toISOString(),
+                })),
+                totalVolume: result.totalVolume || 0,
+                exerciseNames: result.exerciseNames || [],
+              },
+              ...(workouts || []).map(w => {
+                const row = w as Record<string, unknown>
+                const wSets = ((row.sets as import('../types').WorkoutSet[]) || [])
+                return {
+                  id: row.id as string,
+                  user_id: user.id,
+                  split: (row.split as string) || '',
+                  created_at: row.created_at as string,
+                  completed_at: (row.completed_at as string | null) ?? null,
+                  notes: null,
+                  workout_sets: wSets,
+                  totalVolume: wSets.reduce((sum, s) => sum + (s.weight_kg || 0) * (s.reps || 0), 0),
+                  exerciseNames: [...new Set(wSets.map(s => s.exercise))],
+                }
+              }),
+            ] as import('../types').Workout[]
+
+            const achievementCtx = buildAchievementContext(
+              allWorkoutsForAchievements,
+              bodyweight,
+              settings.memberSince,
+            )
+            const unlocked = syncAchievements(achievementCtx)
+            if (unlocked.length > 0) {
+              setNewAchievements(unlocked)
+            }
+          } catch {
+            // Achievement detection is non-critical
+          }
+        }
+
       } catch (err) {
         if (import.meta.env.DEV) console.error('Failed to load finish data:', err)
       } finally {
@@ -312,6 +374,11 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
                 ))}
               </div>
             </div>
+          )}
+
+          {/* New Achievements */}
+          {!loading && newAchievements.length > 0 && (
+            <AchievementToast achievements={newAchievements} />
           )}
 
           {/* Recovery Forecast */}

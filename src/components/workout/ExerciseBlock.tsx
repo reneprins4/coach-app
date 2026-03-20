@@ -44,6 +44,7 @@ export interface ExerciseBlockProps {
   lastUsed: LastUsedData | null
   compact?: boolean
   prefetchedHistory?: ExerciseHistorySet[] | null
+  beginnerMode?: boolean
 }
 
 const ExerciseBlock = React.memo(function ExerciseBlock({
@@ -57,6 +58,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
   lastUsed,
   compact,
   prefetchedHistory,
+  beginnerMode,
 }: ExerciseBlockProps) {
   const { t } = useTranslation()
   const [weight, setWeight] = useState(
@@ -495,7 +497,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         )}
 
         {/* RPE buttons */}
-        <RpeButtons value={rpe} onChange={setRpe} />
+        <RpeButtons value={rpe} onChange={setRpe} beginnerMode={beginnerMode} />
 
         {/* Done state banner */}
         {isDone ? (

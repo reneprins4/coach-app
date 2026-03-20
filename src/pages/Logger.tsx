@@ -9,6 +9,7 @@ import { useRestTimer } from '../hooks/useRestTimer'
 import { useTemplates } from '../hooks/useTemplates'
 import { useStartFlow } from '../hooks/useStartFlow'
 import { getSettings } from '../lib/settings'
+import { isBeginnerMode } from '../lib/beginnerMode'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
 import { calculateMomentum } from '../lib/momentumCalculator'
 import { useAuthContext } from '../App'
@@ -107,12 +108,13 @@ interface SupersetGroupBlockProps {
   junkWarning: JunkVolumeWarning | null
   onClearJunkWarning: () => void
   exerciseHistoryMap: Map<string, ExerciseHistorySet[]>
+  beginnerMode?: boolean
 }
 
 function SupersetGroupBlock({
   group, groupIndex, allExercises, userId, onAddSet, onRemoveSet,
   onRemove, onSwap, onOpenPlateCalc, getLastUsed, junkWarning, onClearJunkWarning,
-  exerciseHistoryMap,
+  exerciseHistoryMap, beginnerMode,
 }: SupersetGroupBlockProps) {
   const { t } = useTranslation()
   const exerciseData = group.exercises.map(ex =>
@@ -146,6 +148,7 @@ function SupersetGroupBlock({
             onOpenPlateCalc={onOpenPlateCalc}
             lastUsed={getLastUsed(exerciseData[0]!.name)}
             prefetchedHistory={exerciseHistoryMap.get(exerciseData[0]!.name) || null}
+            beginnerMode={beginnerMode}
             compact
           />
           {hasWarning(exerciseData[0]!.name) && (
@@ -174,6 +177,7 @@ function SupersetGroupBlock({
             onOpenPlateCalc={onOpenPlateCalc}
             lastUsed={getLastUsed(exerciseData[1]!.name)}
             prefetchedHistory={exerciseHistoryMap.get(exerciseData[1]!.name) || null}
+            beginnerMode={beginnerMode}
             compact
           />
           {hasWarning(exerciseData[1]!.name) && (
@@ -198,6 +202,7 @@ function SupersetGroupBlock({
         onOpenPlateCalc={onOpenPlateCalc}
         lastUsed={getLastUsed(exerciseData[0]!.name)}
         prefetchedHistory={exerciseHistoryMap.get(exerciseData[0]!.name) || null}
+        beginnerMode={beginnerMode}
       />
       {hasWarning(exerciseData[0]!.name) && (
         <div className="mt-2">
@@ -219,6 +224,7 @@ export default function Logger() {
   const rest = useRestTimer()
   const templates = useTemplates(user?.id)
   const settings = getSettings() as UserSettings
+  const beginnerModeActive = isBeginnerMode(settings.experienceLevel)
 
   const startFlow = useStartFlow({ userId: user?.id, isActive: aw.isActive })
 
@@ -602,6 +608,7 @@ export default function Logger() {
               junkWarning={junkWarning}
               onClearJunkWarning={handleClearJunkWarning}
               exerciseHistoryMap={exerciseHistoryMap}
+              beginnerMode={beginnerModeActive}
             />
           ))
         ) : (
@@ -620,6 +627,7 @@ export default function Logger() {
                 onOpenPlateCalc={(weight) => setPlateCalcWeight(weight)}
                 lastUsed={aw.getLastUsed(exercise.name)}
                 prefetchedHistory={exerciseHistoryMap.get(exercise.name) || null}
+                beginnerMode={beginnerModeActive}
               />
               {junkWarning && junkWarning.exercise === exercise.name && (
                 <div className="mt-2">

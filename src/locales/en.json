@@ -100,6 +100,8 @@
     "rest_label": "Default rest time",
     "rest_hint": "The app automatically adjusts this based on your effort — this is your starting value.",
     "experience_label": "Experience level",
+    "experience_complete_beginner": "Completely new",
+    "experience_complete_beginner_sub": "Never trained before",
     "experience_beginner": "Beginner",
     "experience_intermediate": "Intermediate",
     "experience_advanced": "Advanced",
@@ -255,7 +257,8 @@
     "volume_per_muscle": "Volume per muscle group — last 4 weeks",
     "workouts_stat": "Workouts",
     "volume_stat": "Volume",
-    "favorite_stat": "Favorite"
+    "favorite_stat": "Favorite",
+    "workouts_until_analysis": "{{count}} more workouts to unlock analysis"
   },
   "plan": {
     "title": "Training Plan",
@@ -536,8 +539,16 @@
     "explanation_8": "You could do 2 more reps",
     "explanation_9": "You could do 1 more rep",
     "explanation_10": "You couldn't do any more",
-    "explanation_summary": "RPE helps the app understand how hard you train"
+    "explanation_summary": "RPE helps the app understand how hard you train",
+    "beginner_explanation_title": "How hard was your set?",
+    "beginner_explanation_easy": "You could easily do more",
+    "beginner_explanation_medium": "It was challenging but doable",
+    "beginner_explanation_hard": "You could barely finish",
+    "beginner_explanation_summary": "This helps the app adjust your next workout"
   },
+  "rpe_simple_easy": "Easy",
+  "rpe_simple_medium": "Medium",
+  "rpe_simple_hard": "Hard",
   "rest_timer": {
     "heavy_set": "Heavy set — rest longer",
     "intense_set": "Intense set — extra rest",
@@ -699,7 +710,53 @@
     "total_volume": "Total volume",
     "sets_label": "sets"
   },
+  "measurements": {
+    "title": "Body",
+    "weight": "Weight",
+    "waist": "Waist",
+    "chest": "Chest",
+    "arms": "Arms",
+    "hips": "Hips",
+    "thighs": "Thighs",
+    "add": "Add measurement",
+    "trend_up": "Rising",
+    "trend_down": "Declining",
+    "trend_stable": "Stable",
+    "no_data": "No measurements yet",
+    "save": "Save",
+    "latest": "Latest measurement"
+  },
   "review": {
     "your_ai_workout": "Your Workout"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "unlocked": "Achievement unlocked!",
+    "first_workout": "First workout",
+    "first_workout_desc": "Complete your first workout",
+    "streak_3": "3-day streak",
+    "streak_3_desc": "Train 3 consecutive days",
+    "streak_7": "Week streak",
+    "streak_7_desc": "Train 7 consecutive days",
+    "streak_30": "Month streak",
+    "streak_30_desc": "Train 30 consecutive days",
+    "ten_workouts": "10 workouts",
+    "ten_workouts_desc": "Complete 10 workouts",
+    "fifty_workouts": "50 workouts",
+    "fifty_workouts_desc": "Complete 50 workouts",
+    "first_pr": "First PR",
+    "first_pr_desc": "Set your first personal record",
+    "ten_prs": "PR machine",
+    "ten_prs_desc": "Set 10 personal records",
+    "bw_bench": "Bodyweight bench",
+    "bw_bench_desc": "Bench press your own bodyweight",
+    "plate_club": "Plate club",
+    "plate_club_desc": "Lift 100kg on any exercise",
+    "vol_10k": "10,000 kg volume",
+    "vol_10k_desc": "Move a total of 10,000 kg",
+    "vol_100k": "100,000 kg volume",
+    "vol_100k_desc": "Move a total of 100,000 kg",
+    "vol_1m": "1 million kg",
+    "vol_1m_desc": "Move a total of 1,000,000 kg"
   }
 }
