@@ -237,6 +237,14 @@ export default function AICoach() {
         : 'bg-white/[0.04] text-gray-400 border border-white/[0.06]'
     }`
 
+  // Recovered muscles for display
+  const recoveredNames = muscleStatus
+    ? ALL_MUSCLES.filter(m => {
+        const ms = (muscleStatus as Record<string, import('../types').MuscleStatus>)[m]
+        return ms && (ms.recoveryPct ?? 100) >= 80
+      }).map(m => t(`muscles.${m}`))
+    : []
+
   return (
     <div className="min-h-dvh px-5 pt-6 pb-28">
       {/* ━━ Back ━━ */}
@@ -247,7 +255,7 @@ export default function AICoach() {
         <ArrowLeft size={16} /> {t('common.back')}
       </button>
 
-      {/* ━━ Profile banner ━━ */}
+      {/* ━━ Profile completion ━━ */}
       {showProfileBanner && (
         <Link to="/profile" className="card-accent mb-5 flex items-center gap-3 active:scale-[0.98] transition-transform">
           <User size={18} className="shrink-0 text-cyan-400" />
@@ -256,24 +264,47 @@ export default function AICoach() {
         </Link>
       )}
 
-      {/* ━━ Header ━━ */}
+      {/* ━━ Hero: Coach recommendation ━━ */}
       <div className="mb-6">
         <p className="label-caps mb-1">{t('aicoach.your_training')}</p>
-        <h1 className="text-display">{selectedSplit || t('aicoach.today')}</h1>
+        <h1 className="text-display mb-3">{selectedSplit || t('aicoach.today')}</h1>
+
+        {/* Recovery insight card */}
+        {recoveredNames.length > 0 && (
+          <div className="card-accent mb-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-green-400" />
+              <p className="text-sm text-gray-300">
+                <span className="font-semibold text-white">{recoveredNames.join(', ')}</span>
+                {' '}{t('aicoach.ready').toLowerCase()}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* First time messages */}
         {workoutHistory.length === 0 && settings.experienceLevel !== 'advanced' && (
-          <p className="text-sm text-gray-500 mt-1">{t('aicoach.first_training')}</p>
+          <p className="text-sm text-gray-500">{t('aicoach.first_training')}</p>
         )}
         {workoutHistory.length === 0 && settings.experienceLevel === 'advanced' && (
-          <p className="text-sm text-gray-500 mt-1">{t('aicoach.first_training_advanced')}</p>
+          <p className="text-sm text-gray-500">{t('aicoach.first_training_advanced')}</p>
         )}
+
+        {/* Coach reasoning */}
         {workoutHistory.length > 0 && splitScores[0] && (
-          <p className="text-sm text-gray-500 mt-1">{splitScores[0].reasoning}</p>
+          <p className="text-sm text-gray-500">{splitScores[0].reasoning}</p>
         )}
+
+        {/* Recent training warning */}
         {lastWorkoutInfo && lastWorkoutInfo.hoursSince < 20 && (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-amber-400">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
-            {t('aicoach.trained_hours_ago', { hours: Math.round(lastWorkoutInfo.hoursSince) })}
-          </p>
+          <div className="card mt-3 border-amber-500/15">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+              <p className="text-sm text-amber-400/90">
+                {t('aicoach.trained_hours_ago', { hours: Math.round(lastWorkoutInfo.hoursSince) })}
+              </p>
+            </div>
+          </div>
         )}
       </div>
 
@@ -287,22 +318,20 @@ export default function AICoach() {
         </div>
       )}
 
-      {/* ━━ Time ━━ */}
-      <div className="mb-6">
+      {/* ━━ Action area: Time + Generate ━━ */}
+      <div className="card mb-5">
         <p className="label-caps mb-3">{t('aicoach.how_long')}</p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-5">
           {[45, 60, 75, 90].map(tm => (
             <button key={tm} onClick={() => setTime(tm)} className={toggle(time === tm)}>
               {tm}m
             </button>
           ))}
         </div>
+        <button onClick={handleGenerate} disabled={generating || !selectedSplit} className="btn-primary disabled:opacity-50">
+          {generating ? t('common.loading') : t('aicoach.make_training')}
+        </button>
       </div>
-
-      {/* ━━ Generate ━━ */}
-      <button onClick={handleGenerate} disabled={generating || !selectedSplit} className="btn-primary mb-5 disabled:opacity-50">
-        {generating ? t('common.loading') : t('aicoach.make_training')}
-      </button>
 
       {/* ━━ Advanced options ━━ */}
       <button
@@ -314,10 +343,10 @@ export default function AICoach() {
       </button>
 
       {showAdvanced && (
-        <div className="mt-2 space-y-5">
+        <div className="mt-2 space-y-4">
           {/* Energy */}
-          <div>
-            <p className="label-caps mb-2">{t('aicoach.energy_today')}</p>
+          <div className="card">
+            <p className="label-caps mb-3">{t('aicoach.energy_today')}</p>
             <div className="flex gap-2">
               {[
                 { value: 'low', labelKey: 'aicoach.energy_low' },
@@ -331,23 +360,22 @@ export default function AICoach() {
             </div>
           </div>
 
-          {/* Split */}
-          {splitScores.length > 1 && (
-            <div>
-              <p className="label-caps mb-2">{t('aicoach.training_type')}</p>
-              <div className="flex flex-wrap gap-2">
-                {splitScores.map(s => (
-                  <button key={s.name} onClick={() => setSelectedSplit(s.name)} className={chip(selectedSplit === s.name)}>
-                    {s.name}
-                  </button>
-                ))}
+          {/* Split + Focus in one card */}
+          <div className="card">
+            {splitScores.length > 1 && (
+              <div className="mb-5">
+                <p className="label-caps mb-3">{t('aicoach.training_type')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {splitScores.map(s => (
+                    <button key={s.name} onClick={() => setSelectedSplit(s.name)} className={chip(selectedSplit === s.name)}>
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Focus muscles */}
-          <div>
-            <p className="label-caps mb-2">{t('aicoach.want_extra')}</p>
+            <p className="label-caps mb-3">{t('aicoach.want_extra')}</p>
             <div className="flex flex-wrap gap-2">
               {ALL_MUSCLES.map(m => (
                 <button key={m} onClick={() => toggleFocus(m)}
