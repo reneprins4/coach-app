@@ -16,9 +16,11 @@ const ALL_TABS: ProgressTab[] = [
   { id: 'lichaam',  labelKey: 'measurements.title' },
   { id: 'analyse',  labelKey: 'progress.tab_analyse' },
   { id: 'balans',   labelKey: 'progress.tab_balance' },
+  { id: 'optimal_hour', labelKey: 'progress.tab_optimal_hour' },
 ]
 
 const MIN_WORKOUTS_FOR_ANALYSIS = 4
+const MIN_WORKOUTS_FOR_OPTIMAL_HOUR = 20
 
 /**
  * Returns the list of visible tabs based on the number of completed workouts.
@@ -26,10 +28,15 @@ const MIN_WORKOUTS_FOR_ANALYSIS = 4
  * because those views need sufficient data to be useful.
  */
 export function getVisibleTabs(workoutCount: number): ProgressTab[] {
-  if (workoutCount < MIN_WORKOUTS_FOR_ANALYSIS) {
-    return ALL_TABS.filter(tab => tab.id !== 'analyse' && tab.id !== 'balans')
-  }
-  return ALL_TABS
+  return ALL_TABS.filter(tab => {
+    if ((tab.id === 'analyse' || tab.id === 'balans') && workoutCount < MIN_WORKOUTS_FOR_ANALYSIS) {
+      return false
+    }
+    if (tab.id === 'optimal_hour' && workoutCount < MIN_WORKOUTS_FOR_OPTIMAL_HOUR) {
+      return false
+    }
+    return true
+  })
 }
 
 /**

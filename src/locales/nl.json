@@ -948,5 +948,29 @@
     },
     "view_story": "Bekijk Story",
     "share_copied": "Gekopieerd naar klembord"
+  },
+  "optimal_hour": {
+    "title": "Jouw optimale trainingstijd",
+    "subtitle": "Gebaseerd op {{count}} workouts",
+    "best_slot": "Beste tijdslot",
+    "worst_slot": "Slechtste tijdslot",
+    "performance_score": "Prestatiescore",
+    "workouts_in_slot": "{{count}} workouts",
+    "avg_volume": "Gem. volume",
+    "avg_rpe": "Gem. RPE",
+    "percentage_better": "{{pct}}% beter dan gemiddeld",
+    "not_enough_data": "Nog niet genoeg data",
+    "not_enough_data_desc": "Train nog {{remaining}} keer om je optimale trainingstijd te ontdekken",
+    "confidence_low": "Lage betrouwbaarheid",
+    "confidence_medium": "Gemiddelde betrouwbaarheid",
+    "confidence_high": "Hoge betrouwbaarheid",
+    "slot_06_08": "Ochtend vroeg",
+    "slot_08_10": "Ochtend",
+    "slot_10_12": "Late ochtend",
+    "slot_12_14": "Middag",
+    "slot_14_16": "Vroege namiddag",
+    "slot_16_18": "Late namiddag",
+    "slot_18_20": "Vroege avond",
+    "slot_20_22": "Late avond"
   }
 }

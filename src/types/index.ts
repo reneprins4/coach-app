@@ -542,6 +542,33 @@ export interface ForecastResult {
   stale?: boolean
 }
 
+// ---- Optimal Hour ----
+
+export type TimeSlotLabel = '06-08' | '08-10' | '10-12' | '12-14' | '14-16' | '16-18' | '18-20' | '20-22'
+export type OptimalHourConfidence = 'none' | 'low' | 'medium' | 'high'
+
+export interface TimeSlotPerformance {
+  slot: TimeSlotLabel
+  hourStart: number
+  hourEnd: number
+  workoutCount: number
+  avgVolume: number
+  avgRpe: number
+  performanceScore: number
+  normalizedScore: number
+}
+
+export interface OptimalHourResult {
+  hasEnoughData: boolean
+  totalWorkouts: number
+  slotsAnalyzed: number
+  bestSlot: TimeSlotPerformance | null
+  worstSlot: TimeSlotPerformance | null
+  allSlots: TimeSlotPerformance[]
+  percentageDifference: number
+  confidence: OptimalHourConfidence
+}
+
 // ---- Plateau Detection ----
 
 export type PlateauStatus = 'plateau' | 'slowing'

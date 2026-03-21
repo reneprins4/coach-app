@@ -961,5 +961,29 @@
     },
     "view_story": "View Story",
     "share_copied": "Copied to clipboard"
+  },
+  "optimal_hour": {
+    "title": "Your optimal training time",
+    "subtitle": "Based on {{count}} workouts",
+    "best_slot": "Best time slot",
+    "worst_slot": "Worst time slot",
+    "performance_score": "Performance score",
+    "workouts_in_slot": "{{count}} workouts",
+    "avg_volume": "Avg. volume",
+    "avg_rpe": "Avg. RPE",
+    "percentage_better": "{{pct}}% better than average",
+    "not_enough_data": "Not enough data yet",
+    "not_enough_data_desc": "Complete {{remaining}} more workouts to discover your optimal training time",
+    "confidence_low": "Low confidence",
+    "confidence_medium": "Medium confidence",
+    "confidence_high": "High confidence",
+    "slot_06_08": "Early morning",
+    "slot_08_10": "Morning",
+    "slot_10_12": "Late morning",
+    "slot_12_14": "Midday",
+    "slot_14_16": "Early afternoon",
+    "slot_16_18": "Late afternoon",
+    "slot_18_20": "Early evening",
+    "slot_20_22": "Late evening"
   }
 }

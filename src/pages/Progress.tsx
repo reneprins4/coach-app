@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback, lazy, Suspense } from 'react'
+import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Award, TrendingUp, Trophy, ArrowUp, ArrowDown, Minus, Sparkles } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
@@ -14,6 +15,7 @@ import { MEASUREMENT_TYPES, groupByType, calculateTrend, formatMeasurement } fro
 import type { MeasurementType } from '../lib/measurements'
 import MeasurementInput from '../components/MeasurementInput'
 import MeasurementChart from '../components/MeasurementChart'
+import { useOptimalHour } from '../hooks/useOptimalHour'
 import { computeTrainingStory, markStoryViewed } from '../lib/trainingStory'
 import { buildStoryShareText } from '../lib/trainingStoryShare'
 
@@ -22,6 +24,7 @@ const FormDetective = lazy(() => import('../components/FormDetective'))
 const WeaknessHunter = lazy(() => import('../components/WeaknessHunter'))
 const PerformanceForecast = lazy(() => import('../components/PerformanceForecast'))
 const TrainingStory = lazy(() => import('../components/TrainingStory'))
+const OptimalHourDetail = lazy(() => import('../components/OptimalHourDetail'))
 
 function e1rm(weight: number, reps: number): number {
   if (reps <= 0 || weight <= 0) return 0
@@ -53,7 +56,9 @@ export default function Progress() {
   const { t, i18n } = useTranslation()
   const { user, settings, updateSettings } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
-  const [tab, setTab] = useState('exercise')
+  const [searchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab') || 'exercise'
+  const [tab, setTab] = useState(initialTab)
   const [query, setQuery] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null)
@@ -61,6 +66,14 @@ export default function Progress() {
   const { measurements, addMeasurement } = useMeasurements(user?.id)
   const [selectedMeasurementType, setSelectedMeasurementType] = useState<MeasurementType>('weight')
   const [showStory, setShowStory] = useState(false)
+  const optimalHourResult = useOptimalHour(workouts)
+
+  // Sync tab from URL search params (e.g. navigating from Dashboard card)
+  useEffect(() => {
+    const urlTab = searchParams.get('tab')
+    if (urlTab && urlTab !== tab) setTab(urlTab)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   // Training Story for previous month
   const storyContext = useMemo(() => {
@@ -720,6 +733,25 @@ export default function Progress() {
       {tab === 'balans' && (
         <Suspense fallback={<div className="space-y-3"><Skeleton className="h-24 w-full rounded-2xl" /><Skeleton className="h-24 w-full rounded-2xl" /></div>}>
           <WeaknessHunter workouts={workouts} priorityMuscles={settings?.priorityMuscles || []} />
+        </Suspense>
+      )}
+
+      {/* ── Optimale Trainingstijd ────────────────────────────── */}
+      {tab === 'optimal_hour' && (
+        <Suspense fallback={<div className="space-y-3"><Skeleton className="h-24 w-full rounded-2xl" /><Skeleton className="h-24 w-full rounded-2xl" /></div>}>
+          <OptimalHourDetail
+            result={optimalHourResult ?? {
+              hasEnoughData: false,
+              totalWorkouts: workouts.length,
+              slotsAnalyzed: 0,
+              bestSlot: null,
+              worstSlot: null,
+              allSlots: [],
+              percentageDifference: 0,
+              confidence: 'none',
+            }}
+            language={i18n.language}
+          />
         </Suspense>
       )}
 

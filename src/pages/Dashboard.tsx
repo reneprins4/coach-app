@@ -12,6 +12,9 @@ import TrainingStoryBanner from '../components/TrainingStoryBanner'
 import { useInjuries } from '../hooks/useInjuries'
 import type { ActiveInjury } from '../lib/injuryRecovery'
 
+import OptimalHourCard from '../components/OptimalHourCard'
+import { useOptimalHour } from '../hooks/useOptimalHour'
+import { formatSlotLabel } from '../lib/optimalHour'
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
 import { analyzeTraining } from '../lib/training-analysis'
 import { generateTodaysWorkout } from '../lib/todaysWorkout'
@@ -32,6 +35,8 @@ export default function Dashboard() {
   const [showReportModal, setShowReportModal] = useState(false)
   const [showStory, setShowStory] = useState(false)
   const [storyDismissed, setStoryDismissed] = useState(false)
+
+  const optimalHourResult = useOptimalHour(workouts)
 
   const stats = useMemo(() => {
     const now = new Date()
@@ -187,6 +192,17 @@ export default function Dashboard() {
             onResolve={(injury) => resolve(injury.id)}
           />
         </div>
+      )}
+
+      {/* ━━ Optimal Hour Insight ━━ */}
+      {optimalHourResult && optimalHourResult.hasEnoughData && optimalHourResult.bestSlot && (
+        <OptimalHourCard
+          bestSlot={formatSlotLabel(optimalHourResult.bestSlot.slot, i18n.language)}
+          percentageDifference={optimalHourResult.percentageDifference}
+          confidence={optimalHourResult.confidence}
+          totalWorkouts={optimalHourResult.totalWorkouts}
+          onViewDetails={() => nav('/progress?tab=optimal_hour')}
+        />
       )}
 
       {/* ━━ Hero: Today's Workout ━━ */}
