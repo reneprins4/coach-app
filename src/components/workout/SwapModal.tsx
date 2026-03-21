@@ -100,7 +100,7 @@ export default function SwapModal({
         <button
           onClick={handleAiSuggest}
           disabled={aiLoading}
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-gray-400 ring-1 ring-gray-700 disabled:opacity-50 active:bg-gray-800"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-gray-400 border border-gray-700 disabled:opacity-50 active:bg-gray-800"
         >
           {aiLoading
             ? <><Loader2 size={15} className="animate-spin" /> {t('logger.finding_alternative')}</>

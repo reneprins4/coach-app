@@ -73,11 +73,7 @@ export default function InjuryReport({ isOpen, onClose, onReport }: InjuryReport
         role="dialog"
         aria-modal="true"
         aria-labelledby="injury-report-title"
-        className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl"
-        style={{
-          background: 'linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)',
-          border: '1px solid var(--border-subtle)',
-        }}
+        className="card w-full max-w-md max-h-[85vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-2">

@@ -82,10 +82,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
           <p className="label-caps mb-1">{t('analyse.title')}</p>
           <p className="text-2xl font-black tracking-tight text-white">{t('analyse.subtitle')}</p>
         </div>
-        <div
-          className="rounded-2xl p-6 text-center"
-          style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
-        >
+        <div className="card p-6 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-800">
             <AlertCircle size={24} className="text-gray-500" />
           </div>
@@ -119,8 +116,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
     return (
       <div className="space-y-4">
         <div
-          className="rounded-2xl p-5 text-center"
-          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
+          className="rounded-2xl p-5 text-center bg-red-500/8 border border-red-500/20"
         >
           <AlertCircle size={22} className="mx-auto mb-2 text-red-400" />
           <p className="mb-4 text-sm text-red-400">{error}</p>
@@ -140,8 +136,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
     return (
       <div className="space-y-4">
         <div
-          className="rounded-2xl p-5"
-          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
+          className="rounded-2xl p-5 bg-emerald-500/8 border border-emerald-500/20"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
@@ -155,8 +150,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
         </div>
         <button
           onClick={handleRefresh}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-4 py-3 text-sm text-gray-400 active:bg-gray-800"
-          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-4 py-3 text-sm text-gray-400 active:bg-gray-800 border border-white/[0.06]"
         >
           <RefreshCw size={13} />
           {t('analyse.reanalyse')}
@@ -178,8 +172,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-3 py-2 text-xs font-bold text-gray-400 active:bg-gray-800"
-          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+          className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-3 py-2 text-xs font-bold text-gray-400 active:bg-gray-800 border border-white/[0.06]"
         >
           <RefreshCw size={12} />
           {t('analyse.refresh')}
@@ -217,8 +210,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
               </div>
             </div>
             <div
-              className="ml-11 rounded-xl px-3 py-2.5"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+              className="ml-11 rounded-xl px-3 py-2.5 bg-white/[0.04] border border-white/[0.06]"
             >
               <p className="text-xs text-gray-400">
                 <span className="font-bold text-gray-300">{t('analyse.rec_label')}</span> {insight.recommendation}

@@ -133,19 +133,19 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
       <div className="flex min-h-dvh flex-col items-center justify-center bg-gray-950 px-6">
         <div className="w-full max-w-sm">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500">
+          <div className="mb-10 text-center">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500 glow-cyan">
               <Dumbbell size={32} className="text-white" />
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-white">Voer je code in</h1>
-            <p className="text-gray-400">
+            <h1 className="text-title mb-2">Voer je code in</h1>
+            <p className="text-sm text-gray-400">
               We hebben een 6-cijferige code gestuurd naar{' '}
               <span className="font-medium text-white">{email}</span>
             </p>
           </div>
 
           {/* Code inputs */}
-          <div className="mb-6 flex justify-center gap-2" onPaste={handlePaste}>
+          <div className="mb-8 flex justify-center gap-3" onPaste={handlePaste}>
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -159,22 +159,24 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 disabled={loading}
                 aria-label={`Verificatiecode cijfer ${index + 1} van 6`}
-                className="h-14 w-12 rounded-xl bg-gray-900 text-center text-2xl font-bold text-white outline-none ring-1 ring-gray-800 transition-colors focus:ring-cyan-500 disabled:opacity-50"
+                className={`h-16 w-13 rounded-xl bg-white/[0.04] text-center text-2xl font-bold text-white outline-none border transition-all backdrop-blur-sm disabled:opacity-50 ${
+                  digit ? 'border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.15)]' : 'border-white/[0.06]'
+                } focus:border-cyan-500/60 focus:shadow-[0_0_20px_rgba(6,182,212,0.2)]`}
               />
             ))}
           </div>
 
           {error && (
-            <p className="mb-4 rounded-lg bg-red-900/30 px-3 py-2 text-center text-sm text-red-400">
-              {error}
-            </p>
+            <div className="card mb-6" style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}>
+              <p className="text-center text-sm text-red-400">{error}</p>
+            </div>
           )}
 
           {/* Verify button */}
           <button
             onClick={handleVerifyCode}
             disabled={!codeComplete || loading}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-bold text-white transition-transform active:scale-[0.97] disabled:opacity-50"
+            className="btn-primary disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -187,7 +189,7 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
           </button>
 
           {/* Links */}
-          <div className="mt-6 flex flex-col items-center gap-3">
+          <div className="mt-8 flex flex-col items-center gap-3">
             <button
               onClick={handleResendCode}
               disabled={resendTimer > 0 || loading}
@@ -214,18 +216,18 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
     <div className="flex min-h-dvh flex-col items-center justify-center bg-gray-950 px-6">
       <div className="w-full max-w-sm">
         {/* Logo / Branding */}
-        <div className="mb-10 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500">
+        <div className="mb-12 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500 glow-cyan">
             <Dumbbell size={32} className="text-white" />
           </div>
-          <h1 className="text-3xl font-black text-white">Kravex</h1>
-          <p className="mt-1 text-gray-500">Jouw persoonlijke training coach</p>
+          <h1 className="text-display">Kravex</h1>
+          <p className="mt-2 text-sm text-gray-500">Jouw persoonlijke training coach</p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSendCode} className="space-y-4">
+        <form onSubmit={handleSendCode} className="space-y-5">
           <div>
-            <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-400">
+            <label htmlFor="email" className="label-caps mb-2 block">
               Email
             </label>
             <div className="relative">
@@ -238,20 +240,22 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jouw@email.nl"
-                className="h-14 w-full rounded-xl bg-gray-900 pl-12 pr-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 transition-colors focus:ring-cyan-500"
+                className="h-14 w-full rounded-xl pl-12 pr-4 text-white placeholder-gray-600 outline-none transition-colors"
                 disabled={loading}
               />
             </div>
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400">{error}</p>
+            <div className="card" style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}>
+              <p className="text-sm text-red-400">{error}</p>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={!email.trim() || loading}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-bold text-white transition-transform active:scale-[0.97] disabled:opacity-50"
+            className="btn-primary disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -264,7 +268,7 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-gray-600">
+        <p className="mt-8 text-center text-xs text-gray-600">
           Je ontvangt een 6-cijferige code per email om in te loggen.
         </p>
       </div>

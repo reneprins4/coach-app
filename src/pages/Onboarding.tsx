@@ -61,6 +61,7 @@ export default function Onboarding() {
   const isProfileStep = step === CARD_STEPS.length
   const isFrequencyStep = step === CARD_STEPS.length + 1
   const current = isCardStep ? CARD_STEPS[step]! : null
+  const totalVisibleSteps = TOTAL_STEPS - 1
 
   function handleCardSelect(value: string) {
     const newSelections = { ...selections, [current!.key]: value }
@@ -97,7 +98,7 @@ export default function Onboarding() {
         <div 
           className={`text-center transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
         >
-          <h1 className="mb-3 text-3xl font-bold text-white">{t('onboarding.ready')}</h1>
+          <h1 className="text-display mb-3">{t('onboarding.ready')}</h1>
           <p className="mb-10 text-gray-500">{t('onboarding.ready_sub')}</p>
           
           <button
@@ -115,34 +116,42 @@ export default function Onboarding() {
   if (isProfileStep) {
     return (
       <div className="flex min-h-dvh flex-col bg-gray-950 px-5 py-6">
-        {/* Progress bar */}
-        <div className="mb-12 h-0.5 w-full overflow-hidden rounded-full bg-gray-800">
-          <div
-            className="h-full bg-white transition-all duration-300"
-            style={{ width: `${((step + 1) / (TOTAL_STEPS - 1)) * 100}%` }}
-          />
+        {/* Step indicator */}
+        <div className="flex gap-2 pt-6 pb-8 justify-center">
+          {Array.from({ length: totalVisibleSteps }, (_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-all duration-500 ease-out ${
+                i < step
+                  ? 'w-8 bg-cyan-500/40'
+                  : i === step
+                    ? 'w-8 bg-cyan-500 glow-bar'
+                    : 'w-2 bg-white/10'
+              }`}
+            />
+          ))}
         </div>
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">{t('onboarding.profile_title')}</h1>
+          <h1 className="text-display mb-2">{t('onboarding.profile_title')}</h1>
           <p className="mb-8 text-sm text-gray-500">{t('onboarding.profile_sub')}</p>
 
           <div className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">{t('onboarding.name_label')}</label>
+              <label className="label-caps mb-2 block">{t('onboarding.name_label')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value.slice(0, 30))}
                 placeholder={t('onboarding.name_placeholder')}
                 maxLength={30}
-                className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+                className="h-12 w-full rounded-xl px-4 text-white placeholder-gray-600 outline-none transition-colors"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-300">{t('onboarding.weight_label')}</label>
+              <label className="label-caps mb-2 block">{t('onboarding.weight_label')}</label>
               <input
                 type="number"
                 value={bodyweight}
@@ -156,7 +165,7 @@ export default function Onboarding() {
                 placeholder="75"
                 min={30}
                 max={250}
-                className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+                className="h-12 w-full rounded-xl px-4 text-white placeholder-gray-600 outline-none transition-colors"
               />
               <p className="mt-1 text-xs text-gray-600">{t('onboarding.weight_hint')}</p>
             </div>
@@ -178,13 +187,6 @@ export default function Onboarding() {
             {t('onboarding.continue')}
           </button>
         </div>
-
-        {/* Step indicator */}
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-600">
-            {t('onboarding.step_of', { current: step + 1, total: TOTAL_STEPS - 1 })}
-          </p>
-        </div>
       </div>
     )
   }
@@ -193,17 +195,25 @@ export default function Onboarding() {
   if (isFrequencyStep) {
     return (
       <div className="flex min-h-dvh flex-col bg-gray-950 px-5 py-6">
-        {/* Progress bar */}
-        <div className="mb-12 h-0.5 w-full overflow-hidden rounded-full bg-gray-800">
-          <div
-            className="h-full bg-white transition-all duration-300"
-            style={{ width: `${((step + 1) / (TOTAL_STEPS - 1)) * 100}%` }}
-          />
+        {/* Step indicator */}
+        <div className="flex gap-2 pt-6 pb-8 justify-center">
+          {Array.from({ length: totalVisibleSteps }, (_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-all duration-500 ease-out ${
+                i < step
+                  ? 'w-8 bg-cyan-500/40'
+                  : i === step
+                    ? 'w-8 bg-cyan-500 glow-bar'
+                    : 'w-2 bg-white/10'
+              }`}
+            />
+          ))}
         </div>
 
         {/* Content */}
         <div className="flex-1">
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">{t('onboarding.frequency_question')}</h1>
+          <h1 className="text-display mb-2">{t('onboarding.frequency_question')}</h1>
           <p className="mb-8 text-sm text-gray-500">{t('onboarding.frequency_sub')}</p>
 
           <div className="space-y-3">
@@ -211,20 +221,13 @@ export default function Onboarding() {
               <button
                 key={option.value}
                 onClick={() => handleFrequencySelect(option.value)}
-                className="w-full rounded-2xl bg-gray-900 px-5 py-4 text-left ring-1 ring-gray-800 transition-all active:ring-cyan-500 active:bg-cyan-500/10"
+                className="card w-full px-5 py-4 text-left transition-all active:border-cyan-500/40 active:bg-cyan-500/10"
               >
                 <p className="text-base font-semibold text-white">{option.label}</p>
                 <p className="mt-0.5 text-sm text-gray-500">{option.sub}</p>
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Step indicator */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-gray-600">
-            {t('onboarding.step_of', { current: step + 1, total: TOTAL_STEPS - 1 })}
-          </p>
         </div>
       </div>
     )
@@ -233,17 +236,25 @@ export default function Onboarding() {
   // Card steps (goal, experience, equipment)
   return (
     <div className="flex min-h-dvh flex-col bg-gray-950 px-5 py-6">
-      {/* Progress bar */}
-      <div className="mb-12 h-0.5 w-full overflow-hidden rounded-full bg-gray-800">
-        <div
-          className="h-full bg-white transition-all duration-300"
-          style={{ width: `${((step + 1) / (TOTAL_STEPS - 1)) * 100}%` }}
-        />
+      {/* Step indicator */}
+      <div className="flex gap-2 pt-6 pb-8 justify-center">
+        {Array.from({ length: totalVisibleSteps }, (_, i) => (
+          <div
+            key={i}
+            className={`h-1 rounded-full transition-all duration-500 ease-out ${
+              i < step
+                ? 'w-8 bg-cyan-500/40'
+                : i === step
+                  ? 'w-8 bg-cyan-500 glow-bar'
+                  : 'w-2 bg-white/10'
+            }`}
+          />
+        ))}
       </div>
 
       {/* Content */}
       <div className="flex-1">
-        <h1 className="mb-2 text-3xl font-black tracking-tight text-white">{current!.title}</h1>
+        <h1 className="text-display mb-2">{current!.title}</h1>
         <p className="mb-8 text-sm text-gray-500">{current!.sub}</p>
 
         <div className="space-y-3">
@@ -251,20 +262,13 @@ export default function Onboarding() {
             <button
               key={option.value}
               onClick={() => handleCardSelect(option.value)}
-              className="w-full rounded-2xl bg-gray-900 px-5 py-4 text-left ring-1 ring-gray-800 transition-all active:ring-cyan-500 active:bg-cyan-500/10"
+              className="card w-full px-5 py-4 text-left transition-all active:border-cyan-500/40 active:bg-cyan-500/10"
             >
               <p className="text-base font-semibold text-white">{option.label}</p>
               <p className="mt-0.5 text-sm text-gray-500">{option.sub}</p>
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Step indicator */}
-      <div className="mt-8 text-center">
-        <p className="text-xs text-gray-600">
-          {t('onboarding.step_of', { current: step + 1, total: TOTAL_STEPS - 1 })}
-        </p>
       </div>
     </div>
   )

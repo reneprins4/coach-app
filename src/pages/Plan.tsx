@@ -14,10 +14,10 @@ import InjuryRadar from '../components/InjuryRadar'
 import BlockWizard from '../components/BlockWizard'
 
 const PHASE_COLORS = {
-  blue:   { bg: 'bg-blue-500/15',   text: 'text-blue-400',   bar: 'bg-blue-500',   ring: 'ring-blue-500/50',  activeBg: 'bg-blue-500/25', border: 'border-blue-500/40' },
-  orange: { bg: 'bg-cyan-500/15', text: 'text-cyan-400', bar: 'bg-cyan-500', ring: 'ring-cyan-500/50',activeBg: 'bg-cyan-500/25', border: 'border-cyan-500/40' },
-  red:    { bg: 'bg-cyan-500/15',    text: 'text-cyan-400',    bar: 'bg-cyan-500',    ring: 'ring-cyan-500/50',   activeBg: 'bg-cyan-500/25', border: 'border-cyan-500/40' },
-  gray:   { bg: 'bg-gray-500/15',   text: 'text-gray-400',   bar: 'bg-gray-500',   ring: 'ring-gray-500/50',  activeBg: 'bg-gray-500/25', border: 'border-gray-500/40' },
+  blue:   { bg: 'bg-blue-500/15',  text: 'text-blue-400',  bar: 'bg-blue-500',  border: 'border-blue-500/40' },
+  orange: { bg: 'bg-cyan-500/15',  text: 'text-cyan-400',  bar: 'bg-cyan-500',  border: 'border-cyan-500/40' },
+  red:    { bg: 'bg-cyan-500/15',  text: 'text-cyan-400',  bar: 'bg-cyan-500',  border: 'border-cyan-500/40' },
+  gray:   { bg: 'bg-gray-500/15',  text: 'text-gray-400',  bar: 'bg-gray-500',  border: 'border-gray-500/40' },
 }
 
 const PHASE_ICONS = {
@@ -80,7 +80,7 @@ export default function Plan() {
     <div className="px-4 py-6 pb-32">
       <div className="mb-6">
         <p className="label-caps mb-1">{t('plan.periodization')}</p>
-        <h1 className="text-3xl font-black tracking-tight text-white">{t('plan.title')}</h1>
+        <h1 className="text-display">{t('plan.title')}</h1>
       </div>
 
       {/* Injury Prevention Radar */}
@@ -95,12 +95,12 @@ export default function Plan() {
       />
 
       {/* What is periodization — info banner */}
-      <div className="mb-5 rounded-2xl bg-gray-900 p-4">
+      <div className="card mb-5">
         <div className="flex items-start gap-3">
-          <Info size={16} className="mt-0.5 shrink-0 text-gray-500" />
+          <Info size={16} className="mt-0.5 shrink-0 text-[var(--text-3)]" />
           <div>
-            <p className="text-sm font-medium text-gray-300">{t('plan.why_periodization')}</p>
-            <p className="mt-1 text-xs leading-relaxed text-gray-500">
+            <p className="text-sm font-medium text-[var(--text-2)]">{t('plan.why_periodization')}</p>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--text-3)]">
               {t('plan.why_periodization_desc')}
             </p>
           </div>
@@ -110,12 +110,12 @@ export default function Plan() {
       {/* Current block */}
       {block && phase && !selecting ? (
         <>
-          <div className={`mb-5 rounded-2xl border ${phaseColor.border} ${phaseColor.bg} p-5`}>
+          <div className={`card-accent mb-5 ${phaseColor.border}`}>
             <div className="mb-1 flex items-center justify-between">
-              <span className={`text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>{t('plan.active_block')}</span>
+              <span className="label-caps">{t('plan.active_block')}</span>
               <button
                 onClick={() => setConfirmClear(true)}
-                className="text-xs text-gray-600 active:text-cyan-400"
+                className="text-xs text-[var(--text-3)] active:text-cyan-400"
               >
                 <RotateCcw size={14} />
               </button>
@@ -123,15 +123,15 @@ export default function Plan() {
             <div className="mb-4 flex items-center gap-3">
               {PhaseIcon && <PhaseIcon size={28} className={phaseColor.text} />}
               <div>
-                <p className="text-xl font-black text-white">{phase.label}</p>
-                <p className="text-sm text-gray-400">{phase.description}</p>
+                <p className="text-title">{phase.label}</p>
+                <p className="text-sm text-[var(--text-2)]">{phase.description}</p>
               </div>
             </div>
 
             {/* Vermoeidheid indicator */}
             {fatigue?.fatigued && (
-              <div className="mb-3 flex items-center gap-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-xs">
-                <span className="h-2 w-2 rounded-full bg-cyan-500" />
+              <div className="mb-3 flex items-center gap-2 rounded-lg bg-[var(--accent-dim)] px-3 py-2 text-xs">
+                <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
                 <span className="text-cyan-400">
                   {fatigue.recommendation === 'urgent'
                     ? t('plan.fatigue_urgent')
@@ -149,20 +149,20 @@ export default function Plan() {
                 return (
                   <div
                     key={i}
-                    className={`flex flex-1 flex-col items-center rounded-xl py-3 text-center ring-1 ${
+                    className={`flex flex-1 flex-col items-center rounded-xl py-3 text-center border ${
                       isCurrent
-                        ? `${phaseColor.activeBg} ${phaseColor.ring}`
+                        ? `${phaseColor.bg} ${phaseColor.border}`
                         : isDone
-                        ? 'bg-gray-800 ring-gray-700'
-                        : 'bg-gray-800/50 ring-gray-800'
+                        ? 'bg-white/[0.04] border-[var(--border-subtle)]'
+                        : 'bg-white/[0.02] border-[var(--border-subtle)]'
                     }`}
                   >
                     <span className={`text-[10px] font-semibold uppercase tracking-widest ${
-                      isCurrent ? phaseColor.text : isDone ? 'text-gray-400' : 'text-gray-600'
+                      isCurrent ? phaseColor.text : isDone ? 'text-[var(--text-2)]' : 'text-[var(--text-3)]'
                     }`}>
                       {t('plan.week')} {weekNum}
                     </span>
-                    <span className={`mt-1 text-[10px] ${isCurrent ? 'text-white font-medium' : isDone ? 'text-gray-500' : 'text-gray-700'}`}>
+                    <span className={`mt-1 text-[10px] ${isCurrent ? 'text-white font-medium' : isDone ? 'text-[var(--text-3)]' : 'text-[var(--text-3)]'}`}>
                       {wt.isDeload ? 'Deload' : `RPE ${wt.rpe}`}
                     </span>
                     {isDone && <CheckCircle2 size={12} className="mt-1 text-green-500" />}
@@ -171,25 +171,25 @@ export default function Plan() {
                 )
               })}
             </div>
-            <p className="mt-2 text-[10px] text-gray-600 text-center">{t('plan.week_based_on_start')}</p>
+            <p className="mt-2 text-[10px] text-[var(--text-3)] text-center">{t('plan.week_based_on_start')}</p>
 
             {/* Current week details */}
             {weekTarget && (
-              <div className="rounded-xl bg-black/20 p-3">
-                <p className={`mb-2 text-[10px] font-semibold uppercase tracking-widest ${phaseColor.text}`}>
+              <div className="mt-3 rounded-xl bg-black/20 p-3 border border-[var(--border-subtle)]">
+                <p className={`mb-2 label-caps ${phaseColor.text}`}>
                   {weekTarget.isDeload ? t('plan.deload_week') : `${t('plan.week')} ${progress?.currentWeek} ${t('plan.week_focus')}`}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-gray-500">{t('plan.rep_range')}</span>
+                    <span className="text-[var(--text-3)]">{t('plan.rep_range')}</span>
                     <p className="font-semibold text-white">{weekTarget.repRange[0]}–{weekTarget.repRange[1]} reps</p>
                   </div>
                   <div>
-                    <span className="text-gray-500">{t('plan.target_rpe')}</span>
+                    <span className="text-[var(--text-3)]">{t('plan.target_rpe')}</span>
                     <p className="font-semibold text-white">{weekTarget.rpe}</p>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-gray-500">{t('plan.volume_note')}</span>
+                    <span className="text-[var(--text-3)]">{t('plan.volume_note')}</span>
                     <p className="font-semibold text-white">{weekTarget.setNote}</p>
                   </div>
                 </div>
@@ -200,7 +200,7 @@ export default function Plan() {
           {/* Start workout CTA */}
           <button
             onClick={() => nav('/coach')}
-            className="flex h-14 w-full items-center gap-3 rounded-2xl bg-cyan-500 px-5 font-bold text-white active:scale-[0.97] transition-transform mb-4"
+            className="btn-primary mb-4"
           >
             <Sparkles size={20} />
             {t('plan.generate_today')}
@@ -208,8 +208,8 @@ export default function Plan() {
           </button>
 
           {/* Phase sequence suggestion */}
-          <div className="rounded-2xl bg-gray-900 p-4">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{t('plan.recommended_order')}</p>
+          <div className="card">
+            <p className="label-caps mb-3">{t('plan.recommended_order')}</p>
             <div className="flex gap-1.5">
               {SUGGESTED_ORDER.map((key) => {
                 const p = PHASES[key as import('../types').PeriodizationPhase]
@@ -217,24 +217,24 @@ export default function Plan() {
                 const c = PHASE_COLORS[p.color as keyof typeof PHASE_COLORS]
                 const Icon = PHASE_ICONS[key as keyof typeof PHASE_ICONS]
                 return (
-                  <div key={key} className={`flex flex-1 flex-col items-center rounded-xl py-2 text-center ${isCurrent ? c.bg + ' ring-1 ' + c.ring : 'bg-gray-800'}`}>
-                    <Icon size={16} className={isCurrent ? c.text : 'text-gray-500'} />
-                    <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-gray-500'}`}>{p.label.split(' ')[0]}</span>
-                    <span className={`text-[8px] ${isCurrent ? c.text : 'text-gray-700'}`}>{p.weeks}w</span>
+                  <div key={key} className={`flex flex-1 flex-col items-center rounded-xl py-2 text-center border ${isCurrent ? c.bg + ' ' + c.border : 'bg-white/[0.03] border-[var(--border-subtle)]'}`}>
+                    <Icon size={16} className={isCurrent ? c.text : 'text-[var(--text-3)]'} />
+                    <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{p.label.split(' ')[0]}</span>
+                    <span className={`text-[8px] ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{p.weeks}w</span>
                     {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-cyan-400">{t('plan.active_block').toLowerCase()}</span>}
                   </div>
                 )
               })}
             </div>
-            <p className="mt-3 text-[11px] text-gray-600">
+            <p className="mt-3 text-[11px] text-[var(--text-3)]">
               {t('plan.after_block_hint')}
             </p>
             {Array.isArray(block.fullPlan) && (block.fullPlan as string[]).length > 1 && (
-              <div className="mt-3 rounded-xl bg-gray-800/50 px-3 py-2">
-                <p className="text-[10px] text-gray-500">
+              <div className="mt-3 rounded-xl bg-white/[0.03] px-3 py-2 border border-[var(--border-subtle)]">
+                <p className="text-[10px] text-[var(--text-3)]">
                   {String(t('plan.program'))}: {String((block.fullPlan as string[]).map(p => PHASES[p as import('../types').PeriodizationPhase]?.label || p).join(' \u2192 '))}
                 </p>
-                <p className="text-[10px] text-gray-600 mt-0.5">
+                <p className="text-[10px] text-[var(--text-3)] mt-0.5">
                   {t('plan.next_phase_auto')}
                 </p>
               </div>
@@ -244,7 +244,7 @@ export default function Plan() {
       ) : (
         /* Phase selector */
         <>
-          <p className="mb-4 text-sm text-gray-400">{t('plan.choose_phase')}</p>
+          <p className="mb-4 text-sm text-[var(--text-2)]">{t('plan.choose_phase')}</p>
           <div className="space-y-3">
             {Object.entries(PHASES).map(([key, p]) => {
               const c = PHASE_COLORS[p.color as keyof typeof PHASE_COLORS]
@@ -253,17 +253,17 @@ export default function Plan() {
                 <button
                   key={key}
                   onClick={() => handleStart(key as import('../types').PeriodizationPhase)}
-                  className={`w-full rounded-2xl border p-4 text-left transition-colors ${c.bg} ${c.border} active:scale-[0.98]`}
+                  className={`card w-full text-left transition-all active:scale-[0.98] ${c.bg} border-[var(--border-accent)]`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
                       <Icon size={24} className={c.text} />
                       <div>
                         <p className="font-bold text-white">{p.label}</p>
-                        <p className="mt-0.5 text-xs text-gray-400">{p.description}</p>
+                        <p className="mt-0.5 text-xs text-[var(--text-2)]">{p.description}</p>
                         <div className="mt-2 flex gap-3 text-xs">
                           <span className={c.text}>{p.weeks} {t('plan.weeks')}</span>
-                          <span className="text-gray-600">
+                          <span className="text-[var(--text-3)]">
                             RPE {p.weekTargets[0]!.rpe}–{p.weekTargets[p.weekTargets.length - 2]?.rpe ?? p.weekTargets[0]!.rpe}
                           </span>
                         </div>
@@ -279,7 +279,7 @@ export default function Plan() {
           {block && (
             <button
               onClick={() => setSelecting(false)}
-              className="mt-4 w-full rounded-2xl py-3 text-sm text-gray-500 ring-1 ring-gray-800"
+              className="btn-secondary mt-4"
             >
               {t('common.cancel')}
             </button>
@@ -287,13 +287,13 @@ export default function Plan() {
 
           {!block && (
             <>
-              <div className="mt-6 rounded-2xl bg-gray-900 p-4 text-center">
-                <p className="text-sm text-gray-500">{t('plan.new_hint')}</p>
-                <p className="mt-1 text-xs text-gray-600">{t('plan.new_hint_sub')}</p>
+              <div className="card mt-6 text-center">
+                <p className="text-sm text-[var(--text-3)]">{t('plan.new_hint')}</p>
+                <p className="mt-1 text-xs text-[var(--text-3)]">{t('plan.new_hint_sub')}</p>
               </div>
               <button
                 onClick={() => setWizardOpen(true)}
-                className="mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-cyan-500 px-5 font-bold text-white active:scale-[0.97] transition-transform"
+                className="btn-primary mt-4"
               >
                 <Sparkles size={20} />
                 {t('plan.start_block')}
@@ -307,12 +307,12 @@ export default function Plan() {
       {/* Confirm clear */}
       {confirmClear && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-gray-900 p-6">
-            <h3 className="mb-2 text-lg font-bold text-white">{t('plan.end_block_confirm')}</h3>
-            <p className="mb-6 text-sm text-gray-400">{t('plan.end_block_hint')}</p>
+          <div className="card w-full max-w-sm p-6">
+            <h3 className="text-title mb-2">{t('plan.end_block_confirm')}</h3>
+            <p className="mb-6 text-sm text-[var(--text-2)]">{t('plan.end_block_hint')}</p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmClear(false)} className="h-12 flex-1 rounded-xl font-medium text-white ring-1 ring-gray-700">{t('common.cancel')}</button>
-              <button onClick={handleClear} className="h-12 flex-1 rounded-xl bg-cyan-600 font-semibold text-white">{t('plan.end_block')}</button>
+              <button onClick={() => setConfirmClear(false)} className="btn-secondary flex-1">{t('common.cancel')}</button>
+              <button onClick={handleClear} className="btn-primary flex-1">{t('plan.end_block')}</button>
             </div>
           </div>
         </div>

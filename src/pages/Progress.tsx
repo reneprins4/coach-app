@@ -307,7 +307,7 @@ export default function Progress() {
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedExercise(null) }}
               placeholder={t('progress.search_exercise')}
-              className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-sm text-white placeholder-gray-600 outline-none ring-1 ring-gray-800 focus:ring-gray-600"
+              className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-sm text-white placeholder-gray-600 outline-none border border-gray-800 focus:border-gray-600"
             />
           </div>
 
@@ -440,18 +440,12 @@ export default function Progress() {
 
           {/* Volume chart */}
           {volumeData.length > 0 ? (
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
+            <div className="card p-4">
               <p className="label-caps mb-4">{t('volume.total_volume')}</p>
               <VolumeChart data={volumeData} unit="kg" />
             </div>
           ) : (
-            <div
-              className="rounded-2xl p-8 text-center"
-              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
+            <div className="card p-8 text-center">
               <p className="text-sm text-gray-500">{t('volume.no_data')}</p>
             </div>
           )}
@@ -460,8 +454,7 @@ export default function Progress() {
           <div className="grid grid-cols-3 gap-3">
             {/* Avg per week */}
             <div
-              className="rounded-2xl p-4 text-center"
-              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+              className="card p-4 text-center"
             >
               <p className="text-2xl font-black tabular-nums text-white">
                 {volumeStats.avgVolume >= 1000
@@ -473,8 +466,7 @@ export default function Progress() {
 
             {/* Best week */}
             <div
-              className="rounded-2xl p-4 text-center"
-              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+              className="card p-4 text-center"
             >
               <p className="text-2xl font-black tabular-nums text-white">
                 {volumeStats.best
@@ -488,8 +480,7 @@ export default function Progress() {
 
             {/* Trend */}
             <div
-              className="rounded-2xl p-4 text-center"
-              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+              className="card p-4 text-center"
             >
               <div className="flex items-center justify-center gap-1">
                 {volumeStats.trend.direction === 'up' && (
@@ -522,8 +513,7 @@ export default function Progress() {
           {/* Muscle breakdown */}
           {muscleSorted.length > 0 && (
             <div
-              className="rounded-2xl p-5"
-              style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+              className="card"
             >
               <p className="label-caps mb-4">{t('volume.muscle_breakdown')}</p>
               <div className="space-y-4">
@@ -587,8 +577,7 @@ export default function Progress() {
             ].map(({ label, value, name }) => (
               <div
                 key={label}
-                className="rounded-2xl p-4 text-center"
-                style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+                className="card p-4 text-center"
               >
                 <p className="text-xl font-black text-white tabular-nums">{value ?? ''}</p>
                 {name && <p className="truncate text-xs font-bold text-white">{name}</p>}
@@ -616,8 +605,7 @@ export default function Progress() {
                   {prs.map((pr, idx) => (
                     <div
                       key={`${pr.exercise}-${idx}`}
-                      className="rounded-2xl p-4"
-                      style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+                      className="card p-4"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
@@ -670,12 +658,11 @@ export default function Progress() {
                 <button
                   key={type}
                   onClick={() => setSelectedMeasurementType(type)}
-                  className={`rounded-2xl p-3 text-center transition-colors ${
+                  className={`card p-3 text-center transition-colors ${
                     isSelected
-                      ? 'ring-1 ring-cyan-500'
-                      : 'ring-1 ring-gray-800/50'
+                      ? 'border-cyan-500'
+                      : 'border-gray-800/50'
                   }`}
-                  style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)' }}
                 >
                   <p className="label-caps mb-1">{t(labelKey)}</p>
                   {latest ? (
@@ -705,8 +692,7 @@ export default function Progress() {
 
           {/* Chart for selected type */}
           <div
-            className="rounded-2xl p-4"
-            style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+            className="card p-4"
           >
             <div className="mb-3 flex items-center gap-2">
               <TrendingUp size={15} className="text-cyan-400" />

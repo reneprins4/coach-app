@@ -9,7 +9,7 @@ export default function Onboarding() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthContext()
-  
+
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
   const [goal, setGoal] = useState<string | null>(null)
@@ -58,15 +58,19 @@ export default function Onboarding() {
     navigate('/', { replace: true })
   }
 
-  // Progress dots
-  function ProgressDots() {
+  // Animated step indicator (InjuryReport pattern)
+  function StepIndicator() {
     return (
       <div className="flex justify-center gap-2 pt-6 pb-8">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className={`h-2 w-2 rounded-full transition-colors ${
-              i === step ? 'bg-cyan-500' : 'bg-gray-700'
+            className={`h-1 rounded-full transition-all duration-500 ease-out ${
+              i < step
+                ? 'w-8 bg-cyan-500/40'
+                : i === step
+                  ? 'w-8 bg-cyan-500 glow-bar'
+                  : 'w-2 bg-white/10'
             }`}
           />
         ))}
@@ -78,19 +82,19 @@ export default function Onboarding() {
   if (step === 0) {
     return (
       <div className="flex min-h-dvh flex-col bg-gray-950 px-5">
-        <ProgressDots />
-        
+        <StepIndicator />
+
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <h1 className="mb-4 text-4xl font-black tracking-tight text-white">
+          <h1 className="text-display mb-4">
             {t('onboarding.beginners.welcome_title')}
           </h1>
           <p className="mb-12 text-lg text-gray-400">
             {t('onboarding.beginners.welcome_sub')}
           </p>
-          
+
           <button
             onClick={handleStart}
-            className="h-14 w-full max-w-xs rounded-2xl bg-cyan-500 font-semibold text-white transition-transform active:scale-[0.97]"
+            className="btn-primary max-w-xs"
           >
             {t('onboarding.beginners.begin')}
           </button>
@@ -133,10 +137,10 @@ export default function Onboarding() {
 
     return (
       <div className="flex min-h-dvh flex-col bg-gray-950 px-5">
-        <ProgressDots />
-        
+        <StepIndicator />
+
         <div className="flex-1">
-          <h1 className="mb-2 text-3xl font-black tracking-tight text-white">
+          <h1 className="text-display mb-2">
             {t('onboarding.beginners.how_title')}
           </h1>
           <p className="mb-6 text-sm text-gray-500">
@@ -147,10 +151,10 @@ export default function Onboarding() {
             {concepts.map((concept, i) => (
               <div
                 key={i}
-                className="rounded-2xl bg-gray-900 p-4 ring-1 ring-white/10"
+                className="card"
               >
                 <div className="mb-2 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-800 text-cyan-500">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-500">
                     {concept.icon}
                   </div>
                   <h2 className="text-lg font-bold text-white">{concept.title}</h2>
@@ -164,7 +168,7 @@ export default function Onboarding() {
         <div className="py-6">
           <button
             onClick={handleNext}
-            className="h-14 w-full rounded-2xl bg-cyan-500 font-semibold text-white transition-transform active:scale-[0.97]"
+            className="btn-primary"
           >
             {t('common.next')}
           </button>
@@ -176,10 +180,10 @@ export default function Onboarding() {
   // Step 3: Preferences
   return (
     <div className="flex min-h-dvh flex-col bg-gray-950 px-5">
-      <ProgressDots />
-      
+      <StepIndicator />
+
       <div className="flex-1 overflow-y-auto pb-4">
-        <h1 className="mb-2 text-3xl font-black tracking-tight text-white">
+        <h1 className="text-display mb-2">
           {t('onboarding.beginners.pref_title')}
         </h1>
         <p className="mb-6 text-sm text-gray-500">
@@ -188,7 +192,7 @@ export default function Onboarding() {
 
         {/* Name (optional) */}
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="label-caps mb-2 block">
             {t('onboarding.beginners.name_label')} <span className="text-gray-600">({t('profile.optional')})</span>
           </label>
           <input
@@ -197,13 +201,13 @@ export default function Onboarding() {
             onChange={(e) => setName(e.target.value.slice(0, 30))}
             placeholder={t('onboarding.name_placeholder')}
             maxLength={30}
-            className="h-12 w-full rounded-xl bg-gray-900 px-4 text-white placeholder-gray-600 outline-none ring-1 ring-white/10 focus:ring-cyan-500"
+            className="h-12 w-full rounded-xl px-4 text-white placeholder-gray-600 outline-none transition-colors"
           />
         </div>
 
         {/* Goal */}
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="label-caps mb-2 block">
             {t('onboarding.beginners.goal_label')}
           </label>
           <div className="flex gap-2">
@@ -213,8 +217,8 @@ export default function Onboarding() {
                 onClick={() => setGoal(opt.value)}
                 className={`flex-1 rounded-xl px-3 py-3 text-sm font-medium transition-all active:scale-[0.97] ${
                   goal === opt.value
-                    ? 'bg-cyan-500 text-white'
-                    : 'bg-gray-800 text-gray-400'
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.15)]'
+                    : 'bg-white/[0.04] text-gray-400 border border-white/[0.06]'
                 }`}
               >
                 {opt.label}
@@ -225,7 +229,7 @@ export default function Onboarding() {
 
         {/* Time */}
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="label-caps mb-2 block">
             {t('onboarding.beginners.time_label')}
           </label>
           <div className="flex gap-2">
@@ -235,8 +239,8 @@ export default function Onboarding() {
                 onClick={() => setTime(opt.value)}
                 className={`flex-1 rounded-xl px-3 py-3 text-sm font-medium transition-all active:scale-[0.97] ${
                   time === opt.value
-                    ? 'bg-cyan-500 text-white'
-                    : 'bg-gray-800 text-gray-400'
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.15)]'
+                    : 'bg-white/[0.04] text-gray-400 border border-white/[0.06]'
                 }`}
               >
                 {opt.label}
@@ -247,7 +251,7 @@ export default function Onboarding() {
 
         {/* Equipment */}
         <div className="mb-6">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="label-caps mb-2 block">
             {t('onboarding.beginners.equipment_label')}
           </label>
           <div className="flex flex-col gap-2">
@@ -257,8 +261,8 @@ export default function Onboarding() {
                 onClick={() => setEquipment(opt.value)}
                 className={`rounded-xl px-4 py-3 text-left text-sm font-medium transition-all active:scale-[0.97] ${
                   equipment === opt.value
-                    ? 'bg-cyan-500 text-white'
-                    : 'bg-gray-800 text-gray-400'
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.15)]'
+                    : 'bg-white/[0.04] text-gray-400 border border-white/[0.06]'
                 }`}
               >
                 {opt.label}
@@ -272,11 +276,7 @@ export default function Onboarding() {
         <button
           onClick={handleFinish}
           disabled={!goal || !time || !equipment}
-          className={`h-14 w-full rounded-2xl font-semibold transition-all active:scale-[0.97] ${
-            goal && time && equipment
-              ? 'bg-cyan-500 text-white'
-              : 'bg-gray-800 text-gray-500'
-          }`}
+          className={`btn-primary ${!goal || !time || !equipment ? 'opacity-40' : ''}`}
         >
           {t('onboarding.beginners.start_training')}
         </button>

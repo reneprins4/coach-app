@@ -73,8 +73,7 @@ export default function WeaknessHunter({ workouts, priorityMuscles = [] }: Weakn
 
       {/* Volume bars card */}
       <div
-        className="rounded-2xl p-5"
-        style={{ background: 'linear-gradient(135deg, #111827 0%, #0d1421 100%)', border: '1px solid rgba(255,255,255,0.06)' }}
+        className="card"
       >
         <p className="label-caps mb-4">{t('weakness.volume_per_group')}</p>
         <div className="space-y-4">
@@ -146,8 +145,7 @@ export default function WeaknessHunter({ workouts, priorityMuscles = [] }: Weakn
         </div>
       ) : (
         <div
-          className="rounded-2xl p-4"
-          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
+          className="rounded-2xl p-4 bg-emerald-500/8 border border-emerald-500/20"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">

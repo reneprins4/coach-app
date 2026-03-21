@@ -179,11 +179,11 @@ function Heatmap({
   const numWeeks = grid[0]?.length || 0
 
   return (
-    <div className="rounded-2xl bg-gray-900 p-4">
+    <div className="card">
       <p className="label-caps mb-3">{t('calendar.heatmap_title')}</p>
 
       {/* Month labels */}
-      <div className="flex mb-1" style={{ paddingLeft: 28 }}>
+      <div className="flex mb-1 pl-7">
         {monthLabels.map((m, i) => (
           <span
             key={i}
@@ -299,14 +299,14 @@ function HeatmapTooltip({
 
   if (day.workoutCount === 0) {
     return (
-      <div className="mt-2 rounded-xl bg-gray-900/60 px-3 py-2 text-center">
-        <span className="text-xs text-gray-500">{formatted} — {t('calendar.rest_day')}</span>
+      <div className="card mt-2 py-2 text-center">
+        <span className="text-xs text-gray-500">{formatted} -- {t('calendar.rest_day')}</span>
       </div>
     )
   }
 
   return (
-    <div className="mt-2 rounded-xl bg-gray-900/60 px-3 py-2 flex items-center justify-between">
+    <div className="card mt-2 py-2 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: day.splitColor }} />
         <span className="text-xs text-gray-300">{formatted}</span>
@@ -437,22 +437,22 @@ export default function Calendar() {
     <div className="px-4 py-6 pb-32">
       <div className="mb-6">
         <p className="label-caps mb-1">{t('calendar.overview')}</p>
-        <h1 className="text-3xl font-black tracking-tight text-white">{t('calendar.calendar')}</h1>
+        <h1 className="text-display">{t('calendar.calendar')}</h1>
       </div>
 
       {/* Stats strip */}
       <div className="mb-5 flex gap-2">
-        <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
+        <div className="card flex flex-1 flex-col items-center py-3.5">
           <CalendarIcon size={15} className="mb-1.5 text-gray-500" />
           <span className="text-xl font-black text-white tabular-nums">{stats.thisMonth}</span>
           <span className="label-caps mt-0.5">{t('calendar.this_month')}</span>
         </div>
-        <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
+        <div className="card flex flex-1 flex-col items-center py-3.5">
           <Flame size={15} className="mb-1.5 text-cyan-500" />
           <span className="text-xl font-black text-white tabular-nums">{stats.streak}</span>
           <span className="label-caps mt-0.5">{t('dashboard.streak')}</span>
         </div>
-        <div className="flex flex-1 flex-col items-center rounded-2xl bg-gray-900 py-3.5">
+        <div className="card flex flex-1 flex-col items-center py-3.5">
           <Trophy size={15} className="mb-1.5 text-yellow-500" />
           <span className="text-xl font-black text-white tabular-nums">{stats.thisYear}</span>
           <span className="label-caps mt-0.5">{t('calendar.this_year')}</span>
@@ -473,36 +473,38 @@ export default function Calendar() {
         </>
       )}
 
-      {/* Month navigation */}
-      <div className={`mb-4 flex items-center justify-between ${workouts.length > 0 ? 'mt-5' : ''}`}>
-        <button
-          onClick={prevMonth}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-gray-800"
-        >
-          <ChevronLeft size={22} />
-        </button>
-        <h2 className="text-base font-bold text-white">
-          {getMonthName(currentMonth, i18n.language)} {currentYear}
-        </h2>
-        <button
-          onClick={nextMonth}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-gray-800"
-        >
-          <ChevronRight size={22} />
-        </button>
-      </div>
+      {/* Month view */}
+      <div className={`card ${workouts.length > 0 ? 'mt-5' : ''}`}>
+        {/* Month navigation */}
+        <div className="mb-4 flex items-center justify-between">
+          <button
+            onClick={prevMonth}
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <h2 className="text-base font-bold text-white">
+            {getMonthName(currentMonth, i18n.language)} {currentYear}
+          </h2>
+          <button
+            onClick={nextMonth}
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
+          >
+            <ChevronRight size={22} />
+          </button>
+        </div>
 
-      {/* Day headers */}
-      <div className="mb-2 grid grid-cols-7 gap-1">
-        {DAYS.map(day => (
-          <div key={day} className="py-2 text-center label-caps">
-            {day}
-          </div>
-        ))}
-      </div>
+        {/* Day headers */}
+        <div className="mb-2 grid grid-cols-7 gap-1">
+          {DAYS.map(day => (
+            <div key={day} className="py-2 text-center label-caps">
+              {day}
+            </div>
+          ))}
+        </div>
 
-      {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1">
         {days.map((day, i) => {
           const dateKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`
           const hasWorkout = !!workoutsByDate[dateKey]
@@ -521,11 +523,11 @@ export default function Calendar() {
               key={i}
               onClick={() => handleDayClick(day)}
               disabled={!hasWorkout}
-              className={`relative flex aspect-square flex-col items-center justify-center rounded-lg transition-colors ${
+              className={`relative flex aspect-square flex-col items-center justify-center rounded-xl transition-colors ${
                 !day.isCurrentMonth ? 'text-gray-800' :
                 isFuture ? 'text-gray-700' :
-                isSelected ? 'text-white ring-1 ring-white/40' :
-                isToday ? 'ring-1 ring-white/30 text-white' :
+                isSelected ? 'text-white border border-white/40' :
+                isToday ? 'border border-white/30 text-white' :
                 hasWorkout ? 'text-white' :
                 'text-gray-500'
               } ${hasWorkout && !isSelected ? 'active:bg-gray-800' : ''}`}
@@ -557,12 +559,13 @@ export default function Calendar() {
             </button>
           )
         })}
+        </div>
       </div>
 
       {/* Selected workout detail */}
       {selectedDate && selectedWorkouts.length > 0 && (
-        <div className="mt-6 rounded-2xl bg-gray-900 p-4">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+        <div className="card mt-6">
+          <p className="label-caps mb-1">
             {formatDate(selectedDate, i18n.language)}
           </p>
 
@@ -621,7 +624,7 @@ export default function Calendar() {
                 {/* Link to detail */}
                 <Link
                   to={`/history/${workout.id}`}
-                  className="mt-4 flex h-10 items-center justify-center rounded-lg text-sm font-medium text-cyan-500 ring-1 ring-cyan-500/30 active:bg-cyan-500/10"
+                  className="mt-4 flex h-10 items-center justify-center rounded-lg text-sm font-medium text-cyan-500 border border-cyan-500/30 active:bg-cyan-500/10"
                 >
                   {t('calendar.view_full_workout')}
                 </Link>
