@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MEASUREMENT_TYPES, validateMeasurement } from '../lib/measurements'
+import { getLocalDateString } from '../lib/dateUtils'
 import type { MeasurementType } from '../lib/measurements'
 
 interface MeasurementInputProps {
@@ -11,7 +12,7 @@ export default function MeasurementInput({ onSave }: MeasurementInputProps) {
   const { t } = useTranslation()
   const [type, setType] = useState<MeasurementType>('weight')
   const [value, setValue] = useState('')
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]!)
+  const [date, setDate] = useState(() => getLocalDateString(new Date()))
   const [error, setError] = useState<string | null>(null)
 
   const selectedType = MEASUREMENT_TYPES.find(m => m.type === type)

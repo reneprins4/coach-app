@@ -4,8 +4,9 @@
  */
 
 import type { Workout, FatigueResult, FatigueSignal } from '../types'
+import { getLocalDateString } from './dateUtils'
 
-export function detectFatigue(workouts: Workout[], weeksToCheck: number = 3): FatigueResult {
+export function detectFatigue(workouts: Workout[], weeksToCheck: number = 3, targetFrequency: number = 4): FatigueResult {
   // Kijk naar de laatste N weken data
   const cutoff = new Date()
   cutoff.setDate(cutoff.getDate() - weeksToCheck * 7)
@@ -53,9 +54,10 @@ export function detectFatigue(workouts: Workout[], weeksToCheck: number = 3): Fa
     }
   }
 
-  // Signal 3: Workout frequency drop
+  // Signal 3: Workout frequency drop — relative to user's target frequency
   const workoutsPerWeek = recent.length / weeksToCheck
-  if (workoutsPerWeek < 2 && recent.length > 3) {
+  const frequencyThreshold = targetFrequency * 0.6
+  if (workoutsPerWeek < frequencyThreshold && recent.length > 3) {
     signals.push({ type: 'frequency_drop', perWeek: workoutsPerWeek.toFixed(1) })
     fatigueScore += 1
   }
@@ -77,5 +79,5 @@ function getWeekNumber(date: Date): string {
   const d = new Date(date)
   d.setHours(0, 0, 0, 0)
   d.setDate(d.getDate() - d.getDay())
-  return d.toISOString().split('T')[0] ?? ''
+  return getLocalDateString(d)
 }

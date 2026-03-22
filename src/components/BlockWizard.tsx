@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, ChevronLeft, ChevronRight, Zap, TrendingUp, Target, Battery, Check } from 'lucide-react'
 import { PHASES } from '../lib/periodization'
+import { getLocalDateString } from '../lib/dateUtils'
 import type { PeriodizationPhase } from '../types'
 import { saveSettings, getSettings } from '../lib/settings'
 import { useModalA11y } from '../hooks/useModalA11y'
@@ -105,7 +106,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
   const { t, i18n } = useTranslation()
   const [step, setStep] = useState(1)
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null)
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]!)
+  const [startDate, setStartDate] = useState(getLocalDateString(new Date()))
   const [loading, setLoading] = useState(false)
   useModalA11y(isOpen, onClose)
 
@@ -248,7 +249,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={getLocalDateString(new Date())}
                   className="w-full rounded-lg bg-gray-900 px-4 py-3 text-white outline-none border border-gray-700 focus:border-cyan-500"
                 />
               </div>

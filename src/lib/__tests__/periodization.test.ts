@@ -27,6 +27,8 @@ import {
   getBlockProgress,
   startBlock,
   clearBlock,
+  isBlockExpired,
+  getBlockExpiryInfo,
 } from '../periodization'
 import { createTrainingBlock } from '../../__tests__/helpers'
 
@@ -224,6 +226,108 @@ describe('periodization', () => {
       localStorage.setItem(BLOCK_KEY, '{"phase":"test"}')
       await clearBlock(null)
       expect(localStorage.getItem(BLOCK_KEY)).toBeNull()
+    })
+  })
+
+  describe('isBlockExpired (ALGO-012)', () => {
+    it('returns false when within phase weeks', () => {
+      // accumulation = 4 weeks, block started 2 weeks ago -> not expired
+      const start = new Date()
+      start.setDate(start.getDate() - 14) // 2 weeks ago
+      const block = createTrainingBlock({
+        phase: 'accumulation',
+        startDate: start.toISOString(),
+        daysElapsed: 14,
+      })
+      expect(isBlockExpired(block)).toBe(false)
+    })
+
+    it('returns false within 2-week grace period', () => {
+      // accumulation = 4 weeks, block started 5 weeks ago -> within grace
+      const start = new Date()
+      start.setDate(start.getDate() - 35) // 5 weeks ago
+      const block = createTrainingBlock({
+        phase: 'accumulation',
+        startDate: start.toISOString(),
+        daysElapsed: 35,
+      })
+      expect(isBlockExpired(block)).toBe(false)
+    })
+
+    it('returns false at exactly 2 weeks overdue (boundary)', () => {
+      // accumulation = 4 weeks, block started 6 weeks ago -> exactly at grace limit
+      const start = new Date()
+      start.setDate(start.getDate() - 42) // 6 weeks ago = 4 + 2
+      const block = createTrainingBlock({
+        phase: 'accumulation',
+        startDate: start.toISOString(),
+        daysElapsed: 42,
+      })
+      expect(isBlockExpired(block)).toBe(false)
+    })
+
+    it('returns true when 3+ weeks overdue', () => {
+      // accumulation = 4 weeks, block started 8 weeks ago -> 4 weeks overdue
+      const start = new Date()
+      start.setDate(start.getDate() - 56) // 8 weeks ago
+      const block = createTrainingBlock({
+        phase: 'accumulation',
+        startDate: start.toISOString(),
+        daysElapsed: 56,
+      })
+      expect(isBlockExpired(block)).toBe(true)
+    })
+
+    it('returns true for strength phase (3 weeks) when overdue', () => {
+      // strength = 3 weeks, 3 + 2 grace = 5 weeks max, 6 weeks elapsed -> expired
+      const start = new Date()
+      start.setDate(start.getDate() - 43) // ~6.1 weeks
+      const block = createTrainingBlock({
+        phase: 'strength',
+        startDate: start.toISOString(),
+        daysElapsed: 43,
+      })
+      expect(isBlockExpired(block)).toBe(true)
+    })
+  })
+
+  describe('getBlockExpiryInfo (ALGO-012)', () => {
+    it('returns correct weeksOverdue when block is overdue', () => {
+      // accumulation = 4 weeks, 8 weeks elapsed -> 4 weeks overdue
+      const start = new Date()
+      start.setDate(start.getDate() - 56) // 8 weeks
+      const block = createTrainingBlock({
+        phase: 'accumulation',
+        startDate: start.toISOString(),
+        daysElapsed: 56,
+      })
+      const info = getBlockExpiryInfo(block)
+      expect(info.expired).toBe(true)
+      expect(info.weeksOverdue).toBe(4)
+    })
+
+    it('returns weeksOverdue 0 when not expired', () => {
+      const block = createTrainingBlock({
+        phase: 'accumulation',
+        startDate: new Date().toISOString(),
+        daysElapsed: 0,
+      })
+      const info = getBlockExpiryInfo(block)
+      expect(info.expired).toBe(false)
+      expect(info.weeksOverdue).toBe(0)
+    })
+
+    it('returns weeksOverdue 0 within grace period', () => {
+      const start = new Date()
+      start.setDate(start.getDate() - 35) // 5 weeks, within 4+2 grace
+      const block = createTrainingBlock({
+        phase: 'accumulation',
+        startDate: start.toISOString(),
+        daysElapsed: 35,
+      })
+      const info = getBlockExpiryInfo(block)
+      expect(info.expired).toBe(false)
+      expect(info.weeksOverdue).toBe(0)
     })
   })
 })

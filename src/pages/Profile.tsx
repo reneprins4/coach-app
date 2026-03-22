@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
+import { getLocalDateString } from '../lib/dateUtils'
 import { ACHIEVEMENTS, buildAchievementContext, getUnlockedAchievements, syncAchievements } from '../lib/achievements'
 import AchievementBadge from '../components/AchievementBadge'
 import InjuryBanner from '../components/InjuryBanner'
@@ -138,7 +139,7 @@ export default function Profile() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `kravex-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `kravex-export-${getLocalDateString(new Date())}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }

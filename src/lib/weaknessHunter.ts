@@ -44,20 +44,19 @@ function getDetailedMuscleGroup(name: string): DetailedMuscleGroup | null {
 
   if (/bench|chest|fly|push.?up|pec/.test(l)) return 'chest'
 
+  // Leg-specific patterns must precede generic shoulder/press patterns
+  if (/hamstring|leg.?curl|romanian|rdl|stiff.?leg|nordic/.test(l)) return 'hamstrings'
+  if (/glute|hip.?thrust|bridge/.test(l)) return 'glutes'
+  if (/squat|leg.?press|leg.?extension|lunge|hack/.test(l)) return 'quadriceps'
+  if (/calf/.test(l)) return 'calves'
+
   if (/front.?raise/.test(l)) return 'shoulders_front'
   if (/face.?pull|rear.?delt|reverse.?fly/.test(l)) return 'shoulders_rear'
   if (/lateral.?raise|side.?raise|upright/.test(l)) return 'shoulders_side'
   if (/shoulder|delt|shrug|arnold/.test(l)) return 'shoulders_front'
   if (/overhead|military|(?:press)(?!.*bench)(?!.*leg)(?!.*chest)(?!.*incline)(?!.*decline)/.test(l)) return 'shoulders_front'
 
-  if (/hamstring|leg.?curl|romanian|rdl|stiff.?leg|nordic/.test(l)) return 'hamstrings'
-
-  if (/glute|hip.?thrust|bridge/.test(l)) return 'glutes'
-
   if (/dead|row|pull|lat|back/.test(l)) return 'back'
-
-  if (/squat|leg.?press|lunge|extension|hack/.test(l)) return 'quadriceps'
-  if (/calf/.test(l)) return 'calves'
 
   if (/curl|bicep|hammer/.test(l)) return 'biceps'
   if (/tricep|skull|pushdown|extension(?!.*leg)/.test(l)) return 'triceps'

@@ -6,9 +6,10 @@ const CONFIGS: Record<MomentumStatus, { bg: string; border: string; dot: string;
   good:      { bg: 'bg-blue-500/10',   border: 'border-blue-500/25',   dot: 'bg-blue-400',   text: 'text-blue-400',   labelKey: 'momentum.good' },
   declining: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/25', dot: 'bg-yellow-400', text: 'text-yellow-400', labelKey: 'momentum.declining'       },
   fatigue:   { bg: 'bg-red-500/10',    border: 'border-red-500/25',    dot: 'bg-red-400',    text: 'text-red-400',    labelKey: 'momentum.fatigue'     },
+  deload:    { bg: 'bg-gray-500/10',   border: 'border-gray-500/25',   dot: 'bg-gray-400',   text: 'text-gray-400',   labelKey: 'momentum.deload'  },
 }
 
-const SHOW_ONLY: MomentumStatus[] = ['peak', 'fatigue']
+const SHOW_ONLY: MomentumStatus[] = ['peak', 'fatigue', 'deload']
 
 export default function MomentumIndicator({ momentum }: MomentumIndicatorProps) {
   const { t } = useTranslation()

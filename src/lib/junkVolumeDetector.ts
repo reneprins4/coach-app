@@ -17,14 +17,30 @@ export interface JunkVolumeDetectionResult {
 }
 
 /**
+ * Filter out likely warmup sets: sets where weight < 70% of the heaviest
+ * set in the sequence. This prevents warmup-to-work RPE increases from
+ * triggering false junk volume warnings.
+ */
+function filterWarmupSets(sets: JunkVolumeSet[]): JunkVolumeSet[] {
+  const maxWeight = Math.max(...sets.map(s => s.weight_kg ?? 0))
+  if (maxWeight <= 0) return sets
+  const threshold = maxWeight * 0.7
+  return sets.filter(s => (s.weight_kg ?? 0) >= threshold)
+}
+
+/**
  * Detecteer junk volume op basis van set-kwaliteit degradatie
  */
 export function detectJunkVolume(exerciseName: string, allSetsThisExercise: JunkVolumeSet[]): JunkVolumeDetectionResult | null {
   // Minimaal 3 sets nodig voor trend detectie
   if (!allSetsThisExercise || allSetsThisExercise.length < 3) return null
 
+  // Filter out warmup sets before analysis (ALGO-010)
+  const workSets = filterWarmupSets(allSetsThisExercise)
+  if (workSets.length < 3) return null
+
   // Check RPE trend: stijgt RPE terwijl gewicht gelijk blijft?
-  const setsWithRPE = allSetsThisExercise.filter(s => s.rpe && s.weight_kg)
+  const setsWithRPE = workSets.filter(s => s.rpe && s.weight_kg)
   if (setsWithRPE.length >= 3) {
     const recent = setsWithRPE.slice(-3)
     const firstRPE = recent[0]!.rpe!
@@ -54,7 +70,7 @@ export function detectJunkVolume(exerciseName: string, allSetsThisExercise: Junk
   }
 
   // Check reps trend: dalen reps significant bij zelfde gewicht?
-  const setsWithReps = allSetsThisExercise.filter(s => s.reps && s.weight_kg)
+  const setsWithReps = workSets.filter(s => s.reps && s.weight_kg)
   if (setsWithReps.length >= 3) {
     const recentReps = setsWithReps.slice(-3)
     const firstReps = recentReps[0]!.reps!

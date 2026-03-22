@@ -12,6 +12,7 @@ import { getSettings } from '../lib/settings'
 import { isBeginnerMode } from '../lib/beginnerMode'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
 import { calculateMomentum } from '../lib/momentumCalculator'
+import { getCurrentBlock, getCurrentWeekTarget } from '../lib/periodization'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
 import ExercisePicker from '../components/ExercisePicker'
@@ -258,7 +259,12 @@ export default function Logger() {
     return () => { cancelled = true }
   }, [user?.id, aw.isActive, exerciseNames.join(',')])
 
-  const momentum = useMemo(() => aw.workout ? calculateMomentum(aw.workout) : null, [aw.workout])
+  const isDeload = useMemo(() => {
+    const block = getCurrentBlock()
+    const weekTarget = getCurrentWeekTarget(block)
+    return weekTarget?.isDeload ?? false
+  }, [])
+  const momentum = useMemo(() => aw.workout ? calculateMomentum(aw.workout, { isDeload }) : null, [aw.workout, isDeload])
 
   // Enrich workout exercises with image URLs from exercise library
   const enrichedWorkout = useMemo(() => {

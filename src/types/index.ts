@@ -493,7 +493,7 @@ export interface JunkVolumeSet {
 
 // ---- Momentum Calculator ----
 
-export type MomentumStatus = 'peak' | 'good' | 'declining' | 'fatigue'
+export type MomentumStatus = 'peak' | 'good' | 'declining' | 'fatigue' | 'deload'
 export type MomentumSignal =
   | 'e1rm_rising' | 'e1rm_dropping'
   | 'rpe_improving' | 'rpe_degrading'

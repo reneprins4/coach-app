@@ -28,8 +28,9 @@ export default function DeloadAlert({ workouts, settings, updateSettings }: Delo
 
   const fatigue = useMemo(() => {
     if (!workouts || workouts.length < 4) return null
-    return detectFatigue(workouts)
-  }, [workouts])
+    const targetFrequency = parseInt(settings?.frequency ?? '4') || 4
+    return detectFatigue(workouts, 3, targetFrequency)
+  }, [workouts, settings?.frequency])
 
   if (dismissed || !fatigue || !fatigue.fatigued) return null
 

@@ -141,6 +141,34 @@ export async function clearBlock(userId: string | null): Promise<void> {
   }
 }
 
+const GRACE_PERIOD_WEEKS = 2
+
+/**
+ * Returns true when elapsed weeks exceed phase.weeks + grace period (2 weeks).
+ * A block that ran for 8 weeks on a 4-week phase is expired (4 weeks overdue > 2 week grace).
+ */
+export function isBlockExpired(block: TrainingBlock): boolean {
+  const phase = PHASES[block.phase]
+  if (!phase) return false
+  const elapsedWeeks = Math.floor(block.daysElapsed / 7)
+  return elapsedWeeks > phase.weeks + GRACE_PERIOD_WEEKS
+}
+
+/**
+ * Returns expiry info: whether the block is expired and how many weeks overdue.
+ */
+export function getBlockExpiryInfo(block: TrainingBlock): { expired: boolean; weeksOverdue: number } {
+  const phase = PHASES[block.phase]
+  if (!phase) return { expired: false, weeksOverdue: 0 }
+  const elapsedWeeks = Math.floor(block.daysElapsed / 7)
+  const overdue = elapsedWeeks - phase.weeks
+  const expired = overdue > GRACE_PERIOD_WEEKS
+  return {
+    expired,
+    weeksOverdue: expired ? overdue : 0,
+  }
+}
+
 export function getCurrentWeekTarget(block: TrainingBlock | null): WeekTarget | null {
   if (!block) return null
   const phase = PHASES[block.phase]

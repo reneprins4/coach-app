@@ -16,6 +16,7 @@ import OptimalHourCard from '../components/OptimalHourCard'
 import { useOptimalHour } from '../hooks/useOptimalHour'
 import { formatSlotLabel } from '../lib/optimalHour'
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
+import { getLocalDateString } from '../lib/dateUtils'
 import { analyzeTraining } from '../lib/training-analysis'
 import { generateTodaysWorkout } from '../lib/todaysWorkout'
 import { computeTrainingStory, isStoryViewed, markStoryViewed } from '../lib/trainingStory'
@@ -45,12 +46,12 @@ export default function Dashboard() {
     const thisWeek = workouts.filter(w => new Date(w.created_at) >= weekStart)
 
     let streak = 0
-    const dates = new Set(workouts.map(w => new Date(w.created_at).toISOString().split('T')[0]))
+    const dates = new Set(workouts.map(w => getLocalDateString(new Date(w.created_at))))
     const d = new Date()
-    let check = d.toISOString().split('T')[0]
-    if (!dates.has(check)) { d.setDate(d.getDate() - 1); check = d.toISOString().split('T')[0] }
+    let check = getLocalDateString(d)
+    if (!dates.has(check)) { d.setDate(d.getDate() - 1); check = getLocalDateString(d) }
     while (dates.has(check)) {
-      streak++; d.setDate(d.getDate() - 1); check = d.toISOString().split('T')[0]
+      streak++; d.setDate(d.getDate() - 1); check = getLocalDateString(d)
     }
 
     return { thisWeekCount: thisWeek.length, streak }

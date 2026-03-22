@@ -1,4 +1,5 @@
 import type { Workout, PlateauResult, PlateauWeekData, PlateauStatus } from '../types'
+import { getLocalDateString } from './dateUtils'
 
 export function detectPlateaus(workouts: Workout[]): PlateauResult[] {
   const exerciseData: Record<string, Record<string, number>> = {}
@@ -118,7 +119,7 @@ function getWeekKey(date: Date): string {
   const d = new Date(date)
   d.setHours(0, 0, 0, 0)
   d.setDate(d.getDate() - d.getDay())
-  return d.toISOString().split('T')[0] ?? ''
+  return getLocalDateString(d)
 }
 
 function formatWeekLabel(weekKey: string): string {

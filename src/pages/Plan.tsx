@@ -33,15 +33,16 @@ export default function Plan() {
   const { t } = useTranslation()
   const nav = useNavigate()
   const { user } = useAuthContext()
-  getSettings()  // loaded for side effects
+  const settings = getSettings()
   const { workouts } = useWorkouts(user?.id)
   const [block, setBlock] = useState<import('../types').TrainingBlock | null>(null)
   const [selecting, setSelecting] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(false)
 
-  // Detecteer vermoeidheid
-  const fatigue = workouts.length >= 4 ? detectFatigue(workouts) : null
+  // Detecteer vermoeidheid — gebruik target frequency uit settings
+  const targetFrequency = parseInt(settings.frequency) || 4
+  const fatigue = workouts.length >= 4 ? detectFatigue(workouts, 3, targetFrequency) : null
 
   // Laad blok van Supabase (of localStorage als fallback)
   useEffect(() => {

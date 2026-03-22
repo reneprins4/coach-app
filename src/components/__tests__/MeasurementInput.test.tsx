@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MeasurementInput from '../MeasurementInput'
+import { getLocalDateString } from '../../lib/dateUtils'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -37,7 +38,7 @@ describe('MeasurementInput', () => {
 
   it('date defaults to today', () => {
     render(<MeasurementInput onSave={vi.fn()} />)
-    const dateInput = screen.getByDisplayValue(new Date().toISOString().split('T')[0]!)
+    const dateInput = screen.getByDisplayValue(getLocalDateString(new Date()))
     expect(dateInput).toBeDefined()
   })
 

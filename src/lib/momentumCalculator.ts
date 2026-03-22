@@ -23,7 +23,11 @@ interface MomentumWorkout {
   exercises?: MomentumExercise[]
 }
 
-export function calculateMomentum(workout: MomentumWorkout): MomentumResult | null {
+interface MomentumOptions {
+  isDeload?: boolean
+}
+
+export function calculateMomentum(workout: MomentumWorkout, options?: MomentumOptions): MomentumResult | null {
   if (!workout?.exercises) return null
 
   // Verzamel alle sets van alle oefeningen in tijdsvolgorde
@@ -74,6 +78,21 @@ export function calculateMomentum(workout: MomentumWorkout): MomentumResult | nu
   }
 
   score = Math.max(0, Math.min(100, score))
+
+  // During deload weeks, suppress negative signals and override status
+  if (options?.isDeload) {
+    const filteredSignals = signals.filter(
+      s => s !== 'e1rm_dropping' && s !== 'rpe_degrading' && s !== 'reps_dropping'
+    )
+    return {
+      score: Math.max(score, 50), // floor at 50 during deload
+      status: 'deload' as MomentumStatus,
+      message: 'Deload week — herstel heeft prioriteit. Lagere intensiteit is het doel.',
+      signals: filteredSignals,
+      showPRHint: false,
+      totalSets: validSets.length,
+    }
+  }
 
   let status: MomentumStatus
   let message: string
