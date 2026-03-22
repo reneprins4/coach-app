@@ -8,9 +8,9 @@
   "common": {
     "save": "Opslaan",
     "saved": "Opgeslagen",
-    "cancel": "Annuleer",
-    "confirm": "Bevestig",
-    "delete": "Verwijder",
+    "cancel": "Annuleren",
+    "confirm": "Bevestigen",
+    "delete": "Verwijderen",
     "back": "Terug",
     "loading": "Laden...",
     "close": "Sluiten",
@@ -62,7 +62,7 @@
     "greeting_evening": "Goedenavond",
     "start_training": "Start training",
     "free_training": "Vrije training",
-    "time_to_start": "Tijd om te beginnen.",
+    "time_to_start": "Tijd om te presteren.",
     "workouts": "Trainingen",
     "streak": "Streak",
     "recent": "Recent",
@@ -361,7 +361,7 @@
   "onboarding": {
     "beginners": {
       "welcome_title": "Welkom bij Kravex",
-      "welcome_sub": "Slimme krachttraining. Gebaseerd op sport science.",
+      "welcome_sub": "Slimme krachttraining. Gebaseerd op sportwetenschap.",
       "begin": "Begin",
       "how_title": "Hoe het werkt",
       "step_indicator": "{{current}} van {{total}}",
@@ -433,7 +433,7 @@
     "freq_4x": "4x per week",
     "freq_4x_sub": "Serieus bezig",
     "freq_5x": "5x of meer",
-    "freq_5x_sub": "Topsport niveau"
+    "freq_5x_sub": "Topsportniveau"
   },
   "deload": {
     "title": "Deload aanbevolen",
@@ -458,7 +458,7 @@
     "pr_moment": "PR MOMENT"
   },
   "forecast": {
-    "title": "Performance Forecast",
+    "title": "Prestatieverloop",
     "on_track": "Op schema",
     "stale": "Laatste training meer dan 2 weken geleden — prognose mogelijk niet actueel.",
     "insufficient": "Meer trainingen nodig voor een voorspelling",
@@ -747,7 +747,7 @@
     "latest": "Laatste meting"
   },
   "review": {
-    "your_ai_workout": "Jouw Training"
+    "your_ai_workout": "Jouw training"
   },
   "achievements": {
     "title": "Achievements",
@@ -843,8 +843,8 @@
     "rehab_straight_leg_raise": "Op rug liggend, gestrekt been optillen",
     "rehab_wall_sit": "Rug tegen muur, knieen 90 graden",
     "rehab_terminal_knee_ext": "Band achter knie, strek volledig",
-    "rehab_cat_cow": "Op handen en knieen, rug ronden en hollen",
-    "rehab_bird_dog": "Op handen en knieen, tegenovergestelde arm en been strekken",
+    "rehab_cat_cow": "Op handen en knieën, rug ronden en hollen",
+    "rehab_bird_dog": "Op handen en knieën, tegenovergestelde arm en been strekken",
     "rehab_dead_bug": "Op rug liggend, tegenovergestelde arm/been bewegen",
     "rehab_glute_bridge": "Op rug liggend, heupen optillen",
     "rehab_chin_tucks": "Kin naar borst trekken, houd 5s",
