@@ -22,7 +22,9 @@
     "exercises": "exercises",
     "next": "Next",
     "retry": "Try again",
-    "volume": "Volume"
+    "volume": "Volume",
+    "show_less": "Show less",
+    "show_more": "Show {{count}} more"
   },
   "muscles": {
     "chest": "Chest",
@@ -248,7 +250,8 @@
     "analysis_required": "Analysis required",
     "recovered": "recovered",
     "select_time_first": "Select a duration",
-    "try_later": "Try again later"
+    "try_later": "Try again later",
+    "no_sets_error": "Log at least one set before finishing"
   },
   "progress": {
     "title": "Progress",
@@ -972,5 +975,11 @@
     "slot_16_18": "Late afternoon",
     "slot_18_20": "Early evening",
     "slot_20_22": "Late evening"
+  },
+  "plateau_alert": {
+    "title": "Attention Points",
+    "plateau": "Plateau",
+    "slowing": "Slowing",
+    "exercise_count": "{{count}} exercise(s)"
   }
 }

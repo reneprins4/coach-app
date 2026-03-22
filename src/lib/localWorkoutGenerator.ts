@@ -386,9 +386,18 @@ export function generateLocalWorkout({
         .filter(e => e !== ex && e.muscle_group === ex.muscle_group)
         .reduce((s, e) => s + e.sets, 0)
       const remaining = Math.max(0, ceiling - currentWeekly - otherPlanned)
-      if (ex.sets > remaining && remaining > 0) {
+      if (remaining <= 0) {
+        ex.sets = 0
+      } else if (ex.sets > remaining) {
         ex.sets = remaining
       }
+    }
+  }
+
+  // Remove exercises that were capped to 0 sets
+  for (let i = exercises.length - 1; i >= 0; i--) {
+    if (exercises[i]!.sets <= 0) {
+      exercises.splice(i, 1)
     }
   }
 

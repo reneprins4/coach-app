@@ -22,7 +22,9 @@
     "exercises": "oefeningen",
     "next": "Volgende",
     "retry": "Opnieuw proberen",
-    "volume": "Volume"
+    "volume": "Volume",
+    "show_less": "Minder tonen",
+    "show_more": "Toon {{count}} meer"
   },
   "muscles": {
     "chest": "Borst",
@@ -248,7 +250,8 @@
     "analysis_required": "Analyse vereist",
     "recovered": "hersteld",
     "select_time_first": "Kies een tijd",
-    "try_later": "Probeer het later opnieuw"
+    "try_later": "Probeer het later opnieuw",
+    "no_sets_error": "Log minimaal één set voor je de workout afrondt"
   },
   "progress": {
     "title": "Voortgang",
@@ -972,5 +975,11 @@
     "slot_16_18": "Late namiddag",
     "slot_18_20": "Vroege avond",
     "slot_20_22": "Late avond"
+  },
+  "plateau_alert": {
+    "title": "Aandachtspunten",
+    "plateau": "Plateau",
+    "slowing": "Vertraagd",
+    "exercise_count": "{{count}} oefening(en)"
   }
 }

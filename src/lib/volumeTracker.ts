@@ -33,7 +33,13 @@ function getMonthStart(date: Date): Date {
  */
 function calcWorkoutVolume(workout: Workout): number {
   const sets = workout.workout_sets || []
-  return sets.reduce((sum, s) => sum + ((s.weight_kg || 0) * (s.reps || 0)), 0)
+  return sets.reduce((sum, s) => {
+    const weight = s.weight_kg || 0
+    const reps = s.reps || 0
+    // Bodyweight exercises (weight 0 or null): use reps as volume
+    // so 15 push-ups = 15 volume units instead of 0
+    return sum + (weight > 0 ? weight * reps : reps)
+  }, 0)
 }
 
 /**

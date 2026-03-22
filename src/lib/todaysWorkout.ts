@@ -10,7 +10,7 @@ import { generateLocalWorkout } from './localWorkoutGenerator'
 import { getSettings } from './settings'
 import { getCurrentBlock } from './periodization'
 import { buildWorkoutPreferences } from './workoutPreferences'
-import type { Workout, AIWorkoutResponse } from '../types'
+import type { Workout, AIWorkoutResponse, RecentSession } from '../types'
 
 export interface TodaysWorkoutSuggestion {
   split: string
@@ -54,10 +54,21 @@ export function generateTodaysWorkout(workouts: Workout[]): TodaysWorkoutSuggest
   const block = getCurrentBlock()
   const preferences = buildWorkoutPreferences(settings, block)
 
+  // Build recent history from last 5 workouts for progressive overload
+  const recentHistory: RecentSession[] = workouts.slice(0, 5).map(w => ({
+    date: w.created_at,
+    sets: (w.workout_sets || []).map(s => ({
+      exercise: s.exercise,
+      weight_kg: s.weight_kg || 0,
+      reps: s.reps || 0,
+      rpe: s.rpe ?? null,
+    })),
+  }))
+
   const workout = generateLocalWorkout({
     muscleStatus,
     recommendedSplit: bestSplit.name,
-    recentHistory: [],
+    recentHistory,
     preferences: {
       trainingGoal: settings.trainingGoal || 'hypertrophy',
       experienceLevel: settings.experienceLevel || 'intermediate',

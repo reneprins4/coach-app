@@ -219,6 +219,12 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
       }))
     )
 
+    if (pendingSets.length === 0) {
+      setSaving(false)
+      setError('Log at least one set before finishing')
+      return null
+    }
+
     try {
       const { data: row, error: wErr } = await supabase
         .from('workouts')

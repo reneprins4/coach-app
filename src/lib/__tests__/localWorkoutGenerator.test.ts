@@ -104,8 +104,15 @@ describe('localWorkoutGenerator', () => {
     })
 
     it('adds extra exercises for focused muscles', () => {
-      const withoutFocus = generateLocalWorkout(makeInput())
+      // Use low setsThisWeek so volume ceiling doesn't interfere with focus test
+      const lowVolumeStatus = createMuscleStatusMap({
+        chest: { setsThisWeek: 0 },
+        shoulders: { setsThisWeek: 0 },
+        triceps: { setsThisWeek: 0 },
+      })
+      const withoutFocus = generateLocalWorkout(makeInput({ muscleStatus: lowVolumeStatus }))
       const withFocus = generateLocalWorkout(makeInput({
+        muscleStatus: lowVolumeStatus,
         preferences: {
           ...makeInput().preferences,
           focusedMuscles: ['chest'] as MuscleGroup[],
@@ -195,6 +202,60 @@ describe('localWorkoutGenerator', () => {
     it('estimated_duration_min is a positive number', () => {
       const result = generateLocalWorkout(makeInput())
       expect(result.estimated_duration_min).toBeGreaterThan(0)
+    })
+
+    // --- ENGINE-003: Volume ceiling enforcement ---
+
+    it('caps exercise sets to 0 and removes exercises when user is already at weekly MRV', () => {
+      // Intermediate ceiling is 18 sets per muscle group.
+      // Set setsThisWeek = 18 for chest so remaining = 0.
+      const muscleStatus = createMuscleStatusMap({
+        chest: { setsThisWeek: 18 },
+      })
+      const result = generateLocalWorkout(makeInput({
+        muscleStatus,
+        recommendedSplit: 'Push',
+      }))
+      // All chest exercises should be removed (sets would be 0)
+      const chestExercises = result.exercises.filter(e => e.muscle_group === 'chest')
+      expect(chestExercises).toHaveLength(0)
+    })
+
+    it('reduces exercise sets when partially over MRV', () => {
+      // Intermediate ceiling = 18. setsThisWeek = 15.
+      // Remaining = 18 - 15 = 3 sets for all chest exercises combined.
+      // A Push workout normally generates 3 chest exercises (compound 4 sets + compound 4 sets + isolation 3 sets = 11 sets).
+      // With only 3 remaining, total chest sets should be capped to 3.
+      const muscleStatus = createMuscleStatusMap({
+        chest: { setsThisWeek: 15 },
+      })
+      const result = generateLocalWorkout(makeInput({
+        muscleStatus,
+        recommendedSplit: 'Push',
+      }))
+      const chestSets = result.exercises
+        .filter(e => e.muscle_group === 'chest')
+        .reduce((sum, e) => sum + e.sets, 0)
+      expect(chestSets).toBeLessThanOrEqual(3)
+      expect(chestSets).toBeGreaterThan(0)
+    })
+
+    it('does not cap sets when well under MRV', () => {
+      // Intermediate ceiling = 18. setsThisWeek = 5.
+      // Remaining = 13 — plenty of room, no capping needed.
+      const muscleStatus = createMuscleStatusMap({
+        chest: { setsThisWeek: 5 },
+      })
+      const result = generateLocalWorkout(makeInput({
+        muscleStatus,
+        recommendedSplit: 'Push',
+      }))
+      const chestSets = result.exercises
+        .filter(e => e.muscle_group === 'chest')
+        .reduce((sum, e) => sum + e.sets, 0)
+      // Normal Push generates 3 chest exercises: 4+4+3 = 11 sets
+      // With 13 remaining, all sets should be preserved
+      expect(chestSets).toBeGreaterThanOrEqual(11)
     })
   })
 })

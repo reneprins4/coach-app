@@ -34,15 +34,20 @@ const ANTAGONIST_PAIRS: AntagonistPair[] = [
 ]
 
 // Gedetailleerde exercise mapping
-function getDetailedMuscleGroup(name: string): DetailedMuscleGroup {
+function getDetailedMuscleGroup(name: string): DetailedMuscleGroup | null {
   const l = name.toLowerCase()
 
-  if (/bench|chest|fly|dip|push.?up|pec/.test(l)) return 'chest'
+  // Tricep/assisted/bare dip → triceps (must precede chest pattern)
+  if (/tricep.*dip|assisted.*dip|^dip$/i.test(l)) return 'triceps'
+  // Chest dip stays chest
+  if (/chest.*dip/.test(l)) return 'chest'
+
+  if (/bench|chest|fly|push.?up|pec/.test(l)) return 'chest'
 
   if (/front.?raise/.test(l)) return 'shoulders_front'
   if (/face.?pull|rear.?delt|reverse.?fly/.test(l)) return 'shoulders_rear'
   if (/lateral.?raise|side.?raise|upright/.test(l)) return 'shoulders_side'
-  if (/shoulder|delt|shrug/.test(l)) return 'shoulders_front'
+  if (/shoulder|delt|shrug|arnold/.test(l)) return 'shoulders_front'
   if (/overhead|military|(?:press)(?!.*bench)(?!.*leg)(?!.*chest)(?!.*incline)(?!.*decline)/.test(l)) return 'shoulders_front'
 
   if (/hamstring|leg.?curl|romanian|rdl|stiff.?leg|nordic/.test(l)) return 'hamstrings'
@@ -60,11 +65,12 @@ function getDetailedMuscleGroup(name: string): DetailedMuscleGroup {
   if (/plank|ab|crunch|core|sit.?up/.test(l)) return 'core'
 
   if (/leg/.test(l)) return 'quadriceps'
-  return 'chest'
+  return null
 }
 
-function getSimpleMuscleGroup(name: string): SimpleMuscleGroup {
+function getSimpleMuscleGroup(name: string): SimpleMuscleGroup | null {
   const detailed = getDetailedMuscleGroup(name)
+  if (!detailed) return null
   if (['quadriceps', 'hamstrings', 'glutes', 'calves'].includes(detailed)) return 'legs'
   if (['shoulders_front', 'shoulders_rear', 'shoulders_side'].includes(detailed)) return 'shoulders'
   if (['biceps', 'triceps'].includes(detailed)) return 'arms'
@@ -85,8 +91,12 @@ export function analyzeWeaknesses(workouts: Workout[], weeksBack: number = 4): W
       const detailed = getDetailedMuscleGroup(set.exercise)
       const simple = getSimpleMuscleGroup(set.exercise)
 
-      volumeMap[detailed] = (volumeMap[detailed] || 0) + 1
-      simpleVolumeMap[simple] = (simpleVolumeMap[simple] || 0) + 1
+      if (detailed) {
+        volumeMap[detailed] = (volumeMap[detailed] || 0) + 1
+      }
+      if (simple) {
+        simpleVolumeMap[simple] = (simpleVolumeMap[simple] || 0) + 1
+      }
     }
   }
 
