@@ -62,7 +62,7 @@
     "greeting_evening": "Good evening",
     "start_training": "Start training",
     "free_training": "Free training",
-    "time_to_start": "Time to get started.",
+    "time_to_start": "Time to perform.",
     "workouts": "Workouts",
     "streak": "Streak",
     "recent": "Recent",
@@ -361,7 +361,7 @@
   "onboarding": {
     "beginners": {
       "welcome_title": "Welcome to Kravex",
-      "welcome_sub": "Smart strength training. Based on sport science.",
+      "welcome_sub": "Smart strength training. Built on sports science.",
       "begin": "Begin",
       "how_title": "How it works",
       "step_indicator": "{{current}} of {{total}}",
@@ -413,7 +413,7 @@
     "goal_strength": "Get stronger",
     "goal_strength_sub": "Lift more weight",
     "goal_endurance": "Get fitter",
-    "goal_endurance_sub": "Cardio and endurance",
+    "goal_endurance_sub": "Stamina and conditioning",
     "exp_beginner": "New",
     "exp_beginner_sub": "Less than 1 year",
     "exp_intermediate": "Intermediate",
@@ -429,7 +429,7 @@
     "freq_2x": "2x per week",
     "freq_2x_sub": "Minimal, but effective",
     "freq_3x": "3x per week",
-    "freq_3x_sub": "The golden standard",
+    "freq_3x_sub": "The gold standard",
     "freq_4x": "4x per week",
     "freq_4x_sub": "Serious training",
     "freq_5x": "5x or more",
@@ -747,7 +747,7 @@
     "latest": "Latest measurement"
   },
   "review": {
-    "your_ai_workout": "Your Workout"
+    "your_ai_workout": "Your workout"
   },
   "achievements": {
     "title": "Achievements",
@@ -778,19 +778,6 @@
     "vol_100k_desc": "Move a total of 100,000 kg",
     "vol_1m": "1 million kg",
     "vol_1m_desc": "Move a total of 1,000,000 kg"
-  },
-  "story": {
-    "banner_title": "Your {{month}} story is ready!",
-    "banner_subtitle": "View your monthly recap",
-    "view_now": "View now",
-    "view_story": "View Story",
-    "share": "Share",
-    "share_copied": "Copied to clipboard",
-    "personality_consistent": "The Consistent One",
-    "personality_powerhouse": "The Powerhouse",
-    "personality_volume": "The Volume Machine",
-    "personality_allrounder": "The Allrounder",
-    "personality_persistent": "The Persistent One"
   },
   "injury": {
     "report_title": "Report Injury",
@@ -930,8 +917,8 @@
     "personality": {
       "subtitle": "Your training type",
       "consistent": {
-        "name": "The Consistent",
-        "description": "You show up every week. Consistency is your strength."
+        "name": "The Consistent One",
+        "description": "You show up every week. Consistency is your superpower."
       },
       "powerhouse": {
         "name": "The Powerhouse",
@@ -946,8 +933,8 @@
         "description": "A bit of everything, good at all. Balanced and strong."
       },
       "persistent": {
-        "name": "The Persistent",
-        "description": "Pushing through when it gets tough. That's your strength."
+        "name": "The Persistent One",
+        "description": "Pushing through when it gets tough. That's your edge."
       }
     },
     "final": {
