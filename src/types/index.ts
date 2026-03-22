@@ -528,7 +528,7 @@ export interface ForecastChartPoint {
   forecast: number | null
 }
 
-export type ForecastStatus = 'insufficient' | 'plateau' | 'positive'
+export type ForecastStatus = 'insufficient' | 'plateau' | 'positive' | 'break'
 
 export interface ForecastResult {
   status: ForecastStatus
@@ -540,6 +540,7 @@ export interface ForecastResult {
   slope?: number
   chartData?: ForecastChartPoint[]
   stale?: boolean
+  message?: string
 }
 
 // ---- Optimal Hour ----

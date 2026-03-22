@@ -7,7 +7,7 @@ import type { ForecastSession, RegressionResult, ForecastChartPoint, ForecastRes
 
 const SMOOTHING_FACTOR = 0.85
 const MIN_SESSIONS = 4
-const PR_INCREMENT = 2.5 // kg improvement target
+const MIN_PR_INCREMENT = 2.5 // minimum kg improvement target
 
 interface RegressionPoint {
   x: number
@@ -86,9 +86,12 @@ export function calculateForecast(sessions: ForecastSession[]): ForecastResult {
   const now = new Date()
   const daysSinceLastSession = Math.floor((now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
 
-  // If > 21 days since last session, forecast is unreliable
+  // If > 21 days since last session, user is on a break — not a plateau
   if (daysSinceLastSession > 21) {
-    return { status: 'plateau' }
+    return {
+      status: 'break',
+      message: 'Je bent even weggeweest — welkom terug! Pak je laatste gewicht en bouw rustig weer op.',
+    }
   }
 
   // Track if data is getting stale (14-21 days)
@@ -108,7 +111,8 @@ export function calculateForecast(sessions: ForecastSession[]): ForecastResult {
 
   // Current PR (highest e1RM ever)
   const currentPR = Math.max(...points.map(p => p.y))
-  const targetPR = currentPR + PR_INCREMENT
+  const prIncrement = Math.max(MIN_PR_INCREMENT, currentPR * 0.015)
+  const targetPR = currentPR + prIncrement
 
   // Check if trend is positive enough
   // Slope should be positive and meaningful (at least 0.1kg per session on average)

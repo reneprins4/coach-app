@@ -248,7 +248,7 @@ Rules:
 - Note overload decision in "notes" field
 - 2+ exercises per muscle, ${preferences.time || 60}min→6-8 exercises (high energy+75min→8-10)
 - Compounds 3-5 sets, isolations 3-4 sets. Focus muscles get +1-2 extra sets
-- VOLUME CEILING: Max ${getVolumeCeiling(level).chest} sets/muscle/week for ${level}. Check sets_done in muscle status and do NOT exceed ceiling including today's workout.
+- VOLUME CEILING (${level}, sets/muscle/week): ${Object.entries(getVolumeCeiling(level)).map(([m, v]) => `${m}:${v}`).join(', ')}. Check sets_done in muscle status and do NOT exceed ceiling including today's workout.
 ${preferences.isDeload ? '- DELOAD: 2-3 sets max, RPE<=6' : preferences.trainingPhase ? `- ${preferences.trainingPhase} Wk${preferences.blockWeek}: strict RPE ${preferences.targetRPE}` : ''}
 - Vary 1-2 exercises vs last session (rotate compound variations)
 

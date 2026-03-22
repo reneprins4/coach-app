@@ -220,10 +220,18 @@ export function calcMuscleRecovery(muscle: string, hoursSinceTrained: number | n
 /**
  * Weekly volume ceiling per muscle group based on experience level.
  * Evidence-based maximum recoverable volume (MRV) thresholds.
+ *
+ * Uses SET_TARGETS (hypertrophy) max values as the advanced ceiling,
+ * then scales down for lower experience levels:
+ * - Beginner:      max * 0.6 (rounded)
+ * - Intermediate:  max * 0.85 (rounded)
+ * - Advanced:      max * 1.0
  */
 export function getVolumeCeiling(experienceLevel: string): Record<string, number> {
-  const base = experienceLevel === 'beginner' ? 12 : experienceLevel === 'advanced' ? 24 : 18
-  return Object.fromEntries(MUSCLE_GROUPS.map(m => [m, base]))
+  const scale = experienceLevel === 'beginner' ? 0.6 : experienceLevel === 'advanced' ? 1.0 : 0.85
+  return Object.fromEntries(
+    MUSCLE_GROUPS.map(m => [m, Math.round(SET_TARGETS[m].max * scale)])
+  )
 }
 
 export function recoveryStatus(pct: number): RecoveryStatusLabel {
@@ -384,6 +392,9 @@ export function scoreSplits(
       score -= 15 * fatiguedPrimary.length
     }
 
+    if (lastWorkoutInfo && lastWorkoutInfo.split === splitName) {
+      score -= 25 // penalty for same split consecutively
+    }
     if (splitName === 'Full Body' && lastWorkoutInfo?.split === 'Full Body' && lastWorkoutInfo.hoursSince < 24) {
       score -= 30
     }

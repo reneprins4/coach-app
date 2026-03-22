@@ -204,6 +204,131 @@ describe('localWorkoutGenerator', () => {
       expect(result.estimated_duration_min).toBeGreaterThan(0)
     })
 
+    // --- ENGINE-004: Pull split includes rear delts ---
+
+    it('Pull split includes at least 1 shoulder exercise (rear delt)', () => {
+      const result = generateLocalWorkout(makeInput({ recommendedSplit: 'Pull' }))
+      const shoulderExercises = result.exercises.filter(e => e.muscle_group === 'shoulders')
+      expect(shoulderExercises.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('rear delt exercises on Pull day are posterior only (Face Pull, Rear Delt Fly, Band Pull-Apart)', () => {
+      const posteriorOnly = ['Face Pull', 'Rear Delt Fly', 'Band Pull-Apart']
+      const result = generateLocalWorkout(makeInput({ recommendedSplit: 'Pull' }))
+      const shoulderExercises = result.exercises.filter(e => e.muscle_group === 'shoulders')
+      for (const ex of shoulderExercises) {
+        expect(posteriorOnly).toContain(ex.name)
+      }
+    })
+
+    // --- ENGINE-005: Bodyweight/dumbbell users get quad exercises ---
+
+    it('bodyweight user gets quad exercises (not empty)', () => {
+      const result = generateLocalWorkout(makeInput({
+        recommendedSplit: 'Legs',
+        preferences: { ...makeInput().preferences, equipment: 'bodyweight' },
+      }))
+      const quadExercises = result.exercises.filter(e => e.muscle_group === 'quads')
+      expect(quadExercises.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('dumbbell user gets multiple quad exercise options', () => {
+      const result = generateLocalWorkout(makeInput({
+        recommendedSplit: 'Legs',
+        preferences: { ...makeInput().preferences, equipment: 'dumbbells' },
+      }))
+      const quadExercises = result.exercises.filter(e => e.muscle_group === 'quads')
+      expect(quadExercises.length).toBeGreaterThanOrEqual(2)
+    })
+
+    // --- ENGINE-006: Deload isolation volume too high (67% vs 40%) ---
+
+    it('deload isolation exercises get 1 set (not 2)', () => {
+      const lowVolumeStatus = createMuscleStatusMap({
+        chest: { setsThisWeek: 0 },
+        shoulders: { setsThisWeek: 0 },
+        triceps: { setsThisWeek: 0 },
+      })
+      const result = generateLocalWorkout(makeInput({
+        muscleStatus: lowVolumeStatus,
+        recommendedSplit: 'Push',
+        preferences: {
+          ...makeInput().preferences,
+          isDeload: true,
+        },
+      }))
+      // Isolation exercises in a Push split: Cable Fly, Lateral Raise, Tricep Pushdown, etc.
+      const isolations = result.exercises.filter(e =>
+        ['Cable Fly (Mid)', 'Pec Deck', 'Lateral Raise', 'Face Pull', 'Cable Lateral Raise',
+         'Rear Delt Fly', 'Tricep Pushdown', 'Skull Crusher', 'Overhead Tricep Extension',
+         'Diamond Push-up'].includes(e.name)
+      )
+      expect(isolations.length).toBeGreaterThan(0)
+      for (const ex of isolations) {
+        expect(ex.sets).toBe(1)
+      }
+    })
+
+    it('deload compound exercises get 2 sets', () => {
+      const lowVolumeStatus = createMuscleStatusMap({
+        chest: { setsThisWeek: 0 },
+        shoulders: { setsThisWeek: 0 },
+        triceps: { setsThisWeek: 0 },
+      })
+      const result = generateLocalWorkout(makeInput({
+        muscleStatus: lowVolumeStatus,
+        recommendedSplit: 'Push',
+        preferences: {
+          ...makeInput().preferences,
+          isDeload: true,
+        },
+      }))
+      const compounds = result.exercises.filter(e =>
+        ['Flat Barbell Bench Press', 'Incline Dumbbell Press', 'Incline Barbell Bench Press',
+         'Flat Dumbbell Bench Press', 'Dumbbell Overhead Press', 'Barbell Overhead Press',
+         'Close Grip Bench Press'].includes(e.name)
+      )
+      expect(compounds.length).toBeGreaterThan(0)
+      for (const ex of compounds) {
+        expect(ex.sets).toBe(2)
+      }
+    })
+
+    // --- ENGINE-008: Progressive overload uses best set (highest e1RM), not first ---
+
+    it('progressive overload uses best set (highest e1RM), not first set', () => {
+      // Two sessions, older one has two sets for Incline Dumbbell Press:
+      // Set 1: 20kg x 10 -> e1RM = 20*(1+10/30) = 26.7
+      // Set 2: 30kg x 5  -> e1RM = 30*(1+5/30) = 35.0 (higher)
+      // The generator should use the 30kg x 5 set for progression, not the 20kg x 10 set.
+      // Use a second session (most recent) with different exercises so Incline DB Press
+      // is not filtered by the variety logic.
+      const lowVolumeStatus = createMuscleStatusMap({
+        chest: { setsThisWeek: 0 },
+        shoulders: { setsThisWeek: 0 },
+        triceps: { setsThisWeek: 0 },
+      })
+      const history = [
+        createRecentSession({}, [
+          { exercise: 'Flat Barbell Bench Press', weight_kg: 80, reps: 8, rpe: 7 },
+        ]),
+        createRecentSession({}, [
+          { exercise: 'Incline Dumbbell Press', weight_kg: 20, reps: 10, rpe: 7 },
+          { exercise: 'Incline Dumbbell Press', weight_kg: 30, reps: 5, rpe: 7 },
+        ]),
+      ]
+      const result = generateLocalWorkout(makeInput({
+        muscleStatus: lowVolumeStatus,
+        recentHistory: history,
+      }))
+      const incline = result.exercises.find(e => e.name === 'Incline Dumbbell Press')
+      expect(incline).toBeDefined()
+      // The vs_last_session note should reference the best set (30kg), not first (20kg).
+      // Buggy: "prev 20kg x10", Fixed: "prev 30kg x5"
+      expect(incline!.vs_last_session).toContain('prev 30')
+      expect(incline!.vs_last_session).not.toContain('prev 20')
+    })
+
     // --- ENGINE-003: Volume ceiling enforcement ---
 
     it('caps exercise sets to 0 and removes exercises when user is already at weekly MRV', () => {

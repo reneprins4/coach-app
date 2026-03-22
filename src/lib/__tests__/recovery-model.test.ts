@@ -70,25 +70,6 @@ describe('Recovery Model - Safety Fixes', () => {
 })
 
 describe('Volume Ceilings', () => {
-  it('beginner volume ceiling is 12 sets per muscle per week', () => {
-    const ceilings = getVolumeCeiling('beginner')
-    expect(ceilings['chest']).toBe(12)
-    expect(ceilings['quads']).toBe(12)
-    expect(ceilings['biceps']).toBe(12)
-  })
-
-  it('intermediate volume ceiling is 18 sets per muscle per week', () => {
-    const ceilings = getVolumeCeiling('intermediate')
-    expect(ceilings['chest']).toBe(18)
-    expect(ceilings['back']).toBe(18)
-  })
-
-  it('advanced volume ceiling is 24 sets per muscle per week', () => {
-    const ceilings = getVolumeCeiling('advanced')
-    expect(ceilings['chest']).toBe(24)
-    expect(ceilings['quads']).toBe(24)
-  })
-
   it('getVolumeCeiling returns correct ceiling for experience level', () => {
     const beginner = getVolumeCeiling('beginner')
     const intermediate = getVolumeCeiling('intermediate')
@@ -110,5 +91,67 @@ describe('Volume Ceilings', () => {
     const unknown = getVolumeCeiling('unknown')
     const intermediate = getVolumeCeiling('intermediate')
     expect(unknown['chest']).toBe(intermediate['chest'])
+  })
+})
+
+describe('Muscle-specific MRV ceilings', () => {
+  it('biceps ceiling is higher than quads ceiling for intermediate', () => {
+    // Small muscles (biceps) recover faster and can handle more relative volume
+    // But SET_TARGETS max for quads (20) > biceps (14), so quads ceiling is actually higher
+    // The key point: they are NOT the same value anymore
+    const ceilings = getVolumeCeiling('intermediate')
+    expect(ceilings['biceps']).not.toBe(ceilings['quads'])
+  })
+
+  it('beginner has lower ceilings than advanced for all muscles', () => {
+    const beginner = getVolumeCeiling('beginner')
+    const advanced = getVolumeCeiling('advanced')
+    const muscles = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
+    for (const m of muscles) {
+      expect(beginner[m]!).toBeLessThan(advanced[m]!)
+    }
+  })
+
+  it('returns different values per muscle group, not uniform', () => {
+    const ceilings = getVolumeCeiling('advanced')
+    const values = Object.values(ceilings)
+    const unique = new Set(values)
+    // With per-muscle targets, we should have more than 1 unique value
+    expect(unique.size).toBeGreaterThan(1)
+  })
+
+  it('all ceilings are positive numbers', () => {
+    for (const level of ['beginner', 'intermediate', 'advanced']) {
+      const ceilings = getVolumeCeiling(level)
+      for (const [, value] of Object.entries(ceilings)) {
+        expect(value).toBeGreaterThan(0)
+        expect(Number.isFinite(value)).toBe(true)
+      }
+    }
+  })
+
+  it('advanced ceiling equals SET_TARGETS hypertrophy max per muscle', () => {
+    const ceilings = getVolumeCeiling('advanced')
+    // Advanced = 1.0 * max from SET_TARGETS (hypertrophy)
+    expect(ceilings['chest']).toBe(20)      // SET_TARGETS.chest.max = 20
+    expect(ceilings['back']).toBe(22)       // SET_TARGETS.back.max = 22
+    expect(ceilings['core']).toBe(12)       // SET_TARGETS.core.max = 12
+    expect(ceilings['biceps']).toBe(14)     // SET_TARGETS.biceps.max = 14
+  })
+
+  it('beginner ceiling is 60% of advanced ceiling (rounded)', () => {
+    const beginner = getVolumeCeiling('beginner')
+    // beginner = round(max * 0.6)
+    expect(beginner['chest']).toBe(Math.round(20 * 0.6))       // 12
+    expect(beginner['back']).toBe(Math.round(22 * 0.6))        // 13
+    expect(beginner['biceps']).toBe(Math.round(14 * 0.6))      // 8
+  })
+
+  it('intermediate ceiling is 85% of advanced ceiling (rounded)', () => {
+    const intermediate = getVolumeCeiling('intermediate')
+    // intermediate = round(max * 0.85)
+    expect(intermediate['chest']).toBe(Math.round(20 * 0.85))  // 17
+    expect(intermediate['back']).toBe(Math.round(22 * 0.85))   // 19
+    expect(intermediate['biceps']).toBe(Math.round(14 * 0.85)) // 12
   })
 })

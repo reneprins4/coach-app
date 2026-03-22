@@ -190,6 +190,115 @@ describe('calculateForecast', () => {
     expect(result.status).toBe('insufficient')
   })
 
+  it('PR increment for 200kg squat is more than 2.5kg', () => {
+    const now = new Date()
+    const sessions = []
+
+    // Advanced lifter: squat progressing around 200kg
+    for (let i = 0; i < 8; i++) {
+      const d = new Date(now)
+      d.setDate(now.getDate() - ((7 - i) * 3))
+      sessions.push({
+        bestE1rm: 195 + i * 1.0, // slow but steady gains
+        fullDate: d.toISOString()
+      })
+    }
+
+    const result = calculateForecast(sessions)
+
+    expect(result.status).toBe('positive')
+    // Target should be currentPR + ~1.5% of PR, not just +2.5kg
+    // For 202kg PR: increment should be ~3.03kg, so target ~205kg
+    expect(result.targetPR).toBeGreaterThan(result.currentPR + 2.5)
+  })
+
+  it('PR increment for 40kg curl is 2.5kg (minimum)', () => {
+    const now = new Date()
+    const sessions = []
+
+    // Light exercise: curls around 40kg e1rm
+    for (let i = 0; i < 8; i++) {
+      const d = new Date(now)
+      d.setDate(now.getDate() - ((7 - i) * 3))
+      sessions.push({
+        bestE1rm: 36 + i * 0.8,
+        fullDate: d.toISOString()
+      })
+    }
+
+    const result = calculateForecast(sessions)
+
+    expect(result.status).toBe('positive')
+    // For 41.6kg PR: 1.5% = 0.624kg, so minimum 2.5kg applies
+    expect(result.targetPR).toBeCloseTo(result.currentPR + 2.5, 1)
+  })
+
+  it('PR increment scales with current level', () => {
+    const now = new Date()
+
+    function makeSessions(basePR) {
+      const sessions = []
+      for (let i = 0; i < 8; i++) {
+        const d = new Date(now)
+        d.setDate(now.getDate() - ((7 - i) * 3))
+        sessions.push({
+          bestE1rm: basePR + i * (basePR * 0.005),
+          fullDate: d.toISOString()
+        })
+      }
+      return sessions
+    }
+
+    const lightResult = calculateForecast(makeSessions(50))
+    const heavyResult = calculateForecast(makeSessions(250))
+
+    if (lightResult.status === 'positive' && heavyResult.status === 'positive') {
+      const lightIncrement = lightResult.targetPR - lightResult.currentPR
+      const heavyIncrement = heavyResult.targetPR - heavyResult.currentPR
+      // Heavy lifter should have a larger absolute increment
+      expect(heavyIncrement).toBeGreaterThan(lightIncrement)
+    }
+  })
+
+  it('21+ days since last session returns status "break" not "plateau"', () => {
+    const now = new Date()
+    const sessions = []
+
+    // Sessions from a month+ ago
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now)
+      d.setDate(now.getDate() - 30 - ((5 - i) * 3))
+      sessions.push({
+        bestE1rm: 100 + i * 2,
+        fullDate: d.toISOString()
+      })
+    }
+
+    const result = calculateForecast(sessions)
+
+    expect(result.status).toBe('break')
+  })
+
+  it('break status has encouraging message', () => {
+    const now = new Date()
+    const sessions = []
+
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now)
+      d.setDate(now.getDate() - 30 - ((5 - i) * 3))
+      sessions.push({
+        bestE1rm: 100 + i * 2,
+        fullDate: d.toISOString()
+      })
+    }
+
+    const result = calculateForecast(sessions)
+
+    expect(result.status).toBe('break')
+    expect(result.message).toBeDefined()
+    expect(result.message.length).toBeGreaterThan(0)
+  })
+
   it('includes chartData with both historical and forecast points', () => {
     const now = new Date()
     const sessions = []

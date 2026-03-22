@@ -122,6 +122,84 @@ describe('plateauDetector', () => {
       }
     })
 
+    it('4-week vacation followed by 2 weeks training is NOT a plateau', () => {
+      // User trained for 4 weeks progressing well, took 4 weeks off,
+      // came back slightly lower (detraining), then 2 weeks progressing again.
+      // Without the fix, slice(-6) grabs 6 data weeks spanning a huge gap,
+      // and the detraining dip makes the regression look flat/negative = false plateau.
+      const workouts: Workout[] = []
+
+      // 4 weeks of training before vacation (week -10, -9, -8, -7)
+      for (let week = 0; week < 4; week++) {
+        const date = new Date()
+        date.setDate(date.getDate() - (10 - week) * 7)
+        date.setDate(date.getDate() - date.getDay())
+        workouts.push(createWorkout({
+          created_at: date.toISOString(),
+        }, [
+          { exercise: 'Bench Press', weight_kg: 80 + week * 2.5, reps: 8, rpe: 7 },
+        ]))
+      }
+
+      // 4 weeks vacation (no workouts)
+
+      // 2 weeks of training after vacation (week -2, -1) — came back a bit lower but progressing
+      for (let week = 0; week < 2; week++) {
+        const date = new Date()
+        date.setDate(date.getDate() - (2 - week) * 7)
+        date.setDate(date.getDate() - date.getDay())
+        workouts.push(createWorkout({
+          created_at: date.toISOString(),
+        }, [
+          // Came back at 82.5 (lost some strength) but progressing: 82.5 → 85
+          { exercise: 'Bench Press', weight_kg: 82.5 + week * 2.5, reps: 8, rpe: 7 },
+        ]))
+      }
+
+      const results = detectPlateaus(workouts)
+      const benchResults = results.filter(r => r.exercise === 'Bench Press')
+      // Should NOT detect plateau — only the 2 recent weeks should be considered,
+      // and the user is progressing in those weeks
+      expect(benchResults.length).toBe(0)
+    })
+
+    it('only weeks with training data are used for regression', () => {
+      // 7 weeks of data spanning a long calendar period with a gap.
+      // Pre-break: strong progress. Post-break: slight detraining but progressing.
+      // Bug: slice(-6) takes last 6 data-weeks including the dip, looks like plateau.
+      // Fix: only use recent consecutive training weeks.
+      const workouts: Workout[] = []
+
+      // 4 old weeks with strong progression
+      for (let i = 0; i < 4; i++) {
+        const date = new Date()
+        date.setDate(date.getDate() - (20 - i) * 7)
+        date.setDate(date.getDate() - date.getDay())
+        workouts.push(createWorkout({
+          created_at: date.toISOString(),
+        }, [
+          { exercise: 'Squat', weight_kg: 100 + i * 5, reps: 5, rpe: 8 },
+        ]))
+      }
+
+      // 3 recent weeks, came back slightly lower but progressing
+      for (let i = 0; i < 3; i++) {
+        const date = new Date()
+        date.setDate(date.getDate() - (3 - i) * 7)
+        date.setDate(date.getDate() - date.getDay())
+        workouts.push(createWorkout({
+          created_at: date.toISOString(),
+        }, [
+          { exercise: 'Squat', weight_kg: 105 + i * 5, reps: 5, rpe: 8 },
+        ]))
+      }
+
+      const results = detectPlateaus(workouts)
+      const squatResults = results.filter(r => r.exercise === 'Squat')
+      // Progression is clear in actual training weeks — should NOT be a plateau
+      expect(squatResults.length).toBe(0)
+    })
+
     it('includes weeklyData and weeklyGrowthPct in results', () => {
       const workouts = makeWorkoutsWithProgression('Bench Press', 6, 80, 0)
       const results = detectPlateaus(workouts)

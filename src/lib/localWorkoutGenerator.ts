@@ -27,6 +27,8 @@ interface TemplateExercise {
   equipment: 'barbell' | 'dumbbell' | 'cable' | 'machine' | 'bodyweight'
   /** Base weight multiplier relative to bodyweight for intermediates */
   bwMultiplier: number
+  /** Tags for sub-classification (e.g. 'posterior' for rear delt exercises) */
+  tags?: string[]
 }
 
 const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
@@ -49,10 +51,11 @@ const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
   shoulders: [
     { name: 'Dumbbell Overhead Press', muscle_group: 'shoulders', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.3 },
     { name: 'Lateral Raise', muscle_group: 'shoulders', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
-    { name: 'Face Pull', muscle_group: 'shoulders', isCompound: false, equipment: 'cable', bwMultiplier: 0.15 },
+    { name: 'Face Pull', muscle_group: 'shoulders', isCompound: false, equipment: 'cable', bwMultiplier: 0.15, tags: ['posterior'] },
     { name: 'Barbell Overhead Press', muscle_group: 'shoulders', isCompound: true, equipment: 'barbell', bwMultiplier: 0.5 },
     { name: 'Cable Lateral Raise', muscle_group: 'shoulders', isCompound: false, equipment: 'cable', bwMultiplier: 0.08 },
-    { name: 'Rear Delt Fly', muscle_group: 'shoulders', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.08 },
+    { name: 'Rear Delt Fly', muscle_group: 'shoulders', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.08, tags: ['posterior'] },
+    { name: 'Band Pull-Apart', muscle_group: 'shoulders', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, tags: ['posterior'] },
   ],
   quads: [
     { name: 'Back Squat', muscle_group: 'quads', isCompound: true, equipment: 'barbell', bwMultiplier: 1.2 },
@@ -61,6 +64,12 @@ const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Front Squat', muscle_group: 'quads', isCompound: true, equipment: 'barbell', bwMultiplier: 0.9 },
     { name: 'Bulgarian Split Squat', muscle_group: 'quads', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.25 },
     { name: 'Hack Squat', muscle_group: 'quads', isCompound: true, equipment: 'machine', bwMultiplier: 1.0 },
+    { name: 'Bodyweight Squat', muscle_group: 'quads', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Jump Squat', muscle_group: 'quads', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Step-Up', muscle_group: 'quads', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Goblet Squat', muscle_group: 'quads', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.3 },
+    { name: 'Dumbbell Lunge', muscle_group: 'quads', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.25 },
+    { name: 'Wall Sit', muscle_group: 'quads', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
   ],
   hamstrings: [
     { name: 'Romanian Deadlift', muscle_group: 'hamstrings', isCompound: true, equipment: 'barbell', bwMultiplier: 0.9 },
@@ -96,14 +105,16 @@ const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
 }
 
 // Split templates: which muscles and how many exercises per muscle
-const SPLIT_TEMPLATES: Record<string, { muscles: MuscleGroup[]; exercisesPerMuscle: Record<MuscleGroup, number> }> = {
+const SPLIT_TEMPLATES: Record<string, { muscles: MuscleGroup[]; exercisesPerMuscle: Record<MuscleGroup, number>; shoulderFilter?: string }> = {
   'Push': {
     muscles: ['chest', 'shoulders', 'triceps'],
     exercisesPerMuscle: { chest: 3, shoulders: 2, triceps: 2, back: 0, quads: 0, hamstrings: 0, glutes: 0, biceps: 0, core: 0 },
   },
   'Pull': {
-    muscles: ['back', 'biceps'],
-    exercisesPerMuscle: { back: 3, biceps: 2, chest: 0, shoulders: 0, triceps: 0, quads: 0, hamstrings: 0, glutes: 0, core: 0 },
+    muscles: ['back', 'shoulders', 'biceps'],
+    exercisesPerMuscle: { back: 3, shoulders: 1, biceps: 2, chest: 0, triceps: 0, quads: 0, hamstrings: 0, glutes: 0, core: 0 },
+    /** Only posterior shoulder exercises (rear delts) on Pull day */
+    shoulderFilter: 'posterior',
   },
   'Legs': {
     muscles: ['quads', 'hamstrings', 'glutes', 'core'],
@@ -174,7 +185,7 @@ function getRepRange(goal: string, isCompound: boolean): [number, number] {
 }
 
 function getSets(isCompound: boolean, isDeload: boolean): number {
-  if (isDeload) return 2
+  if (isDeload) return isCompound ? 2 : 1
   return isCompound ? 4 : 3
 }
 
@@ -189,14 +200,20 @@ function getRestSeconds(isCompound: boolean, goal: string): number {
  */
 function buildHistoryMap(history: RecentSession[]): Record<string, { weight: number; reps: number; rpe: number | null }> {
   const map: Record<string, { weight: number; reps: number; rpe: number | null }> = {}
-  // Most recent first — only keep the latest entry per exercise
+  const e1rm = (w: number, r: number) => r <= 0 ? w : w * (1 + r / 30)
+  // Keep the set with highest estimated 1RM per exercise
   for (const session of history) {
     for (const set of session.sets) {
-      if (!set.exercise || map[set.exercise]) continue
-      map[set.exercise] = {
-        weight: set.weight_kg ?? 0,
-        reps: set.reps ?? 0,
-        rpe: set.rpe,
+      if (!set.exercise) continue
+      const w = set.weight_kg ?? 0
+      const r = set.reps ?? 0
+      const existing = map[set.exercise]
+      if (!existing || e1rm(w, r) > e1rm(existing.weight, existing.reps)) {
+        map[set.exercise] = {
+          weight: w,
+          reps: r,
+          rpe: set.rpe,
+        }
       }
     }
   }
@@ -249,6 +266,7 @@ function pickExercises(
   count: number,
   recentExerciseNames: Set<string>,
   equipment: string,
+  requiredTag?: string,
 ): TemplateExercise[] {
   const pool = EXERCISE_POOL[muscle] || []
   // Filter by equipment availability
@@ -259,7 +277,12 @@ function pickExercises(
     bodyweight: ['bodyweight'],
   }
   const available = equipmentSets[equipment] || equipmentSets.full_gym!
-  const filtered = pool.filter(e => available.includes(e.equipment))
+  let filtered = pool.filter(e => available.includes(e.equipment))
+
+  // Filter by required tag (e.g. 'posterior' for rear delt exercises on Pull day)
+  if (requiredTag) {
+    filtered = filtered.filter(e => e.tags?.includes(requiredTag))
+  }
 
   if (filtered.length === 0) return []
 
@@ -343,7 +366,8 @@ export function generateLocalWorkout({
     const count = exerciseCounts[muscle] || 0
     if (count === 0) continue
 
-    const picked = pickExercises(muscle, count, recentExerciseNames, equipment)
+    const tagFilter = muscle === 'shoulders' ? template.shoulderFilter : undefined
+    const picked = pickExercises(muscle, count, recentExerciseNames, equipment, tagFilter)
 
     for (const tmpl of picked) {
       const estimatedWt = estimateWeight(tmpl, bwKg, level)

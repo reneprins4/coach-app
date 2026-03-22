@@ -23,7 +23,10 @@ export function detectPlateaus(workouts: Workout[]): PlateauResult[] {
     const weeks = Object.keys(weekData).sort()
     if (weeks.length < 3) continue // niet genoeg data
 
-    const recentWeeks = weeks.slice(-6) // laatste 6 weken
+    // Filter: alleen recente aaneengesloten trainingsblok gebruiken
+    // Als er een gap > 2 weken zit, gebruik alleen de weken NA de gap
+    const recentWeeks = getRecentTrainingWeeks(weeks, 6)
+    if (recentWeeks.length < 3) continue // niet genoeg recente data
     const values = recentWeeks.map(w => weekData[w]!)
 
     // Bereken progressie rate per week (lineaire regressie slope)
@@ -78,6 +81,37 @@ function linearRegressionSlope(values: number[]): number {
   const denom = n * sumX2 - sumX * sumX
   if (denom === 0) return 0
   return (n * sumXY - sumX * sumY) / denom
+}
+
+/**
+ * Selecteer de laatste N weken met trainingsdata, maar knip af bij grote gaps.
+ * Als er een gap van meer dan 2 weken tussen datapunten zit (vakantie/break),
+ * gebruik alleen de weken na de laatste gap.
+ */
+function getRecentTrainingWeeks(sortedWeeks: string[], maxWeeks: number): string[] {
+  if (sortedWeeks.length <= maxWeeks) {
+    // Check for gaps even in small datasets
+    return filterByGaps(sortedWeeks)
+  }
+
+  const candidate = sortedWeeks.slice(-maxWeeks)
+  return filterByGaps(candidate)
+}
+
+function filterByGaps(weeks: string[]): string[] {
+  if (weeks.length < 2) return weeks
+
+  // Zoek de laatste gap > 2 weken en neem alleen weken erna
+  for (let i = weeks.length - 1; i > 0; i--) {
+    const curr = new Date(weeks[i]!)
+    const prev = new Date(weeks[i - 1]!)
+    const diffWeeks = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24 * 7)
+    if (diffWeeks > 2) {
+      return weeks.slice(i)
+    }
+  }
+
+  return weeks
 }
 
 function getWeekKey(date: Date): string {
