@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/core/schema/stryker-core.schema.json",
+  "testRunner": "vitest",
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "mutate": [
+    "src/lib/progressiveOverload.ts",
+    "src/lib/training-analysis.ts",
+    "src/lib/warmupCalculator.ts",
+    "src/lib/fatigueDetector.ts",
+    "src/lib/plateauDetector.ts",
+    "src/lib/junkVolumeDetector.ts",
+    "src/lib/periodization.ts",
+    "src/lib/optimalHour.ts",
+    "src/lib/measurements.ts",
+    "src/lib/exerciseAliases.ts",
+    "src/lib/workoutTrimmer.ts",
+    "src/lib/dateUtils.ts"
+  ],
+  "reporters": ["clear-text", "progress"],
+  "concurrency": 4,
+  "timeoutMS": 30000,
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  }
+}
