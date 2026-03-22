@@ -12,7 +12,7 @@ export type TrainingPhase = 'build' | 'strength' | 'peak' | 'deload'
 
 export type PeriodizationPhase = 'accumulation' | 'intensification' | 'strength' | 'deload'
 
-export type ExperienceLevel = 'complete_beginner' | 'beginner' | 'intermediate' | 'advanced'
+export type ExperienceLevel = 'complete_beginner' | 'beginner' | 'returning' | 'intermediate' | 'advanced'
 
 export type Equipment = 'full_gym' | 'home_gym' | 'minimal' | 'bodyweight'
 

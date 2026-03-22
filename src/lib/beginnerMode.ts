@@ -10,7 +10,7 @@ export type SimpleRpe = 'easy' | 'medium' | 'hard'
  * based on their experience level setting.
  */
 export function isBeginnerMode(experienceLevel: string): boolean {
-  return experienceLevel === 'complete_beginner' || experienceLevel === 'beginner'
+  return experienceLevel === 'complete_beginner' || experienceLevel === 'beginner' || experienceLevel === 'returning'
 }
 
 /**

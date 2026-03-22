@@ -10,6 +10,7 @@ import { useTemplates } from '../hooks/useTemplates'
 import { useStartFlow } from '../hooks/useStartFlow'
 import { getSettings } from '../lib/settings'
 import { isBeginnerMode } from '../lib/beginnerMode'
+import { generateFirstWorkout } from '../lib/firstWorkout'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
 import { calculateMomentum } from '../lib/momentumCalculator'
 import { getCurrentBlock, getCurrentWeekTarget } from '../lib/periodization'
@@ -240,6 +241,7 @@ export default function Logger() {
   const [showTemplates, setShowTemplates] = useState(false)
   const [showSupersetModal, setShowSupersetModal] = useState(false)
   const [lastWorkout, setLastWorkout] = useState<LastWorkoutPreview | null>(null)
+  const [workoutCount, setWorkoutCount] = useState<number | undefined>(undefined)
   const [supersetMode, setSupersetMode] = useState<SupersetModeState | null>(null)
   const [junkWarning, setJunkWarning] = useState<JunkVolumeWarning | null>(null)
   const [showReview, setShowReview] = useState(false)
@@ -317,13 +319,33 @@ export default function Logger() {
         }
       } catch (err) { logError('Logger.loadLastWorkout', err) }
     }
+    async function loadWorkoutCount() {
+      try {
+        const { count } = await supabase
+          .from('workouts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user!.id)
+        setWorkoutCount(count ?? 0)
+      } catch (err) { logError('Logger.loadWorkoutCount', err) }
+    }
     loadLastWorkout()
+    loadWorkoutCount()
   }, [user?.id, aw.isActive])
 
   const handleRepeatLastWorkout = useCallback(() => {
     if (!lastWorkout?.exercises) return
     aw.startWorkout(lastWorkout.exercises)
   }, [lastWorkout, aw])
+
+  const handleStartFirstWorkout = useCallback(() => {
+    const workout = generateFirstWorkout(settings)
+    const exercises = workout.exercises.map(ex => ({
+      name: ex.name,
+      sets: [],
+      plan: ex,
+    })) as ActiveExercise[]
+    aw.startWorkout(exercises)
+  }, [settings, aw])
 
   const handleFinishClick = useCallback(() => {
     setShowConfirmFinish(true)
@@ -527,6 +549,8 @@ export default function Logger() {
         onToggleSplitPicker={(show) => startFlow.dispatch({ type: 'TOGGLE_SPLIT_PICKER', payload: { show } })}
         onNavigateToCoach={() => nav('/coach')}
         onShowReview={startFlow.state.generatedWorkout ? handleShowReview : undefined}
+        workoutCount={workoutCount}
+        onStartFirstWorkout={handleStartFirstWorkout}
       />
     )
   }
@@ -565,6 +589,10 @@ export default function Logger() {
                 canSuperset={workout.exercises.length >= 2 && !supersetMode}
                 onSuperset={() => setShowSupersetModal(true)}
                 onStop={() => setShowDiscard(true)}
+                onTrimWorkout={(targetCount) => {
+                  aw.trimExercises(targetCount)
+                  setToast({ message: t('logger.trimmed') })
+                }}
               />
               <button
                 onClick={handleFinishClick}

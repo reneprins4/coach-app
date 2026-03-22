@@ -34,6 +34,7 @@ export default function Onboarding() {
       key: 'experienceLevel',
       options: [
         { value: 'beginner', label: t('onboarding.exp_beginner'), sub: t('onboarding.exp_beginner_sub') },
+        { value: 'returning', label: t('onboarding.exp_returning'), sub: t('onboarding.exp_returning_sub') },
         { value: 'intermediate', label: t('onboarding.exp_intermediate'), sub: t('onboarding.exp_intermediate_sub') },
         { value: 'advanced', label: t('onboarding.exp_advanced'), sub: t('onboarding.exp_advanced_sub') },
       ],

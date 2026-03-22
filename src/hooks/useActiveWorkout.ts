@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import type { ActiveWorkout, ActiveExercise, ActiveWorkoutSet } from '../types'
 import { supabase } from '../lib/supabase'
+import { trimWorkout } from '../lib/workoutTrimmer'
 
 const STORAGE_KEY = 'coach-active-workout'
 const LAST_USED_KEY = 'coach-last-used'
@@ -59,6 +60,7 @@ interface UseActiveWorkoutReturn {
   replaceExercise: (oldName: string, newExercise: NewExerciseInput) => void
   addSet: (exerciseName: string, setData: SetInput) => void
   removeSet: (exerciseName: string, setId: string) => void
+  trimExercises: (targetCount: number) => void
   updateNotes: (notes: string) => void
   finishWorkout: () => Promise<FinishedWorkoutResult | null>
   discardWorkout: () => void
@@ -199,6 +201,15 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
     })
   }, [])
 
+  const trimExercises = useCallback((targetCount: number): void => {
+    setWorkout(prev => {
+      if (!prev) return prev
+      const trimmed = trimWorkout(prev.exercises, targetCount)
+      if (trimmed.length === prev.exercises.length) return prev
+      return { ...prev, exercises: trimmed }
+    })
+  }, [])
+
   const updateNotes = useCallback((notes: string): void => {
     setWorkout(prev => prev ? { ...prev, notes } : prev)
   }, [])
@@ -293,7 +304,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
   return {
     workout, saving, error, elapsed, totalSets, totalVolume,
     startWorkout, addExercise, removeExercise, replaceExercise, addSet, removeSet,
-    updateNotes, finishWorkout, discardWorkout, getLastUsed,
+    trimExercises, updateNotes, finishWorkout, discardWorkout, getLastUsed,
     isActive: !!workout,
   }
 }

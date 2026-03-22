@@ -1,7 +1,9 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, Check, RefreshCw, Dumbbell, BookOpen, ChevronDown, ChevronUp, Play } from 'lucide-react'
 import { getCurrentBlock, PHASES } from '../../lib/periodization'
+import { generateFirstWorkout, isFirstWorkoutEligible } from '../../lib/firstWorkout'
+import { getSettings } from '../../lib/settings'
 import type { StartFlowState, LastWorkoutPreview, PeriodizationPhase } from '../../types'
 import TemplateLibrary from '../TemplateLibrary'
 import Toast from '../Toast'
@@ -31,15 +33,26 @@ interface StartFlowViewProps {
   onToggleSplitPicker: (show: boolean) => void
   onNavigateToCoach: () => void
   onShowReview?: () => void
+  workoutCount?: number
+  onStartFirstWorkout?: () => void
 }
 
 export default function StartFlowView({
   state, user, formattedDate, lastWorkout, templates, showTemplates, toast,
   onStartEmpty, onStartAIWorkout, onRepeatLastWorkout, onLoadTemplate, onDeleteTemplate,
   onSetShowTemplates, onSetToast, onTimeChange, onGenerateForSplit, onToggleSplitPicker, onNavigateToCoach, onShowReview,
+  workoutCount, onStartFirstWorkout,
 }: StartFlowViewProps) {
   const { t } = useTranslation()
   const [moreOptionsOpen, setMoreOptionsOpen] = useState(false)
+
+  // First workout detection
+  const settings = useMemo(() => getSettings(), [])
+  const showFirstWorkout = user && isFirstWorkoutEligible(workoutCount ?? 0, settings.experienceLevel)
+  const firstWorkout = useMemo(
+    () => showFirstWorkout ? generateFirstWorkout(settings) : null,
+    [showFirstWorkout, settings],
+  )
 
   const block = getCurrentBlock()
   const phase = block ? PHASES[block.phase as PeriodizationPhase] : null
@@ -76,6 +89,49 @@ export default function StartFlowView({
         {showTemplates && (
           <TemplateLibrary templates={templates.templates} onLoad={onLoadTemplate} onDelete={onDeleteTemplate} onClose={() => onSetShowTemplates(false)} />
         )}
+        {toast && <Toast message={toast.message} action={toast.action} onAction={toast.onAction} onDismiss={() => onSetToast(null)} />}
+      </div>
+    )
+  }
+
+  // ━━ First Workout guided flow ━━
+  if (showFirstWorkout && firstWorkout && onStartFirstWorkout) {
+    return (
+      <div className="min-h-[80vh] px-5 pt-8 pb-28">
+        <p className="label-caps mb-1">{formattedDate}</p>
+        <h1 className="text-display mb-2">{t('first_workout.title')}</h1>
+        <p className="text-sm text-gray-400 mb-8">{t('first_workout.subtitle')}</p>
+
+        {/* Exercise preview */}
+        <div className="card mb-6">
+          <p className="label-caps text-cyan-600 mb-3">Full Body · ~{firstWorkout.estimated_duration_min} min</p>
+          <div className="space-y-2">
+            {firstWorkout.exercises.map((ex, i) => (
+              <div key={ex.name} className="flex items-center gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-bold text-gray-400">
+                  {i + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white truncate">{ex.name}</p>
+                  <p className="text-xs text-gray-500">{ex.sets} sets &middot; {ex.reps_min}-{ex.reps_max} reps</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Tip */}
+        <p className="text-center text-xs text-gray-500 mb-6">{t('first_workout.tip')}</p>
+
+        {/* Start button */}
+        <button
+          onClick={onStartFirstWorkout}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 py-4 text-base font-black text-white shadow-[0_4px_24px_rgba(6,182,212,0.35)] transition-all active:scale-[0.97]"
+        >
+          <Play size={18} fill="white" />
+          {t('first_workout.start')}
+        </button>
+
         {toast && <Toast message={toast.message} action={toast.action} onAction={toast.onAction} onDismiss={() => onSetToast(null)} />}
       </div>
     )

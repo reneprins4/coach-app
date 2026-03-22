@@ -113,6 +113,8 @@
     "experience_complete_beginner": "Helemaal nieuw",
     "experience_complete_beginner_sub": "Nog nooit getraind",
     "experience_beginner": "Beginner",
+    "experience_returning": "Teruggekeerd",
+    "experience_returning_sub": "Eerder getraind, lange pauze",
     "experience_intermediate": "Gemiddeld",
     "experience_advanced": "Gevorderd",
     "equipment_label": "Apparatuur",
@@ -251,7 +253,10 @@
     "recovered": "hersteld",
     "select_time_first": "Kies een tijd",
     "try_later": "Probeer het later opnieuw",
-    "no_sets_error": "Log minimaal één set voor je de workout afrondt"
+    "no_sets_error": "Log minimaal één set voor je de workout afrondt",
+    "less_time": "Minder tijd",
+    "how_many_exercises": "Hoeveel oefeningen nog?",
+    "trimmed": "Workout ingekort"
   },
   "progress": {
     "title": "Voortgang",
@@ -419,6 +424,8 @@
     "goal_endurance_sub": "Conditie en uithoudingsvermogen",
     "exp_beginner": "Nieuw",
     "exp_beginner_sub": "Minder dan 1 jaar",
+    "exp_returning": "Teruggekeerd",
+    "exp_returning_sub": "Eerder getraind, lange pauze",
     "exp_intermediate": "Gevorderd",
     "exp_intermediate_sub": "1 tot 3 jaar",
     "exp_advanced": "Ervaren",
@@ -721,7 +728,9 @@
     "tab": "Volume",
     "title": "Trainingsvolume",
     "period_4w": "4w",
+    "period_8w": "8 weken",
     "period_12w": "12w",
+    "period_16w": "16 weken",
     "period_6m": "6m",
     "avg_per_week": "Gem. per week",
     "best_week": "Beste week",
@@ -983,10 +992,38 @@
     "slowing": "Vertraagd",
     "exercise_count": "{{count}} oefening(en)"
   },
+  "first_workout": {
+    "title": "Je eerste training",
+    "subtitle": "We hebben een Full Body training voor je samengesteld",
+    "start": "Start je eerste training",
+    "tip": "Focus op techniek, niet op gewicht"
+  },
   "export": {
     "json_full": "Volledige backup (JSON)",
     "csv_workouts": "Workouts (CSV)",
     "csv_measurements": "Metingen (CSV)",
     "success": "Export gedownload"
+  },
+  "pr_goals": {
+    "title": "PR Doelen",
+    "add": "Doel toevoegen",
+    "exercise": "Oefening",
+    "target": "Doel (kg)",
+    "date": "Streef datum",
+    "max_reached": "Maximum 5 doelen",
+    "duplicate": "Dit doel bestaat al",
+    "remove": "Verwijderen",
+    "no_goals": "Nog geen PR doelen ingesteld",
+    "progress": "voortgang",
+    "days_left": "{{days}}d",
+    "current": "Huidig",
+    "of_target": "van {{target}} kg"
+  },
+  "resume_banner": {
+    "title": "Hervat je training",
+    "resume": "Hervat",
+    "discard": "Verwijder",
+    "confirm_discard": "Weet je het zeker? Je verliest je voortgang.",
+    "elapsed": "{{minutes}} min bezig"
   }
 }

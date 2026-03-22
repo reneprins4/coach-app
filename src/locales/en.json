@@ -113,6 +113,8 @@
     "experience_complete_beginner": "Completely new",
     "experience_complete_beginner_sub": "Never trained before",
     "experience_beginner": "Beginner",
+    "experience_returning": "Returning",
+    "experience_returning_sub": "Previously trained, long break",
     "experience_intermediate": "Intermediate",
     "experience_advanced": "Advanced",
     "equipment_label": "Equipment",
@@ -251,7 +253,10 @@
     "recovered": "recovered",
     "select_time_first": "Select a duration",
     "try_later": "Try again later",
-    "no_sets_error": "Log at least one set before finishing"
+    "no_sets_error": "Log at least one set before finishing",
+    "less_time": "Less time",
+    "how_many_exercises": "How many exercises left?",
+    "trimmed": "Workout trimmed"
   },
   "progress": {
     "title": "Progress",
@@ -419,6 +424,8 @@
     "goal_endurance_sub": "Stamina and conditioning",
     "exp_beginner": "New",
     "exp_beginner_sub": "Less than 1 year",
+    "exp_returning": "Returning",
+    "exp_returning_sub": "Previously trained, long break",
     "exp_intermediate": "Intermediate",
     "exp_intermediate_sub": "1 to 3 years",
     "exp_advanced": "Experienced",
@@ -721,7 +728,9 @@
     "tab": "Volume",
     "title": "Training Volume",
     "period_4w": "4w",
+    "period_8w": "8 weeks",
     "period_12w": "12w",
+    "period_16w": "16 weeks",
     "period_6m": "6m",
     "avg_per_week": "Avg per week",
     "best_week": "Best week",
@@ -983,10 +992,38 @@
     "slowing": "Slowing",
     "exercise_count": "{{count}} exercise(s)"
   },
+  "first_workout": {
+    "title": "Your first workout",
+    "subtitle": "We've put together a Full Body workout for you",
+    "start": "Start your first workout",
+    "tip": "Focus on technique, not weight"
+  },
   "export": {
     "json_full": "Full backup (JSON)",
     "csv_workouts": "Workouts (CSV)",
     "csv_measurements": "Measurements (CSV)",
     "success": "Export downloaded"
+  },
+  "pr_goals": {
+    "title": "PR Goals",
+    "add": "Add goal",
+    "exercise": "Exercise",
+    "target": "Target (kg)",
+    "date": "Target date",
+    "max_reached": "Maximum 5 goals",
+    "duplicate": "This goal already exists",
+    "remove": "Remove",
+    "no_goals": "No PR goals set yet",
+    "progress": "progress",
+    "days_left": "{{days}}d",
+    "current": "Current",
+    "of_target": "of {{target}} kg"
+  },
+  "resume_banner": {
+    "title": "Resume your workout",
+    "resume": "Resume",
+    "discard": "Discard",
+    "confirm_discard": "Are you sure? You will lose your progress.",
+    "elapsed": "{{minutes}} min elapsed"
   }
 }

@@ -13,6 +13,7 @@ import AchievementBadge from '../components/AchievementBadge'
 import InjuryBanner from '../components/InjuryBanner'
 import InjuryReport from '../components/InjuryReport'
 import InjuryCheckIn from '../components/InjuryCheckIn'
+import PrGoalsSection from '../components/PrGoalsSection'
 import { useInjuries } from '../hooks/useInjuries'
 import type { ActiveInjury } from '../lib/injuryRecovery'
 
@@ -60,6 +61,7 @@ export default function Profile() {
   const LEVELS = [
     { value: 'complete_beginner', label: t('profile.experience_complete_beginner'), sub: t('profile.experience_complete_beginner_sub') },
     { value: 'beginner',     label: t('profile.experience_beginner'),     sub: '< 1 jaar' },
+    { value: 'returning',    label: t('profile.experience_returning'),    sub: t('profile.experience_returning_sub') },
     { value: 'intermediate', label: t('profile.experience_intermediate'), sub: '1–3 jaar' },
     { value: 'advanced',     label: t('profile.experience_advanced'),     sub: '3+ jaar' },
   ]
@@ -439,6 +441,9 @@ export default function Profile() {
               })}
             </div>
           </div>
+
+          {/* PR Doelen */}
+          <PrGoalsSection />
 
           {/* Spiergroep focus */}
           <div className="card">

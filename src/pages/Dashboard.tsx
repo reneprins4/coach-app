@@ -9,6 +9,8 @@ import InjuryBanner from '../components/InjuryBanner'
 import InjuryCheckIn from '../components/InjuryCheckIn'
 import InjuryReport from '../components/InjuryReport'
 import TrainingStoryBanner from '../components/TrainingStoryBanner'
+import ResumeWorkoutBanner from '../components/ResumeWorkoutBanner'
+import PrGoalsDashboard from '../components/PrGoalsDashboard'
 import { useInjuries } from '../hooks/useInjuries'
 import type { ActiveInjury } from '../lib/injuryRecovery'
 
@@ -173,6 +175,9 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ━━ Resume Workout Banner ━━ */}
+      <ResumeWorkoutBanner />
+
       {/* ━━ Training Story Banner ━━ */}
       {showBanner && (
         <div className="mb-4">
@@ -256,6 +261,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* ━━ Custom PR Goals ━━ */}
+      <PrGoalsDashboard onNavigate={() => nav('/profile')} />
 
       {/* ━━ Muscle Recovery ━━ */}
       {muscles.length > 0 && (

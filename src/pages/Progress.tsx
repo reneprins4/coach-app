@@ -215,6 +215,10 @@ export default function Progress() {
       return groupVolumeByMonth(workouts, 6)
     } else if (volumePeriod === '4w') {
       return groupVolumeByWeek(workouts, 4)
+    } else if (volumePeriod === '8w') {
+      return groupVolumeByWeek(workouts, 8)
+    } else if (volumePeriod === '16w') {
+      return groupVolumeByWeek(workouts, 16)
     } else {
       return groupVolumeByWeek(workouts, 12)
     }
@@ -225,7 +229,7 @@ export default function Progress() {
     const trend = calcTrend(weeklyData, 4)
     const avgVolume = calcAvgWeeklyVolume(weeklyData)
     const best = findBestWeek(weeklyData)
-    const weeksForMuscle = volumePeriod === '4w' ? 4 : volumePeriod === '6m' ? 26 : 12
+    const weeksForMuscle = volumePeriod === '4w' ? 4 : volumePeriod === '8w' ? 8 : volumePeriod === '16w' ? 16 : volumePeriod === '6m' ? 26 : 12
     const muscleBreakdown = groupVolumeByMuscle(workouts, weeksForMuscle)
     return { trend, avgVolume, best, muscleBreakdown }
   }, [workouts, volumePeriod])
@@ -422,7 +426,7 @@ export default function Progress() {
               <p className="label-caps mb-1">{t('volume.title')}</p>
             </div>
             <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
-              {['4w', '12w', '6m'].map(p => (
+              {['4w', '8w', '12w', '16w', '6m'].map(p => (
                 <button
                   key={p}
                   onClick={() => setVolumePeriod(p)}
