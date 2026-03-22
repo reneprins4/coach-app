@@ -273,23 +273,25 @@ describe('warmupCalculator', () => {
       expect(warmups).toEqual([])
     })
 
-    it('21kg working weight: no warmups (light, 50% rounds below bar)', () => {
-      // 21 is in light range (<=30). 50% of 21 = 10.5 -> rounds to 10, < BAR_WEIGHT -> no sets
+    it('21kg working weight: 1 bar-only warmup (light range)', () => {
       const warmups = generateWarmupSets('Bench Press', 21)
-      expect(warmups.length).toBe(0)
+      expect(warmups.length).toBe(1)
+      expect(warmups[0]!.weight_kg).toBe(BAR_WEIGHT)
+      expect(warmups[0]!.isBarOnly).toBe(true)
     })
 
-    it('25kg working weight (light): 1 warmup set at ~50%', () => {
+    it('25kg working weight (light): 1 bar-only warmup', () => {
       const warmups = generateWarmupSets('Overhead Press', 25)
-      // Light path (<=30): 50% of 25 = 12.5 -> rounded to 12.5, but < BAR_WEIGHT(20) so not added
-      // Actually 12.5 < 20 so no sets
-      expect(warmups.length).toBe(0)
+      expect(warmups.length).toBe(1)
+      expect(warmups[0]!.weight_kg).toBe(BAR_WEIGHT)
+      expect(warmups[0]!.isBarOnly).toBe(true)
     })
 
-    it('30kg working weight (light boundary): 1 warmup set', () => {
+    it('30kg working weight (light boundary): 1 bar-only warmup', () => {
       const warmups = generateWarmupSets('Bench Press', 30)
-      // Light path (<=30): 50% of 30 = 15 -> round to 15, but 15 < 20 so no set
-      expect(warmups.length).toBe(0)
+      expect(warmups.length).toBe(1)
+      expect(warmups[0]!.weight_kg).toBe(BAR_WEIGHT)
+      expect(warmups[0]!.isBarOnly).toBe(true)
     })
 
     it('31kg working weight (medium tier): bar + ~70%', () => {
@@ -659,10 +661,12 @@ describe('warmupCalculator', () => {
     // All weights <=30 produce 50% < BAR_WEIGHT, making the inner block dead code.
     // We verify that the light path correctly returns empty for all values in range.
 
-    it('generateWarmupSets: all light weights (21-30) return empty', () => {
+    it('generateWarmupSets: all light weights (21-30) return 1 bar-only warmup', () => {
       for (let w = 21; w <= 30; w++) {
         const warmups = generateWarmupSets('Bench Press', w)
-        expect(warmups.length).toBe(0)
+        expect(warmups.length).toBe(1)
+        expect(warmups[0]!.weight_kg).toBe(BAR_WEIGHT)
+        expect(warmups[0]!.isBarOnly).toBe(true)
       }
     })
 
