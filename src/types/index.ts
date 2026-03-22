@@ -175,6 +175,7 @@ export interface TrainingBlock {
   startDate: string
   createdAt: string
   fullPlan: unknown
+  lastModified: string
   currentWeek: number
   daysElapsed: number
 }

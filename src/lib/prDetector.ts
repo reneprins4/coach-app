@@ -7,6 +7,7 @@
  */
 
 import type { Workout, WorkoutSet, PRDetectionResult, PRRecord, PRDisplayRecord } from '../types'
+import { areExercisesEquivalent, normalizeExerciseName } from './exerciseAliases'
 
 /**
  * Calculate estimated 1RM using Brzycki-style formula
@@ -30,9 +31,9 @@ export function detectPR(
   if (!weight || weight <= 0 || !reps || reps <= 0) return null
   if (!historicalSets || historicalSets.length === 0) return null
 
-  // Filter to only this exercise
+  // Filter to only this exercise (using alias-aware matching for DATA-001)
   const exerciseSets = historicalSets.filter(s =>
-    s.exercise?.toLowerCase() === exerciseName.toLowerCase()
+    areExercisesEquivalent(s.exercise ?? '', exerciseName)
   )
 
   if (exerciseSets.length === 0) return null
@@ -108,7 +109,8 @@ export function computeAllPRs(workouts: Workout[]): Map<string, PRRecord> {
     for (const set of sets) {
       if (!set.exercise || !set.weight_kg || !set.reps) continue
 
-      const exerciseName = set.exercise
+      // Normalize exercise name to canonical form (DATA-001: merge name variants)
+      const exerciseName = normalizeExerciseName(set.exercise)
       const weight = set.weight_kg
       const reps = set.reps
       const e1rm = calculateE1RM(weight, reps)

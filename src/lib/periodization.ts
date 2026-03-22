@@ -61,6 +61,7 @@ interface StoredBlock {
   startDate: string
   createdAt: string
   fullPlan: unknown
+  lastModified: string
 }
 
 export function getCurrentBlock(_userId?: string): TrainingBlock | null {
@@ -81,14 +82,15 @@ export function getCurrentBlock(_userId?: string): TrainingBlock | null {
       Math.floor(daysElapsed / 7) + 1,
       PHASES[block.phase]?.weeks || 4
     )
-    return { ...block, currentWeek, daysElapsed }
+    return { ...block, lastModified: block.lastModified || '', currentWeek, daysElapsed }
   } catch {
     localStorage.removeItem(BLOCK_KEY)  // clear corrupted data
     return null
   }
 }
 
-// Laad trainingsblok van Supabase, val terug op localStorage
+// Laad trainingsblok van Supabase, val terug op localStorage.
+// Compares lastModified timestamps to resolve multi-device conflicts (DATA-002).
 export async function loadBlock(userId: string | null): Promise<TrainingBlock | null> {
   if (userId) {
     try {
@@ -98,9 +100,29 @@ export async function loadBlock(userId: string | null): Promise<TrainingBlock | 
         .eq('user_id', userId)
         .single()
 
-      if (data?.block) {
-        // Sync naar localStorage voor offline gebruik
-        localStorage.setItem(BLOCK_KEY, JSON.stringify(data.block))
+      const cloudBlock = data?.block as StoredBlock | null
+      const localRaw = localStorage.getItem(BLOCK_KEY)
+      const localBlock = localRaw ? JSON.parse(localRaw) as StoredBlock : null
+
+      if (cloudBlock && localBlock) {
+        // Compare timestamps — missing lastModified treated as epoch (very old)
+        const cloudTime = new Date(cloudBlock.lastModified || '1970-01-01').getTime()
+        const localTime = new Date(localBlock.lastModified || '1970-01-01').getTime()
+
+        if (localTime > cloudTime) {
+          // localStorage is newer — push it to Supabase
+          try {
+            await supabase
+              .from('training_blocks')
+              .upsert({ user_id: userId, block: localBlock, updated_at: new Date().toISOString() })
+          } catch { /* best-effort sync */ }
+        } else {
+          // Supabase is newer or equal — update localStorage
+          localStorage.setItem(BLOCK_KEY, JSON.stringify(cloudBlock))
+        }
+      } else if (cloudBlock) {
+        // Only cloud has data — sync to localStorage
+        localStorage.setItem(BLOCK_KEY, JSON.stringify(cloudBlock))
       }
     } catch { /* val terug op localStorage */ }
   }
@@ -108,12 +130,14 @@ export async function loadBlock(userId: string | null): Promise<TrainingBlock | 
 }
 
 export async function startBlock(phase: PeriodizationPhase, userId: string | null, fullPlan: unknown = null): Promise<StoredBlock> {
+  const now = new Date().toISOString()
   const block: StoredBlock = {
     id: crypto.randomUUID(),
     phase,
-    startDate: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
+    startDate: now,
+    createdAt: now,
     fullPlan: fullPlan || null,
+    lastModified: now,
   }
   localStorage.setItem(BLOCK_KEY, JSON.stringify(block))
 

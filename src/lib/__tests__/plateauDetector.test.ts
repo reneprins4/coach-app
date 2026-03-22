@@ -48,7 +48,7 @@ describe('plateauDetector', () => {
       const workouts = makeWorkoutsWithProgression('Bench Press', 6, 60, 5)
       const results = detectPlateaus(workouts)
       // Should not flag as plateau since there is clear upward trend
-      const benchPlateaus = results.filter(r => r.exercise === 'Bench Press')
+      const benchPlateaus = results.filter(r => r.exercise === 'Flat Barbell Bench Press')
       expect(benchPlateaus.length).toBe(0)
     })
 
@@ -57,7 +57,7 @@ describe('plateauDetector', () => {
       const workouts = makeWorkoutsWithProgression('Bench Press', 6, 80, 0)
       const results = detectPlateaus(workouts)
       expect(results.length).toBeGreaterThan(0)
-      expect(results[0]!.exercise).toBe('Bench Press')
+      expect(results[0]!.exercise).toBe('Flat Barbell Bench Press')
       expect(results[0]!.status).toBe('plateau')
     })
 
@@ -76,7 +76,7 @@ describe('plateauDetector', () => {
         ]))
       }
       const results = detectPlateaus(workouts)
-      const squatResults = results.filter(r => r.exercise === 'Squat')
+      const squatResults = results.filter(r => r.exercise === 'Back Squat')
       if (squatResults.length > 0) {
         expect(['plateau', 'slowing']).toContain(squatResults[0]!.status)
       }
@@ -157,7 +157,7 @@ describe('plateauDetector', () => {
       }
 
       const results = detectPlateaus(workouts)
-      const benchResults = results.filter(r => r.exercise === 'Bench Press')
+      const benchResults = results.filter(r => r.exercise === 'Flat Barbell Bench Press')
       // Should NOT detect plateau — only the 2 recent weeks should be considered,
       // and the user is progressing in those weeks
       expect(benchResults.length).toBe(0)
@@ -195,7 +195,7 @@ describe('plateauDetector', () => {
       }
 
       const results = detectPlateaus(workouts)
-      const squatResults = results.filter(r => r.exercise === 'Squat')
+      const squatResults = results.filter(r => r.exercise === 'Back Squat')
       // Progression is clear in actual training weeks — should NOT be a plateau
       expect(squatResults.length).toBe(0)
     })

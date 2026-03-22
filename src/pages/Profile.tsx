@@ -3,9 +3,11 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Check, LogOut, Trash2, AlertTriangle, Download } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
+import { useMeasurements } from '../hooks/useMeasurements'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
 import { getLocalDateString } from '../lib/dateUtils'
+import { buildExportData, exportToJSON, exportWorkoutsToCSV, exportMeasurementsToCSV, downloadFile } from '../lib/dataExport'
 import { ACHIEVEMENTS, buildAchievementContext, getUnlockedAchievements, syncAchievements } from '../lib/achievements'
 import AchievementBadge from '../components/AchievementBadge'
 import InjuryBanner from '../components/InjuryBanner'
@@ -21,6 +23,7 @@ export default function Profile() {
   const [localSettings, setLocalSettings] = useState(globalSettings)
   const [loggingOut, setLoggingOut] = useState(false)
   const { workouts } = useWorkouts(user?.id)
+  const { measurements } = useMeasurements(user?.id)
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -124,24 +127,20 @@ export default function Profile() {
     return getUnlockedAchievements()
   }, [workouts, settings.bodyweight, settings.memberSince])
 
-  function exportWorkoutsCSV() {
-    const headers = ['Datum', 'Training ID', 'Oefening', 'Gewicht (kg)', 'Herhalingen', 'RPE', 'Volume (kg)']
-    const rows = [headers]
-    for (const w of workouts) {
-      const date = new Date(w.created_at).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB')
-      for (const s of (w.workout_sets || [])) {
-        const volume = ((s.weight_kg || 0) * (s.reps || 0)).toFixed(1)
-        rows.push([date, w.id.slice(0, 8), s.exercise, String(s.weight_kg || 0), String(s.reps || 0), String(s.rpe || ''), volume])
-      }
-    }
-    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n')
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `kravex-export-${getLocalDateString(new Date())}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+  function handleExportJSON() {
+    const data = buildExportData(workouts, measurements, settings)
+    const json = exportToJSON(data)
+    downloadFile(json, `kravex-backup-${getLocalDateString(new Date())}.json`, 'application/json')
+  }
+
+  function handleExportWorkoutsCSV() {
+    const csv = exportWorkoutsToCSV(workouts)
+    downloadFile(csv, `kravex-workouts-${getLocalDateString(new Date())}.csv`, 'text/csv')
+  }
+
+  function handleExportMeasurementsCSV() {
+    const csv = exportMeasurementsToCSV(measurements)
+    downloadFile(csv, `kravex-measurements-${getLocalDateString(new Date())}.csv`, 'text/csv')
   }
 
   const profileComplete = settings.name && settings.bodyweight && settings.experienceLevel
@@ -603,21 +602,40 @@ export default function Profile() {
           </div>
 
           {/* Data exporteren */}
-          <button
-            onClick={exportWorkoutsCSV}
-            disabled={workouts.length === 0}
-            className="card flex w-full items-center gap-3 text-left text-sm text-[var(--text-2)] active:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Download size={18} className="text-[var(--text-3)]" />
-            <div className="flex-1">
-              <p>{t('profile.export_data')}</p>
-              <p className="text-xs text-[var(--text-3)]">
-                {workouts.length === 0
-                  ? t('profile.no_export')
-                  : `${workouts.length} ${t('profile.export_sub')}`}
-              </p>
+          <div className="card space-y-3">
+            <div className="flex items-center gap-2">
+              <Download size={18} className="text-[var(--text-3)]" />
+              <p className="text-sm font-bold text-white">{t('profile.export_data')}</p>
             </div>
-          </button>
+            <p className="text-xs text-[var(--text-3)]">
+              {workouts.length === 0 && measurements.length === 0
+                ? t('profile.no_export')
+                : `${workouts.length} ${t('profile.export_sub')}`}
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleExportJSON}
+                disabled={workouts.length === 0 && measurements.length === 0}
+                className="btn-secondary flex w-full items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t('export.json_full')}
+              </button>
+              <button
+                onClick={handleExportWorkoutsCSV}
+                disabled={workouts.length === 0}
+                className="btn-secondary flex w-full items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t('export.csv_workouts')}
+              </button>
+              <button
+                onClick={handleExportMeasurementsCSV}
+                disabled={measurements.length === 0}
+                className="btn-secondary flex w-full items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {t('export.csv_measurements')}
+              </button>
+            </div>
+          </div>
 
           {/* Links */}
           <div className="flex justify-center gap-4">

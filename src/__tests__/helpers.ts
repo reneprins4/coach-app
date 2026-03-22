@@ -163,12 +163,14 @@ export function createRecentSession(overrides: Partial<RecentSession> = {}, sets
 // ---- Training block factory ----
 
 export function createTrainingBlock(overrides: Partial<TrainingBlock> = {}): TrainingBlock {
+  const now = new Date().toISOString()
   return {
     id: 'block-1',
     phase: 'accumulation',
-    startDate: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
+    startDate: now,
+    createdAt: now,
     fullPlan: null,
+    lastModified: now,
     currentWeek: 1,
     daysElapsed: 0,
     ...overrides,

@@ -1,5 +1,6 @@
 import type { Workout, PlateauResult, PlateauWeekData, PlateauStatus } from '../types'
 import { getLocalDateString } from './dateUtils'
+import { normalizeExerciseName } from './exerciseAliases'
 
 export function detectPlateaus(workouts: Workout[]): PlateauResult[] {
   const exerciseData: Record<string, Record<string, number>> = {}
@@ -9,9 +10,11 @@ export function detectPlateaus(workouts: Workout[]): PlateauResult[] {
     const week = getWeekKey(new Date(workout.created_at))
     for (const set of workout.workout_sets || []) {
       if (!set.weight_kg || !set.reps) continue
-      if (!exerciseData[set.exercise]) exerciseData[set.exercise] = {}
+      // Normalize exercise name to merge name variants (DATA-001)
+      const exerciseName = normalizeExerciseName(set.exercise)
+      if (!exerciseData[exerciseName]) exerciseData[exerciseName] = {}
       const e1rm = set.reps === 1 ? set.weight_kg : set.weight_kg * (1 + set.reps / 30)
-      const exData = exerciseData[set.exercise]!
+      const exData = exerciseData[exerciseName]!
       if (!exData[week] || e1rm > exData[week]) {
         exData[week] = e1rm
       }

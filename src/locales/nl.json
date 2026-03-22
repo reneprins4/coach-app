@@ -982,5 +982,11 @@
     "plateau": "Plateau",
     "slowing": "Vertraagd",
     "exercise_count": "{{count}} oefening(en)"
+  },
+  "export": {
+    "json_full": "Volledige backup (JSON)",
+    "csv_workouts": "Workouts (CSV)",
+    "csv_measurements": "Metingen (CSV)",
+    "success": "Export gedownload"
   }
 }

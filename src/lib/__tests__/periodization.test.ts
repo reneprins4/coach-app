@@ -3,14 +3,17 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-// Mock supabase
+// Mock supabase — controllable per test via mockSingle
+const mockSingle = vi.fn().mockResolvedValue({ data: null, error: null })
+const mockUpsert = vi.fn().mockResolvedValue({ error: null })
+
 vi.mock('../supabase', () => ({
   supabase: {
     from: vi.fn(() => ({
-      upsert: vi.fn().mockResolvedValue({ error: null }),
+      upsert: mockUpsert,
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          single: vi.fn().mockResolvedValue({ data: null, error: null }),
+          single: mockSingle,
         })),
       })),
       delete: vi.fn(() => ({
@@ -27,6 +30,7 @@ import {
   getBlockProgress,
   startBlock,
   clearBlock,
+  loadBlock,
   isBlockExpired,
   getBlockExpiryInfo,
 } from '../periodization'
@@ -37,6 +41,9 @@ const BLOCK_KEY = 'coach-training-block'
 describe('periodization', () => {
   beforeEach(() => {
     localStorage.clear()
+    vi.clearAllMocks()
+    mockSingle.mockResolvedValue({ data: null, error: null })
+    mockUpsert.mockResolvedValue({ error: null })
   })
 
   describe('PHASES', () => {
@@ -226,6 +233,102 @@ describe('periodization', () => {
       localStorage.setItem(BLOCK_KEY, '{"phase":"test"}')
       await clearBlock(null)
       expect(localStorage.getItem(BLOCK_KEY)).toBeNull()
+    })
+  })
+
+  describe('Multi-device sync (DATA-002)', () => {
+    const oldTimestamp = '2026-03-20T10:00:00.000Z'
+    const newTimestamp = '2026-03-22T10:00:00.000Z'
+
+    function makeStoredBlock(lastModified: string) {
+      return {
+        id: 'block-sync',
+        phase: 'accumulation',
+        startDate: '2026-03-15T00:00:00.000Z',
+        createdAt: '2026-03-15T00:00:00.000Z',
+        fullPlan: null,
+        lastModified,
+      }
+    }
+
+    it('loadBlock prefers Supabase when its lastModified is newer', async () => {
+      // localStorage has old data
+      localStorage.setItem(BLOCK_KEY, JSON.stringify(makeStoredBlock(oldTimestamp)))
+      // Supabase has newer data
+      mockSingle.mockResolvedValue({
+        data: { block: makeStoredBlock(newTimestamp) },
+        error: null,
+      })
+
+      const block = await loadBlock('user-1')
+      expect(block).not.toBeNull()
+      expect(block!.lastModified).toBe(newTimestamp)
+    })
+
+    it('loadBlock prefers localStorage when its lastModified is newer', async () => {
+      // localStorage has newer data
+      localStorage.setItem(BLOCK_KEY, JSON.stringify(makeStoredBlock(newTimestamp)))
+      // Supabase has older data
+      mockSingle.mockResolvedValue({
+        data: { block: makeStoredBlock(oldTimestamp) },
+        error: null,
+      })
+
+      const block = await loadBlock('user-1')
+      expect(block).not.toBeNull()
+      expect(block!.lastModified).toBe(newTimestamp)
+    })
+
+    it('loadBlock syncs newer localStorage data back to Supabase', async () => {
+      // localStorage has newer data
+      localStorage.setItem(BLOCK_KEY, JSON.stringify(makeStoredBlock(newTimestamp)))
+      // Supabase has older data
+      mockSingle.mockResolvedValue({
+        data: { block: makeStoredBlock(oldTimestamp) },
+        error: null,
+      })
+
+      await loadBlock('user-1')
+      // Should upsert to Supabase with the newer block
+      expect(mockUpsert).toHaveBeenCalled()
+    })
+
+    it('missing lastModified treats data as epoch (fallback to Supabase)', async () => {
+      // localStorage has block without lastModified (legacy data)
+      const legacyBlock = { ...makeStoredBlock(newTimestamp) }
+      delete (legacyBlock as Record<string, unknown>).lastModified
+      localStorage.setItem(BLOCK_KEY, JSON.stringify(legacyBlock))
+
+      // Supabase has block with lastModified
+      mockSingle.mockResolvedValue({
+        data: { block: makeStoredBlock(oldTimestamp) },
+        error: null,
+      })
+
+      const block = await loadBlock('user-1')
+      expect(block).not.toBeNull()
+      // Supabase block (with any lastModified) beats legacy block (no lastModified = epoch)
+      expect(block!.lastModified).toBe(oldTimestamp)
+    })
+
+    it('loadBlock falls back to localStorage when Supabase fails', async () => {
+      localStorage.setItem(BLOCK_KEY, JSON.stringify(makeStoredBlock(oldTimestamp)))
+      mockSingle.mockRejectedValue(new Error('network error'))
+
+      const block = await loadBlock('user-1')
+      expect(block).not.toBeNull()
+      expect(block!.lastModified).toBe(oldTimestamp)
+    })
+  })
+
+  describe('startBlock sets lastModified', () => {
+    it('startBlock sets lastModified timestamp', async () => {
+      const before = new Date().toISOString()
+      await startBlock('accumulation', null)
+      const raw = localStorage.getItem(BLOCK_KEY)
+      const block = JSON.parse(raw!)
+      expect(block.lastModified).toBeTruthy()
+      expect(block.lastModified >= before).toBe(true)
     })
   })
 

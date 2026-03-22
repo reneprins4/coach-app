@@ -982,5 +982,11 @@
     "plateau": "Plateau",
     "slowing": "Slowing",
     "exercise_count": "{{count}} exercise(s)"
+  },
+  "export": {
+    "json_full": "Full backup (JSON)",
+    "csv_workouts": "Workouts (CSV)",
+    "csv_measurements": "Measurements (CSV)",
+    "success": "Export downloaded"
   }
 }
