@@ -353,6 +353,7 @@ describe('Sofia: Intermediate, 29yo, 65kg, full_gym, 4x/week Upper/Lower, hypert
           equipment: 'full_gym',
           experienceLevel: 'intermediate',
           bodyweight: '65',
+          time: 90,
         },
       })
 
@@ -379,6 +380,7 @@ describe('Sofia: Intermediate, 29yo, 65kg, full_gym, 4x/week Upper/Lower, hypert
           equipment: 'full_gym',
           experienceLevel: 'intermediate',
           bodyweight: '65',
+          time: 90,
         },
       })
 

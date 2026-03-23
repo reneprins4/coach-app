@@ -29,7 +29,7 @@ function makeBodyweightFullBody(level: 'complete_beginner' | 'beginner' | 'inter
       bodyweight: '75',
       equipment: 'bodyweight',
       energy: 'medium',
-      time: 60,
+      time: 90,
       focusedMuscles: [],
       isDeload: false,
       targetRPE: null,

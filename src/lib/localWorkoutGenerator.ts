@@ -492,9 +492,25 @@ export function generateLocalWorkout({
     }
   }
 
+  // Trim exercises to fit within time budget
+  // Only trim if estimated duration significantly exceeds the target
+  // Keep minimum 3 exercises to maintain workout quality
+  if (timeMin > 0) {
+    const maxDuration = timeMin + 15 // allow 15 min buffer
+    while (exercises.length > 3) {
+      const tempSets = exercises.reduce((sum, e) => sum + e.sets, 0)
+      const tempAvgRest = exercises.length > 0
+        ? exercises.reduce((sum, e) => sum + e.rest_seconds, 0) / exercises.length / 60
+        : 0
+      const tempDuration = Math.round(tempSets * (1.5 + tempAvgRest))
+      if (tempDuration <= maxDuration) break
+      exercises.pop()
+    }
+  }
+
   // Calculate estimated duration
   const totalSets = exercises.reduce((sum, e) => sum + e.sets, 0)
-  const avgRestMin = exercises.reduce((sum, e) => sum + e.rest_seconds, 0) / exercises.length / 60
+  const avgRestMin = exercises.length > 0 ? exercises.reduce((sum, e) => sum + e.rest_seconds, 0) / exercises.length / 60 : 0
   const estimatedDuration = Math.round(totalSets * (1.5 + avgRestMin))
 
   // Build volume notes

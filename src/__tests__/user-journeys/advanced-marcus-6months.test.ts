@@ -77,7 +77,7 @@ function genWorkout(
       experienceLevel: 'advanced',
       bodyweight: '90',
       energy: 'high',
-      time: 75,
+      time: 120,
       ...overrides,
     },
   })

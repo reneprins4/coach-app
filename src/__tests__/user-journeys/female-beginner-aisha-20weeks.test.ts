@@ -160,7 +160,7 @@ function runAishaSimulation() {
           bodyweight: AISHA.bodyweight,
           equipment: AISHA.equipment,
           energy: 'medium',
-          time: 60,
+          time: 90,
           focusedMuscles: [] as MuscleGroup[],
           isDeload: phaseInfo.isDeload,
           blockWeek: ((week - 1) % 4) + 1,

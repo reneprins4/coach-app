@@ -33,7 +33,7 @@ function makeInput(overrides: Record<string, unknown> = {}) {
       bodyweight: '80',
       equipment: 'full_gym',
       energy: 'medium',
-      time: 60,
+      time: 90,
       focusedMuscles: [] as MuscleGroup[],
       isDeload: false,
       targetRPE: null,
