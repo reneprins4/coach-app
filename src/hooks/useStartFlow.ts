@@ -14,6 +14,8 @@ import { generateScientificWorkout } from '../lib/ai'
 import { getSettings, saveSettings } from '../lib/settings'
 import { getCurrentBlock } from '../lib/periodization'
 import { buildWorkoutPreferences } from '../lib/workoutPreferences'
+import { getCachedWorkout, cacheWorkout, buildContextHash } from '../lib/workoutCache'
+import { loadInjuries } from '../lib/injuryRecovery'
 
 // ---- Session Cache ----
 
@@ -290,17 +292,42 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         dispatch({ type: 'GENERATION_START' })
 
         const settings = getSettings() as UserSettings
-        const block = getCurrentBlock()
-        const recentHistory = getRelevantHistory(history, recommendedSplit)
-        const preferences = buildWorkoutPreferences(settings, block, { time: currentTime })
 
-        const result = await (generateScientificWorkout as CallableFunction)({
-          muscleStatus,
-          recommendedSplit,
-          recentHistory,
-          preferences,
-          userId: userId ?? null,
+        // Check localStorage workout cache first (shared with Dashboard)
+        const injuries = loadInjuries().filter(i => i.status !== 'resolved')
+        const cacheHash = buildContextHash({
+          split: recommendedSplit,
+          date: new Date().toISOString().slice(0, 10),
+          workoutCount: history.length,
+          injuryCount: injuries.length,
+          equipment: settings.equipment || 'full_gym',
+          trainingGoal: settings.trainingGoal || 'hypertrophy',
+          experienceLevel: settings.experienceLevel || 'intermediate',
+          time: currentTime,
         })
+        const cachedResult = getCachedWorkout(cacheHash)
+
+        let result: AIWorkoutResponse
+
+        if (cachedResult) {
+          if (import.meta.env.DEV) console.log('[useStartFlow] Cache HIT')
+          result = cachedResult
+        } else {
+          const block = getCurrentBlock()
+          const recentHistory = getRelevantHistory(history, recommendedSplit)
+          const preferences = buildWorkoutPreferences(settings, block, { time: currentTime })
+
+          result = await (generateScientificWorkout as CallableFunction)({
+            muscleStatus,
+            recommendedSplit,
+            recentHistory,
+            preferences,
+            userId: userId ?? null,
+          }) as AIWorkoutResponse
+
+          // Write to shared cache
+          cacheWorkout(cacheHash, result)
+        }
 
         if (cancelled) return
 
@@ -312,7 +339,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
             generatedWorkout: workoutExercises,
             estimatedDuration: result.estimated_duration_min,
             exerciseCount: result.exercises.length,
-            aiResponse: result as AIWorkoutResponse,
+            aiResponse: result,
           },
         })
 
@@ -370,18 +397,43 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
       if (generationIdRef.current !== myGenerationId) return
 
       const settings = getSettings() as UserSettings
-      const block = getCurrentBlock()
-      const recentHistory = getRelevantHistory(history, splitName)
-      const preferences = buildWorkoutPreferences(settings, block, { time: timeToUse })
 
-      const result = await (generateScientificWorkout as CallableFunction)({
-        muscleStatus: state.muscleStatus,
-        recommendedSplit: splitName,
-        recentHistory,
-        preferences,
-        userId: userId ?? null,
-        signal: controller.signal,
+      // Check localStorage workout cache first (shared with Dashboard)
+      const injuries = loadInjuries().filter(i => i.status !== 'resolved')
+      const cacheHash = buildContextHash({
+        split: splitName,
+        date: new Date().toISOString().slice(0, 10),
+        workoutCount: history.length,
+        injuryCount: injuries.length,
+        equipment: settings.equipment || 'full_gym',
+        trainingGoal: settings.trainingGoal || 'hypertrophy',
+        experienceLevel: settings.experienceLevel || 'intermediate',
+        time: timeToUse,
       })
+      const cachedResult = getCachedWorkout(cacheHash)
+
+      let result: AIWorkoutResponse
+
+      if (cachedResult) {
+        if (import.meta.env.DEV) console.log('[useStartFlow] Cache HIT for split:', splitName)
+        result = cachedResult
+      } else {
+        const block = getCurrentBlock()
+        const recentHistory = getRelevantHistory(history, splitName)
+        const preferences = buildWorkoutPreferences(settings, block, { time: timeToUse })
+
+        result = await (generateScientificWorkout as CallableFunction)({
+          muscleStatus: state.muscleStatus,
+          recommendedSplit: splitName,
+          recentHistory,
+          preferences,
+          userId: userId ?? null,
+          signal: controller.signal,
+        }) as AIWorkoutResponse
+
+        // Write to shared cache
+        cacheWorkout(cacheHash, result)
+      }
 
       if (generationIdRef.current !== myGenerationId) return
 
@@ -393,7 +445,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
           generatedWorkout: workoutExercises,
           estimatedDuration: result.estimated_duration_min,
           exerciseCount: result.exercises.length,
-          aiResponse: result as AIWorkoutResponse,
+          aiResponse: result,
         },
       })
 

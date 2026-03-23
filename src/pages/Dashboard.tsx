@@ -1,6 +1,6 @@
-import { useMemo, useCallback, useState, lazy, Suspense } from 'react'
+import { useMemo, useCallback, useState, useEffect, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Play, Dumbbell } from 'lucide-react'
+import { ChevronRight, Play, Dumbbell, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
@@ -20,11 +20,11 @@ import { formatSlotLabel } from '../lib/optimalHour'
 import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
 import { getLocalDateString } from '../lib/dateUtils'
 import { analyzeTraining } from '../lib/training-analysis'
-import { generateTodaysWorkout } from '../lib/todaysWorkout'
+import { generateWorkoutPreview, generateFullWorkout } from '../lib/workoutCache'
 import { computeTrainingStory, isStoryViewed, markStoryViewed } from '../lib/trainingStory'
 import { getMonthName } from '../lib/trainingStoryShare'
 import { buildStoryShareText } from '../lib/trainingStoryShare'
-import type { AIExercise } from '../types'
+import type { AIExercise, AIWorkoutResponse } from '../types'
 
 const TrainingStory = lazy(() => import('../components/TrainingStory'))
 
@@ -65,7 +65,22 @@ export default function Dashboard() {
   const progress = block ? getBlockProgress(block) : null
   const phase = block ? PHASES[block.phase] : null
 
-  const todaysWorkout = useMemo(() => generateTodaysWorkout(workouts), [workouts])
+  const todaysWorkout = useMemo(() => generateWorkoutPreview(workouts), [workouts])
+
+  // Pre-generate full workout in background on mount
+  const [preGeneratedWorkout, setPreGeneratedWorkout] = useState<AIWorkoutResponse | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  useEffect(() => {
+    if (!todaysWorkout || workouts.length < 3) return
+    let cancelled = false
+
+    generateFullWorkout(workouts, user?.id ?? null)
+      .then(result => { if (!cancelled) setPreGeneratedWorkout(result) })
+      .catch(() => { /* non-fatal: user can still generate on demand */ })
+
+    return () => { cancelled = true }
+  }, [todaysWorkout?.split, workouts.length, user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Training Story
   const storyContext = useMemo(() => {
@@ -101,21 +116,48 @@ export default function Dashboard() {
     }
   }, [storyData, i18n.language])
 
-  const handleStartTodaysWorkout = useCallback(() => {
+  const handleStartTodaysWorkout = useCallback(async () => {
     if (!todaysWorkout) return
-    const pending = todaysWorkout.exercises.map((ex: AIExercise) => ({
-      name: ex.name,
-      muscle_group: ex.muscle_group,
-      sets: [],
-      plan: {
-        sets: ex.sets, reps_min: ex.reps_min, reps_max: ex.reps_max,
-        weight_kg: ex.weight_kg, rpe_target: ex.rpe_target,
-        rest_seconds: ex.rest_seconds, notes: ex.notes || '',
-      },
-    }))
-    localStorage.setItem('coach-pending-workout', JSON.stringify(pending))
-    nav('/log')
-  }, [todaysWorkout, nav])
+
+    // If pre-generated workout is ready, use it instantly
+    if (preGeneratedWorkout) {
+      const pending = preGeneratedWorkout.exercises.map((ex: AIExercise) => ({
+        name: ex.name,
+        muscle_group: ex.muscle_group,
+        sets: [],
+        plan: {
+          sets: ex.sets, reps_min: ex.reps_min, reps_max: ex.reps_max,
+          weight_kg: ex.weight_kg, rpe_target: ex.rpe_target,
+          rest_seconds: ex.rest_seconds, notes: ex.notes || '',
+        },
+      }))
+      localStorage.setItem('coach-pending-workout', JSON.stringify(pending))
+      nav('/log')
+      return
+    }
+
+    // Fallback: generate on demand with brief loading state
+    setIsGenerating(true)
+    try {
+      const result = await generateFullWorkout(workouts, user?.id ?? null)
+      const pending = result.exercises.map((ex: AIExercise) => ({
+        name: ex.name,
+        muscle_group: ex.muscle_group,
+        sets: [],
+        plan: {
+          sets: ex.sets, reps_min: ex.reps_min, reps_max: ex.reps_max,
+          weight_kg: ex.weight_kg, rpe_target: ex.rpe_target,
+          rest_seconds: ex.rest_seconds, notes: ex.notes || '',
+        },
+      }))
+      localStorage.setItem('coach-pending-workout', JSON.stringify(pending))
+      nav('/log')
+    } catch {
+      // Non-fatal: user stays on dashboard
+    } finally {
+      setIsGenerating(false)
+    }
+  }, [todaysWorkout, preGeneratedWorkout, workouts, user?.id, nav])
 
   const recentWorkouts = workouts.slice(0, 3)
 
@@ -215,18 +257,25 @@ export default function Dashboard() {
       {todaysWorkout && (
         <button
           onClick={handleStartTodaysWorkout}
-          className="card-accent mb-5 w-full text-left active:scale-[0.98] transition-transform"
+          disabled={isGenerating}
+          className="card-accent mb-5 w-full text-left active:scale-[0.98] transition-transform disabled:opacity-70"
         >
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
               <p className="label-caps text-cyan-500 mb-1">{t('dashboard.todays_workout')}</p>
               <p className="text-title">{todaysWorkout.split}</p>
               <p className="mt-1 text-sm text-gray-500">
-                {todaysWorkout.exerciseCount} {t('common.exercises')} · ~{todaysWorkout.estimatedDuration} min
+                ~{todaysWorkout.estimatedDuration} min
+                {todaysWorkout.muscleContext.length > 0 && (
+                  <> · {todaysWorkout.muscleContext.filter(m => m.status === 'ready').length} {t('dashboard.muscle_ready')}</>
+                )}
               </p>
             </div>
             <div className="ml-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-500 glow-cyan">
-              <Play size={20} className="text-white ml-0.5" fill="white" />
+              {isGenerating
+                ? <Loader2 size={20} className="text-white animate-spin" />
+                : <Play size={20} className="text-white ml-0.5" fill="white" />
+              }
             </div>
           </div>
         </button>

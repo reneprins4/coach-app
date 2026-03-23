@@ -13,6 +13,7 @@ import {
   loadInjuries,
   saveInjuries,
 } from '../lib/injuryRecovery'
+import { invalidateWorkoutCache } from '../lib/workoutCache'
 
 /**
  * Hook for managing injury state with localStorage persistence.
@@ -39,6 +40,7 @@ export function useInjuries() {
       saveInjuries(next)
       return next
     })
+    invalidateWorkoutCache() // Injury changed → workout needs regeneration
     return injury
   }, [injuries])
 
@@ -50,6 +52,7 @@ export function useInjuries() {
       saveInjuries(next)
       return next
     })
+    invalidateWorkoutCache() // Injury status changed → workout may need regeneration
   }, [])
 
   const resolve = useCallback((injuryId: string) => {
@@ -60,6 +63,7 @@ export function useInjuries() {
       saveInjuries(next)
       return next
     })
+    invalidateWorkoutCache() // Injury resolved → workout can use full exercise pool
   }, [])
 
   return {

@@ -82,7 +82,9 @@
     "trained_days_ago": "{{days}}d ago",
     "todays_workout": "Today's workout",
     "start_now": "Start",
-    "based_on_recovery": "Based on your recovery"
+    "based_on_recovery": "Based on your recovery",
+    "generating": "Generating your workout...",
+    "muscle_ready": "muscles recovered"
   },
   "history": {
     "title": "History",

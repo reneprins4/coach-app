@@ -82,7 +82,9 @@
     "trained_days_ago": "{{days}}d geleden",
     "todays_workout": "Vandaag's training",
     "start_now": "Start",
-    "based_on_recovery": "Gebaseerd op je herstel"
+    "based_on_recovery": "Gebaseerd op je herstel",
+    "generating": "Workout wordt samengesteld...",
+    "muscle_ready": "spieren hersteld"
   },
   "history": {
     "title": "Geschiedenis",

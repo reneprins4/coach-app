@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { useAuth } from './hooks/useAuth'
 import { getSettings, saveSettings, mergeSettingsOnLogin } from './lib/settings'
+import { invalidateWorkoutCache } from './lib/workoutCache'
 import { isBeginnerMode as checkBeginnerMode } from './lib/beginnerMode'
 import { supabase } from './lib/supabase'
 import { logError } from './lib/logger'
@@ -104,6 +105,7 @@ export default function App() {
   function updateSettings(newSettings: Partial<UserSettings>): UserSettings {
     const merged = saveSettings(newSettings, auth.user?.id ?? null)
     setSettings(merged)
+    invalidateWorkoutCache() // Settings changed → workout needs regeneration
     return merged
   }
 

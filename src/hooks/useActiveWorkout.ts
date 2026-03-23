@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import type { ActiveWorkout, ActiveExercise, ActiveWorkoutSet } from '../types'
 import { supabase } from '../lib/supabase'
 import { trimWorkout } from '../lib/workoutTrimmer'
+import { invalidateWorkoutCache } from '../lib/workoutCache'
 
 const STORAGE_KEY = 'coach-active-workout'
 const LAST_USED_KEY = 'coach-last-used'
@@ -263,6 +264,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
         exercises: workout.exercises, // Include for template saving
       }
       setWorkout(null)
+      invalidateWorkoutCache() // New workout logged → recovery changed → regenerate
       return result
     } catch (err: unknown) {
       // Queue workout for later sync when back online
