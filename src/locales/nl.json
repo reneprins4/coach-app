@@ -103,7 +103,7 @@
     "based_on_recovery": "Gebaseerd op je herstel",
     "generating": "Workout wordt samengesteld...",
     "muscle_ready": "spieren hersteld",
-    "all_muscles_ready": "Alle spieren hersteld",
+    "all_muscles_ready": "Alle spieren voor deze training hersteld",
     "training_plan": "Trainingsplan",
     "week_of": "Week {{current}} van {{total}}",
     "plan_suggestion": "Wil je een trainingsplan?"

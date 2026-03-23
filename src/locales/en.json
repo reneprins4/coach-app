@@ -103,7 +103,7 @@
     "based_on_recovery": "Based on your recovery",
     "generating": "Generating your workout...",
     "muscle_ready": "muscles recovered",
-    "all_muscles_ready": "All muscles recovered",
+    "all_muscles_ready": "All muscles for this workout recovered",
     "training_plan": "Training Plan",
     "week_of": "Week {{current}} of {{total}}",
     "plan_suggestion": "Want a training plan?"

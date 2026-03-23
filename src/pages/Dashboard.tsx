@@ -182,7 +182,7 @@ export default function Dashboard() {
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
         <h1 className="text-display mb-3">{t(getGreetingKey())}</h1>
         <p className="mb-8 text-sm text-gray-500">{t('dashboard.time_to_start')}</p>
-        <button onClick={() => nav('/coach')} className="btn-primary mb-3 max-w-xs">{t('dashboard.start_training')}</button>
+        <button onClick={() => nav('/log')} className="btn-primary mb-3 max-w-xs">{t('dashboard.start_training')}</button>
         <button onClick={() => nav('/log')} className="btn-secondary max-w-xs">{t('dashboard.free_training')}</button>
       </div>
     )
@@ -313,6 +313,11 @@ export default function Dashboard() {
           <div className="relative flex items-center justify-between">
             <div className="min-w-0 flex-1">
               <p className="label-caps text-cyan-500 mb-1">{t('dashboard.todays_workout')}</p>
+              {block && phase && (
+                <span className="text-xs font-semibold text-cyan-400">
+                  {t(phase.labelKey)} · {t('dashboard.week_of', { current: progress?.currentWeek, total: progress?.totalWeeks })}
+                </span>
+              )}
               <p className="text-title">{todaysWorkout.split}</p>
               <p className="mt-1 text-sm text-gray-500">
                 ~{todaysWorkout.estimatedDuration} min
@@ -403,7 +408,7 @@ export default function Dashboard() {
       {/* ━━ CTAs ━━ */}
       {!todaysWorkout && (
         <>
-          <button onClick={() => nav('/coach')} className="btn-primary mb-3">{t('dashboard.start_training')}</button>
+          <button onClick={() => nav('/log')} className="btn-primary mb-3">{t('dashboard.start_training')}</button>
           <button onClick={() => nav('/log')} className="btn-secondary mb-4">{t('dashboard.free_training')}</button>
         </>
       )}
