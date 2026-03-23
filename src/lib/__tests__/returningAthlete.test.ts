@@ -9,12 +9,12 @@ describe('MF-001: Returning athlete experience level', () => {
     expect(level).toBe('returning')
   })
 
-  it('returning athlete gets conservative weight estimates (between complete_beginner and beginner)', () => {
+  it('returning athlete gets weight estimates equal to beginner (technique memory compensates)', () => {
     expect(LEVEL_MULTIPLIERS.returning).toBeDefined()
-    // Returning athletes have technique memory but lost strength.
-    // Multiplier sits between complete_beginner (0.45) and beginner (0.6).
+    // Returning athletes have technique memory which compensates for lost strength.
+    // They should start at the same level as beginners, not below them.
     expect(LEVEL_MULTIPLIERS.returning).toBeGreaterThan(LEVEL_MULTIPLIERS.complete_beginner)
-    expect(LEVEL_MULTIPLIERS.returning).toBeLessThan(LEVEL_MULTIPLIERS.beginner)
+    expect(LEVEL_MULTIPLIERS.returning).toBe(LEVEL_MULTIPLIERS.beginner)
   })
 
   it('isBeginnerMode returns true for returning (they need guidance)', () => {

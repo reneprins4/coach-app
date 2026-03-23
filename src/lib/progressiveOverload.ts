@@ -43,6 +43,7 @@ export type ProgressionStrategy =
   | 'maintain'
   | 'deload'
   | 'estimate'
+  | 'variation'
 
 export interface ProgressionResult {
   suggestedWeight: number
@@ -141,6 +142,45 @@ export function calculateProgression(input: ProgressionInput): ProgressionResult
   } = input
 
   const [repMin, repMax] = targetRepRange
+
+  // 0. Bodyweight exercises: weight=0 means no external load — never add weight
+  if (previousWeight === 0 && previousReps != null && previousRpe != null) {
+    // RPE >= 9.5: at max effort, maintain current volume
+    if (previousRpe >= 9.5) {
+      return {
+        suggestedWeight: 0,
+        suggestedReps: previousReps,
+        strategy: 'maintain',
+        reason: 'Bodyweight exercise at max effort — maintain current volume.',
+      }
+    }
+    // RPE 8-9: productive range, maintain
+    if (previousRpe >= 8) {
+      return {
+        suggestedWeight: 0,
+        suggestedReps: previousReps,
+        strategy: 'maintain',
+        reason: `Bodyweight exercise @RPE ${previousRpe} — maintain ${previousReps} reps.`,
+      }
+    }
+    // At top of rep range: suggest a harder variation
+    if (previousReps >= repMax) {
+      return {
+        suggestedWeight: 0,
+        suggestedReps: previousReps,
+        strategy: 'variation',
+        reason: 'At top of rep range for bodyweight — try a harder variation (e.g., elevated, single-arm).',
+      }
+    }
+    // RPE < 8: rep progression
+    const addReps = previousRpe < 7 ? 2 : 1
+    return {
+      suggestedWeight: 0,
+      suggestedReps: Math.min(previousReps + addReps, repMax),
+      strategy: 'rep_progression',
+      reason: `Bodyweight exercise @RPE ${previousRpe} — adding ${addReps} rep(s): 0kg x ${Math.min(previousReps + addReps, repMax)}.`,
+    }
+  }
 
   // 1. No history -> estimate
   if (previousWeight == null || previousReps == null || previousRpe == null) {

@@ -32,7 +32,7 @@ interface TemplateExercise {
   tags?: string[]
 }
 
-const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
+export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
   chest: [
     { name: 'Flat Barbell Bench Press', muscle_group: 'chest', isCompound: true, equipment: 'barbell', bwMultiplier: 0.8 },
     { name: 'Incline Dumbbell Press', muscle_group: 'chest', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.35 },
@@ -40,6 +40,10 @@ const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Incline Barbell Bench Press', muscle_group: 'chest', isCompound: true, equipment: 'barbell', bwMultiplier: 0.65 },
     { name: 'Flat Dumbbell Bench Press', muscle_group: 'chest', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.35 },
     { name: 'Pec Deck', muscle_group: 'chest', isCompound: false, equipment: 'machine', bwMultiplier: 0.5 },
+    { name: 'Push-Up', muscle_group: 'chest', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.65 },
+    { name: 'Wide Push-Up', muscle_group: 'chest', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.65 },
+    { name: 'Diamond Push-Up', muscle_group: 'chest', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0.65 },
+    { name: 'Decline Push-Up', muscle_group: 'chest', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.65 },
   ],
   back: [
     { name: 'Barbell Row', muscle_group: 'back', isCompound: true, equipment: 'barbell', bwMultiplier: 0.7 },
@@ -76,7 +80,9 @@ const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Romanian Deadlift', muscle_group: 'hamstrings', isCompound: true, equipment: 'barbell', bwMultiplier: 0.9 },
     { name: 'Lying Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'machine', bwMultiplier: 0.4 },
     { name: 'Seated Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'machine', bwMultiplier: 0.4 },
-    { name: 'Nordic Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Nordic Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, tags: ['advanced'] },
+    { name: 'Glute Bridge (Single Leg)', muscle_group: 'hamstrings', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Slider Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
   ],
   glutes: [
     { name: 'Hip Thrust', muscle_group: 'glutes', isCompound: true, equipment: 'barbell', bwMultiplier: 1.2 },
@@ -89,6 +95,8 @@ const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Hammer Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.14 },
     { name: 'Incline Dumbbell Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
     { name: 'Cable Curl', muscle_group: 'biceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.2 },
+    { name: 'Chin-Up', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.9 },
+    { name: 'Inverted Row (Underhand)', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.5 },
   ],
   triceps: [
     { name: 'Tricep Pushdown', muscle_group: 'triceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.25 },
@@ -155,6 +163,11 @@ interface LocalWorkoutInput {
     blockWeek?: number
     targetRPE?: number | null
     targetRepRange?: [number, number] | null
+    gender?: string
+    benchMax?: string
+    squatMax?: string
+    deadliftMax?: string
+    ohpMax?: string
   }
 }
 
@@ -163,15 +176,46 @@ interface LocalWorkoutInput {
 export const LEVEL_MULTIPLIERS: Record<ExperienceLevel, number> = {
   complete_beginner: 0.45,
   beginner: 0.6,
-  returning: 0.55,
+  returning: 0.6,
   intermediate: 1.0,
   advanced: 1.3,
 }
 
-function estimateWeight(template: TemplateExercise, bodyweightKg: number, level: ExperienceLevel): number {
+/** Gender-based weight scaling factor. Male is the baseline (1.0). */
+export const GENDER_FACTOR: Record<string, number> = {
+  male: 1.0,
+  female: 0.65,
+  other: 0.825, // average of male and female
+}
+
+/**
+ * Check if user has a stored 1RM for the primary movement pattern of this exercise.
+ * Returns a working weight (75% of 1RM, rounded to 2.5kg) or null if no max stored.
+ */
+function getStoredMaxWeight(exerciseName: string, preferences: LocalWorkoutInput['preferences']): number | null {
+  const lower = exerciseName.toLowerCase()
+  let max: number | null = null
+
+  if (/bench/.test(lower) && preferences.benchMax) {
+    max = parseFloat(preferences.benchMax)
+  } else if (/squat/.test(lower) && preferences.squatMax) {
+    max = parseFloat(preferences.squatMax)
+  } else if (/dead|rdl/.test(lower) && preferences.deadliftMax) {
+    max = parseFloat(preferences.deadliftMax)
+  } else if (/ohp|overhead.*press|military/.test(lower) && preferences.ohpMax) {
+    max = parseFloat(preferences.ohpMax)
+  }
+
+  if (!max || max <= 0 || isNaN(max)) return null
+  // Work at 75% of 1RM, rounded to nearest 2.5kg
+  return Math.round(max * 0.75 / 2.5) * 2.5
+}
+
+function estimateWeight(template: TemplateExercise, bodyweightKg: number, level: ExperienceLevel, gender?: string): number {
   if (template.equipment === 'bodyweight') return 0
   const mult = LEVEL_MULTIPLIERS[level] || 1.0
-  const raw = bodyweightKg * template.bwMultiplier * mult
+  const genderFactor = (gender && GENDER_FACTOR[gender]) || 1.0
+  const raw = bodyweightKg * template.bwMultiplier * mult * genderFactor
   return Math.max(2.5, Math.round(raw / 2.5) * 2.5)
 }
 
@@ -233,7 +277,7 @@ function applyOverload(
   historyMap: Record<string, { weight: number; reps: number; rpe: number | null }>,
 ): [number, number | null, AIExercise['vs_last_session']] {
   const prev = historyMap[exerciseName]
-  if (!prev || prev.weight === 0) {
+  if (!prev) {
     return [estimatedWeight, null, 'new']
   }
 
@@ -252,6 +296,7 @@ function applyOverload(
     maintain: 'same',
     deload: 'down',
     estimate: 'new',
+    variation: 'same',
   }
   const label = strategyLabels[result.strategy] ?? 'same'
   const vsNote = `${label} - prev ${prev.weight}kg x${prev.reps}${prev.rpe != null ? ` @RPE${prev.rpe}` : ''}, ${result.reason}` as AIExercise['vs_last_session']
@@ -268,6 +313,7 @@ function pickExercises(
   recentExerciseNames: Set<string>,
   equipment: string,
   requiredTag?: string,
+  experienceLevel?: ExperienceLevel,
 ): TemplateExercise[] {
   const pool = EXERCISE_POOL[muscle] || []
   // Filter by equipment availability
@@ -283,6 +329,12 @@ function pickExercises(
   // Filter by required tag (e.g. 'posterior' for rear delt exercises on Pull day)
   if (requiredTag) {
     filtered = filtered.filter(e => e.tags?.includes(requiredTag))
+  }
+
+  // Exclude advanced-tagged exercises for beginners (BUG 9: Nordic Curl too hard for beginners)
+  const beginnerLevels: ExperienceLevel[] = ['complete_beginner', 'beginner', 'returning']
+  if (experienceLevel && beginnerLevels.includes(experienceLevel)) {
+    filtered = filtered.filter(e => !e.tags?.includes('advanced'))
   }
 
   if (filtered.length === 0) return []
@@ -324,6 +376,7 @@ export function generateLocalWorkout({
   const focusedMuscles = new Set(preferences.focusedMuscles || [])
   const timeMin = preferences.time || 60
   const energy = preferences.energy || 'medium'
+  const gender = preferences.gender
 
   // Build recent exercise set for variety
   const recentExerciseNames = new Set<string>()
@@ -369,10 +422,12 @@ export function generateLocalWorkout({
     if (count === 0) continue
 
     const tagFilter = muscle === 'shoulders' ? template.shoulderFilter : undefined
-    const picked = pickExercises(muscle, count, recentExerciseNames, equipment, tagFilter)
+    const picked = pickExercises(muscle, count, recentExerciseNames, equipment, tagFilter, level)
 
     for (const tmpl of picked) {
-      const estimatedWt = estimateWeight(tmpl, bwKg, level)
+      // BUG 12 fix: prefer stored 1RM-based weight over bodyweight estimate
+      const storedMax = getStoredMaxWeight(tmpl.name, preferences)
+      const estimatedWt = storedMax ?? estimateWeight(tmpl, bwKg, level, gender)
       const repRange: [number, number] = targetRepRange || getRepRange(goal, tmpl.isCompound)
       const [repsMin, repsMax] = repRange
       const [weight, suggestedReps, vsNote] = applyOverload(tmpl.name, estimatedWt, tmpl.muscle_group, repRange, historyMap)
@@ -398,7 +453,7 @@ export function generateLocalWorkout({
   for (const ex of exercises) {
     const tmpl = EXERCISE_POOL[ex.muscle_group]?.find(t => t.name === ex.name)
     if (tmpl && tmpl.equipment !== 'bodyweight' && (!ex.weight_kg || ex.weight_kg === 0)) {
-      ex.weight_kg = estimateWeight(tmpl, bwKg, level)
+      ex.weight_kg = estimateWeight(tmpl, bwKg, level, gender)
     }
   }
 

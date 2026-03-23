@@ -228,7 +228,7 @@ export function calcMuscleRecovery(muscle: string, hoursSinceTrained: number | n
  * - Advanced:      max * 1.0
  */
 export function getVolumeCeiling(experienceLevel: string): Record<string, number> {
-  const scale = (experienceLevel === 'beginner' || experienceLevel === 'returning') ? 0.6 : experienceLevel === 'advanced' ? 1.0 : 0.85
+  const scale = (['complete_beginner', 'beginner', 'returning'].includes(experienceLevel)) ? 0.6 : experienceLevel === 'advanced' ? 1.0 : 0.85
   return Object.fromEntries(
     MUSCLE_GROUPS.map(m => [m, Math.round(SET_TARGETS[m].max * scale)])
   )

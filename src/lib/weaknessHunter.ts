@@ -42,6 +42,9 @@ function getDetailedMuscleGroup(name: string): DetailedMuscleGroup | null {
   // Chest dip stays chest
   if (/chest.*dip/.test(l)) return 'chest'
 
+  // Rear delt fly / reverse fly must be caught before generic fly → chest
+  if (/rear.?delt|reverse.?fly/i.test(l)) return 'shoulders_rear'
+
   if (/bench|chest|fly|push.?up|pec/.test(l)) return 'chest'
 
   // Leg-specific patterns must precede generic shoulder/press patterns

@@ -5,13 +5,23 @@ import { normalizeExerciseName } from './exerciseAliases'
 export function detectPlateaus(workouts: Workout[]): PlateauResult[] {
   const exerciseData: Record<string, Record<string, number>> = {}
 
+  // Track which exercises are pure bodyweight (all sets have weight_kg === 0)
+  const exerciseHasWeight: Record<string, boolean> = {}
+
   // Groepeer e1RM per oefening per week
   for (const workout of workouts) {
     const week = getWeekKey(new Date(workout.created_at))
     for (const set of workout.workout_sets || []) {
-      if (!set.weight_kg || !set.reps) continue
+      if (!set.reps) continue
       // Normalize exercise name to merge name variants (DATA-001)
       const exerciseName = normalizeExerciseName(set.exercise)
+      // Track whether this exercise ever has a non-zero weight
+      if (set.weight_kg && set.weight_kg > 0) {
+        exerciseHasWeight[exerciseName] = true
+      } else if (!(exerciseName in exerciseHasWeight)) {
+        exerciseHasWeight[exerciseName] = false
+      }
+      if (!set.weight_kg || !set.reps) continue
       if (!exerciseData[exerciseName]) exerciseData[exerciseName] = {}
       const e1rm = set.reps === 1 ? set.weight_kg : set.weight_kg * (1 + set.reps / 30)
       const exData = exerciseData[exerciseName]!
@@ -24,6 +34,10 @@ export function detectPlateaus(workouts: Workout[]): PlateauResult[] {
   const results: PlateauResult[] = []
 
   for (const [exercise, weekData] of Object.entries(exerciseData)) {
+    // Skip pure bodyweight exercises (weight=0) — e1RM plateau detection
+    // is meaningless when progression is rep-based only (BUG 5)
+    if (exerciseHasWeight[exercise] === false) continue
+
     const weeks = Object.keys(weekData).sort()
     if (weeks.length < 3) continue // niet genoeg data
 
@@ -48,7 +62,15 @@ export function detectPlateaus(workouts: Workout[]): PlateauResult[] {
     const progressionSlowdown = firstSlope > 0 && secondSlope < firstSlope * 0.3
     const isStagnant = relativeSlope < 0.005 // minder dan 0.5% groei per week
 
-    if (progressionSlowdown || isStagnant) {
+    // BUG 11 fix: At light weights, 2.5kg rounding can cause e1RM to appear
+    // flat for weeks even though weight increased. Check whether the second
+    // half of the window shows ANY e1RM increase — if so, the lifter is
+    // progressing despite the low regression slope.
+    const secondHalfMax = Math.max(...secondHalf)
+    const secondHalfMin = Math.min(...secondHalf)
+    const secondHalfProgressed = secondHalfMax > secondHalfMin
+
+    if ((progressionSlowdown || isStagnant) && !secondHalfProgressed) {
       const status: PlateauStatus = isStagnant ? 'plateau' : 'slowing'
       const weeklyData: PlateauWeekData[] = recentWeeks.map((w, i) => ({
         week: formatWeekLabel(w),
