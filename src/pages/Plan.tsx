@@ -259,11 +259,13 @@ export default function Plan() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <button onClick={() => nav('/log')} className="btn-primary">
-              <Sparkles size={18} />
+            <motion.button
+              onClick={() => nav('/log')}
+              className="btn-primary"
+              whileTap={{ scale: 0.97 }}
+            >
               {t('plan.generate_today')}
-              <ChevronRight size={16} className="ml-auto" />
-            </button>
+            </motion.button>
           </motion.div>
 
           {/* Phase Roadmap */}
