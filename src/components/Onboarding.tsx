@@ -86,34 +86,36 @@ export default function Onboarding() {
     )
   }
 
-  // Step 0: Language selection (first thing users see)
+  // Step 0: Language selection — the very first impression
   if (step === -1) {
     return (
-      <div className="flex min-h-dvh flex-col bg-gray-950 px-5">
+      <div className="flex min-h-dvh flex-col bg-gray-950 px-6">
         <div className="flex flex-1 flex-col items-center justify-center">
-          <p className="label-caps mb-2 tracking-[0.3em]">Kravex</p>
-          <h1 className="text-display mb-12">Choose your language</h1>
+          {/* Brand mark */}
+          <p className="label-caps mb-4 tracking-[0.35em] text-cyan-500">Kravex</p>
+          <h1 className="text-display mb-2">Choose your language</h1>
+          <p className="text-sm text-gray-600 mb-14">Kies je taal</p>
 
           <div className="w-full max-w-xs space-y-3">
             <button
               onClick={() => handleSelectLanguage('nl')}
-              className="card flex w-full items-center gap-4 active:scale-[0.98] transition-transform"
+              className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 text-left transition-all active:scale-[0.97] active:border-cyan-500/30 active:bg-cyan-500/5"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-sm font-black text-white">NL</span>
-              <div className="text-left">
-                <p className="text-sm font-bold text-white">Nederlands</p>
-                <p className="text-xs text-gray-500">Dutch</p>
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-base font-black tracking-wide text-white transition-colors group-active:bg-cyan-500/20 group-active:text-cyan-400">NL</span>
+              <div>
+                <p className="text-base font-bold text-white">Nederlands</p>
+                <p className="text-xs text-gray-600">Dutch</p>
               </div>
             </button>
 
             <button
               onClick={() => handleSelectLanguage('en')}
-              className="card flex w-full items-center gap-4 active:scale-[0.98] transition-transform"
+              className="group flex w-full items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 text-left transition-all active:scale-[0.97] active:border-cyan-500/30 active:bg-cyan-500/5"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-sm font-black text-white">EN</span>
-              <div className="text-left">
-                <p className="text-sm font-bold text-white">English</p>
-                <p className="text-xs text-gray-500">Engels</p>
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-base font-black tracking-wide text-white transition-colors group-active:bg-cyan-500/20 group-active:text-cyan-400">EN</span>
+              <div>
+                <p className="text-base font-bold text-white">English</p>
+                <p className="text-xs text-gray-600">Engels</p>
               </div>
             </button>
           </div>

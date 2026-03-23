@@ -167,7 +167,7 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
           </div>
 
           {error && (
-            <div className="card mb-6" style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}>
+            <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
               <p className="text-center text-sm text-red-400">{error}</p>
             </div>
           )}
@@ -247,7 +247,7 @@ export default function Login({ onSendOtp, onVerifyOtp }: LoginProps) {
           </div>
 
           {error && (
-            <div className="card" style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}>
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
               <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
