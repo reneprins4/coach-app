@@ -108,10 +108,25 @@ const INCREASE_TIERS: Record<ExerciseCategory, PercentageRange> = {
 
 // ---- Helpers ----
 
-/** Round to nearest 2.5 kg, minimum 2.5 kg for non-zero results. */
+/**
+ * Scale the minimum weight increment by current weight.
+ * Light dumbbells (< 10 kg) use 1.25 kg plates; heavier weights use 2.5 kg.
+ */
+function getMinIncrement(currentWeight: number): number {
+  if (currentWeight <= 0) return 0  // bodyweight
+  if (currentWeight < 10) return 1.25
+  if (currentWeight < 20) return 2.5
+  return 2.5
+}
+
+/**
+ * Round to the nearest plate increment.
+ * For weights < 10 kg, round to 1.25 kg. For >= 10 kg, round to 2.5 kg.
+ */
 function roundWeight(kg: number): number {
-  const rounded = Math.round(kg / 2.5) * 2.5
-  return Math.max(2.5, rounded)
+  if (kg <= 0) return 0
+  const increment = kg < 10 ? 1.25 : 2.5
+  return Math.max(increment, Math.round(kg / increment) * increment)
 }
 
 /** Default bodyweight multipliers per muscle group for first-time estimates. */
@@ -196,7 +211,9 @@ export function calculateProgression(input: ProgressionInput): ProgressionResult
 
   // 2. RPE >= 9.5 -> deload (-5%)
   if (previousRpe >= 9.5) {
-    const reduced = roundWeight(previousWeight * 0.95)
+    const increment = getMinIncrement(previousWeight)
+    // Ensure deload always reduces by at least one increment
+    const reduced = Math.min(previousWeight - increment, roundWeight(previousWeight * 0.95))
     return {
       suggestedWeight: reduced,
       suggestedReps: previousReps,
@@ -237,8 +254,8 @@ export function calculateProgression(input: ProgressionInput): ProgressionResult
   const overloadMult = getOverloadMultiplier(experienceLevel)
   const pct = ((tier.min + tier.max) / 2) * overloadMult
   const rawIncrease = previousWeight * pct
-  // Ensure at least 2.5 kg increase
-  const increase = Math.max(2.5, rawIncrease)
+  // Ensure at least a meaningful plate increment (scaled by current weight)
+  const increase = Math.max(getMinIncrement(previousWeight), rawIncrease)
   const newWeight = roundWeight(previousWeight + increase)
 
   return {

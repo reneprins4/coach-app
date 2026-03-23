@@ -55,7 +55,7 @@ const safeStringArb = fc.string({ minLength: 0, maxLength: 200 }).filter(
 // ============================================================================
 
 describe('Property: Progressive Overload', () => {
-  it('suggested weight is always rounded to 2.5 kg', () => {
+  it('suggested weight is always rounded to a plate increment (1.25 or 2.5 kg)', () => {
     fc.assert(
       fc.property(
         roundedWeightArb.filter(w => w >= 2.5),
@@ -71,14 +71,15 @@ describe('Property: Progressive Overload', () => {
             targetRepRange: [6, 12] as [number, number],
             muscleGroup,
           })
-          return result.suggestedWeight % 2.5 === 0
+          // Weights < 10kg round to 1.25kg, >= 10kg round to 2.5kg
+          return result.suggestedWeight % 1.25 === 0
         },
       ),
       { numRuns: 2000 },
     )
   })
 
-  it('suggested weight is always positive (>= 2.5 kg)', () => {
+  it('suggested weight is always positive (>= 1.25 kg)', () => {
     fc.assert(
       fc.property(
         roundedWeightArb.filter(w => w >= 2.5),
@@ -94,7 +95,7 @@ describe('Property: Progressive Overload', () => {
             targetRepRange: [4, 8] as [number, number],
             muscleGroup,
           })
-          return result.suggestedWeight >= 2.5
+          return result.suggestedWeight >= 1.25
         },
       ),
       { numRuns: 2000 },
@@ -139,7 +140,7 @@ describe('Property: Progressive Overload', () => {
             muscleGroup,
             bodyweightKg: bw,
           })
-          return result.strategy === 'estimate' && result.suggestedWeight % 2.5 === 0
+          return result.strategy === 'estimate' && result.suggestedWeight % 1.25 === 0
         },
       ),
       { numRuns: 500 },

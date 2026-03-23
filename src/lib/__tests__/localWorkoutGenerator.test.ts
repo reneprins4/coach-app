@@ -6,9 +6,24 @@ import { generateLocalWorkout } from '../localWorkoutGenerator'
 import { createMuscleStatusMap, createRecentSession } from '../../__tests__/helpers'
 import type { MuscleGroup } from '../../types'
 
+/** Fresh muscle status with low weekly volume so MRV ceilings don't interfere */
+function freshMuscleStatus() {
+  return createMuscleStatusMap({
+    chest: { setsThisWeek: 2 },
+    back: { setsThisWeek: 2 },
+    shoulders: { setsThisWeek: 2 },
+    quads: { setsThisWeek: 2 },
+    hamstrings: { setsThisWeek: 2 },
+    glutes: { setsThisWeek: 2 },
+    biceps: { setsThisWeek: 2 },
+    triceps: { setsThisWeek: 2 },
+    core: { setsThisWeek: 2 },
+  })
+}
+
 function makeInput(overrides: Record<string, unknown> = {}) {
   return {
-    muscleStatus: createMuscleStatusMap(),
+    muscleStatus: freshMuscleStatus(),
     recommendedSplit: 'Push' as string,
     recentHistory: [] as ReturnType<typeof createRecentSession>[],
     preferences: {

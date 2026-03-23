@@ -58,37 +58,41 @@ export default function App() {
   // Laad settings van Supabase zodra gebruiker ingelogd is
   useEffect(() => {
     if (auth.user?.id) {
-      mergeSettingsOnLogin(auth.user.id).then(async merged => {
+      const userId = auth.user.id
+
+      /** Check workouts as fallback proof of prior onboarding */
+      async function checkWorkoutsForOnboarding() {
+        try {
+          const { count } = await supabase.from('workouts')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', userId)
+          if (count && count > 0) {
+            saveSettings({ onboardingCompleted: true }, userId ?? null)
+            setNeedsOnboarding(false)
+            return
+          }
+        } catch { /* ignore — keep current onboarding state */ }
+        setNeedsOnboarding(true)
+      }
+
+      mergeSettingsOnLogin(userId).then(async merged => {
         if (merged) {
           setSettings(merged)
-          // If onboardingCompleted is missing (old account), check for existing workouts
-          if (!merged.onboardingCompleted) {
-            const { count } = await supabase.from('workouts')
-              .select('id', { count: 'exact', head: true })
-              .eq('user_id', auth.user!.id)
-            if (count && count > 0) {
-              saveSettings({ onboardingCompleted: true }, auth.user!.id ?? null)
-              setNeedsOnboarding(false)
-            } else {
-              setNeedsOnboarding(true)
-            }
-          } else {
+          if (merged.onboardingCompleted) {
             setNeedsOnboarding(false)
+          } else {
+            // onboardingCompleted missing or false — always check for existing workouts
+            await checkWorkoutsForOnboarding()
           }
+        } else {
+          // merge returned nothing — check workouts as proof of prior usage
+          await checkWorkoutsForOnboarding()
         }
         setSettingsLoaded(true)
       }).catch(async (err) => {
         logError('App.mergeSettingsOnLogin', err)
         // Fallback: check if user has workouts as proof of prior onboarding
-        try {
-          const { count } = await supabase.from('workouts')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', auth.user!.id)
-          if (count && count > 0) {
-            setNeedsOnboarding(false)
-            saveSettings({ onboardingCompleted: true }, auth.user!.id ?? null)
-          }
-        } catch { /* ignore secondary failure */ }
+        await checkWorkoutsForOnboarding()
         setSettingsLoaded(true)
       })
     } else if (!auth.loading) {

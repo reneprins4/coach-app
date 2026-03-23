@@ -227,7 +227,7 @@ describe('Percentage-Based Progressive Overload', () => {
     expect(result.suggestedReps).toBeLessThanOrEqual(12)
   })
 
-  it('very light isolation still gets minimum 2.5kg increase when progressing', () => {
+  it('very light isolation uses 1.25kg increment when under 10kg', () => {
     const result = calculateProgression({
       exercise: 'Lateral Raise',
       previousWeight: 5,
@@ -238,8 +238,9 @@ describe('Percentage-Based Progressive Overload', () => {
     })
     expect(result.strategy).toBe('weight_increase')
     expect(result.suggestedWeight).toBeGreaterThanOrEqual(5)
-    // 2.5% of 5 = 0.125, but should round up to at least 2.5 increment
-    expect(result.suggestedWeight % 2.5).toBe(0)
+    // 5kg + 1.25kg minimum increment = 6.25kg
+    expect(result.suggestedWeight).toBe(6.25)
+    expect(result.suggestedWeight % 1.25).toBe(0)
   })
 
   // ---- Category detection (mutant killers) ----
@@ -642,7 +643,7 @@ describe('Percentage-Based Progressive Overload', () => {
 
   // ---- roundWeight ----
 
-  it('roundWeight ensures minimum 2.5kg for non-zero results', () => {
+  it('roundWeight ensures minimum 1.25kg for non-zero results under 10kg', () => {
     // When estimating from bodyweight for a muscle group with low multiplier
     const result = calculateProgression({
       exercise: 'Wrist Curl',
@@ -651,9 +652,9 @@ describe('Percentage-Based Progressive Overload', () => {
       previousRpe: null,
       targetRepRange: [10, 15],
       muscleGroup: 'biceps', // 0.15 multiplier
-      bodyweightKg: 10, // 10*0.15=1.5 -> should round to 2.5
+      bodyweightKg: 10, // 10*0.15=1.5 -> should round to 1.25 (nearest 1.25)
     })
-    expect(result.suggestedWeight).toBe(2.5)
+    expect(result.suggestedWeight).toBe(1.25)
   })
 
   // ---- Bodyweight estimate defaults ----
@@ -700,7 +701,7 @@ describe('Percentage-Based Progressive Overload', () => {
 
   // ---- Ensure minimum 2.5kg increase in weight_increase strategy ----
 
-  it('weight increase enforces minimum 2.5kg step even when percentage is tiny', () => {
+  it('weight increase enforces minimum 1.25kg step for light weights', () => {
     const result = calculateProgression({
       exercise: 'Lateral Raise',
       previousWeight: 7.5,
@@ -710,8 +711,8 @@ describe('Percentage-Based Progressive Overload', () => {
       muscleGroup: 'shoulders',
     })
     expect(result.strategy).toBe('weight_increase')
-    // isolation 3.75% of 7.5 = 0.28 -> max(2.5, 0.28) = 2.5 -> 7.5+2.5=10
-    expect(result.suggestedWeight).toBe(10)
+    // isolation 3.75% of 7.5 = 0.28 -> max(1.25, 0.28) = 1.25 -> 7.5+1.25=8.75
+    expect(result.suggestedWeight).toBe(8.75)
   })
 
   // ---- Partial null inputs ----

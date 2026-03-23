@@ -363,7 +363,8 @@ interface LastWorkoutInfo {
 export function scoreSplits(
   muscleStatus: Record<string, MuscleStatus>,
   lastWorkoutInfo: LastWorkoutInfo | null = null,
-  experienceLevel: ExperienceLevel = 'intermediate'
+  experienceLevel: ExperienceLevel = 'intermediate',
+  frequency: number = 0,
 ): SplitScore[] {
   const scores: Record<string, number> = {}
   for (const [splitName, muscles] of Object.entries(SPLIT_MUSCLES)) {
@@ -400,6 +401,28 @@ export function scoreSplits(
     }
     if (splitName === 'Full Body' && experienceLevel === 'advanced') {
       score -= 40
+    }
+
+    // Beginners and returning athletes should always prefer Full Body
+    // to avoid muscle imbalance from incomplete split coverage
+    if (['complete_beginner', 'beginner', 'returning'].includes(experienceLevel) && splitName === 'Full Body') {
+      score += 50
+    }
+
+    // Frequency-based split bonus (DB-013):
+    // At 3x/week, Full Body is optimal (each muscle trained 3x/week, Schoenfeld et al.)
+    // At 4x/week, Upper/Lower is natural (each muscle trained 2x/week)
+    // At 5-6x/week, PPL is the natural fit
+    if (frequency > 0) {
+      if (frequency <= 3 && splitName === 'Full Body') {
+        score += 30
+      }
+      if (frequency === 4 && (splitName === 'Upper' || splitName === 'Lower')) {
+        score += 20
+      }
+      if (frequency >= 5 && (splitName === 'Push' || splitName === 'Pull' || splitName === 'Legs')) {
+        score += 15
+      }
     }
 
     scores[splitName] = Math.round(score * 10) / 10

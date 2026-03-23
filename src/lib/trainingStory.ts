@@ -163,6 +163,11 @@ export function computeConsistencyScore(
   month: number,
   year: number,
 ): number {
+  // Guard against undefined/NaN/non-positive frequency
+  if (!weeklyFrequency || !isFinite(weeklyFrequency) || weeklyFrequency <= 0) {
+    weeklyFrequency = 3 // safe default
+  }
+
   // Calculate weeks in month
   const lastDay = new Date(year, month + 1, 0)
   const daysInMonth = lastDay.getDate()

@@ -80,12 +80,17 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Romanian Deadlift', muscle_group: 'hamstrings', isCompound: true, equipment: 'barbell', bwMultiplier: 0.9 },
     { name: 'Lying Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'machine', bwMultiplier: 0.4 },
     { name: 'Seated Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'machine', bwMultiplier: 0.4 },
+    { name: 'Dumbbell Romanian Deadlift', muscle_group: 'hamstrings', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.7 },
+    { name: 'Dumbbell Stiff-Leg Deadlift', muscle_group: 'hamstrings', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.6 },
+    { name: 'Dumbbell Single-Leg Deadlift', muscle_group: 'hamstrings', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.4 },
     { name: 'Nordic Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, tags: ['advanced'] },
     { name: 'Glute Bridge (Single Leg)', muscle_group: 'hamstrings', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Slider Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
   ],
   glutes: [
     { name: 'Hip Thrust', muscle_group: 'glutes', isCompound: true, equipment: 'barbell', bwMultiplier: 1.2 },
+    { name: 'Dumbbell Hip Thrust', muscle_group: 'glutes', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.8 },
+    { name: 'Dumbbell Sumo Squat', muscle_group: 'glutes', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.5 },
     { name: 'Glute Bridge', muscle_group: 'glutes', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Cable Kickback', muscle_group: 'glutes', isCompound: false, equipment: 'cable', bwMultiplier: 0.15 },
   ],
@@ -95,18 +100,22 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Hammer Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.14 },
     { name: 'Incline Dumbbell Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
     { name: 'Cable Curl', muscle_group: 'biceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.2 },
-    { name: 'Chin-Up', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.9 },
-    { name: 'Inverted Row (Underhand)', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.5 },
+    { name: 'Chin-up', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.9 },
+    { name: 'Inverted Row (underhand)', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.5 },
   ],
   triceps: [
     { name: 'Tricep Pushdown', muscle_group: 'triceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.25 },
     { name: 'Skull Crusher', muscle_group: 'triceps', isCompound: false, equipment: 'barbell', bwMultiplier: 0.3 },
     { name: 'Overhead Tricep Extension', muscle_group: 'triceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.2 },
     { name: 'Close Grip Bench Press', muscle_group: 'triceps', isCompound: true, equipment: 'barbell', bwMultiplier: 0.6 },
+    { name: 'Dumbbell Overhead Tricep Extension', muscle_group: 'triceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.15 },
+    { name: 'Dumbbell Kickback', muscle_group: 'triceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
     { name: 'Diamond Push-up', muscle_group: 'triceps', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
   ],
   core: [
     { name: 'Cable Crunch', muscle_group: 'core', isCompound: false, equipment: 'cable', bwMultiplier: 0.3 },
+    { name: 'Dumbbell Russian Twist', muscle_group: 'core', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.15 },
+    { name: 'Dumbbell Woodchop', muscle_group: 'core', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.2 },
     { name: 'Hanging Leg Raise', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Plank', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Ab Wheel Rollout', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
@@ -138,8 +147,8 @@ const SPLIT_TEMPLATES: Record<string, { muscles: MuscleGroup[]; exercisesPerMusc
     exercisesPerMuscle: { quads: 2, hamstrings: 2, glutes: 1, core: 1, chest: 0, back: 0, shoulders: 0, biceps: 0, triceps: 0 },
   },
   'Full Body': {
-    muscles: ['chest', 'back', 'quads', 'shoulders', 'hamstrings', 'biceps', 'triceps'],
-    exercisesPerMuscle: { chest: 1, back: 1, shoulders: 1, quads: 1, hamstrings: 1, glutes: 0, biceps: 1, triceps: 1, core: 0 },
+    muscles: ['chest', 'back', 'quads', 'shoulders', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'],
+    exercisesPerMuscle: { chest: 1, back: 1, shoulders: 1, quads: 1, hamstrings: 1, glutes: 1, biceps: 1, triceps: 1, core: 1 },
   },
 }
 
@@ -307,7 +316,7 @@ function applyOverload(
 /**
  * Pick exercises from the pool, avoiding recently used ones when possible.
  */
-function pickExercises(
+export function pickExercises(
   muscle: MuscleGroup,
   count: number,
   recentExerciseNames: Set<string>,
@@ -318,8 +327,9 @@ function pickExercises(
   const pool = EXERCISE_POOL[muscle] || []
   // Filter by equipment availability
   const equipmentSets: Record<string, string[]> = {
-    full_gym: ['barbell', 'dumbbell', 'cable', 'machine', 'bodyweight'],
+    full_gym: ['barbell', 'dumbbell', 'cable', 'machine', 'smith_machine', 'bodyweight'],
     home_gym: ['barbell', 'dumbbell', 'bodyweight'],
+    minimal: ['dumbbell', 'bodyweight'],
     dumbbells: ['dumbbell', 'bodyweight'],
     bodyweight: ['bodyweight'],
   }

@@ -599,11 +599,11 @@ describe('Scenario J: 16-week golden path (complete_beginner, 3x/week Full Body)
       }
     })
 
-    it('all weights are positive and rounded to 2.5kg', () => {
+    it('all weights are positive and rounded to plate increments (1.25 or 2.5kg)', () => {
       for (const workout of sim.allWorkouts) {
         for (const set of workout.workout_sets) {
           if (set.weight_kg != null && set.weight_kg > 0) {
-            expect(set.weight_kg % 2.5).toBe(0)
+            expect(set.weight_kg % 1.25).toBe(0)
           }
         }
       }
