@@ -84,7 +84,8 @@
     "start_now": "Start",
     "based_on_recovery": "Gebaseerd op je herstel",
     "generating": "Workout wordt samengesteld...",
-    "muscle_ready": "spieren hersteld"
+    "muscle_ready": "spieren hersteld",
+    "all_muscles_ready": "Alle spieren hersteld"
   },
   "history": {
     "title": "Geschiedenis",

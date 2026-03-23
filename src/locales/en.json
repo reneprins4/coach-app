@@ -84,7 +84,8 @@
     "start_now": "Start",
     "based_on_recovery": "Based on your recovery",
     "generating": "Generating your workout...",
-    "muscle_ready": "muscles recovered"
+    "muscle_ready": "muscles recovered",
+    "all_muscles_ready": "All muscles recovered"
   },
   "history": {
     "title": "History",

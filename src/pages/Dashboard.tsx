@@ -266,9 +266,14 @@ export default function Dashboard() {
               <p className="text-title">{todaysWorkout.split}</p>
               <p className="mt-1 text-sm text-gray-500">
                 ~{todaysWorkout.estimatedDuration} min
-                {todaysWorkout.muscleContext.length > 0 && (
-                  <> · {todaysWorkout.muscleContext.filter(m => m.status === 'ready').length} {t('dashboard.muscle_ready')}</>
-                )}
+                {todaysWorkout.muscleContext.length > 0 && (() => {
+                  const ready = todaysWorkout.muscleContext.filter(m => m.status === 'ready')
+                  const total = todaysWorkout.muscleContext.length
+                  if (ready.length === total) {
+                    return <> · {t('dashboard.all_muscles_ready')}</>
+                  }
+                  return <> · {ready.length}/{total} {t('dashboard.muscle_ready')}</>
+                })()}
               </p>
             </div>
             <div className="ml-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-500 glow-cyan">
