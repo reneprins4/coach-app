@@ -100,6 +100,7 @@ export default function PlateCalculator({ targetWeight, onClose }: PlateCalculat
             value={customWeight}
             onChange={(e) => setCustomWeight(e.target.value)}
             placeholder="0"
+            aria-label={t('plate_calc.total_weight')}
             className="h-14 w-full rounded-xl bg-gray-900 px-4 text-center text-2xl font-bold text-white outline-none border border-gray-800 focus:border-cyan-500"
           />
         </div>

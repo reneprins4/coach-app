@@ -55,7 +55,9 @@
     "volume_label": "volume",
     "rest_day": "Rustdag",
     "legend": "Legenda",
-    "workouts_count": "{{count}} training(en)"
+    "workouts_count": "{{count}} training(en)",
+    "prev_month": "Vorige maand",
+    "next_month": "Volgende maand"
   },
   "dashboard": {
     "title": "Vandaag",
@@ -121,6 +123,7 @@
     "equipment_full_gym": "Volledige gym",
     "equipment_dumbbells": "Dumbbells",
     "equipment_bodyweight": "Eigen lichaam",
+    "equipment_home_gym": "Thuisgym",
     "maxes_label": "Bekende maxima",
     "maxes_hint": "Helpt bij het bepalen van startgewichten. De app gebruikt je trainingshistorie als dat nauwkeuriger is.",
     "export_data": "Exporteer data",
@@ -256,7 +259,8 @@
     "no_sets_error": "Log minimaal één set voor je de workout afrondt",
     "less_time": "Minder tijd",
     "how_many_exercises": "Hoeveel oefeningen nog?",
-    "trimmed": "Workout ingekort"
+    "trimmed": "Workout ingekort",
+    "menu": "Menu"
   },
   "progress": {
     "title": "Voortgang",
@@ -350,7 +354,8 @@
     "rest": "rust",
     "volume_summary": "Volume samenvatting",
     "regenerate": "Opnieuw",
-    "block_context": "Blok context"
+    "block_context": "Blok context",
+    "auth_error": "Authenticatiefout. Log opnieuw in."
   },
   "workout_detail": {
     "sets": "sets",
@@ -586,7 +591,8 @@
     "light_set": "Lichte set — korte rust",
     "rest": "Rust",
     "skip": "Sla over",
-    "add_time": "+30s"
+    "add_time": "+30s",
+    "stop": "Stoppen"
   },
   "superset_modal": {
     "title": "Superset modus",
@@ -867,6 +873,7 @@
     "modified": "Aangepast voor blessure"
   },
   "story": {
+    "title": "Training Verhaal",
     "months": {
       "january": "Januari",
       "february": "Februari",
@@ -1025,5 +1032,12 @@
     "discard": "Verwijder",
     "confirm_discard": "Weet je het zeker? Je verliest je voortgang.",
     "elapsed": "{{minutes}} min bezig"
+  },
+  "auth": {
+    "session_expired": "Je sessie is verlopen, log opnieuw in"
+  },
+  "muscle_map": {
+    "front": "Voorkant",
+    "back": "Achterkant"
   }
 }

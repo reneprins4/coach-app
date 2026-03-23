@@ -311,6 +311,7 @@ export default function Progress() {
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedExercise(null) }}
               placeholder={t('progress.search_exercise')}
+              aria-label={t('progress.search_exercise')}
               className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-sm text-white placeholder-gray-600 outline-none border border-gray-800 focus:border-gray-600"
             />
           </div>

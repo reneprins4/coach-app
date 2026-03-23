@@ -55,7 +55,9 @@
     "volume_label": "volume",
     "rest_day": "Rest day",
     "legend": "Legend",
-    "workouts_count": "{{count}} workout(s)"
+    "workouts_count": "{{count}} workout(s)",
+    "prev_month": "Previous month",
+    "next_month": "Next month"
   },
   "dashboard": {
     "title": "Today",
@@ -121,6 +123,7 @@
     "equipment_full_gym": "Full gym",
     "equipment_dumbbells": "Dumbbells",
     "equipment_bodyweight": "Bodyweight",
+    "equipment_home_gym": "Home gym",
     "maxes_label": "Known maxes",
     "maxes_hint": "Helps determine starting weights. The app uses your training history when more accurate.",
     "export_data": "Export data",
@@ -256,7 +259,8 @@
     "no_sets_error": "Log at least one set before finishing",
     "less_time": "Less time",
     "how_many_exercises": "How many exercises left?",
-    "trimmed": "Workout trimmed"
+    "trimmed": "Workout trimmed",
+    "menu": "Menu"
   },
   "progress": {
     "title": "Progress",
@@ -350,7 +354,8 @@
     "rest": "rest",
     "volume_summary": "Volume summary",
     "regenerate": "Regenerate",
-    "block_context": "Block context"
+    "block_context": "Block context",
+    "auth_error": "Authentication error. Please log in again."
   },
   "workout_detail": {
     "sets": "sets",
@@ -586,7 +591,8 @@
     "light_set": "Light set — short rest",
     "rest": "Rest",
     "skip": "Skip",
-    "add_time": "+30s"
+    "add_time": "+30s",
+    "stop": "Stop"
   },
   "superset_modal": {
     "title": "Superset mode",
@@ -867,6 +873,7 @@
     "modified": "Modified for injury"
   },
   "story": {
+    "title": "Training Story",
     "months": {
       "january": "January",
       "february": "February",
@@ -1025,5 +1032,12 @@
     "discard": "Discard",
     "confirm_discard": "Are you sure? You will lose your progress.",
     "elapsed": "{{minutes}} min elapsed"
+  },
+  "auth": {
+    "session_expired": "Your session has expired, please log in again"
+  },
+  "muscle_map": {
+    "front": "Front",
+    "back": "Back"
   }
 }

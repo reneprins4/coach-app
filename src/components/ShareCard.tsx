@@ -12,7 +12,8 @@ export default function ShareCard({ data, onClose, onShare }: ShareCardProps) {
   const { t } = useTranslation()
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center bg-black/90 px-4">
+    <div role="dialog" aria-modal="true" aria-labelledby="share-card-title" className="fixed inset-0 z-[70] flex flex-col items-center justify-center bg-black/90 px-4" onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}>
+      <h2 id="share-card-title" className="sr-only">{t('share.title')}</h2>
       {/* Close button */}
       <div className="mb-4 flex w-full max-w-[350px] justify-end">
         <button

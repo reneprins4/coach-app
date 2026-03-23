@@ -714,7 +714,7 @@ export default function Logger() {
       )}
 
       {showDiscard && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5" onKeyDown={(e) => { if (e.key === 'Escape') setShowDiscard(false) }}>
           <div role="dialog" aria-modal="true" aria-labelledby="discard-dialog-title" className="card w-full max-w-sm text-center">
             <h3 id="discard-dialog-title" className="text-title mb-2">{t('logger.stop_confirm')}</h3>
             <p className="mb-6 text-sm text-gray-500">{t('logger.stop_confirm_sub')}</p>
@@ -763,7 +763,7 @@ export default function Logger() {
       )}
 
       {showConfirmFinish && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5" onKeyDown={(e) => { if (e.key === 'Escape') setShowConfirmFinish(false) }}>
           <div role="dialog" aria-modal="true" aria-labelledby="confirm-finish-title" className="card w-full max-w-sm text-center">
             <h3 id="confirm-finish-title" className="text-title mb-2">{t('logger.confirm_finish')}</h3>
             <p className="mb-6 text-sm text-gray-500">{t('logger.confirm_finish_sub')}</p>

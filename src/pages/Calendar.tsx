@@ -479,18 +479,20 @@ export default function Calendar() {
         <div className="mb-4 flex items-center justify-between">
           <button
             onClick={prevMonth}
+            aria-label={t('calendar.prev_month')}
             className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
           >
-            <ChevronLeft size={22} />
+            <ChevronLeft size={22} aria-hidden="true" />
           </button>
           <h2 className="text-base font-bold text-white">
             {getMonthName(currentMonth, i18n.language)} {currentYear}
           </h2>
           <button
             onClick={nextMonth}
+            aria-label={t('calendar.next_month')}
             className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
           >
-            <ChevronRight size={22} />
+            <ChevronRight size={22} aria-hidden="true" />
           </button>
         </div>
 

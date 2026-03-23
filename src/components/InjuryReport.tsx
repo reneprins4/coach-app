@@ -83,7 +83,7 @@ export default function InjuryReport({ isOpen, onClose, onReport }: InjuryReport
               aria-label={step === 1 ? t('common.close') : t('common.back')}
               className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition-colors active:bg-white/5 min-h-[44px] min-w-[44px] -ml-2"
             >
-              {step === 1 ? <X size={18} /> : <ChevronLeft size={18} />}
+              {step === 1 ? <X size={18} aria-hidden="true" /> : <ChevronLeft size={18} aria-hidden="true" />}
             </button>
 
             {/* Step indicator */}

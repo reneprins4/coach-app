@@ -79,12 +79,17 @@ export default function TrainingStory({ data, onClose, onShare }: TrainingStoryP
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="training-story-title"
       className="fixed inset-0 z-[80] flex flex-col overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #0a0f1a 0%, #020509 100%)' }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={handleClick}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
     >
+      <h2 id="training-story-title" className="sr-only">{t('story.title')}</h2>
       {/* Progress bar - top */}
       <div className="relative z-10 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <ProgressBar currentCard={currentCard} />

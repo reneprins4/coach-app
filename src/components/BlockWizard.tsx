@@ -250,6 +250,7 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   min={getLocalDateString(new Date())}
+                  aria-label={t('block_wizard.start_date')}
                   className="w-full rounded-lg bg-gray-900 px-4 py-3 text-white outline-none border border-gray-700 focus:border-cyan-500"
                 />
               </div>

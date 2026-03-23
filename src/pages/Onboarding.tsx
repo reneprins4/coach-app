@@ -146,6 +146,7 @@ export default function Onboarding() {
                 value={name}
                 onChange={(e) => setName(e.target.value.slice(0, 30))}
                 placeholder={t('onboarding.name_placeholder')}
+                aria-label={t('onboarding.name_label')}
                 maxLength={30}
                 className="h-12 w-full rounded-xl px-4 text-white placeholder-gray-600 outline-none transition-colors"
               />
@@ -166,6 +167,7 @@ export default function Onboarding() {
                 placeholder="75"
                 min={30}
                 max={250}
+                aria-label={t('onboarding.weight_label')}
                 className="h-12 w-full rounded-xl px-4 text-white placeholder-gray-600 outline-none transition-colors"
               />
               <p className="mt-1 text-xs text-gray-600">{t('onboarding.weight_hint')}</p>

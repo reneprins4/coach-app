@@ -60,6 +60,7 @@ export default function History() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('history.search_placeholder')}
+          aria-label={t('history.search_placeholder')}
           className="h-12 w-full rounded-2xl pl-11 pr-4 text-sm text-white placeholder-gray-600 outline-none"
         />
       </div>
@@ -149,9 +150,9 @@ export default function History() {
 
       {/* ━━ Delete confirmation ━━ */}
       {deleteId && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5">
-          <div className="card w-full max-w-sm text-center">
-            <h3 className="text-title mb-2">{t('history.delete_confirm')}</h3>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5" onKeyDown={(e) => { if (e.key === 'Escape') setDeleteId(null) }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="history-delete-title" className="card w-full max-w-sm text-center">
+            <h3 id="history-delete-title" className="text-title mb-2">{t('history.delete_confirm')}</h3>
             <p className="text-sm text-gray-500 mb-6">{t('history.delete_confirm_sub')}</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="btn-secondary h-12 text-sm">

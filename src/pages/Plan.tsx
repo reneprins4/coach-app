@@ -307,9 +307,9 @@ export default function Plan() {
 
       {/* Confirm clear */}
       {confirmClear && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4">
-          <div className="card w-full max-w-sm p-6">
-            <h3 className="text-title mb-2">{t('plan.end_block_confirm')}</h3>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4" onKeyDown={(e) => { if (e.key === 'Escape') setConfirmClear(false) }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="plan-confirm-title" className="card w-full max-w-sm p-6">
+            <h3 id="plan-confirm-title" className="text-title mb-2">{t('plan.end_block_confirm')}</h3>
             <p className="mb-6 text-sm text-[var(--text-2)]">{t('plan.end_block_hint')}</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmClear(false)} className="btn-secondary flex-1">{t('common.cancel')}</button>
