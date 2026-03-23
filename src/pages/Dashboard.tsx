@@ -226,13 +226,38 @@ export default function Dashboard() {
               <span className="font-bold tabular text-white">{stats.streak}</span> {t('dashboard.streak').toLowerCase()}
             </span>
           )}
-          {block && phase && (
-            <span className="text-sm text-gray-500">
-              {phase.label} <span className="text-gray-600">Wk {progress?.currentWeek}/{progress?.totalWeeks}</span>
-            </span>
-          )}
         </div>
       </motion.div>
+
+      {/* ━━ Active Plan Card ━━ */}
+      {block && phase && progress && (
+        <motion.div variants={fadeUp} className="mb-4">
+          <motion.div
+            onClick={() => nav('/plan')}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className="card cursor-pointer"
+            data-testid="plan-card"
+          >
+            <p className="label-caps mb-2">{t('dashboard.training_plan')}</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-title">{phase.label}</p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-gray-500">
+                  {t('dashboard.week_of', { current: progress.currentWeek, total: progress.totalWeeks })}
+                </span>
+                <ChevronRight size={14} className="text-gray-600" />
+              </div>
+            </div>
+            <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
+              <div
+                className="h-full rounded-full bg-cyan-500 glow-bar transition-all duration-700"
+                style={{ width: `${progress.pct}%` }}
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* ━━ Resume Workout Banner ━━ */}
       <ResumeWorkoutBanner />
@@ -383,6 +408,19 @@ export default function Dashboard() {
           <Dumbbell size={16} />
           {t('dashboard.free_training')}
         </button>
+      )}
+
+      {/* ━━ Plan Suggestion ━━ */}
+      {!block && workouts.length >= 5 && (
+        <motion.div variants={fadeUp} className="mb-4">
+          <button
+            onClick={() => nav('/plan')}
+            className="w-full py-2 text-sm text-cyan-500 active:text-cyan-400 transition-colors"
+            data-testid="plan-suggestion"
+          >
+            {t('dashboard.plan_suggestion')} &rarr;
+          </button>
+        </motion.div>
       )}
 
       {/* ━━ Recent Workouts ━━ */}

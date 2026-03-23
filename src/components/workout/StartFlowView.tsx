@@ -204,7 +204,7 @@ export default function StartFlowView({
         {/* Block context */}
         {block && phase && (
           <p className="label-caps text-gray-600 mb-3">
-            {phase.label} · Week {block.currentWeek}/{phase.weeks}
+            {t(phase.labelKey)} · {t('plan.week')} {block.currentWeek}/{phase.weeks}
           </p>
         )}
 

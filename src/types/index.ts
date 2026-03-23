@@ -163,8 +163,10 @@ export interface WeekTarget {
 
 export interface PhaseConfig {
   label: string
+  labelKey: string
   weeks: number
   description: string
+  descriptionKey: string
   color: string
   weekTargets: WeekTarget[]
 }

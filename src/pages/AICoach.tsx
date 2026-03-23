@@ -311,7 +311,7 @@ export default function AICoach() {
       {/* ━━ Block context ━━ */}
       {block && phase && weekTarget && (
         <div className="card-accent mb-5">
-          <p className="text-xs font-semibold text-cyan-400">{phase.label} · {t('plan.week')} {block.currentWeek}/{phase.weeks}</p>
+          <p className="text-xs font-semibold text-cyan-400">{t(phase.labelKey)} · {t('plan.week')} {block.currentWeek}/{phase.weeks}</p>
           <p className="text-sm text-white mt-0.5">
             {weekTarget.isDeload ? t('aicoach.deload_hint') : `RPE ${weekTarget.rpe} · ${weekTarget.repRange[0]}-${weekTarget.repRange[1]} reps`}
           </p>

@@ -103,7 +103,10 @@
     "based_on_recovery": "Gebaseerd op je herstel",
     "generating": "Workout wordt samengesteld...",
     "muscle_ready": "spieren hersteld",
-    "all_muscles_ready": "Alle spieren hersteld"
+    "all_muscles_ready": "Alle spieren hersteld",
+    "training_plan": "Trainingsplan",
+    "week_of": "Week {{current}} van {{total}}",
+    "plan_suggestion": "Wil je een trainingsplan?"
   },
   "history": {
     "title": "Geschiedenis",
@@ -178,7 +181,13 @@
     "terms_label": "Gebruiksvoorwaarden",
     "export_sub": "trainingen beschikbaar",
     "no_export": "Nog geen trainingsdata",
-    "subtitle": "Account"
+    "subtitle": "Account",
+    "plan_active": "Trainingsplan actief",
+    "plan_view": "Bekijk plan",
+    "plan_stop": "Stop plan",
+    "plan_stop_confirm": "Weet je zeker dat je je trainingsplan wilt stoppen?",
+    "plan_suggestion": "Volg een gestructureerd plan met opbouw- en deloadweken.",
+    "plan_choose": "Plan kiezen"
   },
   "logger": {
     "train": "Trainen",
@@ -1060,6 +1069,18 @@
   "muscle_map": {
     "front": "Voorkant",
     "back": "Achterkant"
+  },
+  "phases": {
+    "accumulation": "Opbouw",
+    "accumulation_desc": "Bouw wekelijks volume op, matige intensiteit. Basisfase.",
+    "intensification": "Intensivering",
+    "intensification_desc": "Verhoog intensiteit en belasting. Minder herhalingen, zwaardere gewichten.",
+    "strength": "Kracht Piek",
+    "strength_desc": "Maximale krachtexpressie. Test je grenzen.",
+    "deload": "Deload",
+    "deload_desc": "Volledige herstelweek. Zelfde bewegingen, veel minder volume.",
+    "week_of": "Week {{current}} van {{total}}",
+    "training_plan": "Trainingsplan"
   },
   "rehab": {
     "frequency_daily": "dagelijks",

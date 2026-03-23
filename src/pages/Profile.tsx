@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Check, LogOut, Trash2, AlertTriangle, Download } from 'lucide-react'
+import { Check, LogOut, Trash2, AlertTriangle, Download, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
@@ -8,6 +8,7 @@ import { useMeasurements } from '../hooks/useMeasurements'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
 import { getLocalDateString } from '../lib/dateUtils'
+import { getCurrentBlock, getBlockProgress, clearBlock, PHASES } from '../lib/periodization'
 import { buildExportData, exportToJSON, exportWorkoutsToCSV, exportMeasurementsToCSV, downloadFile } from '../lib/dataExport'
 import { ACHIEVEMENTS, buildAchievementContext, getUnlockedAchievements, syncAchievements } from '../lib/achievements'
 import AchievementBadge from '../components/AchievementBadge'
@@ -39,6 +40,9 @@ export default function Profile() {
   const { activeInjuries, addInjury, checkIn, resolve } = useInjuries()
   const [showInjuryReport, setShowInjuryReport] = useState(false)
   const [checkInInjury, setCheckInInjury] = useState<ActiveInjury | null>(null)
+
+  // Periodization block
+  const [block, setBlock] = useState(() => getCurrentBlock(user?.id))
 
   const settings = localSettings
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -377,29 +381,55 @@ export default function Profile() {
               ))}
             </div>
 
-            {/* Trainingsfase */}
-            <div className="mt-4 flex gap-2 overflow-x-auto scrollbar-none pb-1">
-              {[
-                { value: 'build',    label: t('training_goal.phase_build') },
-                { value: 'strength', label: t('training_goal.phase_strength') },
-                { value: 'peak',     label: t('training_goal.phase_peak') },
-                { value: 'deload',   label: t('training_goal.phase_deload') },
-              ].map(p => (
-                <motion.button
-                  key={p.value}
-                  onClick={() => update('trainingPhase', p.value)}
-                  className={`shrink-0 rounded-xl px-4 py-2 text-xs font-bold transition-colors ${
-                    settings.trainingPhase === p.value
-                      ? 'bg-white text-black'
-                      : 'bg-white/[0.04] text-[var(--text-3)] active:text-[var(--text-2)]'
-                  }`}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          </div>
+          </motion.div>
+
+          {/* Trainingsplan */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.06 }}>
+          <div className="card">
+            <p className="label-caps mb-3">{t('plan.title')}</p>
+            {block ? (() => {
+              const phase = PHASES[block.phase]
+              const progress = getBlockProgress(block)
+              return (
+                <div>
+                  <p className="text-sm font-bold text-white">
+                    {phase.label} — {t('plan.week')} {progress?.currentWeek} / {progress?.totalWeeks}
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => navigate('/plan')}
+                      className="flex items-center gap-1 rounded-xl bg-white/[0.04] px-3 py-2 text-xs font-bold text-cyan-400 active:bg-white/[0.08]"
+                    >
+                      {t('profile.plan_view')}
+                      <ChevronRight size={14} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(t('profile.plan_stop_confirm'))) {
+                          clearBlock(user?.id ?? null)
+                          setBlock(null)
+                        }
+                      }}
+                      className="rounded-xl bg-white/[0.04] px-3 py-2 text-xs font-bold text-[var(--text-3)] active:bg-white/[0.08]"
+                    >
+                      {t('profile.plan_stop')}
+                    </button>
+                  </div>
+                </div>
+              )
+            })() : (
+              <div>
+                <p className="text-sm text-[var(--text-3)]">{t('profile.plan_suggestion')}</p>
+                <button
+                  onClick={() => navigate('/plan')}
+                  className="mt-3 flex items-center gap-1 rounded-xl bg-white/[0.04] px-3 py-2 text-xs font-bold text-cyan-400 active:bg-white/[0.08]"
                 >
-                  {p.label}
-                </motion.button>
-              ))}
-            </div>
+                  {t('profile.plan_choose')}
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
           </div>
           </motion.div>
 

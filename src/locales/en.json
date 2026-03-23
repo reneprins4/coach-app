@@ -103,7 +103,10 @@
     "based_on_recovery": "Based on your recovery",
     "generating": "Generating your workout...",
     "muscle_ready": "muscles recovered",
-    "all_muscles_ready": "All muscles recovered"
+    "all_muscles_ready": "All muscles recovered",
+    "training_plan": "Training Plan",
+    "week_of": "Week {{current}} of {{total}}",
+    "plan_suggestion": "Want a training plan?"
   },
   "history": {
     "title": "History",
@@ -178,7 +181,13 @@
     "terms_label": "Terms of Use",
     "export_sub": "workouts available",
     "no_export": "No training data yet",
-    "subtitle": "Account"
+    "subtitle": "Account",
+    "plan_active": "Training plan active",
+    "plan_view": "View plan",
+    "plan_stop": "Stop plan",
+    "plan_stop_confirm": "Are you sure you want to stop your training plan?",
+    "plan_suggestion": "Follow a structured plan with build and deload weeks.",
+    "plan_choose": "Choose plan"
   },
   "logger": {
     "train": "Train",
@@ -1060,6 +1069,18 @@
   "muscle_map": {
     "front": "Front",
     "back": "Back"
+  },
+  "phases": {
+    "accumulation": "Build",
+    "accumulation_desc": "Build weekly volume, moderate intensity. Base phase.",
+    "intensification": "Intensification",
+    "intensification_desc": "Increase intensity and load. Fewer reps, heavier weights.",
+    "strength": "Strength Peak",
+    "strength_desc": "Maximum strength expression. Test your limits.",
+    "deload": "Deload",
+    "deload_desc": "Full recovery week. Same movements, much less volume.",
+    "week_of": "Week {{current}} of {{total}}",
+    "training_plan": "Training plan"
   },
   "rehab": {
     "frequency_daily": "daily",

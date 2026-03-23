@@ -139,8 +139,8 @@ export default function Plan() {
             <div className="mb-4 flex items-center gap-3">
               {PhaseIcon && <PhaseIcon size={28} className={phaseColor.text} />}
               <div>
-                <p className="text-title">{phase.label}</p>
-                <p className="text-sm text-[var(--text-2)]">{phase.description}</p>
+                <p className="text-title">{t(phase.labelKey)}</p>
+                <p className="text-sm text-[var(--text-2)]">{t(phase.descriptionKey)}</p>
               </div>
             </div>
 
@@ -249,7 +249,7 @@ export default function Plan() {
                 return (
                   <div key={key} className={`flex flex-1 flex-col items-center rounded-xl py-2 text-center border ${isCurrent ? c.bg + ' ' + c.border : 'bg-white/[0.03] border-[var(--border-subtle)]'}`}>
                     <Icon size={16} className={isCurrent ? c.text : 'text-[var(--text-3)]'} />
-                    <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{p.label.split(' ')[0]}</span>
+                    <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{t(p.labelKey).split(' ')[0]}</span>
                     <span className={`text-[8px] ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{p.weeks}w</span>
                     {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-cyan-400">{t('plan.active_block').toLowerCase()}</span>}
                   </div>
@@ -262,7 +262,7 @@ export default function Plan() {
             {Array.isArray(block.fullPlan) && (block.fullPlan as string[]).length > 1 && (
               <div className="mt-3 rounded-xl bg-white/[0.03] px-3 py-2 border border-[var(--border-subtle)]">
                 <p className="text-[10px] text-[var(--text-3)]">
-                  {String(t('plan.program'))}: {String((block.fullPlan as string[]).map(p => PHASES[p as import('../types').PeriodizationPhase]?.label || p).join(' \u2192 '))}
+                  {String(t('plan.program'))}: {String((block.fullPlan as string[]).map(p => { const ph = PHASES[p as import('../types').PeriodizationPhase]; return ph ? t(ph.labelKey) : p; }).join(' \u2192 '))}
                 </p>
                 <p className="text-[10px] text-[var(--text-3)] mt-0.5">
                   {t('plan.next_phase_auto')}
@@ -294,8 +294,8 @@ export default function Plan() {
                       <div className="flex items-start gap-3">
                         <Icon size={24} className={c.text} />
                         <div>
-                          <p className="font-bold text-white">{p.label}</p>
-                          <p className="mt-0.5 text-xs text-[var(--text-2)]">{p.description}</p>
+                          <p className="font-bold text-white">{t(p.labelKey)}</p>
+                          <p className="mt-0.5 text-xs text-[var(--text-2)]">{t(p.descriptionKey)}</p>
                           <div className="mt-2 flex gap-3 text-xs">
                             <span className={c.text}>{p.weeks} {t('plan.weeks')}</span>
                             <span className="text-[var(--text-3)]">

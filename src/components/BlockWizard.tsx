@@ -74,8 +74,10 @@ export function generateBlockConfig(goalId: string, startDate: string) {
     return {
       type: p.type,
       label: phase?.label || p.type,
+      labelKey: phase?.labelKey || `phases.${p.type}`,
       weeks: p.weeks,
       description: phase?.description || '',
+      descriptionKey: phase?.descriptionKey || `phases.${p.type}_desc`,
     }
   })
   
@@ -306,11 +308,11 @@ export default function BlockWizard({ isOpen, onClose, onStart, userId }: BlockW
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">{phase.label}</span>
+                          <span className="font-semibold text-white">{t(phase.labelKey)}</span>
                           <span className={`text-xs ${colors.text}`}>{phase.weeks} {t('plan.weeks')}</span>
                         </div>
                         <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">
-                          {phase.description}
+                          {t(phase.descriptionKey)}
                         </p>
                       </div>
                     </div>

@@ -11,8 +11,10 @@ const BLOCK_KEY = 'coach-training-block'
 export const PHASES: Record<PeriodizationPhase, PhaseConfig> = {
   accumulation: {
     label: 'Opbouw',
+    labelKey: 'phases.accumulation',
     weeks: 4,
     description: 'Bouw wekelijks volume op, matige intensiteit. Basisfase.',
+    descriptionKey: 'phases.accumulation_desc',
     color: 'blue',
     weekTargets: [
       { week: 1, rpe: 7,   repRange: [10, 12], setNote: 'Basisvolume',     isDeload: false },
@@ -23,8 +25,10 @@ export const PHASES: Record<PeriodizationPhase, PhaseConfig> = {
   },
   intensification: {
     label: 'Intensivering',
+    labelKey: 'phases.intensification',
     weeks: 4,
     description: 'Verhoog intensiteit en belasting. Minder herhalingen, zwaardere gewichten.',
+    descriptionKey: 'phases.intensification_desc',
     color: 'red',
     weekTargets: [
       { week: 1, rpe: 7.5, repRange: [6, 8], setNote: 'Basisvolume',    isDeload: false },
@@ -35,8 +39,10 @@ export const PHASES: Record<PeriodizationPhase, PhaseConfig> = {
   },
   strength: {
     label: 'Kracht Piek',
+    labelKey: 'phases.strength',
     weeks: 3,
     description: 'Maximale krachtexpressie. Test je grenzen.',
+    descriptionKey: 'phases.strength_desc',
     color: 'red',
     weekTargets: [
       { week: 1, rpe: 8,   repRange: [3, 5], setNote: 'Zware compound oefeningen',  isDeload: false },
@@ -46,8 +52,10 @@ export const PHASES: Record<PeriodizationPhase, PhaseConfig> = {
   },
   deload: {
     label: 'Deload',
+    labelKey: 'phases.deload',
     weeks: 1,
     description: 'Volledige herstelweek. Zelfde bewegingen, veel minder volume.',
+    descriptionKey: 'phases.deload_desc',
     color: 'gray',
     weekTargets: [
       { week: 1, rpe: 5, repRange: [10, 12], setNote: '2-3 sets alleen, niet forceren', isDeload: true },
