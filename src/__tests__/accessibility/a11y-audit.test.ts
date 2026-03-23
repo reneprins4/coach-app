@@ -355,7 +355,7 @@ describe('Accessibility: Login Page', () => {
     const login = readComponent('pages/Login.tsx')
     expect(login).toContain('aria-label=')
     // Each digit input should be labeled
-    expect(login).toContain('Verificatiecode cijfer')
+    expect(login).toContain('login.otp_digit')
   })
 })
 

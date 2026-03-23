@@ -1,4 +1,22 @@
 {
+  "login": {
+    "subtitle": "Jouw persoonlijke training coach",
+    "email_label": "Email",
+    "email_placeholder": "jouw@email.nl",
+    "send_code": "Stuur code",
+    "sending": "Versturen...",
+    "otp_hint": "Je ontvangt een 6-cijferige code per email om in te loggen.",
+    "enter_code": "Voer je code in",
+    "code_sent_to": "We hebben een 6-cijferige code gestuurd naar",
+    "otp_digit": "Verificatiecode cijfer {{n}} van 6",
+    "verify": "Verifieer",
+    "verifying": "Verifieren...",
+    "wrong_code": "Onjuiste code. Probeer opnieuw.",
+    "unknown_error": "Er ging iets mis. Probeer opnieuw.",
+    "resend_code": "Code opnieuw sturen",
+    "resend_timer": "Code opnieuw sturen ({{seconds}}s)",
+    "use_other_email": "Andere email gebruiken"
+  },
   "nav": {
     "today": "Vandaag",
     "train": "Trainen",

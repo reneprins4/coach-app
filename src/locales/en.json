@@ -1,4 +1,22 @@
 {
+  "login": {
+    "subtitle": "Your personal training coach",
+    "email_label": "Email",
+    "email_placeholder": "your@email.com",
+    "send_code": "Send code",
+    "sending": "Sending...",
+    "otp_hint": "You will receive a 6-digit code by email to log in.",
+    "enter_code": "Enter your code",
+    "code_sent_to": "We sent a 6-digit code to",
+    "otp_digit": "Verification code digit {{n}} of 6",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "wrong_code": "Incorrect code. Please try again.",
+    "unknown_error": "Something went wrong. Please try again.",
+    "resend_code": "Resend code",
+    "resend_timer": "Resend code ({{seconds}}s)",
+    "use_other_email": "Use a different email"
+  },
   "nav": {
     "today": "Today",
     "train": "Train",
