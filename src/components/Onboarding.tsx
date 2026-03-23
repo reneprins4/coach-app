@@ -6,11 +6,11 @@ import { useAuthContext } from '../App'
 
 
 export default function Onboarding() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthContext()
 
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(-1) // -1 = language selection
   const [name, setName] = useState('')
   const [goal, setGoal] = useState<string | null>(null)
   const [time, setTime] = useState<number | null>(null)
@@ -49,6 +49,7 @@ export default function Onboarding() {
       goal: goal || 'hypertrophy',
       time: time || 60,
       equipment: equipment || 'full_gym',
+      language: i18n.language,
     }
     if (name.trim()) {
       (settings as Record<string, unknown>).name = name.trim()
@@ -58,8 +59,15 @@ export default function Onboarding() {
     navigate('/', { replace: true })
   }
 
-  // Animated step indicator (InjuryReport pattern)
+  function handleSelectLanguage(lang: string) {
+    i18n.changeLanguage(lang)
+    localStorage.setItem('coach-lang', lang)
+    setStep(0)
+  }
+
+  // Animated step indicator (skip for language step)
   function StepIndicator() {
+    if (step < 0) return null
     return (
       <div className="flex justify-center gap-2 pt-6 pb-8">
         {[0, 1, 2].map((i) => (
@@ -74,6 +82,42 @@ export default function Onboarding() {
             }`}
           />
         ))}
+      </div>
+    )
+  }
+
+  // Step 0: Language selection (first thing users see)
+  if (step === -1) {
+    return (
+      <div className="flex min-h-dvh flex-col bg-gray-950 px-5">
+        <div className="flex flex-1 flex-col items-center justify-center">
+          <p className="label-caps mb-2 tracking-[0.3em]">Kravex</p>
+          <h1 className="text-display mb-12">Choose your language</h1>
+
+          <div className="w-full max-w-xs space-y-3">
+            <button
+              onClick={() => handleSelectLanguage('nl')}
+              className="card flex w-full items-center gap-4 active:scale-[0.98] transition-transform"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-sm font-black text-white">NL</span>
+              <div className="text-left">
+                <p className="text-sm font-bold text-white">Nederlands</p>
+                <p className="text-xs text-gray-500">Dutch</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handleSelectLanguage('en')}
+              className="card flex w-full items-center gap-4 active:scale-[0.98] transition-transform"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-sm font-black text-white">EN</span>
+              <div className="text-left">
+                <p className="text-sm font-bold text-white">English</p>
+                <p className="text-xs text-gray-500">Engels</p>
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
