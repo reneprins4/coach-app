@@ -29,7 +29,7 @@ export const PHASES: Record<PeriodizationPhase, PhaseConfig> = {
     weeks: 4,
     description: 'Verhoog intensiteit en belasting. Minder herhalingen, zwaardere gewichten.',
     descriptionKey: 'phases.intensification_desc',
-    color: 'red',
+    color: 'orange',
     weekTargets: [
       { week: 1, rpe: 7.5, repRange: [6, 8], setNote: 'Basisvolume',    isDeload: false },
       { week: 2, rpe: 8,   repRange: [6, 8], setNote: '+1 set per spiergroep',  isDeload: false },

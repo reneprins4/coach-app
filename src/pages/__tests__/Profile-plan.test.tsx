@@ -16,10 +16,10 @@ vi.mock('../../lib/periodization', () => ({
   getBlockProgress: vi.fn(() => null),
   clearBlock: vi.fn((userId: string | null) => mockClearBlock(userId)),
   PHASES: {
-    accumulation: { label: 'Opbouw', weeks: 4, description: '', color: 'blue', weekTargets: [] },
-    intensification: { label: 'Intensivering', weeks: 4, description: '', color: 'red', weekTargets: [] },
-    strength: { label: 'Kracht Piek', weeks: 3, description: '', color: 'red', weekTargets: [] },
-    deload: { label: 'Deload', weeks: 1, description: '', color: 'gray', weekTargets: [] },
+    accumulation: { label: 'Opbouw', labelKey: 'phases.accumulation', weeks: 4, description: '', descriptionKey: 'phases.accumulation_desc', color: 'blue', weekTargets: [] },
+    intensification: { label: 'Intensivering', labelKey: 'phases.intensification', weeks: 4, description: '', descriptionKey: 'phases.intensification_desc', color: 'orange', weekTargets: [] },
+    strength: { label: 'Kracht Piek', labelKey: 'phases.strength', weeks: 3, description: '', descriptionKey: 'phases.strength_desc', color: 'red', weekTargets: [] },
+    deload: { label: 'Deload', labelKey: 'phases.deload', weeks: 1, description: '', descriptionKey: 'phases.deload_desc', color: 'gray', weekTargets: [] },
   },
 }))
 
@@ -108,8 +108,16 @@ vi.mock('motion/react', () => {
 // i18n mock
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, opts?: Record<string, unknown>) => {
+      if (key === 'phases.week_of' && opts) {
+        return `Week ${opts.current} van ${opts.total}`
+      }
       const translations: Record<string, string> = {
+        'phases.training_plan': 'Trainingsplan',
+        'phases.accumulation': 'Opbouw',
+        'phases.intensification': 'Intensivering',
+        'phases.strength': 'Kracht Piek',
+        'phases.deload': 'Deload',
         'plan.title': 'Trainingsplan',
         'plan.week': 'Week',
         'profile.plan_view': 'Bekijk plan',
@@ -177,7 +185,7 @@ describe('Profile plan section', () => {
 
     expect(screen.getByText('Trainingsplan')).toBeTruthy()
     expect(screen.getByText(/Opbouw/)).toBeTruthy()
-    expect(screen.getByText(/Week 2 \/ 4/)).toBeTruthy()
+    expect(screen.getByText(/Week 2 van 4/)).toBeTruthy()
     expect(screen.getByText('Bekijk plan')).toBeTruthy()
     expect(screen.getByText('Stop plan')).toBeTruthy()
   })

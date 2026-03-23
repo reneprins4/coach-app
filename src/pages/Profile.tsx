@@ -386,20 +386,31 @@ export default function Profile() {
 
           {/* Trainingsplan */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.06 }}>
-          <div className="card">
-            <p className="label-caps mb-3">{t('plan.title')}</p>
+          <div className={block ? 'card-accent' : 'card'}>
+            <p className="label-caps mb-3">{t('phases.training_plan')}</p>
             {block ? (() => {
-              const phase = PHASES[block.phase]
-              const progress = getBlockProgress(block)
+              const blockPhase = PHASES[block.phase]
+              const blockProgress = getBlockProgress(block)
               return (
                 <div>
-                  <p className="text-sm font-bold text-white">
-                    {phase.label} — {t('plan.week')} {progress?.currentWeek} / {progress?.totalWeeks}
-                  </p>
-                  <div className="mt-3 flex gap-2">
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-title">{t(blockPhase.labelKey)}</p>
+                    <span className="text-sm tabular text-gray-400">
+                      {t('phases.week_of', { current: blockProgress?.currentWeek, total: blockProgress?.totalWeeks })}
+                    </span>
+                  </div>
+                  {blockProgress && (
+                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className="h-full rounded-full bg-cyan-500 glow-bar transition-all duration-700"
+                        style={{ width: `${Math.max(blockProgress.pct, 6)}%` }}
+                      />
+                    </div>
+                  )}
+                  <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => navigate('/plan')}
-                      className="flex items-center gap-1 rounded-xl bg-white/[0.04] px-3 py-2 text-xs font-bold text-cyan-400 active:bg-white/[0.08]"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-cyan-500/20 bg-cyan-500/[0.06] px-3 py-2.5 text-xs font-bold text-cyan-400 active:bg-cyan-500/[0.12]"
                     >
                       {t('profile.plan_view')}
                       <ChevronRight size={14} />
@@ -411,7 +422,7 @@ export default function Profile() {
                           setBlock(null)
                         }
                       }}
-                      className="rounded-xl bg-white/[0.04] px-3 py-2 text-xs font-bold text-[var(--text-3)] active:bg-white/[0.08]"
+                      className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-xs font-bold text-[var(--text-3)] active:bg-white/[0.06]"
                     >
                       {t('profile.plan_stop')}
                     </button>
@@ -420,10 +431,10 @@ export default function Profile() {
               )
             })() : (
               <div>
-                <p className="text-sm text-[var(--text-3)]">{t('profile.plan_suggestion')}</p>
+                <p className="text-sm text-[var(--text-2)]">{t('profile.plan_suggestion')}</p>
                 <button
                   onClick={() => navigate('/plan')}
-                  className="mt-3 flex items-center gap-1 rounded-xl bg-white/[0.04] px-3 py-2 text-xs font-bold text-cyan-400 active:bg-white/[0.08]"
+                  className="mt-3 flex items-center gap-1.5 rounded-xl border border-cyan-500/20 bg-cyan-500/[0.06] px-4 py-2.5 text-xs font-bold text-cyan-400 active:bg-cyan-500/[0.12]"
                 >
                   {t('profile.plan_choose')}
                   <ChevronRight size={14} />

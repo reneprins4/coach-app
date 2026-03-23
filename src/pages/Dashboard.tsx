@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState, useEffect, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Play, Dumbbell, Loader2 } from 'lucide-react'
+import { ChevronRight, Play, Dumbbell, Loader2, Zap, TrendingUp, Target, Battery } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
@@ -76,6 +76,7 @@ export default function Dashboard() {
   const block = getCurrentBlock()
   const progress = block ? getBlockProgress(block) : null
   const phase = block ? PHASES[block.phase] : null
+  const PhaseIcon = block ? ({ accumulation: Zap, intensification: TrendingUp, strength: Target, deload: Battery } as Record<string, typeof Zap>)[block.phase] : null
 
   const todaysWorkout = useMemo(() => generateWorkoutPreview(workouts), [workouts])
 
@@ -236,23 +237,26 @@ export default function Dashboard() {
             onClick={() => nav('/plan')}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="card cursor-pointer"
+            className="card-accent cursor-pointer"
             data-testid="plan-card"
           >
-            <p className="label-caps mb-2">{t('dashboard.training_plan')}</p>
+            <p className="label-caps mb-2 text-cyan-500">{t('dashboard.training_plan')}</p>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-title">{phase.label}</p>
+              <div className="flex items-center gap-2.5">
+                {PhaseIcon && <PhaseIcon size={20} className="text-cyan-400" />}
+                <p className="text-title">{t(phase.labelKey)}</p>
+              </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-sm text-gray-500">
+                <span className="text-sm tabular text-gray-400">
                   {t('dashboard.week_of', { current: progress.currentWeek, total: progress.totalWeeks })}
                 </span>
-                <ChevronRight size={14} className="text-gray-600" />
+                <ChevronRight size={14} className="text-gray-500" />
               </div>
             </div>
-            <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
               <div
                 className="h-full rounded-full bg-cyan-500 glow-bar transition-all duration-700"
-                style={{ width: `${progress.pct}%` }}
+                style={{ width: `${Math.max(progress.pct, 6)}%` }}
               />
             </div>
           </motion.div>
@@ -415,10 +419,12 @@ export default function Dashboard() {
         <motion.div variants={fadeUp} className="mb-4">
           <button
             onClick={() => nav('/plan')}
-            className="w-full py-2 text-sm text-cyan-500 active:text-cyan-400 transition-colors"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.04] py-3 text-sm font-medium text-cyan-400 transition-colors active:bg-cyan-500/[0.08]"
             data-testid="plan-suggestion"
           >
-            {t('dashboard.plan_suggestion')} &rarr;
+            <Zap size={14} />
+            {t('dashboard.plan_suggestion')}
+            <ChevronRight size={14} className="text-cyan-500/60" />
           </button>
         </motion.div>
       )}

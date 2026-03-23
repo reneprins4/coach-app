@@ -16,10 +16,10 @@ import BlockWizard from '../components/BlockWizard'
 import PageTransition from '../components/PageTransition'
 
 const PHASE_COLORS = {
-  blue:   { bg: 'bg-blue-500/15',  text: 'text-blue-400',  bar: 'bg-blue-500',  border: 'border-blue-500/40' },
-  orange: { bg: 'bg-cyan-500/15',  text: 'text-cyan-400',  bar: 'bg-cyan-500',  border: 'border-cyan-500/40' },
-  red:    { bg: 'bg-cyan-500/15',  text: 'text-cyan-400',  bar: 'bg-cyan-500',  border: 'border-cyan-500/40' },
-  gray:   { bg: 'bg-gray-500/15',  text: 'text-gray-400',  bar: 'bg-gray-500',  border: 'border-gray-500/40' },
+  blue:   { bg: 'bg-blue-500/12',   text: 'text-blue-400',    bar: 'bg-blue-500',    border: 'border-blue-500/30' },
+  orange: { bg: 'bg-orange-500/12',  text: 'text-orange-400',  bar: 'bg-orange-500',  border: 'border-orange-500/30' },
+  red:    { bg: 'bg-red-500/12',     text: 'text-red-400',     bar: 'bg-red-500',     border: 'border-red-500/30' },
+  gray:   { bg: 'bg-emerald-500/12', text: 'text-emerald-400', bar: 'bg-emerald-500', border: 'border-emerald-500/30' },
 }
 
 const PHASE_ICONS = {
@@ -102,16 +102,18 @@ export default function Plan() {
 
       {/* What is periodization -- info banner */}
       <motion.div
-        className="card mb-5"
+        className="glass mb-5 p-4"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
       >
         <div className="flex items-start gap-3">
-          <Info size={16} className="mt-0.5 shrink-0 text-[var(--text-3)]" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
+            <Info size={15} className="text-cyan-400" />
+          </div>
           <div>
-            <p className="text-sm font-medium text-[var(--text-2)]">{t('plan.why_periodization')}</p>
-            <p className="mt-1 text-xs leading-relaxed text-[var(--text-3)]">
+            <p className="text-sm font-bold text-white">{t('plan.why_periodization')}</p>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--text-2)]">
               {t('plan.why_periodization_desc')}
             </p>
           </div>
@@ -176,16 +178,16 @@ export default function Plan() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, ease: 'easeOut', delay: 0.1 + i * 0.06 }}
                   >
-                    <span className={`text-[10px] font-semibold uppercase tracking-widest ${
+                    <span className={`text-[11px] font-bold uppercase tracking-wide ${
                       isCurrent ? phaseColor.text : isDone ? 'text-[var(--text-2)]' : 'text-[var(--text-3)]'
                     }`}>
                       {t('plan.week')} {weekNum}
                     </span>
-                    <span className={`mt-1 text-[10px] ${isCurrent ? 'text-white font-medium' : isDone ? 'text-[var(--text-3)]' : 'text-[var(--text-3)]'}`}>
-                      {wt.isDeload ? 'Deload' : `RPE ${wt.rpe}`}
+                    <span className={`mt-1 text-[11px] ${isCurrent ? 'text-white font-medium' : 'text-[var(--text-3)]'}`}>
+                      {wt.isDeload ? t('phases.deload') : `RPE ${wt.rpe}`}
                     </span>
-                    {isDone && <CheckCircle2 size={12} className="mt-1 text-green-500" />}
-                    {isCurrent && <span className="mt-1 text-[8px] uppercase text-cyan-400 font-bold">{t('plan.now')}</span>}
+                    {isDone && <CheckCircle2 size={12} className="mt-1.5 text-green-500" />}
+                    {isCurrent && <span className="mt-1 text-[10px] uppercase text-cyan-400 font-bold">{t('plan.now')}</span>}
                   </motion.div>
                 )
               })}
@@ -248,10 +250,10 @@ export default function Plan() {
                 const Icon = PHASE_ICONS[key as keyof typeof PHASE_ICONS]
                 return (
                   <div key={key} className={`flex flex-1 flex-col items-center rounded-xl py-2 text-center border ${isCurrent ? c.bg + ' ' + c.border : 'bg-white/[0.03] border-[var(--border-subtle)]'}`}>
-                    <Icon size={16} className={isCurrent ? c.text : 'text-[var(--text-3)]'} />
-                    <span className={`mt-1 text-[9px] font-medium ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{t(p.labelKey).split(' ')[0]}</span>
-                    <span className={`text-[8px] ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{p.weeks}w</span>
-                    {isCurrent && <span className="mt-0.5 text-[7px] uppercase font-bold text-cyan-400">{t('plan.active_block').toLowerCase()}</span>}
+                    <Icon size={18} className={isCurrent ? c.text : 'text-[var(--text-3)]'} />
+                    <span className={`mt-1 text-[11px] font-bold ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{t(p.labelKey).split(' ')[0]}</span>
+                    <span className={`text-[10px] ${isCurrent ? c.text : 'text-[var(--text-3)]'}`}>{p.weeks}w</span>
+                    {isCurrent && <span className="mt-0.5 text-[9px] uppercase font-bold text-cyan-400">{t('plan.active_block').toLowerCase()}</span>}
                   </div>
                 )
               })}
@@ -288,7 +290,8 @@ export default function Plan() {
                 >
                   <button
                     onClick={() => handleStart(key as import('../types').PeriodizationPhase)}
-                    className={`card w-full text-left transition-all active:scale-[0.98] ${c.bg} border-[var(--border-accent)]`}
+                    className={`w-full rounded-2xl p-5 text-left transition-all active:scale-[0.98] ${c.bg} border ${c.border}`}
+                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.15)' }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">

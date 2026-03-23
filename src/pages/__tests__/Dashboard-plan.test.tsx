@@ -31,10 +31,10 @@ vi.mock('../../lib/periodization', () => ({
   getCurrentBlock: vi.fn(() => null),
   getBlockProgress: vi.fn(() => null),
   PHASES: {
-    accumulation: { label: 'Opbouw', weeks: 4, description: '', color: 'blue', weekTargets: [] },
-    intensification: { label: 'Intensivering', weeks: 4, description: '', color: 'red', weekTargets: [] },
-    strength: { label: 'Kracht Piek', weeks: 3, description: '', color: 'red', weekTargets: [] },
-    deload: { label: 'Deload', weeks: 1, description: '', color: 'gray', weekTargets: [] },
+    accumulation: { label: 'Opbouw', labelKey: 'phases.accumulation', weeks: 4, description: '', descriptionKey: 'phases.accumulation_desc', color: 'blue', weekTargets: [] },
+    intensification: { label: 'Intensivering', labelKey: 'phases.intensification', weeks: 4, description: '', descriptionKey: 'phases.intensification_desc', color: 'orange', weekTargets: [] },
+    strength: { label: 'Kracht Piek', labelKey: 'phases.strength', weeks: 3, description: '', descriptionKey: 'phases.strength_desc', color: 'red', weekTargets: [] },
+    deload: { label: 'Deload', labelKey: 'phases.deload', weeks: 1, description: '', descriptionKey: 'phases.deload_desc', color: 'gray', weekTargets: [] },
   },
 }))
 
@@ -106,6 +106,10 @@ vi.mock('react-i18next', () => ({
         'dashboard.view_all': 'Bekijk alles',
         'dashboard.no_exercises': 'Geen oefeningen',
         'injury.report_injury': 'Blessure melden',
+        'phases.accumulation': 'Opbouw',
+        'phases.intensification': 'Intensivering',
+        'phases.strength': 'Kracht Piek',
+        'phases.deload': 'Deload',
       }
       if (key === 'dashboard.week_of' && opts) {
         return `Week ${opts.current} van ${opts.total}`
