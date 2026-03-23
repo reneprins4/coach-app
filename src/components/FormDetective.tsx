@@ -83,7 +83,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
           <p className="text-2xl font-black tracking-tight text-white">{t('analyse.subtitle')}</p>
         </div>
         <div className="card p-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-800">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.06]">
             <AlertCircle size={24} className="text-gray-500" />
           </div>
           <p className="mb-1 text-sm font-black tracking-tight text-white">{t('analyse.cta_title')}</p>
@@ -91,7 +91,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
           <button
             onClick={() => runAnalysis(false)}
             disabled={loading || workouts.length < 3}
-            className="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40 active:bg-cyan-600"
+            className="btn-primary h-auto px-5 py-2.5 text-sm w-auto disabled:opacity-40"
           >
             {workouts.length < 3 ? t('analyse.need_more') : t('analyse.run_btn')}
           </button>
@@ -122,7 +122,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
           <p className="mb-4 text-sm text-red-400">{error}</p>
           <button
             onClick={() => runAnalysis(false)}
-            className="rounded-xl bg-gray-800 px-4 py-2 text-sm font-bold text-white active:bg-gray-700"
+            className="btn-secondary h-auto px-4 py-2 text-sm w-auto"
           >
             {t('analyse.retry')}
           </button>
@@ -150,7 +150,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
         </div>
         <button
           onClick={handleRefresh}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-4 py-3 text-sm text-gray-400 active:bg-gray-800 border border-white/[0.06]"
+          className="btn-secondary h-auto px-4 py-3 text-sm"
         >
           <RefreshCw size={13} />
           {t('analyse.reanalyse')}
@@ -172,7 +172,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="flex items-center gap-1.5 rounded-xl bg-gray-900 px-3 py-2 text-xs font-bold text-gray-400 active:bg-gray-800 border border-white/[0.06]"
+          className="btn-secondary h-auto px-3 py-2 text-xs w-auto"
         >
           <RefreshCw size={12} />
           {t('analyse.refresh')}
@@ -200,7 +200,7 @@ export default function FormDetective({ workouts, userId }: FormDetectiveProps) 
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <span className="text-sm font-black tracking-tight text-white">{insight.exercise}</span>
                   <span
-                    className="rounded-lg px-2 py-0.5 text-[10px] font-bold"
+                    className="label-caps rounded-lg px-2 py-0.5"
                     style={config.badge}
                   >
                     {config.label}

@@ -1,6 +1,7 @@
 import { useMemo, useCallback, useState, useEffect, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Play, Dumbbell, Loader2 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
@@ -24,9 +25,20 @@ import { generateWorkoutPreview, generateFullWorkout } from '../lib/workoutCache
 import { computeTrainingStory, isStoryViewed, markStoryViewed } from '../lib/trainingStory'
 import { getMonthName } from '../lib/trainingStoryShare'
 import { buildStoryShareText } from '../lib/trainingStoryShare'
+import PageTransition from '../components/PageTransition'
 import type { AIExercise, AIWorkoutResponse } from '../types'
 
 const TrainingStory = lazy(() => import('../components/TrainingStory'))
+
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0 },
+}
 
 export default function Dashboard() {
   const { t, i18n } = useTranslation()
@@ -192,15 +204,20 @@ export default function Dashboard() {
     : 0
 
   return (
-    <div className="px-5 pt-6 pb-28">
+    <PageTransition>
+    <div className="relative overflow-hidden px-5 pt-6 pb-28">
+      {/* Atmospheric glow */}
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 h-[400px] w-[500px] bg-[radial-gradient(ellipse,rgba(6,182,212,0.08)_0%,transparent_70%)] blur-[80px] z-0" />
+
+      <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
 
       {/* ━━ Greeting + inline stats ━━ */}
-      <div className="mb-7">
+      <motion.div variants={fadeUp} className="mb-7">
         <p className="label-caps mb-1">{getDayName(i18n.language)}</p>
-        <h1 className="text-display">
+        <h1 className="text-display text-3xl">
           {t(getGreetingKey())}{settings.name ? `, ${settings.name}` : ''}
         </h1>
-        <div className="mt-3 flex items-center gap-4">
+        <div className="mt-3 flex items-center gap-5">
           <span className="text-sm text-gray-500">
             <span className="font-bold tabular text-white">{stats.thisWeekCount}</span> {t('dashboard.workouts').toLowerCase()}
           </span>
@@ -215,7 +232,7 @@ export default function Dashboard() {
             </span>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* ━━ Resume Workout Banner ━━ */}
       <ResumeWorkoutBanner />
@@ -255,12 +272,16 @@ export default function Dashboard() {
 
       {/* ━━ Hero: Today's Workout ━━ */}
       {todaysWorkout && (
-        <button
+        <motion.div variants={fadeUp}>
+        <motion.button
           onClick={handleStartTodaysWorkout}
           disabled={isGenerating}
-          className="card-accent mb-5 w-full text-left active:scale-[0.98] transition-transform disabled:opacity-70"
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="card-accent relative mb-5 w-full text-left disabled:opacity-70 overflow-hidden"
         >
-          <div className="flex items-center justify-between">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-cyan-500/[0.07] via-transparent to-transparent" />
+          <div className="relative flex items-center justify-between">
             <div className="min-w-0 flex-1">
               <p className="label-caps text-cyan-500 mb-1">{t('dashboard.todays_workout')}</p>
               <p className="text-title">{todaysWorkout.split}</p>
@@ -276,21 +297,25 @@ export default function Dashboard() {
                 })()}
               </p>
             </div>
-            <div className="ml-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-500 glow-cyan">
+            <div className="ml-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cyan-500 glow-cyan">
               {isGenerating
                 ? <Loader2 size={20} className="text-white animate-spin" />
                 : <Play size={20} className="text-white ml-0.5" fill="white" />
               }
             </div>
           </div>
-        </button>
+        </motion.button>
+        </motion.div>
       )}
 
       {/* ━━ Main Lift Progress ━━ */}
       {settings.mainLift && settings.mainLiftGoalKg && liftMax > 0 && (
-        <div
+        <motion.div
+          variants={fadeUp}
           onClick={() => nav('/progress')}
-          className="card mb-4 cursor-pointer active:scale-[0.98] transition-transform"
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="card mb-4 cursor-pointer"
         >
           <p className="label-caps mb-3">{t(`main_lift.${settings.mainLift}`)} PR</p>
           <div className="flex items-end justify-between mb-3">
@@ -313,7 +338,7 @@ export default function Dashboard() {
               style={{ width: `${Math.min(100, Math.round((liftMax / settings.mainLiftGoalKg) * 100))}%` }}
             />
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* ━━ Custom PR Goals ━━ */}
@@ -321,7 +346,7 @@ export default function Dashboard() {
 
       {/* ━━ Muscle Recovery ━━ */}
       {muscles.length > 0 && (
-        <div className="card mb-4">
+        <motion.div variants={fadeUp} className="card mb-4">
           <p className="label-caps mb-4">{t('dashboard.recovery')}</p>
           <div className="space-y-3">
             {muscles.map(([muscle, ms]) => {
@@ -343,7 +368,7 @@ export default function Dashboard() {
               )
             })}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* ━━ CTAs ━━ */}
@@ -362,7 +387,7 @@ export default function Dashboard() {
 
       {/* ━━ Recent Workouts ━━ */}
       {recentWorkouts.length > 0 && (
-        <div className="mb-4">
+        <motion.div variants={fadeUp} className="mb-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="label-caps">{t('dashboard.recent')}</p>
             <button onClick={() => nav('/history')} className="text-xs font-medium text-gray-600 active:text-white">{t('dashboard.view_all')}</button>
@@ -373,10 +398,12 @@ export default function Dashboard() {
               const exercises = [...new Set((w.workout_sets || []).map(s => s.exercise))].slice(0, 3)
               const vol = (w.workout_sets || []).reduce((sum, s) => sum + (s.weight_kg || 0) * (s.reps || 0), 0)
               return (
-                <div
+                <motion.div
                   key={w.id}
                   onClick={() => nav(`/history/${w.id}`)}
-                  className="card flex cursor-pointer items-center justify-between active:scale-[0.98] transition-transform"
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  className="card flex cursor-pointer items-center justify-between"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-gray-600">
@@ -394,11 +421,11 @@ export default function Dashboard() {
                     )}
                     <ChevronRight size={14} className="text-gray-700" />
                   </div>
-                </div>
+                </motion.div>
               )
             })}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* ━━ Blessure melden (subtle) ━━ */}
@@ -434,7 +461,10 @@ export default function Dashboard() {
           />
         </Suspense>
       )}
+
+      </motion.div>
     </div>
+    </PageTransition>
   )
 }
 

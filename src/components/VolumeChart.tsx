@@ -180,7 +180,7 @@ export default function VolumeChart({ data, unit = 'kg' }: { data: (WeeklyVolume
       {/* Tooltip */}
       {selectedIndex !== null && bars[selectedIndex] && (
         <div
-          className="absolute z-10 rounded-lg bg-gray-800 px-3 py-2 text-xs shadow-lg"
+          className="absolute z-10 glass rounded-lg px-3 py-2 text-xs"
           style={{
             left: `${((bars[selectedIndex].x + bars[selectedIndex].width / 2) / viewBoxWidth) * 100}%`,
             top: `${bars[selectedIndex].y - 10}px`,

@@ -159,7 +159,7 @@ export default function MeasurementChart({ data, type }: { data: Measurement[]; 
       {/* Tooltip */}
       {selectedIndex !== null && points[selectedIndex] && (
         <div
-          className="absolute z-10 rounded-lg bg-gray-800 px-3 py-2 text-xs shadow-lg"
+          className="absolute z-10 glass rounded-lg px-3 py-2 text-xs"
           style={{
             left: `${(points[selectedIndex].x / viewBoxWidth) * 100}%`,
             top: `${points[selectedIndex].y - 10}px`,

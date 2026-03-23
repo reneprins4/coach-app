@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, Trash2, Calendar, CalendarDays, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { logError } from '../lib/logger'
 import { HistorySkeleton } from '../components/Skeleton'
+import PageTransition from '../components/PageTransition'
 
 export default function History() {
   const { t, i18n } = useTranslation()
@@ -36,7 +38,10 @@ export default function History() {
   if (loading) return <HistorySkeleton />
 
   return (
-    <div className="px-5 pt-6 pb-28">
+    <PageTransition>
+    <div className="relative overflow-hidden px-5 pt-6 pb-28">
+      {/* Atmospheric glow */}
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 h-[400px] w-[500px] bg-[radial-gradient(ellipse,rgba(6,182,212,0.08)_0%,transparent_70%)] blur-[80px] z-0" />
       {/* ━━ Header ━━ */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -53,7 +58,12 @@ export default function History() {
       </div>
 
       {/* ━━ Search ━━ */}
-      <div className="relative mb-6">
+      <motion.div
+        className="relative mb-6"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      >
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
         <input
           type="text"
@@ -63,7 +73,7 @@ export default function History() {
           aria-label={t('history.search_placeholder')}
           className="h-12 w-full rounded-2xl pl-11 pr-4 text-sm text-white placeholder-gray-600 outline-none"
         />
-      </div>
+      </motion.div>
 
       {/* ━━ Empty state ━━ */}
       {filtered.length === 0 && (
@@ -80,14 +90,24 @@ export default function History() {
 
       {/* ━━ Workout list ━━ */}
       <div className="space-y-3">
-        {filtered.map(w => {
+        {filtered.map((w, index) => {
           const d = new Date(w.created_at)
           const exercises = (w.exerciseNames || []).slice(0, 3)
           const extraCount = (w.exerciseNames?.length || 0) - 3
           const vol = w.totalVolume || 0
 
           return (
-            <div key={w.id} className="group relative">
+            <motion.div
+              key={w.id}
+              className="group relative"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: 'easeOut',
+                delay: Math.min(index * 0.05, 0.4),
+              }}
+            >
               <Link
                 to={`/history/${w.id}`}
                 className="card flex items-center gap-4 active:scale-[0.98] transition-transform"
@@ -95,7 +115,7 @@ export default function History() {
                 {/* Date column */}
                 <div className="shrink-0 w-12 text-center">
                   <p className="text-lg font-black tabular text-white leading-none">{d.getDate()}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-600 mt-0.5">
+                  <p className="label-caps mt-0.5">
                     {d.toLocaleDateString(locale, { month: 'short' })}
                   </p>
                 </div>
@@ -125,7 +145,7 @@ export default function History() {
               >
                 <Trash2 size={14} />
               </button>
-            </div>
+            </motion.div>
           )
         })}
 
@@ -149,23 +169,42 @@ export default function History() {
       </div>
 
       {/* ━━ Delete confirmation ━━ */}
-      {deleteId && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5" onKeyDown={(e) => { if (e.key === 'Escape') setDeleteId(null) }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="history-delete-title" className="card w-full max-w-sm text-center">
-            <h3 id="history-delete-title" className="text-title mb-2">{t('history.delete_confirm')}</h3>
-            <p className="text-sm text-gray-500 mb-6">{t('history.delete_confirm_sub')}</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="btn-secondary h-12 text-sm">
-                {t('common.cancel')}
-              </button>
-              <button onClick={handleDelete} className="btn-primary h-12 text-sm">
-                {t('common.delete')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {deleteId && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onKeyDown={(e) => { if (e.key === 'Escape') setDeleteId(null) }}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="history-delete-title"
+              className="card w-full max-w-sm text-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
+              <h3 id="history-delete-title" className="text-title mb-2">{t('history.delete_confirm')}</h3>
+              <p className="text-sm text-gray-500 mb-6">{t('history.delete_confirm_sub')}</p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteId(null)} className="btn-secondary h-12 text-sm">
+                  {t('common.cancel')}
+                </button>
+                <button onClick={handleDelete} className="btn-primary h-12 text-sm">
+                  {t('common.delete')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+    </PageTransition>
   )
 }
 

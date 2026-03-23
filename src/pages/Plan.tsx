@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, ChevronRight, RotateCcw, Sparkles, Info, Zap, TrendingUp, Target, Battery } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import {
   PHASES, loadBlock, startBlock, clearBlock,
   getCurrentWeekTarget, getBlockProgress
@@ -12,6 +13,7 @@ import { useWorkouts } from '../hooks/useWorkouts'
 import { detectFatigue } from '../lib/fatigueDetector'
 import InjuryRadar from '../components/InjuryRadar'
 import BlockWizard from '../components/BlockWizard'
+import PageTransition from '../components/PageTransition'
 
 const PHASE_COLORS = {
   blue:   { bg: 'bg-blue-500/15',  text: 'text-blue-400',  bar: 'bg-blue-500',  border: 'border-blue-500/40' },
@@ -40,7 +42,7 @@ export default function Plan() {
   const [confirmClear, setConfirmClear] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(false)
 
-  // Detecteer vermoeidheid — gebruik target frequency uit settings
+  // Detecteer vermoeidheid
   const targetFrequency = parseInt(settings.frequency) || 4
   const fatigue = workouts.length >= 4 ? detectFatigue(workouts, 3, targetFrequency) : null
 
@@ -78,7 +80,10 @@ export default function Plan() {
   }
 
   return (
-    <div className="px-4 py-6 pb-32">
+    <PageTransition>
+    <div className="relative overflow-hidden px-4 py-6 pb-32">
+      {/* Atmospheric glow */}
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 h-[400px] w-[500px] bg-[radial-gradient(ellipse,rgba(6,182,212,0.08)_0%,transparent_70%)] blur-[80px] z-0" />
       <div className="mb-6">
         <p className="label-caps mb-1">{t('plan.periodization')}</p>
         <h1 className="text-display">{t('plan.title')}</h1>
@@ -95,8 +100,13 @@ export default function Plan() {
         userId={user?.id}
       />
 
-      {/* What is periodization — info banner */}
-      <div className="card mb-5">
+      {/* What is periodization -- info banner */}
+      <motion.div
+        className="card mb-5"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      >
         <div className="flex items-start gap-3">
           <Info size={16} className="mt-0.5 shrink-0 text-[var(--text-3)]" />
           <div>
@@ -106,12 +116,17 @@ export default function Plan() {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Current block */}
       {block && phase && !selecting ? (
         <>
-          <div className={`card-accent mb-5 ${phaseColor.border}`}>
+          <motion.div
+            className={`card-accent mb-5 ${phaseColor.border}`}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut', delay: 0.05 }}
+          >
             <div className="mb-1 flex items-center justify-between">
               <span className="label-caps">{t('plan.active_block')}</span>
               <button
@@ -141,14 +156,14 @@ export default function Plan() {
               </div>
             )}
 
-            {/* Week timeline */}
+            {/* Week timeline — progressive reveal */}
             <div className="mb-4 flex gap-2">
               {phase.weekTargets.map((wt, i) => {
                 const weekNum = i + 1
                 const isDone = weekNum < (progress?.currentWeek || 1)
                 const isCurrent = weekNum === (progress?.currentWeek || 1)
                 return (
-                  <div
+                  <motion.div
                     key={i}
                     className={`flex flex-1 flex-col items-center rounded-xl py-3 text-center border ${
                       isCurrent
@@ -157,6 +172,9 @@ export default function Plan() {
                         ? 'bg-white/[0.04] border-[var(--border-subtle)]'
                         : 'bg-white/[0.02] border-[var(--border-subtle)]'
                     }`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeOut', delay: 0.1 + i * 0.06 }}
                   >
                     <span className={`text-[10px] font-semibold uppercase tracking-widest ${
                       isCurrent ? phaseColor.text : isDone ? 'text-[var(--text-2)]' : 'text-[var(--text-3)]'
@@ -168,7 +186,7 @@ export default function Plan() {
                     </span>
                     {isDone && <CheckCircle2 size={12} className="mt-1 text-green-500" />}
                     {isCurrent && <span className="mt-1 text-[8px] uppercase text-cyan-400 font-bold">{t('plan.now')}</span>}
-                  </div>
+                  </motion.div>
                 )
               })}
             </div>
@@ -196,20 +214,31 @@ export default function Plan() {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Start workout CTA */}
-          <button
-            onClick={() => nav('/coach')}
-            className="btn-primary mb-4"
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut', delay: 0.15 }}
           >
-            <Sparkles size={20} />
-            {t('plan.generate_today')}
-            <ChevronRight size={18} className="ml-auto" />
-          </button>
+            <button
+              onClick={() => nav('/coach')}
+              className="btn-primary mb-4"
+            >
+              <Sparkles size={20} />
+              {t('plan.generate_today')}
+              <ChevronRight size={18} className="ml-auto" />
+            </button>
+          </motion.div>
 
           {/* Phase sequence suggestion */}
-          <div className="card">
+          <motion.div
+            className="card"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut', delay: 0.2 }}
+          >
             <p className="label-caps mb-3">{t('plan.recommended_order')}</p>
             <div className="flex gap-1.5">
               {SUGGESTED_ORDER.map((key) => {
@@ -240,39 +269,45 @@ export default function Plan() {
                 </p>
               </div>
             )}
-          </div>
+          </motion.div>
         </>
       ) : (
         /* Phase selector */
         <>
           <p className="mb-4 text-sm text-[var(--text-2)]">{t('plan.choose_phase')}</p>
           <div className="space-y-3">
-            {Object.entries(PHASES).map(([key, p]) => {
+            {Object.entries(PHASES).map(([key, p], index) => {
               const c = PHASE_COLORS[p.color as keyof typeof PHASE_COLORS]
               const Icon = PHASE_ICONS[key as keyof typeof PHASE_ICONS]
               return (
-                <button
+                <motion.div
                   key={key}
-                  onClick={() => handleStart(key as import('../types').PeriodizationPhase)}
-                  className={`card w-full text-left transition-all active:scale-[0.98] ${c.bg} border-[var(--border-accent)]`}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut', delay: index * 0.06 }}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <Icon size={24} className={c.text} />
-                      <div>
-                        <p className="font-bold text-white">{p.label}</p>
-                        <p className="mt-0.5 text-xs text-[var(--text-2)]">{p.description}</p>
-                        <div className="mt-2 flex gap-3 text-xs">
-                          <span className={c.text}>{p.weeks} {t('plan.weeks')}</span>
-                          <span className="text-[var(--text-3)]">
-                            RPE {p.weekTargets[0]!.rpe}–{p.weekTargets[p.weekTargets.length - 2]?.rpe ?? p.weekTargets[0]!.rpe}
-                          </span>
+                  <button
+                    onClick={() => handleStart(key as import('../types').PeriodizationPhase)}
+                    className={`card w-full text-left transition-all active:scale-[0.98] ${c.bg} border-[var(--border-accent)]`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        <Icon size={24} className={c.text} />
+                        <div>
+                          <p className="font-bold text-white">{p.label}</p>
+                          <p className="mt-0.5 text-xs text-[var(--text-2)]">{p.description}</p>
+                          <div className="mt-2 flex gap-3 text-xs">
+                            <span className={c.text}>{p.weeks} {t('plan.weeks')}</span>
+                            <span className="text-[var(--text-3)]">
+                              RPE {p.weekTargets[0]!.rpe}–{p.weekTargets[p.weekTargets.length - 2]?.rpe ?? p.weekTargets[0]!.rpe}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <ChevronRight size={18} className={c.text} />
                     </div>
-                    <ChevronRight size={18} className={c.text} />
-                  </div>
-                </button>
+                  </button>
+                </motion.div>
               )
             })}
           </div>
@@ -306,18 +341,37 @@ export default function Plan() {
       )}
 
       {/* Confirm clear */}
-      {confirmClear && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4" onKeyDown={(e) => { if (e.key === 'Escape') setConfirmClear(false) }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="plan-confirm-title" className="card w-full max-w-sm p-6">
-            <h3 id="plan-confirm-title" className="text-title mb-2">{t('plan.end_block_confirm')}</h3>
-            <p className="mb-6 text-sm text-[var(--text-2)]">{t('plan.end_block_hint')}</p>
-            <div className="flex gap-3">
-              <button onClick={() => setConfirmClear(false)} className="btn-secondary flex-1">{t('common.cancel')}</button>
-              <button onClick={handleClear} className="btn-primary flex-1">{t('plan.end_block')}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {confirmClear && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onKeyDown={(e) => { if (e.key === 'Escape') setConfirmClear(false) }}
+          >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="plan-confirm-title"
+              className="card w-full max-w-sm p-6"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
+              <h3 id="plan-confirm-title" className="text-title mb-2">{t('plan.end_block_confirm')}</h3>
+              <p className="mb-6 text-sm text-[var(--text-2)]">{t('plan.end_block_hint')}</p>
+              <div className="flex gap-3">
+                <button onClick={() => setConfirmClear(false)} className="btn-secondary flex-1">{t('common.cancel')}</button>
+                <button onClick={handleClear} className="btn-primary flex-1">{t('plan.end_block')}</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+    </PageTransition>
   )
 }

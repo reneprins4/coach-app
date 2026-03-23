@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useWorkoutDetail } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
+import PageTransition from '../components/PageTransition'
 
 export default function WorkoutDetail() {
   const { t, i18n } = useTranslation()
@@ -49,7 +51,10 @@ export default function WorkoutDetail() {
   const totalVol = workout.totalVolume || 0
 
   return (
-    <div className="px-5 pt-6 pb-28">
+    <PageTransition>
+    <div className="relative overflow-hidden px-5 pt-6 pb-28">
+      {/* Atmospheric glow */}
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 h-[400px] w-[500px] bg-[radial-gradient(ellipse,rgba(6,182,212,0.08)_0%,transparent_70%)] blur-[80px] z-0" />
       {/* ━━ Back ━━ */}
       <button
         onClick={() => nav('/history')}
@@ -71,17 +76,23 @@ export default function WorkoutDetail() {
 
       {/* ━━ Stats row — inline, not cards ━━ */}
       <div className="mb-6 flex items-center gap-5">
-        <span className="text-sm text-gray-500">
-          <span className="font-bold tabular text-white">{totalExercises}</span> {t('common.exercises')}
-        </span>
-        <span className="text-sm text-gray-500">
-          <span className="font-bold tabular text-white">{totalSets}</span> {t('common.sets')}
-        </span>
-        {totalVol > 0 && (
-          <span className="text-sm text-gray-500">
-            <span className="font-bold tabular text-cyan-400">{formatVol(totalVol)}</span> {t('workout_detail.volume').toLowerCase()}
-          </span>
-        )}
+        {[
+          { value: totalExercises, label: t('common.exercises') },
+          { value: totalSets, label: t('common.sets') },
+          ...(totalVol > 0
+            ? [{ value: formatVol(totalVol), label: t('workout_detail.volume').toLowerCase(), accent: true }]
+            : []),
+        ].map((stat, i) => (
+          <motion.span
+            key={i}
+            className="text-sm text-gray-500"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut', delay: i * 0.06 }}
+          >
+            <span className={`font-bold tabular ${('accent' in stat && stat.accent) ? 'text-cyan-400' : 'text-white'}`}>{stat.value}</span> {stat.label}
+          </motion.span>
+        ))}
       </div>
 
       {/* ━━ Notes ━━ */}
@@ -95,11 +106,21 @@ export default function WorkoutDetail() {
       {/* ━━ Exercises ━━ */}
       <p className="label-caps mb-3">{t('workout_detail.exercises')}</p>
       <div className="space-y-3">
-        {Object.entries(grouped).map(([exercise, sets]) => {
+        {Object.entries(grouped).map(([exercise, sets], exerciseIndex) => {
           const exerciseVol = sets.reduce((sum, s) => sum + (s.weight_kg || 0) * (s.reps || 0), 0)
 
           return (
-            <div key={exercise} className="card p-0 overflow-hidden">
+            <motion.div
+              key={exercise}
+              className="card p-0 overflow-hidden"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: 'easeOut',
+                delay: Math.min(exerciseIndex * 0.06, 0.3),
+              }}
+            >
               {/* Exercise header */}
               <div className="flex items-center justify-between px-5 pt-4 pb-3">
                 <h3 className="text-sm font-bold text-white">{exercise}</h3>
@@ -120,22 +141,30 @@ export default function WorkoutDetail() {
 
                 {/* Data rows */}
                 {sets.map((s, i) => (
-                  <div
+                  <motion.div
                     key={s.id}
                     className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-3 py-2.5 border-t border-white/[0.04]"
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      duration: 0.25,
+                      ease: 'easeOut',
+                      delay: Math.min(exerciseIndex * 0.06 + i * 0.04, 0.5),
+                    }}
                   >
                     <span className="text-xs tabular text-gray-700">{i + 1}</span>
                     <span className="text-sm tabular font-semibold text-white">{s.weight_kg ?? '—'}</span>
                     <span className="text-sm tabular font-semibold text-white">{s.reps ?? '—'}</span>
                     <span className="text-xs tabular text-gray-600 text-right">{s.rpe || '—'}</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )
         })}
       </div>
     </div>
+    </PageTransition>
   )
 }
 

@@ -16,6 +16,8 @@ import { calculateMomentum } from '../lib/momentumCalculator'
 import { getCurrentBlock, getCurrentWeekTarget } from '../lib/periodization'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
+import { motion } from 'motion/react'
+import PageTransition from '../components/PageTransition'
 import ExercisePicker from '../components/ExercisePicker'
 import RestTimerBar from '../components/RestTimerBar'
 import FinishModal from '../components/FinishModal'
@@ -528,30 +530,32 @@ export default function Logger() {
     const formattedDate = formatDateForStartFlow(i18n.language)
 
     return (
-      <StartFlowView
-        state={startFlow.state}
-        user={user}
-        formattedDate={formattedDate}
-        lastWorkout={lastWorkout}
-        templates={templates}
-        showTemplates={showTemplates}
-        toast={toast}
-        onStartWorkout={() => aw.startWorkout()}
-        onStartEmpty={() => aw.startWorkout()}
-        onStartAIWorkout={handleStartAIWorkout}
-        onRepeatLastWorkout={handleRepeatLastWorkout}
-        onLoadTemplate={handleLoadTemplate}
-        onDeleteTemplate={handleDeleteTemplate}
-        onSetShowTemplates={setShowTemplates}
-        onSetToast={setToast}
-        onTimeChange={startFlow.handleTimeChange}
-        onGenerateForSplit={startFlow.generateForSplit}
-        onToggleSplitPicker={(show) => startFlow.dispatch({ type: 'TOGGLE_SPLIT_PICKER', payload: { show } })}
-        onNavigateToCoach={() => nav('/coach')}
-        onShowReview={startFlow.state.generatedWorkout ? handleShowReview : undefined}
-        workoutCount={workoutCount}
-        onStartFirstWorkout={handleStartFirstWorkout}
-      />
+      <PageTransition>
+        <StartFlowView
+          state={startFlow.state}
+          user={user}
+          formattedDate={formattedDate}
+          lastWorkout={lastWorkout}
+          templates={templates}
+          showTemplates={showTemplates}
+          toast={toast}
+          onStartWorkout={() => aw.startWorkout()}
+          onStartEmpty={() => aw.startWorkout()}
+          onStartAIWorkout={handleStartAIWorkout}
+          onRepeatLastWorkout={handleRepeatLastWorkout}
+          onLoadTemplate={handleLoadTemplate}
+          onDeleteTemplate={handleDeleteTemplate}
+          onSetShowTemplates={setShowTemplates}
+          onSetToast={setToast}
+          onTimeChange={startFlow.handleTimeChange}
+          onGenerateForSplit={startFlow.generateForSplit}
+          onToggleSplitPicker={(show) => startFlow.dispatch({ type: 'TOGGLE_SPLIT_PICKER', payload: { show } })}
+          onNavigateToCoach={() => nav('/coach')}
+          onShowReview={startFlow.state.generatedWorkout ? handleShowReview : undefined}
+          workoutCount={workoutCount}
+          onStartFirstWorkout={handleStartFirstWorkout}
+        />
+      </PageTransition>
     )
   }
 
@@ -563,7 +567,7 @@ export default function Logger() {
   return (
     <div className="flex min-h-dvh flex-col bg-gray-950 pb-28">
       {/* Sticky Workout Header */}
-      <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 bg-[var(--bg-base)]/95 backdrop-blur-xl border-b border-[var(--border-subtle)]">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
@@ -597,7 +601,7 @@ export default function Logger() {
               <button
                 onClick={handleFinishClick}
                 disabled={aw.saving || aw.totalSets === 0}
-                className="h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(6,182,212,0.3)] disabled:opacity-40 active:scale-[0.97] transition-transform"
+                className="btn-primary h-10 px-5 text-sm w-auto disabled:opacity-40"
               >
                 {aw.saving ? t('logger.saving') : t('logger.finish')}
               </button>
@@ -605,17 +609,16 @@ export default function Logger() {
           </div>
         </div>
         {aw.error && (
-          <p className="mx-4 mb-3 rounded-lg bg-cyan-900/30 px-3 py-2 text-sm text-cyan-400">{aw.error}</p>
+          <p className="mx-4 mb-3 rounded-xl bg-cyan-500/5 border border-cyan-500/15 px-3 py-2 text-sm text-cyan-400">{aw.error}</p>
         )}
         {momentum && (
           <div className="px-4 pb-3">
             <MomentumIndicator momentum={momentum} />
           </div>
         )}
+        {/* Rest timer – inside sticky header so it stays visible while scrolling */}
+        {rest.active && <RestTimerBar remaining={rest.remaining} total={rest.total} onStop={rest.stop} onSetDuration={rest.setDuration} onAddTime={rest.addTime} />}
       </header>
-
-      {/* Rest timer */}
-      {rest.active && <RestTimerBar remaining={rest.remaining} total={rest.total} onStop={rest.stop} onSetDuration={rest.setDuration} onAddTime={rest.addTime} />}
 
       {/* Exercise list */}
       <div className="flex-1 space-y-4 px-4 py-4">
@@ -643,8 +646,13 @@ export default function Logger() {
             />
           ))
         ) : (
-          workout.exercises.map((exercise: ActiveExercise) => (
-            <div key={exercise.name}>
+          workout.exercises.map((exercise: ActiveExercise, index: number) => (
+            <motion.div
+              key={exercise.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+            >
               <ExerciseBlock
                 exercise={exercise}
                 userId={user?.id}
@@ -668,7 +676,7 @@ export default function Logger() {
                   />
                 </div>
               )}
-            </div>
+            </motion.div>
           ))
         )}
 

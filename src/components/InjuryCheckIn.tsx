@@ -59,14 +59,14 @@ export default function InjuryCheckIn({ isOpen, onClose, onCheckIn, injuryArea }
   const selectedConfig = FEELINGS.find(f => f.key === selectedFeeling)
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="injury-checkin-title"
-        className="w-full max-w-sm rounded-2xl bg-gray-900 p-5"
+        className="card w-full max-w-sm"
       >
-        <h2 id="injury-checkin-title" className="mb-4 text-center text-lg font-bold text-white">
+        <h2 id="injury-checkin-title" className="text-title mb-4 text-center">
           {t('injury.check_in_title')}
         </h2>
 
@@ -76,7 +76,7 @@ export default function InjuryCheckIn({ isOpen, onClose, onCheckIn, injuryArea }
               <button
                 key={key}
                 onClick={() => handleSelect(key)}
-                className="flex flex-col items-center gap-2 rounded-xl border border-gray-800 bg-gray-800/50 p-4 active:border-cyan-500 active:bg-cyan-500/10"
+                className="flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] border border-white/[0.06] p-4 active:bg-[var(--accent-dim)] active:border-[var(--border-accent)]"
               >
                 <Icon size={28} className={color} aria-hidden="true" />
                 <span className="text-sm font-medium text-white">{t(`injury.feeling_${key}`)}</span>

@@ -8,6 +8,8 @@ import type {
   SplitScore, Workout, ExerciseClassification, ExperienceLevel,
   LastSessionSet, SplitName,
 } from '../types'
+import { loadInjuries } from './injuryRecovery'
+import type { InjuryArea, InjurySeverity } from './injuryRecovery'
 
 /** All tracked muscle groups */
 export const MUSCLE_GROUPS: MuscleGroup[] = [
@@ -352,6 +354,24 @@ function toNL(muscles: string[]): string {
   return muscles.map(m => MUSCLE_NL[m as MuscleGroup] || m).join(', ')
 }
 
+// Injury area -> muscles that should be penalized in split scoring
+const INJURY_MUSCLE_PENALTIES: Record<InjuryArea, MuscleGroup[]> = {
+  knee:       ['quads', 'hamstrings', 'glutes'],
+  shoulder:   ['shoulders', 'chest'],
+  lower_back: ['back', 'hamstrings'],
+  elbow:      ['biceps', 'triceps'],
+  wrist:      ['biceps', 'triceps', 'chest'],
+  hip:        ['quads', 'hamstrings', 'glutes'],
+  neck:       [],  // small general penalty handled separately
+  ankle:      ['quads', 'glutes'],
+}
+
+const INJURY_SEVERITY_PENALTY: Record<InjurySeverity, number> = {
+  severe:   -200,
+  moderate: -100,
+  mild:     -50,
+}
+
 interface LastWorkoutInfo {
   split: string
   hoursSince: number
@@ -426,6 +446,26 @@ export function scoreSplits(
     }
 
     scores[splitName] = Math.round(score * 10) / 10
+  }
+
+  // --- Injury-aware penalty: deprioritize splits targeting injured areas ---
+  const activeInjuries = loadInjuries().filter(i => i.status !== 'resolved')
+  for (const injury of activeInjuries) {
+    const penalizedMuscles = INJURY_MUSCLE_PENALTIES[injury.bodyArea]
+    const severityPenalty = INJURY_SEVERITY_PENALTY[injury.severity]
+
+    for (const [splitName, muscles] of Object.entries(SPLIT_MUSCLES)) {
+      if (penalizedMuscles.length === 0) {
+        // neck: small general penalty to all splits
+        scores[splitName] = (scores[splitName] ?? 0) + Math.round(severityPenalty * 0.15)
+      } else {
+        const overlap = muscles.filter(m => penalizedMuscles.includes(m))
+        if (overlap.length > 0) {
+          const overlapRatio = overlap.length / muscles.length
+          scores[splitName] = (scores[splitName] ?? 0) + Math.round(severityPenalty * overlapRatio)
+        }
+      }
+    }
   }
 
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1])

@@ -63,32 +63,36 @@ export default function Layout() {
       </main>
 
       {!hideNav && (
-        <nav aria-label="Main navigation" className="nav-premium fixed bottom-0 left-0 right-0 z-50 pb-safe">
-          <div className="mx-auto flex max-w-lg w-full">
-            {tabs.map(({ to, icon: Icon, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === '/'}
-                aria-label={label}
-                className={({ isActive }) =>
-                  `relative flex flex-1 flex-col items-center gap-1 py-4 text-[10px] font-medium uppercase tracking-wide transition-colors min-h-[44px] min-w-[44px] ${
-                    isActive ? 'text-cyan-400' : 'text-[var(--text-3)]'
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} aria-hidden="true" />
-                    <span>{label}</span>
-                    {isActive && (
-                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-cyan-500" aria-hidden="true" />
-                    )}
-                  </>
-                )}
-              </NavLink>
-            ))}
+        <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+          <div className="nav-premium">
+            <div className="mx-auto flex max-w-lg w-full">
+              {tabs.map(({ to, icon: Icon, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={to === '/'}
+                  aria-label={label}
+                  className={({ isActive }) =>
+                    `relative flex flex-1 flex-col items-center gap-1 pt-3 pb-2 text-[10px] font-medium uppercase tracking-wide transition-colors min-h-[44px] min-w-[44px] ${
+                      isActive ? 'text-cyan-400' : 'text-[var(--text-3)]'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} aria-hidden="true" />
+                      <span>{label}</span>
+                      {isActive && (
+                        <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full bg-cyan-500" aria-hidden="true" />
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+            </div>
           </div>
+          {/* Safe area fill — same background as nav */}
+          <div className="bg-[var(--bg-base)]" style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
         </nav>
       )}
     </div>

@@ -224,7 +224,7 @@ export async function generateScientificWorkout({
   const activeInjuries = loadInjuries().filter(i => i.status !== 'resolved')
   const injuryNote = activeInjuries.length > 0
     ? `\nINJURIES:\n${activeInjuries.map(i =>
-        `INJURY: ${i.bodyArea} (${i.severity}, ${i.status}) — AVOID exercises that stress this area. ${i.status === 'recovering' ? 'Use 70% weight for affected area.' : 'DO NOT include exercises for this area.'}`
+        `INJURY: ${i.bodyArea} (${i.side}) - ${i.severity} - ${i.status} — AVOID exercises that stress this area. ${i.status === 'recovering' ? 'Use 70% weight for affected area. Consider unilateral alternatives for the unaffected side.' : 'DO NOT include exercises for this area.'}`
       ).join('\n')}`
     : ''
 

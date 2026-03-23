@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Award, TrendingUp, Trophy, ArrowUp, ArrowDown, Minus, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
+import PageTransition from '../components/PageTransition'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
@@ -47,9 +49,9 @@ function getMuscleGroup(name: string): string | null {
 }
 
 const CHART_TOOLTIP_STYLE = {
-  contentStyle: { background: '#111827', border: '1px solid #1f2937', borderRadius: 12, fontSize: 12 },
-  labelStyle: { color: '#6b7280' },
-  itemStyle: { color: '#e5e7eb' },
+  contentStyle: { background: '#121218', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, fontSize: 12, padding: '8px 12px' },
+  labelStyle: { color: 'rgba(255,255,255,0.32)' },
+  itemStyle: { color: 'rgba(255,255,255,0.92)' },
 }
 
 export default function Progress() {
@@ -254,17 +256,20 @@ export default function Progress() {
   }
 
   return (
-    <div className="px-4 py-6 pb-28">
+    <PageTransition>
+    <div className="relative overflow-hidden px-4 py-6 pb-28">
+      {/* Atmospheric glow */}
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 h-[400px] w-[500px] bg-[radial-gradient(ellipse,rgba(6,182,212,0.08)_0%,transparent_70%)] blur-[80px] z-0" />
       {/* Header */}
       <div className="mb-6 flex items-end justify-between">
         <div>
           <p className="label-caps mb-1">{t('progress.stats')}</p>
-          <h1 className="text-3xl font-black tracking-tight text-white">{t('progress.title')}</h1>
+          <h1 className="text-display">{t('progress.title')}</h1>
         </div>
         {storyData && (
           <button
             onClick={() => setShowStory(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-cyan-500/10 px-3 py-1.5 text-xs font-bold text-cyan-400 active:bg-cyan-500/20"
+            className="flex items-center gap-1.5 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-2 text-xs font-bold text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all active:scale-95 active:bg-cyan-500/20"
           >
             <Sparkles size={14} />
             {t('story.view_story')}
@@ -272,17 +277,17 @@ export default function Progress() {
         )}
       </div>
 
-      {/* Tab bar — horizontally scrollable */}
-      <div className="mb-6 -mx-4 px-4">
-        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+      {/* Tab bar */}
+      <div className="mb-6">
+        <div className="flex gap-1 overflow-x-auto scrollbar-none rounded-2xl bg-white/[0.03] border border-white/[0.06] p-1">
           {TABS.map(tabItem => (
             <button
               key={tabItem.id}
               onClick={() => setTab(tabItem.id)}
-              className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
                 tab === tabItem.id
-                  ? 'bg-white text-black shadow-sm'
-                  : 'bg-gray-900 text-gray-500 active:text-gray-300'
+                  ? 'bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.35)]'
+                  : 'text-gray-500 active:text-gray-300'
               }`}
             >
               {tabItem.label}
@@ -293,33 +298,45 @@ export default function Progress() {
 
       {/* Encouragement message for beginners with few workouts */}
       {remainingForAnalysis > 0 && (
-        <div className="mb-4 rounded-2xl border border-cyan-500/20 bg-cyan-500/8 p-4 text-center">
+        <div className="card-accent mb-4 text-center">
           <p className="text-sm text-cyan-400 font-semibold">
             {t('progress.workouts_until_analysis', { count: remainingForAnalysis })}
           </p>
         </div>
       )}
 
-      {/* ── Per oefening ──────────────────────────────────────────── */}
+      {/* Tab content with AnimatePresence */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+      {/* -- Per oefening ----------------------------------------- */}
       {tab === 'exercise' && (
         <div className="space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-600" />
             <input
               type="text"
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedExercise(null) }}
               placeholder={t('progress.search_exercise')}
               aria-label={t('progress.search_exercise')}
-              className="h-12 w-full rounded-2xl bg-gray-900 pl-10 pr-4 text-sm text-white placeholder-gray-600 outline-none border border-gray-800 focus:border-gray-600"
+              className="h-12 w-full rounded-xl pl-10 pr-4 text-sm text-white placeholder-gray-600 outline-none"
             />
           </div>
 
           {!selectedExercise && (
-            <div className="divide-y divide-gray-800/60 rounded-2xl bg-gray-900 overflow-hidden">
+            <div className="card p-0 overflow-hidden divide-y divide-white/[0.04]">
               {filteredNames.length === 0 ? (
-                <p className="py-10 text-center text-sm text-gray-600">{t('progress.no_exercises')}</p>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <Search size={40} className="mb-3 text-gray-700" />
+                  <p className="text-sm text-gray-500">{t('progress.no_exercises')}</p>
+                </div>
               ) : (
                 filteredNames.map(name => {
                   const mg = getMuscleGroup(name)
@@ -327,12 +344,25 @@ export default function Progress() {
                     <button
                       key={name}
                       onClick={() => { setSelectedExercise(name); setQuery(name) }}
-                      className="flex w-full items-center justify-between px-4 py-3.5 active:bg-gray-800/80"
+                      className="flex w-full items-center justify-between px-4 py-3.5 transition-colors active:bg-white/[0.03]"
                     >
-                      <span className="text-sm text-white">{name}</span>
-                      {mg && (
-                        <span className="label-caps">{t(`muscles.${mg}`)}</span>
-                      )}
+                      <div className="flex items-center gap-3">
+                        {mg && (
+                          <span
+                            className="h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: (MG_COLORS as Record<string, string>)[mg] }}
+                          />
+                        )}
+                        <span className="text-sm font-medium text-white">{name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {mg && (
+                          <span className="label-caps">{t(`muscles.${mg}`)}</span>
+                        )}
+                        <svg width="7" height="12" viewBox="0 0 7 12" fill="none" className="text-gray-700">
+                          <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                     </button>
                   )
                 })
@@ -343,15 +373,15 @@ export default function Progress() {
           {selectedExercise && exerciseData && (
             <div className="space-y-4">
               {/* All-time PR */}
-              <div className="flex items-center gap-4 rounded-2xl border border-cyan-500/20 bg-cyan-500/8 p-5">
+              <div className="card-accent flex items-center gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15">
                   <Award size={22} className="text-cyan-400" />
                 </div>
                 <div>
-                  <p className="label-caps text-cyan-600">{t('progress.all_time_e1rm')}</p>
-                  <p className="text-3xl font-black tracking-tight text-white">
+                  <p className="label-caps text-cyan-500/60">{t('progress.all_time_e1rm')}</p>
+                  <p className="text-4xl font-black tracking-tight text-white">
                     {exerciseData.allTimeE1rm.toFixed(1)}
-                    <span className="ml-1 text-lg font-semibold text-gray-400">kg</span>
+                    <span className="ml-1.5 text-base font-semibold text-gray-500">kg</span>
                   </p>
                 </div>
               </div>
@@ -359,16 +389,16 @@ export default function Progress() {
               {exerciseData.sessions.length > 1 && (
                 <>
                   {/* E1RM trend */}
-                  <div className="rounded-2xl bg-gray-900 p-4">
+                  <div className="card p-5">
                     <div className="mb-4 flex items-center gap-2">
                       <TrendingUp size={15} className="text-orange-400" />
                       <p className="label-caps">{t('progress.estimated_1rm')}</p>
                     </div>
                     <ResponsiveContainer width="100%" height={180}>
                       <LineChart data={exerciseData.sessions}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} width={32} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.32)' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.32)' }} axisLine={false} tickLine={false} width={32} />
                         <Tooltip {...CHART_TOOLTIP_STYLE} />
                         <Line type="monotone" dataKey="e1rm" stroke="#f97316" strokeWidth={2.5} dot={{ r: 3, fill: '#f97316', strokeWidth: 0 }} activeDot={{ r: 5 }} />
                       </LineChart>
@@ -376,13 +406,13 @@ export default function Progress() {
                   </div>
 
                   {/* Volume */}
-                  <div className="rounded-2xl bg-gray-900 p-4">
+                  <div className="card p-5">
                     <p className="label-caps mb-4">{t('progress.volume_per_session')}</p>
                     <ResponsiveContainer width="100%" height={160}>
                       <BarChart data={exerciseData.sessions}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} width={32} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.32)' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.32)' }} axisLine={false} tickLine={false} width={32} />
                         <Tooltip {...CHART_TOOLTIP_STYLE} />
                         <Bar dataKey="volume" fill="#f97316" radius={[6, 6, 0, 0]} />
                       </BarChart>
@@ -392,20 +422,20 @@ export default function Progress() {
               )}
 
               {/* Performance forecast */}
-              <Suspense fallback={<div className="rounded-2xl bg-gray-900 p-4"><Skeleton className="h-32 w-full" /></div>}>
+              <Suspense fallback={<div className="card p-5"><Skeleton className="h-32 w-full rounded-xl" /></div>}>
                 <PerformanceForecast sessions={exerciseData.sessions} exerciseName={selectedExercise} />
               </Suspense>
 
               {/* Recent sessions */}
-              <div className="rounded-2xl bg-gray-900 overflow-hidden">
-                <p className="label-caps px-4 pt-4 pb-3">{t('progress.recent_sessions')}</p>
-                <div className="divide-y divide-gray-800/60">
+              <div className="card p-0 overflow-hidden">
+                <p className="label-caps px-5 pt-5 pb-3">{t('progress.recent_sessions')}</p>
+                <div className="divide-y divide-white/[0.04]">
                   {exerciseData.sessions.slice(-5).reverse().map((s, i) => (
-                    <div key={i} className="flex items-center justify-between px-4 py-3">
+                    <div key={i} className="flex items-center justify-between px-5 py-3.5">
                       <span className="text-xs text-gray-500">{s.date}</span>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-white">
-                          {s.sets.map(x => `${x.weight_kg}×${x.reps}`).join('  ')}
+                          {s.sets.map(x => `${x.weight_kg}x${x.reps}`).join('  ')}
                         </p>
                         <p className="text-[10px] text-gray-600">e1RM {s.e1rm} kg</p>
                       </div>
@@ -418,7 +448,7 @@ export default function Progress() {
         </div>
       )}
 
-      {/* ── Volume ─────────────────────────────────────────────────── */}
+      {/* -- Volume ------------------------------------------------ */}
       {tab === 'volume' && (
         <div className="space-y-5">
           {/* Header with period selector */}
@@ -426,14 +456,14 @@ export default function Progress() {
             <div>
               <p className="label-caps mb-1">{t('volume.title')}</p>
             </div>
-            <div className="flex gap-1 rounded-xl bg-gray-900 p-1">
+            <div className="flex gap-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06] p-1">
               {['4w', '8w', '12w', '16w', '6m'].map(p => (
                 <button
                   key={p}
                   onClick={() => setVolumePeriod(p)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                     volumePeriod === p
-                      ? 'bg-white text-black'
+                      ? 'bg-white text-black shadow-sm'
                       : 'text-gray-500 active:text-gray-300'
                   }`}
                 >
@@ -445,12 +475,13 @@ export default function Progress() {
 
           {/* Volume chart */}
           {volumeData.length > 0 ? (
-            <div className="card p-4">
+            <div className="card p-5">
               <p className="label-caps mb-4">{t('volume.total_volume')}</p>
               <VolumeChart data={volumeData} unit="kg" />
             </div>
           ) : (
-            <div className="card p-8 text-center">
+            <div className="flex flex-col items-center justify-center py-20">
+              <TrendingUp size={40} className="mb-3 text-gray-700" />
               <p className="text-sm text-gray-500">{t('volume.no_data')}</p>
             </div>
           )}
@@ -458,9 +489,7 @@ export default function Progress() {
           {/* Stats cards */}
           <div className="grid grid-cols-3 gap-3">
             {/* Avg per week */}
-            <div
-              className="card p-4 text-center"
-            >
+            <div className="card p-4 text-center">
               <p className="text-2xl font-black tabular-nums text-white">
                 {volumeStats.avgVolume >= 1000
                   ? `${(volumeStats.avgVolume / 1000).toFixed(1)}k`
@@ -470,27 +499,23 @@ export default function Progress() {
             </div>
 
             {/* Best week */}
-            <div
-              className="card p-4 text-center"
-            >
+            <div className="card p-4 text-center">
               <p className="text-2xl font-black tabular-nums text-white">
                 {volumeStats.best
                   ? volumeStats.best.totalVolume >= 1000
                     ? `${(volumeStats.best.totalVolume / 1000).toFixed(1)}k`
                     : volumeStats.best.totalVolume
-                  : '—'}
+                  : '---'}
               </p>
               <p className="label-caps mt-1">{t('volume.best_week')}</p>
             </div>
 
             {/* Trend */}
-            <div
-              className="card p-4 text-center"
-            >
+            <div className="card p-4 text-center">
               <div className="flex items-center justify-center gap-1">
                 {volumeStats.trend.direction === 'up' && (
                   <>
-                    <ArrowUp size={20} className="text-emerald-400" />
+                    <ArrowUp size={20} className="text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]" />
                     <span className="text-2xl font-black tabular-nums text-emerald-400">
                       {volumeStats.trend.pct}%
                     </span>
@@ -498,7 +523,7 @@ export default function Progress() {
                 )}
                 {volumeStats.trend.direction === 'down' && (
                   <>
-                    <ArrowDown size={20} className="text-red-400" />
+                    <ArrowDown size={20} className="text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.5)]" />
                     <span className="text-2xl font-black tabular-nums text-red-400">
                       {volumeStats.trend.pct}%
                     </span>
@@ -507,7 +532,7 @@ export default function Progress() {
                 {volumeStats.trend.direction === 'flat' && (
                   <>
                     <Minus size={20} className="text-gray-400" />
-                    <span className="text-2xl font-black tabular-nums text-gray-400">—</span>
+                    <span className="text-2xl font-black tabular-nums text-gray-400">---</span>
                   </>
                 )}
               </div>
@@ -517,25 +542,23 @@ export default function Progress() {
 
           {/* Muscle breakdown */}
           {muscleSorted.length > 0 && (
-            <div
-              className="card"
-            >
-              <p className="label-caps mb-4">{t('volume.muscle_breakdown')}</p>
+            <div className="card">
+              <p className="label-caps mb-5">{t('volume.muscle_breakdown')}</p>
               <div className="space-y-4">
                 {muscleSorted.map(group => (
                   <div key={group.key}>
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-black tracking-tight text-white">
+                      <span className="text-sm font-bold text-white">
                         {t(`muscles.${group.key}`, group.key)}
                       </span>
                       <span className="tabular-nums text-sm font-bold text-gray-300">
                         {group.sets} <span className="font-normal text-gray-600">{t('volume.sets_label')}</span>
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
                       <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${group.pct}%`, backgroundColor: '#06b6d4', minWidth: group.sets > 0 ? '6px' : '0' }}
+                        className="h-full rounded-full bg-cyan-500 glow-bar transition-all duration-500"
+                        style={{ width: `${group.pct}%`, minWidth: group.sets > 0 ? '6px' : '0' }}
                       />
                     </div>
                   </div>
@@ -546,17 +569,17 @@ export default function Progress() {
         </div>
       )}
 
-      {/* ── Spiergroepen ──────────────────────────────────────────── */}
+      {/* -- Spiergroepen ------------------------------------------ */}
       {tab === 'muscle' && (
         <div className="space-y-4">
           {/* Volume chart */}
-          <div className="rounded-2xl bg-gray-900 p-4">
+          <div className="card p-5">
             <p className="label-caps mb-4">{t('progress.volume_per_muscle')}</p>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={muscleData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#4b5563' }} axisLine={false} tickLine={false} width={32} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                <XAxis dataKey="week" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.32)' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.32)' }} axisLine={false} tickLine={false} width={32} />
                 <Tooltip {...CHART_TOOLTIP_STYLE} />
                 {MUSCLE_GROUPS.map(mg => (
                   <Bar key={mg} dataKey={mg} fill={(MG_COLORS as Record<string, string>)[mg]} stackId="a" radius={mg === 'core' ? [4, 4, 0, 0] : undefined} />
@@ -593,7 +616,7 @@ export default function Progress() {
         </div>
       )}
 
-      {/* ── Records ─────────────────────────────────────────────── */}
+      {/* -- Records ----------------------------------------------- */}
       {tab === 'records' && (
         <div className="space-y-4">
           {allPRs.length === 0 ? (
@@ -610,18 +633,18 @@ export default function Progress() {
                   {prs.map((pr, idx) => (
                     <div
                       key={`${pr.exercise}-${idx}`}
-                      className="card p-4"
+                      className="card"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-black tracking-tight text-white truncate">{pr.exercise}</h3>
-                          <div className="mt-1 flex items-center gap-3">
+                          <div className="mt-1.5 flex items-center gap-3">
                             <span className="text-lg font-bold tabular-nums text-white">
                               {pr.bestWeight}<span className="text-sm font-normal text-gray-500">kg</span>
                               <span className="mx-1 text-gray-600">x</span>
                               {pr.bestReps}
                             </span>
-                            <span className="label-caps text-cyan-500">
+                            <span className="inline-flex items-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 text-[10px] font-bold tabular-nums text-cyan-400">
                               {t('pr.e1rm_label')}: {pr.bestE1RM}kg
                             </span>
                           </div>
@@ -645,7 +668,7 @@ export default function Progress() {
         </div>
       )}
 
-      {/* ── Lichaam (Body Measurements) ────────────────────────────── */}
+      {/* -- Lichaam (Body Measurements) --------------------------- */}
       {tab === 'lichaam' && (
         <div className="space-y-4">
           {/* Input form */}
@@ -663,10 +686,10 @@ export default function Progress() {
                 <button
                   key={type}
                   onClick={() => setSelectedMeasurementType(type)}
-                  className={`card p-3 text-center transition-colors ${
+                  className={`card p-3 text-center transition-all ${
                     isSelected
-                      ? 'border-cyan-500'
-                      : 'border-gray-800/50'
+                      ? 'border-cyan-500/40'
+                      : 'border-white/[0.06]'
                   }`}
                 >
                   <p className="label-caps mb-1">{t(labelKey)}</p>
@@ -683,12 +706,12 @@ export default function Progress() {
                           {trend === 'up' && t('measurements.trend_up')}
                           {trend === 'down' && t('measurements.trend_down')}
                           {trend === 'stable' && t('measurements.trend_stable')}
-                          {!trend && '—'}
+                          {!trend && '---'}
                         </span>
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-gray-600">—</p>
+                    <p className="text-sm text-gray-600">---</p>
                   )}
                 </button>
               )
@@ -696,9 +719,7 @@ export default function Progress() {
           </div>
 
           {/* Chart for selected type */}
-          <div
-            className="card p-4"
-          >
+          <div className="card p-5">
             <div className="mb-3 flex items-center gap-2">
               <TrendingUp size={15} className="text-cyan-400" />
               <p className="label-caps">
@@ -713,23 +734,23 @@ export default function Progress() {
         </div>
       )}
 
-      {/* ── Analyse ───────────────────────────────────────────────── */}
+      {/* -- Analyse ----------------------------------------------- */}
       {tab === 'analyse' && (
-        <Suspense fallback={<div className="space-y-3"><Skeleton className="h-24 w-full rounded-2xl" /><Skeleton className="h-24 w-full rounded-2xl" /></div>}>
+        <Suspense fallback={<div className="space-y-3"><div className="card p-5"><Skeleton className="h-24 w-full rounded-xl" /></div><div className="card p-5"><Skeleton className="h-24 w-full rounded-xl" /></div></div>}>
           <FormDetective workouts={workouts} userId={user?.id} />
         </Suspense>
       )}
 
-      {/* ── Balans ────────────────────────────────────────────────── */}
+      {/* -- Balans ------------------------------------------------ */}
       {tab === 'balans' && (
-        <Suspense fallback={<div className="space-y-3"><Skeleton className="h-24 w-full rounded-2xl" /><Skeleton className="h-24 w-full rounded-2xl" /></div>}>
+        <Suspense fallback={<div className="space-y-3"><div className="card p-5"><Skeleton className="h-24 w-full rounded-xl" /></div><div className="card p-5"><Skeleton className="h-24 w-full rounded-xl" /></div></div>}>
           <WeaknessHunter workouts={workouts} priorityMuscles={settings?.priorityMuscles || []} />
         </Suspense>
       )}
 
-      {/* ── Optimale Trainingstijd ────────────────────────────── */}
+      {/* -- Optimale Trainingstijd -------------------------------- */}
       {tab === 'optimal_hour' && (
-        <Suspense fallback={<div className="space-y-3"><Skeleton className="h-24 w-full rounded-2xl" /><Skeleton className="h-24 w-full rounded-2xl" /></div>}>
+        <Suspense fallback={<div className="space-y-3"><div className="card p-5"><Skeleton className="h-24 w-full rounded-xl" /></div><div className="card p-5"><Skeleton className="h-24 w-full rounded-xl" /></div></div>}>
           <OptimalHourDetail
             result={optimalHourResult ?? {
               hasEnoughData: false,
@@ -746,6 +767,9 @@ export default function Progress() {
         </Suspense>
       )}
 
+        </motion.div>
+      </AnimatePresence>
+
       {/* Training Story Overlay */}
       {showStory && storyData && (
         <Suspense fallback={null}>
@@ -760,5 +784,6 @@ export default function Progress() {
         </Suspense>
       )}
     </div>
+    </PageTransition>
   )
 }

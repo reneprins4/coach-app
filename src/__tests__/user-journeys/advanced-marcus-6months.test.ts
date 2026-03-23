@@ -666,11 +666,11 @@ describe('Marcus 6-Month Simulation', () => {
       expect(isExerciseSafe('Jump Squat', [kneeInjury])).toBe(false)
     })
 
-    it('moderate knee injury: leg press allowed (only excluded at severe)', () => {
-      // Leg press is in severeOnlyExclusions for knee
-      expect(isExerciseSafe('Leg Press', [kneeInjury])).toBe(true)
+    it('moderate knee injury: leg press excluded (in moderateExclusions)', () => {
+      // Leg press is now in moderateExclusions for knee (high-load movement)
+      expect(isExerciseSafe('Leg Press', [kneeInjury])).toBe(false)
 
-      // But excluded at severe
+      // Also excluded at severe
       const severeKnee = addInjury({ bodyArea: 'knee', side: 'left', severity: 'severe' })
       expect(isExerciseSafe('Leg Press', [severeKnee])).toBe(false)
     })

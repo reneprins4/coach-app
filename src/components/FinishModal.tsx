@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { BookmarkPlus, Loader2, Calendar, CheckCircle, Trophy, Star, Share2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import ShareCard from './ShareCard'
 import { generateShareCardData, buildShareText } from '../lib/shareCard'
 import type { ShareCardData } from '../lib/shareCard'
@@ -323,6 +324,12 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
     return 'bg-green-400'
   }
 
+  function getRecoveryGlowColor(daysFromNow: number): string {
+    if (daysFromNow > 3) return 'shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+    if (daysFromNow > 1) return 'shadow-[0_0_8px_rgba(251,146,60,0.5)]'
+    return 'shadow-[0_0_8px_rgba(74,222,128,0.5)]'
+  }
+
   // Build share card data
   const shareCardData: ShareCardData | null = useMemo(() => {
     if (!showShareCard) return null
@@ -356,25 +363,70 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
   useModalA11y(true, onClose)
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="finish-modal-title" className="fixed inset-0 z-[60] overflow-y-auto bg-gray-950">
-      <div className="min-h-full px-4 py-8">
-        <div className="mx-auto max-w-sm">
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="finish-modal-title"
+      className="fixed inset-0 z-[60] overflow-y-auto"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Radial gradient glow overlay */}
+      <div className="absolute inset-0 bg-gray-950/90 backdrop-blur-sm" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(6,182,212,0.12)_0%,transparent_70%)]" />
 
-          {/* Celebratory Header */}
-          <div className="mb-8 flex flex-col items-center text-center">
-            <div
-              className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/25 to-cyan-500/8 glow-cyan"
+      <div className="relative min-h-full px-4 py-8">
+        <motion.div
+          className="mx-auto max-w-sm"
+          initial={{ opacity: 0, scale: 0.96, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        >
+
+          {/* ── Hero Celebration ── */}
+          <div className="mb-10 flex flex-col items-center text-center">
+            <motion.div
+              className="relative mb-6 flex h-28 w-28 items-center justify-center"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-[0_4px_24px_rgba(6,182,212,0.4)] animate-pulse"
+              {/* Outer ring */}
+              <div className="absolute inset-0 rounded-full border-2 border-cyan-500/10" />
+              {/* Middle ring */}
+              <div className="absolute inset-2.5 rounded-full border-2 border-cyan-500/20" />
+              {/* Inner solid circle with pulsing glow */}
+              <motion.div
+                className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600"
+                animate={{
+                  boxShadow: [
+                    '0 0 20px rgba(6,182,212,0.4), 0 0 40px rgba(6,182,212,0.15)',
+                    '0 0 30px rgba(6,182,212,0.6), 0 0 60px rgba(6,182,212,0.25)',
+                    '0 0 20px rgba(6,182,212,0.4), 0 0 40px rgba(6,182,212,0.15)',
+                  ],
+                }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <CheckCircle size={28} className="text-white" strokeWidth={2.5} aria-hidden="true" />
-              </div>
-            </div>
-            <h1 id="finish-modal-title" className="text-display">
+                <CheckCircle size={30} className="text-white" strokeWidth={2.5} aria-hidden="true" />
+              </motion.div>
+            </motion.div>
+
+            <motion.h1
+              id="finish-modal-title"
+              className="text-display text-4xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+            >
               {t('finish_modal.title')}
-            </h1>
-            <p className="mt-2 text-sm text-gray-400">
+            </motion.h1>
+            <motion.p
+              className="mt-3 text-sm text-gray-400"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+            >
               {detectedSplit && <span className="font-semibold text-cyan-400">{detectedSplit}</span>}
               {detectedSplit && ' · '}
               {new Date().toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-US', {
@@ -382,126 +434,201 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
                 day: 'numeric',
                 month: 'long',
               })}
-            </p>
+            </motion.p>
           </div>
 
-          {/* Stats Strip */}
-          <div className="card-accent mb-4 flex items-center divide-x divide-cyan-500/20">
-            <div className="flex-1 py-2 text-center">
-              <p className="text-3xl font-black tabular tracking-tight text-white">{mins}</p>
-              <p className="label-caps mt-0.5">{t('finish_modal.minutes')}</p>
-            </div>
-            <div className="flex-1 py-2 text-center">
-              <p className="text-3xl font-black tabular tracking-tight text-white">{formatVol(result.totalVolume)}</p>
-              <p className="label-caps mt-0.5">{t('finish_modal.volume')}</p>
-            </div>
-            <div className="flex-1 py-2 text-center">
-              <p className="text-3xl font-black tabular tracking-tight text-white">{totalSets}</p>
-              <p className="label-caps mt-0.5">{t('common.sets')}</p>
-            </div>
+          {/* ── Stats Cards ── */}
+          <div className="mb-6 grid grid-cols-3 gap-3">
+            {[
+              { value: mins, label: t('finish_modal.minutes'), accent: false },
+              { value: formatVol(result.totalVolume), label: t('finish_modal.volume'), accent: true },
+              { value: totalSets, label: t('common.sets'), accent: false },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                className="card-accent flex flex-col items-center py-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.55 + i * 0.1 }}
+              >
+                <p className={`text-3xl font-black tabular tracking-tight ${stat.accent ? 'text-cyan-400' : 'text-white'}`}>
+                  {stat.value}
+                </p>
+                <p className="label-caps mt-1">{stat.label}</p>
+              </motion.div>
+            ))}
           </div>
 
-          {/* Loading spinner */}
+          {/* ── Loading spinner ── */}
           {loading && (
-            <div className="card mb-4 flex items-center justify-center p-6" role="status" aria-live="polite">
+            <div className="card mb-6 flex items-center justify-center p-8" role="status" aria-live="polite">
               <Loader2 size={24} className="animate-spin text-cyan-500" aria-hidden="true" />
               <span className="sr-only">{t('common.loading') || 'Loading...'}</span>
             </div>
           )}
 
-          {/* PRs Section */}
-          {!loading && prs.length > 0 && (
-            <div className="card-accent mb-4">
-              <div className="mb-3 flex items-center gap-2">
-                <Trophy size={16} className="text-cyan-400" aria-hidden="true" />
-                <h3 className="label-caps text-cyan-400">{t('finish_modal.new_pr')}</h3>
-              </div>
-              <div className="space-y-2.5">
-                {prs.map((pr, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="text-sm text-white">{pr.exercise}</span>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-lg font-black text-cyan-400">{pr.weight}kg</span>
-                      {pr.prevWeight != null && (
-                        <span className="text-xs text-gray-500">
-                          (was {pr.prevWeight}kg)
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* ── PRs Section ── */}
+          <AnimatePresence>
+            {!loading && prs.length > 0 && (
+              <motion.div
+                className="card-accent mb-6"
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="mb-4 flex items-center gap-2.5">
+                  <motion.div
+                    animate={{
+                      filter: [
+                        'drop-shadow(0 0 4px rgba(6,182,212,0.4))',
+                        'drop-shadow(0 0 10px rgba(6,182,212,0.7))',
+                        'drop-shadow(0 0 4px rgba(6,182,212,0.4))',
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <Trophy size={18} className="text-cyan-400" aria-hidden="true" />
+                  </motion.div>
+                  <h3 className="label-caps text-cyan-400">{t('finish_modal.new_pr')}</h3>
+                </div>
+                <div className="space-y-3">
+                  {prs.map((pr, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex items-center justify-between rounded-xl bg-cyan-500/5 px-3 py-2.5"
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, delay: 0.18 + i * 0.08 }}
+                    >
+                      <span className="text-sm font-medium text-white">{pr.exercise}</span>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xl font-black text-cyan-400">{pr.weight}kg</span>
+                        {pr.prevWeight != null && (
+                          <span className="text-xs text-gray-500">
+                            (was {pr.prevWeight}kg)
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* New Achievements */}
-          {!loading && newAchievements.length > 0 && (
-            <div className="card-gold mb-4">
-              <div className="mb-3 flex items-center gap-2">
-                <Star size={16} className="text-yellow-500" aria-hidden="true" />
-                <h3 className="label-caps text-yellow-500">{t('achievements.unlocked')}</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {newAchievements.map(a => {
-                  const Icon = getIcon(a.icon)
-                  return (
-                    <div key={a.id} className="flex items-center gap-2.5 rounded-xl bg-yellow-500/5 p-2.5">
-                      <Icon size={20} className="shrink-0 text-yellow-500" aria-hidden="true" />
-                      <span className="text-xs font-bold text-white">{t(a.nameKey)}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+          {/* ── New Achievements ── */}
+          <AnimatePresence>
+            {!loading && newAchievements.length > 0 && (
+              <motion.div
+                className="card-gold mb-6"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.45, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="mb-4 flex items-center gap-2.5">
+                  <motion.div
+                    animate={{
+                      filter: [
+                        'drop-shadow(0 0 4px rgba(234,179,8,0.4))',
+                        'drop-shadow(0 0 12px rgba(234,179,8,0.7))',
+                        'drop-shadow(0 0 4px rgba(234,179,8,0.4))',
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <Star size={18} className="text-yellow-500" aria-hidden="true" />
+                  </motion.div>
+                  <h3 className="label-caps text-yellow-500">{t('achievements.unlocked')}</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {newAchievements.map((a, i) => {
+                    const Icon = getIcon(a.icon)
+                    return (
+                      <motion.div
+                        key={a.id}
+                        className="flex items-center gap-2.5 rounded-xl bg-yellow-500/8 px-3 py-3"
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4, delay: 0.2 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        <Icon size={22} className="shrink-0 text-yellow-500" aria-hidden="true" />
+                        <span className="text-xs font-bold text-white">{t(a.nameKey)}</span>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Recovery Forecast */}
+          {/* ── Recovery Forecast ── */}
           {!loading && recoveryForecast.length > 0 && (
-            <div className="card mb-4">
-              <h3 className="label-caps mb-3 text-gray-400">{t('finish_modal.recovery')}</h3>
-              <div className="space-y-3">
+            <motion.div
+              className="card mb-6"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <h3 className="label-caps mb-4 text-gray-400">{t('finish_modal.recovery')}</h3>
+              <div className="space-y-3.5">
                 {recoveryForecast.slice(0, 5).map((item, i) => {
                   const maxHours = recoveryForecast[0]?.hours ?? 72
+                  const barWidth = Math.round((1 - item.hours / maxHours) * 100) || 10
                   return (
-                    <div key={i}>
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-300">{getMuscleLabel(item.muscle)}</span>
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.25 + i * 0.06 }}
+                    >
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <span className="text-sm font-bold text-white">{getMuscleLabel(item.muscle)}</span>
                         <span className="text-xs text-gray-500">
                           {formatDate(item.readyDate)} {formatTime(item.readyDate)}
                         </span>
                       </div>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
-                        <div
-                          className={`h-full rounded-full transition-all ${getRecoveryBarColor(item.daysFromNow)}`}
-                          style={{ width: `${Math.round((1 - item.hours / maxHours) * 100) || 10}%` }}
+                      <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                        <motion.div
+                          className={`h-full rounded-full ${getRecoveryBarColor(item.daysFromNow)} ${getRecoveryGlowColor(item.daysFromNow)}`}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${barWidth}%` }}
+                          transition={{ duration: 0.8, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                         />
                       </div>
-                    </div>
+                    </motion.div>
                   )
                 })}
               </div>
-            </div>
+            </motion.div>
           )}
 
-          {/* Next Workout Recommendation */}
+          {/* ── Next Workout Recommendation ── */}
           {!loading && nextWorkout && (
-            <div className="card mb-4">
-              <h3 className="label-caps mb-2 text-gray-400">{t('finish_modal.next_workout')}</h3>
+            <motion.div
+              className="card-accent mb-6"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <div className="mb-3 flex items-center gap-2">
+                <Calendar size={16} className="text-cyan-400" aria-hidden="true" />
+                <h3 className="label-caps text-cyan-400">{t('finish_modal.next_workout')}</h3>
+              </div>
               <div className="flex items-baseline justify-between">
-                <span className="text-lg font-bold text-white">{nextWorkout.split}</span>
-                <span className="text-sm font-medium text-cyan-400">
+                <span className="text-title">{nextWorkout.split}</span>
+                <span className="text-base font-bold text-cyan-400">
                   {formatDate(nextWorkout.bestDate)}
                 </span>
               </div>
               {nextWorkout.reasoning && (
-                <p className="mt-1 text-xs text-gray-500">{nextWorkout.reasoning}</p>
+                <p className="mt-1.5 text-xs text-gray-500">{nextWorkout.reasoning}</p>
               )}
-            </div>
+            </motion.div>
           )}
 
-          {/* Save Template */}
+          {/* ── Save Template ── */}
           {onSaveTemplate && !saved && (
-            <div className="mb-4">
+            <div className="mb-6">
               {!showTemplateInput ? (
                 <button
                   onClick={() => setShowTemplateInput(true)}
@@ -511,27 +638,27 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
                   {t('finish_modal.save_template')}
                 </button>
               ) : (
-                <div className="card space-y-3">
+                <div className="glass space-y-3 p-4">
                   <input
                     type="text"
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
                     placeholder={t('finish_modal.template_name_placeholder')}
                     aria-label={t('finish_modal.template_name_placeholder')}
-                    className="h-10 w-full rounded-xl bg-gray-800 px-4 text-sm text-white placeholder-gray-500 outline-none border border-gray-700 focus:border-cyan-500"
+                    className="h-11 w-full rounded-xl px-4 text-sm text-white placeholder-gray-600 outline-none"
                     autoFocus
                   />
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowTemplateInput(false)}
-                      className="h-10 flex-1 rounded-xl text-sm font-medium text-gray-400 border border-gray-700 active:scale-[0.97]"
+                      className="btn-secondary flex-1"
                     >
                       {t('common.cancel')}
                     </button>
                     <button
                       onClick={handleSaveTemplate}
                       disabled={!templateName.trim() || saving}
-                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-gray-800 text-sm font-medium text-white disabled:opacity-50 active:scale-[0.97]"
+                      className="btn-primary flex-1"
                     >
                       {saving ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <BookmarkPlus size={14} aria-hidden="true" />}
                       {t('finish_modal.save')}
@@ -546,14 +673,14 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
           )}
 
           {saved && (
-            <div className="mb-4 rounded-xl bg-green-500/10 px-4 py-2 text-center text-sm text-green-400">
+            <div className="mb-6 rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3 text-center text-sm font-medium text-green-400">
               {t('finish_modal.template_saved')}
             </div>
           )}
 
-          {/* Share Card Button */}
+          {/* ── Share Card Button ── */}
           {!loading && (
-            <div className="mb-4">
+            <div className="mb-6">
               <button
                 onClick={() => setShowShareCard(true)}
                 className="btn-secondary"
@@ -564,8 +691,8 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
             </div>
           )}
 
-          {/* CTA Buttons */}
-          <div className="mt-8 space-y-3">
+          {/* ── CTA Buttons ── */}
+          <div className="mt-10 space-y-3 pb-4">
             <button onClick={onClose} className="btn-primary">
               {t('finish_modal.done')}
             </button>
@@ -575,7 +702,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
             </button>
           </div>
 
-        </div>
+        </motion.div>
       </div>
 
       {/* Share Card Overlay */}
@@ -586,7 +713,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
           onShare={handleShare}
         />
       )}
-    </div>
+    </motion.div>
   )
 }
 

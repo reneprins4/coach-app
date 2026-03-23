@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Check, LogOut, Trash2, AlertTriangle, Download } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useMeasurements } from '../hooks/useMeasurements'
@@ -14,6 +15,7 @@ import InjuryBanner from '../components/InjuryBanner'
 import InjuryReport from '../components/InjuryReport'
 import InjuryCheckIn from '../components/InjuryCheckIn'
 import PrGoalsSection from '../components/PrGoalsSection'
+import PageTransition from '../components/PageTransition'
 import { useInjuries } from '../hooks/useInjuries'
 import type { ActiveInjury } from '../lib/injuryRecovery'
 
@@ -149,7 +151,10 @@ export default function Profile() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="px-4 py-6 pb-24">
+    <PageTransition>
+    <div className="relative overflow-hidden px-4 py-6 pb-24">
+      {/* Atmospheric glow */}
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 h-[400px] w-[500px] bg-[radial-gradient(ellipse,rgba(6,182,212,0.08)_0%,transparent_70%)] blur-[80px] z-0" />
 
       {/* Header */}
       <div className="mb-1 flex items-center justify-between">
@@ -183,33 +188,44 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Tab bar — horizontally scrollable */}
-      <div className="mb-6 flex gap-2 overflow-x-auto scrollbar-none pb-1">
-        {[
-          { value: 'personal', label: t('profile.tab_personal') },
-          { value: 'training', label: t('profile.tab_training') },
-          { value: 'account', label: t('profile.tab_account') },
-        ].map(tabItem => (
-          <button
-            key={tabItem.value}
-            onClick={() => setTab(tabItem.value)}
-            className={`shrink-0 rounded-xl px-5 py-2 text-sm font-bold transition-colors ${
-              tab === tabItem.value
-                ? 'bg-white text-black'
-                : 'bg-white/[0.04] text-[var(--text-3)] active:text-[var(--text-2)]'
-            }`}
-          >
-            {tabItem.label}
-          </button>
-        ))}
+      {/* Tab bar */}
+      <div className="mb-6">
+        <div className="flex gap-1 overflow-x-auto scrollbar-none rounded-2xl bg-white/[0.03] border border-white/[0.06] p-1">
+          {[
+            { value: 'personal', label: t('profile.tab_personal') },
+            { value: 'training', label: t('profile.tab_training') },
+            { value: 'account', label: t('profile.tab_account') },
+          ].map(tabItem => (
+            <button
+              key={tabItem.value}
+              onClick={() => setTab(tabItem.value)}
+              className={`shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                tab === tabItem.value
+                  ? 'bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.35)]'
+                  : 'text-gray-500 active:text-gray-300'
+              }`}
+            >
+              {tabItem.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TAB 1: JIJ (Personal Info)
-          ══════════════════════════════════════════════════════════════════════ */}
+      {/* Tab content with AnimatePresence for smooth transitions */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+
+      {/* TAB 1: JIJ (Personal Info) */}
       {tab === 'personal' && (
         <div className="space-y-6">
           {/* Naam */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0 }}>
           <div className="card">
             <label htmlFor="profile-name" className="label-caps mb-2 block">{t('profile.name_label')}</label>
             <input
@@ -221,8 +237,10 @@ export default function Profile() {
               className="h-12 w-full rounded-xl px-4 text-white placeholder-[var(--text-3)] outline-none"
             />
           </div>
+          </motion.div>
 
           {/* Lichaamsgewicht */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}>
           <div className="card">
             <label htmlFor="profile-weight" className="label-caps mb-2 block">{t('profile.weight_label')}</label>
             <input
@@ -235,8 +253,10 @@ export default function Profile() {
             />
             <p className="mt-2 text-xs text-[var(--text-3)]">{t('profile.weight_hint')}</p>
           </div>
+          </motion.div>
 
           {/* Geslacht */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}>
           <div className="card">
             <p className="label-caps mb-3">{t('gender.label')}</p>
             <div className="flex gap-2">
@@ -245,7 +265,7 @@ export default function Profile() {
                 { value: 'female', label: t('gender.female') },
                 { value: 'other', label: t('gender.other') },
               ].map(g => (
-                <button
+                <motion.button
                   key={g.value}
                   onClick={() => update('gender', g.value)}
                   className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-colors ${
@@ -253,42 +273,55 @@ export default function Profile() {
                       ? 'bg-white text-black'
                       : 'bg-white/[0.04] text-[var(--text-3)] active:text-[var(--text-2)]'
                   }`}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   {g.label}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
+          </motion.div>
 
           {/* Ervaringsniveau */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.15 }}>
           <div className="card">
             <p className="label-caps mb-3">{t('profile.experience_label')}</p>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               {LEVELS.map(l => (
-                <button
+                <motion.button
                   key={l.value}
                   onClick={() => update('experienceLevel', l.value)}
-                  className={`flex flex-1 flex-col items-center rounded-xl py-3 text-sm font-bold transition-colors ${
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
                     settings.experienceLevel === l.value
-                      ? 'bg-[var(--accent)] text-white'
-                      : 'bg-white/[0.04] text-[var(--text-2)] border border-[var(--border-subtle)] active:bg-white/[0.06]'
+                      ? 'bg-[var(--accent-dim)] border border-[var(--border-accent)]'
+                      : 'bg-white/[0.03] border border-[var(--border-subtle)] active:bg-white/[0.06]'
                   }`}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
-                  <span>{l.label}</span>
-                  <span className={`text-[10px] font-normal ${settings.experienceLevel === l.value ? 'text-cyan-200' : 'text-[var(--text-3)]'}`}>{l.sub}</span>
-                </button>
+                  <div>
+                    <span className={`text-sm font-bold ${settings.experienceLevel === l.value ? 'text-cyan-400' : 'text-white'}`}>{l.label}</span>
+                    <span className={`ml-2 text-xs font-normal ${settings.experienceLevel === l.value ? 'text-cyan-400/60' : 'text-[var(--text-3)]'}`}>{l.sub}</span>
+                  </div>
+                  {settings.experienceLevel === l.value && (
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]">
+                      <Check size={12} className="text-white" strokeWidth={3} />
+                    </div>
+                  )}
+                </motion.button>
               ))}
             </div>
           </div>
+          </motion.div>
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TAB 2: TRAINING (Training Preferences)
-          ══════════════════════════════════════════════════════════════════════ */}
+      {/* TAB 2: TRAINING */}
       {tab === 'training' && (
         <div className="space-y-6">
           {/* Blessures */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0 }}>
           <div className="card">
             <div className="mb-3 flex items-center justify-between">
               <p className="label-caps">{t('injury.injuries_title')}</p>
@@ -309,8 +342,10 @@ export default function Profile() {
               <p className="text-xs text-[var(--text-3)]">{t('injury.no_injuries')}</p>
             )}
           </div>
+          </motion.div>
 
           {/* Trainingsdoel */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.04 }}>
           <div className="card">
             <p className="label-caps mb-3">{t('training_goal.title')}</p>
             <div className="flex flex-col gap-2">
@@ -350,7 +385,7 @@ export default function Profile() {
                 { value: 'peak',     label: t('training_goal.phase_peak') },
                 { value: 'deload',   label: t('training_goal.phase_deload') },
               ].map(p => (
-                <button
+                <motion.button
                   key={p.value}
                   onClick={() => update('trainingPhase', p.value)}
                   className={`shrink-0 rounded-xl px-4 py-2 text-xs font-bold transition-colors ${
@@ -358,14 +393,18 @@ export default function Profile() {
                       ? 'bg-white text-black'
                       : 'bg-white/[0.04] text-[var(--text-3)] active:text-[var(--text-2)]'
                   }`}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   {p.label}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
+          </motion.div>
 
           {/* Maxima & Doelstelling */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.08 }}>
           <div className="card">
             <p className="label-caps mb-1">{t('main_lift.section_title')}</p>
             <p className="mb-3 text-xs text-[var(--text-3)]">{t('main_lift.section_hint')}</p>
@@ -441,11 +480,15 @@ export default function Profile() {
               })}
             </div>
           </div>
+          </motion.div>
 
           {/* PR Doelen */}
-          <PrGoalsSection />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.12 }}>
+            <PrGoalsSection />
+          </motion.div>
 
           {/* Spiergroep focus */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.16 }}>
           <div className="card">
             <p className="label-caps mb-1">{t('priority_muscles.title')}</p>
             <p className="mb-3 text-xs text-[var(--text-3)]">{t('priority_muscles.subtitle')}</p>
@@ -454,7 +497,7 @@ export default function Profile() {
                 const isSelected = (settings.priorityMuscles || []).includes(muscle as import('../types').MuscleGroup)
                 const canSelect = isSelected || (settings.priorityMuscles || []).length < 2
                 return (
-                  <button
+                  <motion.button
                     key={muscle}
                     onClick={() => {
                       if (!canSelect) return
@@ -469,9 +512,11 @@ export default function Profile() {
                           ? 'bg-white/[0.04] text-[var(--text-2)] border border-[var(--border-subtle)] active:bg-white/[0.06]'
                           : 'cursor-not-allowed bg-white/[0.02] text-[var(--text-3)] border border-[var(--border-subtle)] opacity-40'
                     }`}
+                    whileTap={canSelect ? { scale: 0.95 } : undefined}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   >
                     {t(`muscles.${muscle}`)}
-                  </button>
+                  </motion.button>
                 )
               })}
             </div>
@@ -488,13 +533,15 @@ export default function Profile() {
               </div>
             )}
           </div>
+          </motion.div>
 
           {/* Equipment */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.2 }}>
           <div className="card">
             <p className="label-caps mb-3">{t('profile.equipment_label')}</p>
             <div className="flex gap-2">
               {EQUIPMENT.map(e => (
-                <button
+                <motion.button
                   key={e.value}
                   onClick={() => update('equipment', e.value)}
                   className={`flex-1 rounded-xl py-3 text-sm font-bold transition-colors ${
@@ -502,20 +549,24 @@ export default function Profile() {
                       ? 'bg-[var(--accent)] text-white'
                       : 'bg-white/[0.04] text-[var(--text-2)] border border-[var(--border-subtle)] active:bg-white/[0.06]'
                   }`}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   {e.label}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
+          </motion.div>
 
           {/* Trainingsfrequentie */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.24 }}>
           <div className="card">
             <p className="label-caps mb-1">{t('profile.frequency_label')}</p>
             <p className="mb-3 text-xs text-[var(--text-3)]">{t('profile.frequency_hint')}</p>
             <div className="flex gap-2">
               {FREQUENCIES.map(f => (
-                <button
+                <motion.button
                   key={f}
                   onClick={() => update('frequency', f)}
                   className={`flex-1 rounded-xl py-3 text-sm font-bold transition-colors ${
@@ -523,20 +574,24 @@ export default function Profile() {
                       ? 'bg-[var(--accent)] text-white'
                       : 'bg-white/[0.04] text-[var(--text-2)] border border-[var(--border-subtle)] active:bg-white/[0.06]'
                   }`}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   {f}/{t('profile.week_abbr')}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
+          </motion.div>
 
           {/* Rusttijd */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.28 }}>
           <div className="card">
             <p className="label-caps mb-1">{t('profile.rest_label')}</p>
             <p className="mb-3 text-xs text-[var(--text-3)]">{t('profile.rest_hint')}</p>
             <div className="flex gap-2">
               {REST_TIMES.map(time => (
-                <button
+                <motion.button
                   key={time}
                   onClick={() => update('restTime', time)}
                   className={`flex-1 rounded-xl py-3 text-sm font-bold transition-colors ${
@@ -544,21 +599,23 @@ export default function Profile() {
                       ? 'bg-[var(--accent)] text-white'
                       : 'bg-white/[0.04] text-[var(--text-2)] border border-[var(--border-subtle)] active:bg-white/[0.06]'
                   }`}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   {time}s
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
+          </motion.div>
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TAB 3: ACCOUNT
-          ══════════════════════════════════════════════════════════════════════ */}
+      {/* TAB 3: ACCOUNT */}
       {tab === 'account' && (
         <div className="space-y-6">
           {/* Stats */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0 }}>
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: t('profile.stats_workouts'),    value: stats.totalWorkouts },
@@ -571,8 +628,10 @@ export default function Profile() {
               </div>
             ))}
           </div>
+          </motion.div>
 
           {/* Achievements */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}>
           <div className="card">
             <p className="label-caps mb-3">{t('achievements.title')}</p>
             <div className="grid grid-cols-4 gap-2">
@@ -585,13 +644,15 @@ export default function Profile() {
               ))}
             </div>
           </div>
+          </motion.div>
 
           {/* Taal */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}>
           <div className="card">
             <p className="label-caps mb-3">{t('profile.language_label')}</p>
             <div className="flex gap-2">
               {[{ value: 'nl', label: 'NL' }, { value: 'en', label: 'EN' }].map(lang => (
-                <button
+                <motion.button
                   key={lang.value}
                   onClick={() => { i18n.changeLanguage(lang.value); localStorage.setItem('coach-lang', lang.value) }}
                   className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-colors ${
@@ -599,14 +660,18 @@ export default function Profile() {
                       ? 'bg-white text-black'
                       : 'bg-white/[0.04] text-[var(--text-3)] active:text-[var(--text-2)]'
                   }`}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   {lang.label}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
+          </motion.div>
 
           {/* Data exporteren */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.15 }}>
           <div className="card space-y-3">
             <div className="flex items-center gap-2">
               <Download size={18} className="text-[var(--text-3)]" />
@@ -641,20 +706,26 @@ export default function Profile() {
               </button>
             </div>
           </div>
+          </motion.div>
 
           {/* Links */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.2 }}>
           <div className="flex justify-center gap-4">
             <Link to="/privacy" className="text-xs text-[var(--text-3)] active:text-[var(--text-2)]">{t('profile.privacy')}</Link>
             <Link to="/terms"   className="text-xs text-[var(--text-3)] active:text-[var(--text-2)]">{t('profile.terms_label')}</Link>
           </div>
+          </motion.div>
 
           {/* Versie info */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.25 }}>
           <div className="card flex items-center justify-between">
             <span className="text-xs text-[var(--text-3)] font-mono">versie</span>
             <span className="text-xs text-[var(--text-3)] font-mono">{__GIT_HASH__} · {__GIT_DATE__}</span>
           </div>
+          </motion.div>
 
-          {/* Account verwijderen — intentional, not scary */}
+          {/* Account verwijderen */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.3 }}>
           <div className="card border-red-500/10">
             <p className="label-caps mb-3 text-red-400/70">{t('profile.danger_zone')}</p>
             {!showDeleteConfirm ? (
@@ -691,8 +762,12 @@ export default function Profile() {
               </div>
             )}
           </div>
+          </motion.div>
         </div>
       )}
+
+        </motion.div>
+      </AnimatePresence>
 
       {/* Injury Report Modal */}
       <InjuryReport
@@ -716,5 +791,6 @@ export default function Profile() {
         />
       )}
     </div>
+    </PageTransition>
   )
 }

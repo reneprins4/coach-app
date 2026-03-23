@@ -44,6 +44,8 @@ export interface InjuryAreaConfig {
   excludedPatterns: string[]
   /** Additional patterns only excluded when severity is 'severe' */
   severeOnlyExclusions: string[]
+  /** Subset of severeOnlyExclusions also excluded for 'moderate' severity (highest-risk exercises) */
+  moderateExclusions: string[]
   alternatives: Record<string, string>
   rehabExercises: RehabExercise[]
 }
@@ -79,6 +81,9 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'bench press', 'push.?up', 'dip', 'chest fly', 'cable fly',
       'pec deck', 'incline.*press', 'decline.*press', 'floor press',
     ],
+    moderateExclusions: [
+      'bench press', 'dip', 'incline.*press', 'decline.*press',
+    ],
     alternatives: {
       'Overhead Press': 'Landmine Press',
       'Barbell Overhead Press': 'Landmine Press',
@@ -92,10 +97,10 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'Incline Dumbbell Press': 'Floor Press',
     },
     rehabExercises: [
-      { name: 'Band Pull-Aparts', description: 'Houd band op schouderbreedte, trek uit elkaar', sets: 3, reps: '15-20', frequency: 'dagelijks' },
-      { name: 'External Rotation', description: 'Elleboog langs zij, draai onderarm naar buiten', sets: 3, reps: '12-15', frequency: 'dagelijks' },
-      { name: 'Face Pulls', description: 'Cable op gezichtshoogte, trek naar gezicht', sets: 3, reps: '15-20', frequency: '3x per week' },
-      { name: 'Wall Slides', description: 'Rug tegen muur, armen omhoog schuiven', sets: 2, reps: '10-12', frequency: 'dagelijks' },
+      { name: 'Band Pull-Aparts', description: 'rehab.shoulder_band_pull_apart_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_daily' },
+      { name: 'External Rotation', description: 'rehab.shoulder_external_rotation_desc', sets: 3, reps: '12-15', frequency: 'rehab.frequency_daily' },
+      { name: 'Face Pulls', description: 'rehab.shoulder_face_pulls_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_3x_week' },
+      { name: 'Wall Slides', description: 'rehab.shoulder_wall_slides_desc', sets: 2, reps: '10-12', frequency: 'rehab.frequency_daily' },
     ],
   },
 
@@ -114,6 +119,9 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'leg press', 'hack squat', 'smith.*squat', 'leg curl', 'hip thrust',
       'deadlift', 'calf raise',
     ],
+    moderateExclusions: [
+      'leg press', 'hack squat', 'smith.*squat',
+    ],
     alternatives: {
       'Back Squat': 'Leg Press (Limited ROM)',
       'Front Squat': 'Leg Press (Limited ROM)',
@@ -124,10 +132,10 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'Barbell Squat': 'Leg Press (Limited ROM)',
     },
     rehabExercises: [
-      { name: 'Straight Leg Raise', description: 'Op rug liggend, gestrekt been optillen', sets: 3, reps: '12-15', frequency: 'dagelijks' },
-      { name: 'Wall Sit', description: 'Rug tegen muur, knieen 90 graden', sets: 3, reps: '20-30s hold', frequency: 'dagelijks' },
-      { name: 'Terminal Knee Extension', description: 'Band achter knie, strek volledig', sets: 3, reps: '15-20', frequency: 'dagelijks' },
-      { name: 'Step-Up (low box)', description: 'Lage box, langzaam en gecontroleerd', sets: 2, reps: '10-12', frequency: '3x per week' },
+      { name: 'Straight Leg Raise', description: 'rehab.knee_straight_leg_raise_desc', sets: 3, reps: '12-15', frequency: 'rehab.frequency_daily' },
+      { name: 'Wall Sit', description: 'rehab.knee_wall_sit_desc', sets: 3, reps: '20-30s hold', frequency: 'rehab.frequency_daily' },
+      { name: 'Terminal Knee Extension', description: 'rehab.knee_terminal_knee_ext_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_daily' },
+      { name: 'Step-Up (low box)', description: 'rehab.knee_step_up_desc', sets: 2, reps: '10-12', frequency: 'rehab.frequency_3x_week' },
     ],
   },
 
@@ -142,6 +150,9 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'squat', 'overhead press', 'hip thrust', 'romanian',
       'stiff.?leg',
     ],
+    moderateExclusions: [
+      'squat', 'romanian', 'stiff.?leg',
+    ],
     alternatives: {
       'Conventional Deadlift': 'Hyperextension (bodyweight)',
       'Romanian Deadlift': 'Lying Leg Curl',
@@ -151,10 +162,10 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'Good Morning': 'Glute Bridge',
     },
     rehabExercises: [
-      { name: 'Cat-Cow Stretch', description: 'Op handen en knieen, rug ronden en hollen', sets: 2, reps: '10-12', frequency: 'dagelijks' },
-      { name: 'Bird Dog', description: 'Op handen en knieen, tegenovergestelde arm en been strekken', sets: 3, reps: '10 per kant', frequency: 'dagelijks' },
-      { name: 'Dead Bug', description: 'Op rug liggend, tegenovergestelde arm/been bewegen', sets: 3, reps: '10 per kant', frequency: 'dagelijks' },
-      { name: 'Glute Bridge', description: 'Op rug liggend, heupen optillen', sets: 3, reps: '12-15', frequency: 'dagelijks' },
+      { name: 'Cat-Cow Stretch', description: 'rehab.lower_back_cat_cow_desc', sets: 2, reps: '10-12', frequency: 'rehab.frequency_daily' },
+      { name: 'Bird Dog', description: 'rehab.lower_back_bird_dog_desc', sets: 3, reps: '10 per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Dead Bug', description: 'rehab.lower_back_dead_bug_desc', sets: 3, reps: '10 per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Glute Bridge', description: 'rehab.lower_back_glute_bridge_desc', sets: 3, reps: '12-15', frequency: 'rehab.frequency_daily' },
     ],
   },
 
@@ -174,6 +185,9 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'bench press', 'row', 'pull.?up', 'chin.?up', 'pulldown',
       'dip',
     ],
+    moderateExclusions: [
+      'pull.?up', 'chin.?up', 'dip',
+    ],
     alternatives: {
       'Barbell Curl': 'Hammer Curl (light)',
       'EZ-Bar Curl': 'Hammer Curl (light)',
@@ -182,10 +196,10 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'Preacher Curl': 'Hammer Curl (light)',
     },
     rehabExercises: [
-      { name: 'Wrist Flexor Stretch', description: 'Arm gestrekt, hand naar beneden trekken', sets: 3, reps: '30s hold', frequency: 'dagelijks' },
-      { name: 'Wrist Extensor Stretch', description: 'Arm gestrekt, hand naar boven trekken', sets: 3, reps: '30s hold', frequency: 'dagelijks' },
-      { name: 'Pronation/Supination', description: 'Onderarm draaien met licht gewicht', sets: 2, reps: '15 per richting', frequency: 'dagelijks' },
-      { name: 'Eccentric Wrist Curl', description: 'Langzaam zakken met licht gewicht', sets: 3, reps: '12-15', frequency: '3x per week' },
+      { name: 'Wrist Flexor Stretch', description: 'rehab.elbow_wrist_flexor_stretch_desc', sets: 3, reps: '30s hold', frequency: 'rehab.frequency_daily' },
+      { name: 'Wrist Extensor Stretch', description: 'rehab.elbow_wrist_extensor_stretch_desc', sets: 3, reps: '30s hold', frequency: 'rehab.frequency_daily' },
+      { name: 'Pronation/Supination', description: 'rehab.elbow_pronation_supination_desc', sets: 2, reps: '15 per richting', frequency: 'rehab.frequency_daily' },
+      { name: 'Eccentric Wrist Curl', description: 'rehab.elbow_eccentric_wrist_curl_desc', sets: 3, reps: '12-15', frequency: 'rehab.frequency_3x_week' },
     ],
   },
 
@@ -200,15 +214,18 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'bench press', 'push.?up', 'overhead press', 'deadlift',
       'row',
     ],
+    moderateExclusions: [
+      'bench press', 'push.?up', 'overhead press',
+    ],
     alternatives: {
       'Barbell Curl': 'Machine Bicep Curl',
       'Front Squat': 'Back Squat',
       'Push-up': 'Machine Chest Press',
     },
     rehabExercises: [
-      { name: 'Wrist Circles', description: 'Langzame cirkels met de pols', sets: 2, reps: '10 per richting', frequency: 'dagelijks' },
-      { name: 'Finger Extensions', description: 'Vingers spreiden tegen weerstand (elastiek)', sets: 3, reps: '15-20', frequency: 'dagelijks' },
-      { name: 'Rice Bucket Grabs', description: 'Hand in rijstemmer openen en sluiten', sets: 2, reps: '30s', frequency: 'dagelijks' },
+      { name: 'Wrist Circles', description: 'rehab.wrist_circles_desc', sets: 2, reps: '10 per richting', frequency: 'rehab.frequency_daily' },
+      { name: 'Finger Extensions', description: 'rehab.wrist_finger_extensions_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_daily' },
+      { name: 'Rice Bucket Grabs', description: 'rehab.wrist_rice_bucket_desc', sets: 2, reps: '30s', frequency: 'rehab.frequency_daily' },
     ],
   },
 
@@ -223,16 +240,19 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'squat', 'lunge', 'deadlift', 'leg press',
       'split squat', 'step.?up',
     ],
+    moderateExclusions: [
+      'squat', 'lunge', 'deadlift',
+    ],
     alternatives: {
       'Hip Thrust': 'Glute Bridge (bodyweight)',
       'Sumo Deadlift': 'Conventional Deadlift',
       'Bulgarian Split Squat': 'Leg Extension',
     },
     rehabExercises: [
-      { name: 'Clamshell', description: 'Op zij liggend, knie openen met band', sets: 3, reps: '15 per kant', frequency: 'dagelijks' },
-      { name: 'Hip Flexor Stretch', description: 'Halve kniebuiging, heup naar voren', sets: 2, reps: '30s hold per kant', frequency: 'dagelijks' },
-      { name: 'Glute Bridge', description: 'Op rug liggend, heupen optillen', sets: 3, reps: '12-15', frequency: 'dagelijks' },
-      { name: 'Fire Hydrant', description: 'Op handen en knieen, knie opzij heffen', sets: 3, reps: '12 per kant', frequency: '3x per week' },
+      { name: 'Clamshell', description: 'rehab.hip_clamshell_desc', sets: 3, reps: '15 per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Hip Flexor Stretch', description: 'rehab.hip_flexor_stretch_desc', sets: 2, reps: '30s hold per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Glute Bridge', description: 'rehab.hip_glute_bridge_desc', sets: 3, reps: '12-15', frequency: 'rehab.frequency_daily' },
+      { name: 'Fire Hydrant', description: 'rehab.hip_fire_hydrant_desc', sets: 3, reps: '12 per kant', frequency: 'rehab.frequency_3x_week' },
     ],
   },
 
@@ -247,15 +267,18 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'deadlift', 'barbell row', 'pull.?up', 'lat pulldown',
       'bench press',
     ],
+    moderateExclusions: [
+      'deadlift', 'barbell row', 'pull.?up',
+    ],
     alternatives: {
       'Barbell Shrug': 'Face Pull',
       'Upright Row': 'Lateral Raise',
       'Barbell Overhead Press': 'Landmine Press',
     },
     rehabExercises: [
-      { name: 'Chin Tucks', description: 'Kin naar borst trekken, houd 5s', sets: 3, reps: '10-12', frequency: 'dagelijks' },
-      { name: 'Neck Isometrics', description: 'Handdruk tegen hoofd, houd 10s elke richting', sets: 2, reps: '10s per richting', frequency: 'dagelijks' },
-      { name: 'Upper Trap Stretch', description: 'Hoofd zijwaarts kantelen, schouder laag houden', sets: 2, reps: '30s per kant', frequency: 'dagelijks' },
+      { name: 'Chin Tucks', description: 'rehab.neck_chin_tucks_desc', sets: 3, reps: '10-12', frequency: 'rehab.frequency_daily' },
+      { name: 'Neck Isometrics', description: 'rehab.neck_isometrics_desc', sets: 2, reps: '10s per richting', frequency: 'rehab.frequency_daily' },
+      { name: 'Upper Trap Stretch', description: 'rehab.neck_upper_trap_stretch_desc', sets: 2, reps: '30s per kant', frequency: 'rehab.frequency_daily' },
     ],
   },
 
@@ -270,16 +293,19 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'squat', 'deadlift', 'leg press', 'split squat',
       'bulgarian',
     ],
+    moderateExclusions: [
+      'squat', 'deadlift',
+    ],
     alternatives: {
       'Standing Calf Raise': 'Seated Calf Raise (limited ROM)',
       'Walking Lunges': 'Leg Extension',
       'Box Jump': 'Leg Press',
     },
     rehabExercises: [
-      { name: 'Ankle Circles', description: 'Voet optillen, langzame cirkels draaien', sets: 2, reps: '10 per richting', frequency: 'dagelijks' },
-      { name: 'Towel Scrunches', description: 'Handdoek met tenen naar je toe trekken', sets: 3, reps: '15-20', frequency: 'dagelijks' },
-      { name: 'Single Leg Balance', description: 'Op een been staan, ogen open/dicht', sets: 3, reps: '30s per been', frequency: 'dagelijks' },
-      { name: 'Calf Stretch', description: 'Tegen muur leunen, achterste been gestrekt', sets: 2, reps: '30s per kant', frequency: 'dagelijks' },
+      { name: 'Ankle Circles', description: 'rehab.ankle_circles_desc', sets: 2, reps: '10 per richting', frequency: 'rehab.frequency_daily' },
+      { name: 'Towel Scrunches', description: 'rehab.ankle_towel_scrunches_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_daily' },
+      { name: 'Single Leg Balance', description: 'rehab.ankle_single_leg_balance_desc', sets: 3, reps: '30s per been', frequency: 'rehab.frequency_daily' },
+      { name: 'Calf Stretch', description: 'rehab.ankle_calf_stretch_desc', sets: 2, reps: '30s per kant', frequency: 'rehab.frequency_daily' },
     ],
   },
 }
@@ -305,6 +331,8 @@ export function getExcludedExercises(area: InjuryArea, severity: InjurySeverity)
   const patterns = [...config.excludedPatterns]
   if (severity === 'severe') {
     patterns.push(...config.severeOnlyExclusions)
+  } else if (severity === 'moderate') {
+    patterns.push(...config.moderateExclusions)
   }
   return patterns
 }
@@ -351,12 +379,12 @@ export function getRehabExercises(area: InjuryArea, severity: InjurySeverity): R
     }))
   }
 
-  if (severity === 'mild') {
-    // Mild: full exercises
-    return exercises.map(ex => ({ ...ex }))
+  if (severity === 'moderate') {
+    // Moderate: limit to first 4 exercises
+    return exercises.slice(0, 4).map(ex => ({ ...ex }))
   }
 
-  // Moderate: standard rehab
+  // Mild: full exercises
   return exercises.map(ex => ({ ...ex }))
 }
 
@@ -411,7 +439,8 @@ export function filterWorkoutForInjuries(
     if ((ex as FilteredExercise).isRehab || isExerciseSafe(ex.name, active)) {
       result.push({ ...ex })
     } else {
-      // Try to find an alternative from the first matching injury
+      // Try to find a safe alternative from any matching injury
+      let replaced = false
       for (const injury of active) {
         const excluded = getExcludedExercises(injury.bodyArea, injury.severity)
         const isExcluded = excluded.some(p => {
@@ -424,16 +453,22 @@ export function filterWorkoutForInjuries(
 
         if (isExcluded) {
           const alt = getSafeAlternative(injury.bodyArea, ex.name)
-          if (alt) {
+          if (alt && isExerciseSafe(alt, active)) {
             result.push({
               name: alt,
               muscle_group: ex.muscle_group,
               isAlternative: true,
               originalExercise: ex.name,
             })
+            replaced = true
+            break
           }
-          break // Only replace once per exercise
+          // Alternative is unsafe or doesn't exist — try next injury's alternative
         }
+      }
+      // If no safe alternative was found across all injuries, drop the exercise entirely
+      if (!replaced) {
+        // Exercise is excluded and no safe alternative exists — omitted from workout
       }
     }
   }
@@ -552,11 +587,17 @@ export function getRecoveryGuidance(injury: ActiveInjury): RecoveryGuidance {
         weightModifier: 0,
         message: 'injury.guidance.avoid',
       }
-    case 'recovering':
+    case 'recovering': {
+      const severityModifiers: Record<InjurySeverity, number> = {
+        mild: 0.85,
+        moderate: 0.7,
+        severe: 0.5,
+      }
       return {
-        weightModifier: 0.7,
+        weightModifier: severityModifiers[injury.severity],
         message: 'injury.guidance.reduced',
       }
+    }
     case 'resolved':
       return {
         weightModifier: 1,

@@ -40,7 +40,7 @@ export default function MeasurementInput({ onSave }: MeasurementInputProps) {
         <select
           value={type}
           onChange={(e) => { setType(e.target.value as MeasurementType); setError(null) }}
-          className="h-11 flex-1 rounded-xl bg-gray-800 px-3 text-sm text-white outline-none border border-gray-700 focus:border-gray-600"
+          className="h-11 flex-1 rounded-xl px-3 text-sm text-white outline-none"
         >
           {MEASUREMENT_TYPES.map(m => (
             <option key={m.type} value={m.type}>{t(m.labelKey)}</option>
@@ -55,7 +55,7 @@ export default function MeasurementInput({ onSave }: MeasurementInputProps) {
             onChange={(e) => { setValue(e.target.value); setError(null) }}
             placeholder="0"
             aria-label={`${t(selectedType?.labelKey ?? 'measurements.weight')} (${unit})`}
-            className="h-11 w-full rounded-xl bg-gray-800 px-3 pr-10 text-sm text-white placeholder-gray-600 outline-none border border-gray-700 focus:border-gray-600"
+            className="h-11 w-full rounded-xl px-3 pr-10 text-sm text-white placeholder-gray-600 outline-none"
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">
             {unit}
@@ -69,7 +69,7 @@ export default function MeasurementInput({ onSave }: MeasurementInputProps) {
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="h-11 flex-1 rounded-xl bg-gray-800 px-3 text-sm text-white outline-none border border-gray-700 focus:border-gray-600"
+          className="h-11 flex-1 rounded-xl px-3 text-sm text-white outline-none"
         />
         <button
           type="submit"

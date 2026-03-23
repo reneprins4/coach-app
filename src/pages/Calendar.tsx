@@ -1,10 +1,12 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Flame, Calendar as CalendarIcon, Trophy } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { buildHeatmapData, type HeatmapDay } from '../lib/calendarUtils'
+import PageTransition from '../components/PageTransition'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -89,12 +91,12 @@ function calculateStreak(workouts: import('../types').Workout[]): number {
 
 const INTENSITY_OPACITY = [0, 0.25, 0.55, 1.0] as const
 
-function HeatmapCell({ day, onClick }: { day: HeatmapDay; onClick: (day: HeatmapDay) => void }) {
+function HeatmapCell({ day, onClick, index }: { day: HeatmapDay; onClick: (day: HeatmapDay) => void; index: number }) {
   const color = day.workoutCount > 0 ? day.splitColor : '#6b7280'
   const opacity = INTENSITY_OPACITY[day.intensity]
 
   return (
-    <button
+    <motion.button
       onClick={() => onClick(day)}
       className="rounded-[3px] transition-transform active:scale-110"
       style={{
@@ -104,6 +106,9 @@ function HeatmapCell({ day, onClick }: { day: HeatmapDay; onClick: (day: Heatmap
         opacity: day.workoutCount > 0 ? opacity : 1,
       }}
       aria-label={`${day.date}: ${day.workoutCount > 0 ? day.split : 'rest'}`}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: day.workoutCount > 0 ? opacity : 1, scale: 1 }}
+      transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(index * 0.003, 0.3) }}
     />
   )
 }
@@ -119,28 +124,24 @@ function Heatmap({
 }) {
   const { t } = useTranslation()
 
-  // Build weeks (columns) from the data, rows = Mon-Sun (7 rows)
-  // Take last 16 weeks of data
   const weeksCount = 16
   const totalDays = weeksCount * 7
 
-  // Align to Monday: find last Monday <= today
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const dayOfWeek = (today.getDay() + 6) % 7 // 0=Mon
+  const dayOfWeek = (today.getDay() + 6) % 7
   const endDate = new Date(today)
   const startDate = new Date(today)
   startDate.setDate(today.getDate() - totalDays + 1 - dayOfWeek)
 
   const dataMap = new Map(data.map(d => [d.date, d]))
 
-  // Build grid: 7 rows (Mon=0..Sun=6) x N columns (weeks)
   const grid: (HeatmapDay | null)[][] = Array.from({ length: 7 }, () => [])
   const currentDate = new Date(startDate)
 
   while (currentDate <= endDate) {
     const key = formatDateForCompare(currentDate)
-    const row = (currentDate.getDay() + 6) % 7 // 0=Mon
+    const row = (currentDate.getDay() + 6) % 7
     const entry = dataMap.get(key) || {
       date: key,
       volume: 0,
@@ -153,15 +154,12 @@ function Heatmap({
     currentDate.setDate(currentDate.getDate() + 1)
   }
 
-  // Day labels (only show Mon, Wed, Fri)
   const dayLabels = [0, 1, 2, 3, 4, 5, 6].map(i => getWeekdayShort(i, language))
 
-  // Month labels for the top
   const monthLabels = useMemo(() => {
     const labels: { label: string; col: number }[] = []
     let lastMonth = -1
     for (let col = 0; col < (grid[0]?.length || 0); col++) {
-      // Each column represents a day for row 0 (Monday), but we step by week
       const d = new Date(startDate)
       d.setDate(startDate.getDate() + col * 7)
       if (d.getMonth() !== lastMonth && d <= endDate) {
@@ -175,14 +173,13 @@ function Heatmap({
     return labels
   }, [startDate, grid, language, endDate])
 
-  // Number of actual weeks (columns)
   const numWeeks = grid[0]?.length || 0
+  let cellIndex = 0
 
   return (
     <div className="card">
       <p className="label-caps mb-3">{t('calendar.heatmap_title')}</p>
 
-      {/* Month labels */}
       <div className="flex mb-1 pl-7">
         {monthLabels.map((m, i) => (
           <span
@@ -199,9 +196,7 @@ function Heatmap({
         ))}
       </div>
 
-      {/* Grid */}
       <div className="flex gap-0">
-        {/* Row labels */}
         <div className="flex flex-col gap-[2px] mr-1.5 mt-0">
           {dayLabels.map((label, i) => (
             <div
@@ -216,7 +211,6 @@ function Heatmap({
           ))}
         </div>
 
-        {/* Cells */}
         <div
           className="grid gap-[2px]"
           style={{
@@ -226,22 +220,26 @@ function Heatmap({
           }}
         >
           {grid.flatMap((row, rowIdx) =>
-            row.map((day, colIdx) =>
-              day ? (
-                <HeatmapCell
-                  key={`${rowIdx}-${colIdx}`}
-                  day={day}
-                  onClick={onDayClick}
-                />
-              ) : (
+            row.map((day, colIdx) => {
+              if (day) {
+                const idx = cellIndex++
+                return (
+                  <HeatmapCell
+                    key={`${rowIdx}-${colIdx}`}
+                    day={day}
+                    onClick={onDayClick}
+                    index={idx}
+                  />
+                )
+              }
+              return (
                 <div key={`${rowIdx}-${colIdx}`} style={{ width: 12, height: 12 }} />
               )
-            )
+            })
           )}
         </div>
       </div>
 
-      {/* Legend */}
       <div className="mt-3 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-gray-500">{t('calendar.less')}</span>
@@ -280,10 +278,6 @@ function Heatmap({
 function formatDateForCompare(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
-
-// ---------------------------------------------------------------------------
-// Heatmap tooltip (selected day detail)
-// ---------------------------------------------------------------------------
 
 function HeatmapTooltip({
   day,
@@ -342,10 +336,10 @@ export default function Calendar() {
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedHeatmapDay, setSelectedHeatmapDay] = useState<HeatmapDay | null>(null)
+  const directionRef = useRef<'left' | 'right'>('right')
 
   const days = useMemo(() => getMonthDays(currentYear, currentMonth), [currentYear, currentMonth])
 
-  // Build heatmap data
   const heatmapData = useMemo(() => buildHeatmapData(workouts), [workouts])
   const heatmapMap = useMemo(() => {
     const map = new Map<string, HeatmapDay>()
@@ -384,6 +378,7 @@ export default function Calendar() {
   }, [selectedDate, workoutsByDate])
 
   function prevMonth() {
+    directionRef.current = 'left'
     if (currentMonth === 0) {
       setCurrentMonth(11)
       setCurrentYear(y => y - 1)
@@ -394,6 +389,7 @@ export default function Calendar() {
   }
 
   function nextMonth() {
+    directionRef.current = 'right'
     if (currentMonth === 11) {
       setCurrentMonth(0)
       setCurrentYear(y => y + 1)
@@ -413,11 +409,9 @@ export default function Calendar() {
 
   const handleHeatmapDayClick = useCallback((day: HeatmapDay) => {
     setSelectedHeatmapDay(day)
-    // Also navigate the month view to this day
     const d = new Date(day.date + 'T00:00:00')
     setCurrentMonth(d.getMonth())
     setCurrentYear(d.getFullYear())
-    // If this day has workouts, select it in the month view too
     if (day.workoutCount > 0) {
       setSelectedDate(d)
     } else {
@@ -433,8 +427,13 @@ export default function Calendar() {
     )
   }
 
+  const slideDirection = directionRef.current === 'right' ? 1 : -1
+
   return (
-    <div className="px-4 py-6 pb-32">
+    <PageTransition>
+    <div className="relative overflow-hidden px-4 py-6 pb-32">
+      {/* Atmospheric glow */}
+      <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 h-[400px] w-[500px] bg-[radial-gradient(ellipse,rgba(6,182,212,0.08)_0%,transparent_70%)] blur-[80px] z-0" />
       <div className="mb-6">
         <p className="label-caps mb-1">{t('calendar.overview')}</p>
         <h1 className="text-display">{t('calendar.calendar')}</h1>
@@ -442,21 +441,23 @@ export default function Calendar() {
 
       {/* Stats strip */}
       <div className="mb-5 flex gap-2">
-        <div className="card flex flex-1 flex-col items-center py-3.5">
-          <CalendarIcon size={15} className="mb-1.5 text-gray-500" />
-          <span className="text-xl font-black text-white tabular-nums">{stats.thisMonth}</span>
-          <span className="label-caps mt-0.5">{t('calendar.this_month')}</span>
-        </div>
-        <div className="card flex flex-1 flex-col items-center py-3.5">
-          <Flame size={15} className="mb-1.5 text-cyan-500" />
-          <span className="text-xl font-black text-white tabular-nums">{stats.streak}</span>
-          <span className="label-caps mt-0.5">{t('dashboard.streak')}</span>
-        </div>
-        <div className="card flex flex-1 flex-col items-center py-3.5">
-          <Trophy size={15} className="mb-1.5 text-yellow-500" />
-          <span className="text-xl font-black text-white tabular-nums">{stats.thisYear}</span>
-          <span className="label-caps mt-0.5">{t('calendar.this_year')}</span>
-        </div>
+        {[
+          { icon: <CalendarIcon size={15} className="mb-1.5 text-gray-500" />, value: stats.thisMonth, label: t('calendar.this_month') },
+          { icon: <Flame size={15} className="mb-1.5 text-cyan-500" />, value: stats.streak, label: t('dashboard.streak') },
+          { icon: <Trophy size={15} className="mb-1.5 text-yellow-500" />, value: stats.thisYear, label: t('calendar.this_year') },
+        ].map((stat, i) => (
+          <motion.div
+            key={i}
+            className="card flex flex-1 flex-col items-center py-3.5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut', delay: i * 0.06 }}
+          >
+            {stat.icon}
+            <span className="text-xl font-black text-white tabular-nums">{stat.value}</span>
+            <span className="label-caps mt-0.5">{stat.label}</span>
+          </motion.div>
+        ))}
       </div>
 
       {/* GitHub-style heatmap */}
@@ -475,12 +476,11 @@ export default function Calendar() {
 
       {/* Month view */}
       <div className={`card ${workouts.length > 0 ? 'mt-5' : ''}`}>
-        {/* Month navigation */}
         <div className="mb-4 flex items-center justify-between">
           <button
             onClick={prevMonth}
             aria-label={t('calendar.prev_month')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
+            className="flex h-10 w-10 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
           >
             <ChevronLeft size={22} aria-hidden="true" />
           </button>
@@ -490,13 +490,12 @@ export default function Calendar() {
           <button
             onClick={nextMonth}
             aria-label={t('calendar.next_month')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
+            className="flex h-10 w-10 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-gray-400 active:bg-white/5"
           >
             <ChevronRight size={22} aria-hidden="true" />
           </button>
         </div>
 
-        {/* Day headers */}
         <div className="mb-2 grid grid-cols-7 gap-1">
           {DAYS.map(day => (
             <div key={day} className="py-2 text-center label-caps">
@@ -505,68 +504,81 @@ export default function Calendar() {
           ))}
         </div>
 
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-1">
-        {days.map((day, i) => {
-          const dateKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`
-          const hasWorkout = !!workoutsByDate[dateKey]
-          const isToday = isSameDay(day.date, today)
-          const isFuture = day.date > today
-          const isSelected = selectedDate && isSameDay(day.date, selectedDate)
+        {/* Calendar grid -- slides on month change */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${currentYear}-${currentMonth}`}
+            className="grid grid-cols-7 gap-1"
+            initial={{ opacity: 0, x: slideDirection * 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: slideDirection * -40 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+          {days.map((day, i) => {
+            const dateKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`
+            const hasWorkout = !!workoutsByDate[dateKey]
+            const isToday = isSameDay(day.date, today)
+            const isFuture = day.date > today
+            const isSelected = selectedDate && isSameDay(day.date, selectedDate)
 
-          // Get heatmap info for split coloring
-          const heatmapKey = formatDateForCompare(day.date)
-          const heatmapInfo = heatmapMap.get(heatmapKey)
-          const splitColor = heatmapInfo?.splitColor
-          const intensity = heatmapInfo?.intensity || 0
+            const heatmapKey = formatDateForCompare(day.date)
+            const heatmapInfo = heatmapMap.get(heatmapKey)
+            const splitColor = heatmapInfo?.splitColor
+            const intensity = heatmapInfo?.intensity || 0
 
-          return (
-            <button
-              key={i}
-              onClick={() => handleDayClick(day)}
-              disabled={!hasWorkout}
-              className={`relative flex aspect-square flex-col items-center justify-center rounded-xl transition-colors ${
-                !day.isCurrentMonth ? 'text-gray-800' :
-                isFuture ? 'text-gray-700' :
-                isSelected ? 'text-white border border-white/40' :
-                isToday ? 'border border-white/30 text-white' :
-                hasWorkout ? 'text-white' :
-                'text-gray-500'
-              } ${hasWorkout && !isSelected ? 'active:bg-gray-800' : ''}`}
-              style={
-                hasWorkout && day.isCurrentMonth && splitColor
-                  ? {
-                      backgroundColor: splitColor,
-                      opacity: isSelected ? 1 : (0.12 + intensity * 0.08),
-                    }
-                  : undefined
-              }
-            >
-              <span
-                className={`text-sm ${hasWorkout && day.isCurrentMonth ? 'font-semibold' : ''}`}
+            return (
+              <button
+                key={i}
+                onClick={() => handleDayClick(day)}
+                disabled={!hasWorkout}
+                className={`relative flex aspect-square flex-col items-center justify-center rounded-xl transition-colors ${
+                  !day.isCurrentMonth ? 'text-gray-800' :
+                  isFuture ? 'text-gray-700' :
+                  isSelected ? 'text-white border border-white/40' :
+                  isToday ? 'border border-white/30 text-white' :
+                  hasWorkout ? 'text-white' :
+                  'text-gray-500'
+                } ${hasWorkout && !isSelected ? 'active:bg-gray-800' : ''}`}
                 style={
-                  hasWorkout && day.isCurrentMonth
-                    ? { opacity: isSelected ? 1 : (1 / (0.12 + intensity * 0.08)) * 0.9, minWidth: 0 }
+                  hasWorkout && day.isCurrentMonth && splitColor
+                    ? {
+                        backgroundColor: splitColor,
+                        opacity: isSelected ? 1 : (0.12 + intensity * 0.08),
+                      }
                     : undefined
                 }
               >
-                {day.date.getDate()}
-              </span>
-              {hasWorkout && day.isCurrentMonth && (
                 <span
-                  className="absolute bottom-1.5 h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: splitColor || '#06b6d4' }}
-                />
-              )}
-            </button>
-          )
-        })}
-        </div>
+                  className={`text-sm ${hasWorkout && day.isCurrentMonth ? 'font-semibold' : ''}`}
+                  style={
+                    hasWorkout && day.isCurrentMonth
+                      ? { opacity: isSelected ? 1 : (1 / (0.12 + intensity * 0.08)) * 0.9, minWidth: 0 }
+                      : undefined
+                  }
+                >
+                  {day.date.getDate()}
+                </span>
+                {hasWorkout && day.isCurrentMonth && (
+                  <span
+                    className="absolute bottom-1.5 h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: splitColor || '#06b6d4' }}
+                  />
+                )}
+              </button>
+            )
+          })}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Selected workout detail */}
       {selectedDate && selectedWorkouts.length > 0 && (
-        <div className="card mt-6">
+        <motion.div
+          className="card mt-6"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
           <p className="label-caps mb-1">
             {formatDate(selectedDate, i18n.language)}
           </p>
@@ -577,7 +589,6 @@ export default function Calendar() {
 
             return (
               <div key={workout.id} className="mt-3 first:mt-0">
-                {/* Split badge */}
                 {hInfo?.split && (
                   <div className="mb-2 flex items-center gap-2">
                     <div
@@ -595,7 +606,6 @@ export default function Calendar() {
                   </p>
                 )}
 
-                {/* Exercise summary */}
                 <div className="space-y-1.5">
                   {(workout.exerciseNames || []).slice(0, 4).map(name => {
                     const sets = workout.workout_sets.filter(s => s.exercise === name)
@@ -616,14 +626,12 @@ export default function Calendar() {
                   )}
                 </div>
 
-                {/* Volume */}
                 {workout.totalVolume > 0 && (
                   <p className="mt-3 text-sm text-gray-500">
                     {t('common.volume')}: <span className="font-semibold text-white">{workout.totalVolume.toLocaleString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB')} kg</span>
                   </p>
                 )}
 
-                {/* Link to detail */}
                 <Link
                   to={`/history/${workout.id}`}
                   className="mt-4 flex h-10 items-center justify-center rounded-lg text-sm font-medium text-cyan-500 border border-cyan-500/30 active:bg-cyan-500/10"
@@ -633,17 +641,15 @@ export default function Calendar() {
               </div>
             )
           })}
-        </div>
+        </motion.div>
       )}
 
-      {/* Empty state when no date selected */}
       {!selectedDate && workouts.length > 0 && (
         <p className="mt-6 text-center text-sm text-gray-600">
           {t('calendar.tap_day_hint')}
         </p>
       )}
 
-      {/* Empty state when no workouts */}
       {workouts.length === 0 && (
         <div className="mt-8 text-center">
           <p className="text-gray-500">{t('calendar.no_workouts')}</p>
@@ -656,5 +662,6 @@ export default function Calendar() {
         </div>
       )}
     </div>
+    </PageTransition>
   )
 }

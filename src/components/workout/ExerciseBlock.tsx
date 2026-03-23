@@ -276,9 +276,9 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         <div className="border-t border-white/[0.04] px-5 py-3 space-y-1.5">
           {exercise.sets.map((s, i) => (
             <button key={s.id} onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-              className="flex w-full items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-2.5 active:bg-white/[0.06] transition-colors">
+              className={`flex w-full items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-2.5 active:bg-white/[0.06] transition-colors ${isDone ? 'border-l-2 border-l-green-500/40' : ''}`}>
               <div className="flex items-center gap-3">
-                <span className="text-xs tabular font-bold text-gray-700 w-5 text-right">{i + 1}</span>
+                <span className="text-sm tabular font-bold text-gray-700 w-5 text-right">{i + 1}</span>
                 <span className="text-[0.9375rem] font-bold tracking-tight text-white tabular">
                   {s.weight_kg}<span className="text-xs text-gray-600">kg</span>
                   <span className="mx-1.5 text-gray-700">{'\u00D7'}</span>
@@ -330,11 +330,11 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
             </div>
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={() => adjustWeight(-2.5)} aria-label={t('logger.weight') + ' -2.5kg'}
-                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
               <input type="number" inputMode="decimal" step="0.5" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="\u2014" aria-label={t('logger.weight')}
                 className="h-12 min-w-0 flex-1 rounded-xl px-1 text-center text-xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700" />
               <button type="button" onClick={() => adjustWeight(2.5)} aria-label={t('logger.weight') + ' +2.5kg'}
-                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
             </div>
           </div>
           <div>
@@ -343,11 +343,11 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
             </div>
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={() => adjustReps(-1)} aria-label={t('logger.reps_label') + ' -1'}
-                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
               <input type="number" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} placeholder="\u2014" aria-label={t('logger.reps_label')}
                 className="h-12 min-w-0 flex-1 rounded-xl px-1 text-center text-xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700" />
               <button type="button" onClick={() => adjustReps(1)} aria-label={t('logger.reps_label') + ' +1'}
-                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
+                className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
             </div>
           </div>
         </div>

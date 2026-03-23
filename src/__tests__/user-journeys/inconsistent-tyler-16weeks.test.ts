@@ -100,10 +100,13 @@ const WEEKLY_SESSIONS = [5, 4, 1, 0, 0, 2, 4, 5, 3, 0, 0, 1, 3, 4, 4, 5]
 // Simulation infrastructure
 // ---------------------------------------------------------------------------
 
+// Fixed reference point to avoid flaky week-boundary issues with Date.now()
+const REFERENCE_NOW = new Date('2026-03-23T12:00:00Z').getTime()
+
 function buildTylerWorkouts(): Workout[] {
-  // Place all 16 weeks ending roughly "now" so algorithms see fresh data
+  // Place all 16 weeks ending roughly at REFERENCE_NOW so algorithms see fresh data
   const totalDays = 16 * 7
-  const startDate = new Date(Date.now() - totalDays * 24 * 60 * 60 * 1000)
+  const startDate = new Date(REFERENCE_NOW - totalDays * 24 * 60 * 60 * 1000)
 
   const allWorkouts: Workout[] = []
   let cumulativeWeeksOfTraining = 0 // only count weeks where Tyler actually trained
@@ -156,14 +159,14 @@ function countConsecutiveZeroWeeksBefore(weekIndex: number): number {
 
 function getWorkoutsUpToWeek(allWorkouts: Workout[], weekNum: number): Workout[] {
   const totalDays = 16 * 7
-  const startDate = new Date(Date.now() - totalDays * 24 * 60 * 60 * 1000)
+  const startDate = new Date(REFERENCE_NOW - totalDays * 24 * 60 * 60 * 1000)
   const cutoff = new Date(startDate.getTime() + weekNum * 7 * 24 * 60 * 60 * 1000)
   return allWorkouts.filter(w => new Date(w.created_at) <= cutoff)
 }
 
 function getWorkoutsForWeek(allWorkouts: Workout[], weekNum: number): Workout[] {
   const totalDays = 16 * 7
-  const startDate = new Date(Date.now() - totalDays * 24 * 60 * 60 * 1000)
+  const startDate = new Date(REFERENCE_NOW - totalDays * 24 * 60 * 60 * 1000)
   const weekStart = new Date(startDate.getTime() + (weekNum - 1) * 7 * 24 * 60 * 60 * 1000)
   const weekEnd = new Date(startDate.getTime() + weekNum * 7 * 24 * 60 * 60 * 1000)
   return allWorkouts.filter(w => {

@@ -18,7 +18,7 @@ export default function PerformanceForecast({ sessions }: { sessions: ForecastSe
   // Onvoldoende data
   if (forecast.status === 'insufficient') {
     return (
-      <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
+      <div className="card mt-4">
         <div className="flex items-center gap-2 text-gray-400">
           <TrendingUp size={16} />
           <span className="text-sm">{t('forecast.insufficient')}</span>
@@ -30,7 +30,7 @@ export default function PerformanceForecast({ sessions }: { sessions: ForecastSe
   // Dalende of platte trend
   if (forecast.status === 'plateau') {
     return (
-      <div className="mt-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
+      <div className="card mt-4">
         <div className="flex items-center gap-2 text-gray-400">
           <TrendingUp size={16} />
           <span className="text-sm">{t('forecast.plateau')}</span>
@@ -41,7 +41,7 @@ export default function PerformanceForecast({ sessions }: { sessions: ForecastSe
 
   // Positieve trend met voorspelling
   return (
-    <div className="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+    <div className="card-accent mt-4">
       <div className="mb-3 flex items-center gap-2">
         <TrendingUp size={16} className="text-cyan-500" />
         <span className="text-sm font-medium text-cyan-400">{t('forecast.title')}</span>
@@ -57,11 +57,11 @@ export default function PerformanceForecast({ sessions }: { sessions: ForecastSe
       
       <div className="mb-3 flex gap-6 text-xs text-gray-400">
         <div>
-          <span className="text-gray-500">{t('forecast.current')}:</span>{' '}
+          <span className="label-caps">{t('forecast.current')}:</span>{' '}
           <span className="text-white">{forecast.currentPR!.toFixed(1)} kg</span>
         </div>
         <div>
-          <span className="text-gray-500">{t('forecast.target')}:</span>{' '}
+          <span className="label-caps">{t('forecast.target')}:</span>{' '}
           <span className="text-cyan-400">{forecast.targetPR!.toFixed(1)} kg</span>
         </div>
       </div>

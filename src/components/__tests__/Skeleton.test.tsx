@@ -7,7 +7,7 @@ describe('Skeleton', () => {
     const { container } = render(<Skeleton />)
     const el = container.firstElementChild!
     expect(el.className).toContain('animate-pulse')
-    expect(el.className).toContain('bg-gray-800')
+    expect(el.className).toContain('bg-white/[0.06]')
   })
 
   it('renders with a custom className', () => {
@@ -34,7 +34,7 @@ describe('Skeleton', () => {
     expect(el.className).toContain('my-custom-class')
     expect(el.className).toContain('animate-pulse')
     expect(el.className).toContain('rounded')
-    expect(el.className).toContain('bg-gray-800')
+    expect(el.className).toContain('bg-white/[0.06]')
   })
 })
 
@@ -55,11 +55,10 @@ describe('WorkoutCardSkeleton', () => {
     expect(classNames.some(c => c.includes('w-3/4'))).toBe(true)
   })
 
-  it('has a bordered container for card appearance', () => {
+  it('has a card container for card appearance', () => {
     const { container } = render(<WorkoutCardSkeleton />)
     const card = container.firstElementChild!
-    expect(card.className).toContain('border')
-    expect(card.className).toContain('rounded-2xl')
+    expect(card.className).toContain('card')
   })
 })
 
@@ -79,11 +78,10 @@ describe('StatCardSkeleton', () => {
     expect(classNames.some(c => c.includes('h-8'))).toBe(true)
   })
 
-  it('has a bordered container', () => {
+  it('has a card container', () => {
     const { container } = render(<StatCardSkeleton />)
     const card = container.firstElementChild!
-    expect(card.className).toContain('border')
-    expect(card.className).toContain('rounded-2xl')
+    expect(card.className).toContain('card')
   })
 })
 

@@ -63,9 +63,9 @@ describe('BUG 1: Regex pattern specificity', () => {
       expect(isExerciseSafe('Hack Squat', [severeKnee])).toBe(false)
     })
 
-    it('does NOT exclude "Hack Squat" for moderate knee injury', () => {
+    it('DOES exclude "Hack Squat" for moderate knee injury (moderateExclusions)', () => {
       const moderateKnee = makeInjury({ bodyArea: 'knee', severity: 'moderate' })
-      expect(isExerciseSafe('Hack Squat', [moderateKnee])).toBe(true)
+      expect(isExerciseSafe('Hack Squat', [moderateKnee])).toBe(false)
     })
 
     it('excludes "Bodyweight Squat" for mild knee injury', () => {
