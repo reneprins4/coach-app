@@ -150,7 +150,7 @@ export default function History() {
         })}
 
         {/* ━━ Load more ━━ */}
-        {hasMore && !query && (
+        {hasMore && !query && filtered.length > 0 && (
           <button
             onClick={loadMore}
             disabled={loadingMore}

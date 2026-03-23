@@ -47,12 +47,12 @@ export default function Layout() {
         <header role="banner">
           <button
             onClick={() => navigate('/log')}
-            className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-cyan-500 px-4 py-3 active:bg-cyan-600"
+            className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-gradient-to-r from-cyan-500 to-cyan-600 px-4 py-3 shadow-[0_2px_12px_rgba(6,182,212,0.3)] active:from-cyan-600 active:to-cyan-700"
             aria-label={t('nav.train') + ' - Training actief'}
           >
             <div className="flex items-center gap-3">
               <Timer size={16} className="text-white" aria-hidden="true" />
-              <span className="text-sm font-semibold text-white">Training actief</span>
+              <span className="text-sm font-bold text-white">Training actief</span>
             </div>
             <span className="text-sm font-medium text-cyan-100">Ga terug</span>
           </button>

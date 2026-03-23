@@ -701,7 +701,7 @@ export default function Logger() {
       </div>
 
       {/* Add exercise button */}
-      <div className="fixed bottom-24 left-0 right-0 z-30 px-4 pb-4 pb-safe pt-3 bg-gradient-to-t from-gray-950 via-gray-950/80 to-transparent">
+      <div className="fixed bottom-28 left-0 right-0 z-30 px-4 pb-4 pb-safe pt-3 bg-gradient-to-t from-gray-950 via-gray-950/80 to-transparent">
         <button
           onClick={() => setShowPicker(true)}
           className="btn-secondary h-13"

@@ -448,7 +448,7 @@ export default function Calendar() {
         ].map((stat, i) => (
           <motion.div
             key={i}
-            className="card flex flex-1 flex-col items-center py-3.5"
+            className="card flex flex-1 flex-col items-center justify-center py-3.5 min-h-[88px]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut', delay: i * 0.06 }}

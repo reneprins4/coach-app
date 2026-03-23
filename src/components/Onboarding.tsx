@@ -214,6 +214,7 @@ export default function Onboarding() {
             className="flex flex-1 flex-col items-center justify-center text-center"
           >
             <motion.h1
+              style={{ marginTop: '-4rem' }}
               className="text-display mb-5"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
