@@ -21,13 +21,13 @@ export const SET_TARGETS_BY_GOAL: Record<GoalKey, Record<MuscleGroup, SetTarget>
   hypertrophy: {
     chest:      { min: 10, max: 20, mev: 8 },
     back:       { min: 14, max: 22, mev: 10 },
-    shoulders:  { min: 8,  max: 16, mev: 6 },
+    shoulders:  { min: 8,  max: 20, mev: 6 },
     quads:      { min: 12, max: 20, mev: 8 },
     hamstrings: { min: 10, max: 16, mev: 6 },
-    glutes:     { min: 10, max: 20, mev: 8 },
+    glutes:     { min: 6,  max: 16, mev: 4 },
     biceps:     { min: 8,  max: 14, mev: 6 },
     triceps:    { min: 8,  max: 14, mev: 6 },
-    core:       { min: 6,  max: 12, mev: 4 },
+    core:       { min: 4,  max: 12, mev: 2 },
   },
   strength: {
     chest:      { min: 6,  max: 12, mev: 4 },

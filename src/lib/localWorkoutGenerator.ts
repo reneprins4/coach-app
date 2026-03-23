@@ -15,6 +15,7 @@ import type {
 } from '../types'
 import { SET_TARGETS_BY_GOAL, getVolumeCeiling } from './training-analysis'
 import { calculateProgression } from './progressiveOverload'
+import { getRpeCap, getExperienceSets } from './experienceLevel'
 import { loadInjuries, filterWorkoutForInjuries, getRecoveryGuidance, INJURY_AREAS } from './injuryRecovery'
 import type { ActiveInjury } from './injuryRecovery'
 
@@ -162,7 +163,7 @@ interface LocalWorkoutInput {
 export const LEVEL_MULTIPLIERS: Record<ExperienceLevel, number> = {
   complete_beginner: 0.45,
   beginner: 0.6,
-  returning: 0.7,
+  returning: 0.55,
   intermediate: 1.0,
   advanced: 1.3,
 }
@@ -185,9 +186,8 @@ function getRepRange(goal: string, isCompound: boolean): [number, number] {
   return ranges[goal] || ranges.hypertrophy!
 }
 
-function getSets(isCompound: boolean, isDeload: boolean): number {
-  if (isDeload) return isCompound ? 2 : 1
-  return isCompound ? 4 : 3
+function getSets(isCompound: boolean, isDeload: boolean, level: ExperienceLevel = 'intermediate'): number {
+  return getExperienceSets(isCompound, isDeload, level)
 }
 
 function getRestSeconds(isCompound: boolean, goal: string): number {
@@ -318,7 +318,8 @@ export function generateLocalWorkout({
   const bwKg = parseFloat(preferences.bodyweight || '') || 80
   const equipment = preferences.equipment || 'full_gym'
   const isDeload = preferences.isDeload || false
-  const targetRPE = isDeload ? 6 : (preferences.targetRPE ?? 8)
+  const rpeCap = getRpeCap(level)
+  const targetRPE = isDeload ? (preferences.targetRPE ?? 5) : (preferences.targetRPE ?? 8)
   const targetRepRange = preferences.targetRepRange || null
   const focusedMuscles = new Set(preferences.focusedMuscles || [])
   const timeMin = preferences.time || 60
@@ -375,7 +376,7 @@ export function generateLocalWorkout({
       const repRange: [number, number] = targetRepRange || getRepRange(goal, tmpl.isCompound)
       const [repsMin, repsMax] = repRange
       const [weight, suggestedReps, vsNote] = applyOverload(tmpl.name, estimatedWt, tmpl.muscle_group, repRange, historyMap)
-      const sets = getSets(tmpl.isCompound, isDeload)
+      const sets = getSets(tmpl.isCompound, isDeload, level)
       const restSec = getRestSeconds(tmpl.isCompound, goal)
 
       exercises.push({
@@ -385,7 +386,7 @@ export function generateLocalWorkout({
         reps_min: suggestedReps ?? repsMin,
         reps_max: repsMax,
         weight_kg: weight,
-        rpe_target: Math.min(targetRPE, isDeload ? 6 : 10),
+        rpe_target: Math.min(targetRPE, isDeload ? 6 : rpeCap),
         rest_seconds: restSec,
         notes: vsNote.startsWith('new') ? 'First time — focus on form and control' : '',
         vs_last_session: vsNote,

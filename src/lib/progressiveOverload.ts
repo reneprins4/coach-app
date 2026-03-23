@@ -19,7 +19,8 @@
  * All weights are rounded to the nearest 2.5 kg.
  */
 
-import type { MuscleGroup } from '../types'
+import type { MuscleGroup, ExperienceLevel } from '../types'
+import { getOverloadMultiplier } from './experienceLevel'
 
 // ---- Public types ----
 
@@ -32,6 +33,8 @@ export interface ProgressionInput {
   muscleGroup: MuscleGroup
   /** Optional bodyweight in kg for first-time estimates. Default 80 kg. */
   bodyweightKg?: number
+  /** Optional experience level for overload scaling. Default intermediate. */
+  experienceLevel?: ExperienceLevel
 }
 
 export type ProgressionStrategy =
@@ -134,6 +137,7 @@ export function calculateProgression(input: ProgressionInput): ProgressionResult
     targetRepRange,
     muscleGroup,
     bodyweightKg = 80,
+    experienceLevel = 'intermediate',
   } = input
 
   const [repMin, repMax] = targetRepRange
@@ -189,8 +193,9 @@ export function calculateProgression(input: ProgressionInput): ProgressionResult
   // 5. At top of rep range -> weight increase + reset reps
   const category = categoriseExercise(exercise, muscleGroup)
   const tier = INCREASE_TIERS[category]
-  // Use the midpoint of the percentage range
-  const pct = (tier.min + tier.max) / 2
+  // Use the midpoint of the percentage range, scaled by experience level
+  const overloadMult = getOverloadMultiplier(experienceLevel)
+  const pct = ((tier.min + tier.max) / 2) * overloadMult
   const rawIncrease = previousWeight * pct
   // Ensure at least 2.5 kg increase
   const increase = Math.max(2.5, rawIncrease)

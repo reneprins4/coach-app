@@ -88,7 +88,7 @@ describe('Scenario H: MRV volume ceiling', () => {
     // Advanced uses 1.0 multiplier on hypertrophy max values
     expect(ceilings['chest']).toBe(20)
     expect(ceilings['back']).toBe(22)
-    expect(ceilings['shoulders']).toBe(16)
+    expect(ceilings['shoulders']).toBe(20)
     expect(ceilings['quads']).toBe(20)
     expect(ceilings['biceps']).toBe(14)
     expect(ceilings['triceps']).toBe(14)

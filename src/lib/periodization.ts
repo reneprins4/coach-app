@@ -41,7 +41,7 @@ export const PHASES: Record<PeriodizationPhase, PhaseConfig> = {
     weekTargets: [
       { week: 1, rpe: 8,   repRange: [3, 5], setNote: 'Zware compound oefeningen',  isDeload: false },
       { week: 2, rpe: 9,   repRange: [2, 4], setNote: 'Bijna-max inspanning',  isDeload: false },
-      { week: 3, rpe: 5,   repRange: [3, 5], setNote: "Mini deload + PR's",isDeload: true  },
+      { week: 3, rpe: 5,   repRange: [3, 5], setNote: 'Deload — herstel voor volgende cyclus', isDeload: true  },
     ],
   },
   deload: {
