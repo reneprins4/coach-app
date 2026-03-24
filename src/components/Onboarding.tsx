@@ -16,6 +16,7 @@ export default function Onboarding() {
   const [goal, setGoal] = useState<string | null>(null)
   const [time, setTime] = useState<number | null>(null)
   const [equipment, setEquipment] = useState<string | null>(null)
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg')
 
   // Track direction for slide transitions
   const [direction, setDirection] = useState(1)
@@ -56,6 +57,7 @@ export default function Onboarding() {
       time: time || 60,
       equipment: equipment || 'full_gym',
       language: i18n.language,
+      units: weightUnit,
     }
     if (name.trim()) {
       (settings as Record<string, unknown>).name = name.trim()
@@ -376,6 +378,40 @@ export default function Onboarding() {
                       }`}
                       whileTap={{ scale: 0.95 }}
                       animate={goal === opt.value ? {
+                        borderColor: 'rgba(6,182,212,0.3)',
+                        backgroundColor: 'rgba(6,182,212,0.1)',
+                      } : {
+                        borderColor: 'rgba(255,255,255,0.06)',
+                        backgroundColor: 'rgba(255,255,255,0.03)',
+                      }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      {opt.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Weight unit */}
+              <div className="mb-8">
+                <label className="label-caps mb-2.5 block">
+                  {t('onboarding.beginners.unit_label')}
+                </label>
+                <div className="flex gap-2.5">
+                  {[
+                    { value: 'kg' as const, label: 'KG' },
+                    { value: 'lbs' as const, label: 'LBS' },
+                  ].map((opt) => (
+                    <motion.button
+                      key={opt.value}
+                      onClick={() => setWeightUnit(opt.value)}
+                      className={`flex-1 rounded-xl px-3 py-3.5 text-sm font-medium border transition-shadow ${
+                        weightUnit === opt.value
+                          ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 shadow-[0_0_16px_rgba(6,182,212,0.12)]'
+                          : 'bg-white/[0.03] text-gray-400 border-white/[0.06]'
+                      }`}
+                      whileTap={{ scale: 0.95 }}
+                      animate={weightUnit === opt.value ? {
                         borderColor: 'rgba(6,182,212,0.3)',
                         backgroundColor: 'rgba(6,182,212,0.1)',
                       } : {

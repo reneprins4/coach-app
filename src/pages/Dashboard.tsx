@@ -27,6 +27,7 @@ import { getMonthName } from '../lib/trainingStoryShare'
 import { buildStoryShareText } from '../lib/trainingStoryShare'
 import PageTransition from '../components/PageTransition'
 import MuscleRadar from '../components/MuscleRadar'
+import { toDisplayWeight, formatVolume, getUnitLabel } from '../lib/unitConversion'
 import type { AIExercise, AIWorkoutResponse } from '../types'
 
 const TrainingStory = lazy(() => import('../components/TrainingStory'))
@@ -361,11 +362,11 @@ export default function Dashboard() {
           <p className="label-caps mb-3">{t(`main_lift.${settings.mainLift}`)} PR</p>
           <div className="flex items-end justify-between mb-3">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-black tabular text-white">{liftMax}</span>
-              <span className="text-xs text-gray-600">kg</span>
+              <span className="text-2xl font-black tabular text-white">{toDisplayWeight(liftMax, settings.units)}</span>
+              <span className="text-xs text-gray-600">{getUnitLabel(settings.units)}</span>
               <span className="text-gray-700 mx-1">/</span>
-              <span className="text-2xl font-black tabular text-cyan-400">{settings.mainLiftGoalKg}</span>
-              <span className="text-xs text-gray-600">kg</span>
+              <span className="text-2xl font-black tabular text-cyan-400">{toDisplayWeight(settings.mainLiftGoalKg ?? 0, settings.units)}</span>
+              <span className="text-xs text-gray-600">{getUnitLabel(settings.units)}</span>
             </div>
             {settings.mainLiftGoalDate && (
               <p className="text-xs text-gray-600">
@@ -456,7 +457,7 @@ export default function Dashboard() {
                   <div className="ml-3 flex items-center gap-3 shrink-0">
                     {vol > 0 && (
                       <span className="text-xs tabular font-bold text-gray-600">
-                        {vol >= 1000 ? `${(vol / 1000).toFixed(1)}t` : `${Math.round(vol)}kg`}
+                        {formatVolume(vol, settings.units)}
                       </span>
                     )}
                     <ChevronRight size={14} className="text-gray-700" />

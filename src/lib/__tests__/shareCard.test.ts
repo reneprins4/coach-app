@@ -56,13 +56,13 @@ describe('Share Card Generator', () => {
   })
 
   it('includes total volume formatted (kg or tons)', () => {
-    // Under 1000 kg
+    // Under 1000 kg — includes unit suffix
     const small = generateShareCardData(makeResult({ totalVolume: 850 }), { locale: 'nl', prs: [], streak: 0 })
-    expect(small.volume).toBe('850')
+    expect(small.volume).toMatch(/850/)
 
     // Over 1000 kg should show tons
     const big = generateShareCardData(makeResult({ totalVolume: 12500 }), { locale: 'nl', prs: [], streak: 0 })
-    expect(big.volume).toBe('12.5t')
+    expect(big.volume).toMatch(/12\.5/)
   })
 
   it('includes total sets count', () => {

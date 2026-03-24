@@ -160,8 +160,11 @@
     "lang_en": "Engels",
     "name_label": "Naam",
     "name_placeholder": "Jouw naam",
-    "weight_label": "Lichaamsgewicht (kg)",
+    "weight_label": "Lichaamsgewicht",
     "weight_hint": "Helpt bij het schatten van startgewichten",
+    "weight_unit": "Gewichtseenheid",
+    "unit_kg": "Kilogram (kg)",
+    "unit_lbs": "Pounds (lbs)",
     "weight_placeholder": "80",
     "optional": "optioneel",
     "incomplete_banner": "Vul je gegevens in voor nauwkeurigere gewichten",
@@ -291,7 +294,8 @@
     "how_many_exercises": "Hoeveel oefeningen nog?",
     "trimmed": "Workout ingekort",
     "menu": "Menu",
-    "overview": "Overzicht"
+    "overview": "Overzicht",
+    "tap_to_remove": "Tik om te verwijderen"
   },
   "progress": {
     "title": "Voortgang",
@@ -423,6 +427,7 @@
       "goal_strength": "Kracht",
       "goal_endurance": "Conditie",
       "time_label": "Beschikbare tijd",
+      "unit_label": "Gewichtseenheid",
       "equipment_label": "Apparatuur",
       "equip_full": "Full gym",
       "equip_dumbbells": "Thuis / dumbbells",

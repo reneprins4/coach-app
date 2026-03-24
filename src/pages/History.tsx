@@ -8,10 +8,12 @@ import { useAuthContext } from '../App'
 import { logError } from '../lib/logger'
 import { HistorySkeleton } from '../components/Skeleton'
 import PageTransition from '../components/PageTransition'
+import { formatVolume } from '../lib/unitConversion'
 
 export default function History() {
   const { t, i18n } = useTranslation()
-  const { user } = useAuthContext()
+  const { user, settings } = useAuthContext()
+  const unit = settings?.units || 'kg'
   const nav = useNavigate()
   const { workouts, loading, loadingMore, hasMore, loadMore, deleteWorkout } = useWorkouts(user?.id)
   const [query, setQuery] = useState('')
@@ -131,7 +133,7 @@ export default function History() {
                   <p className="mt-1 text-xs text-gray-600">
                     {w.workout_sets.length} {t('common.sets')}
                     {vol > 0 && <span className="text-gray-700"> · </span>}
-                    {vol > 0 && <span className="tabular font-semibold text-gray-500">{formatVol(vol)}</span>}
+                    {vol > 0 && <span className="tabular font-semibold text-gray-500">{formatVolume(vol, unit)}</span>}
                   </p>
                 </div>
 
@@ -208,8 +210,4 @@ export default function History() {
   )
 }
 
-function formatVol(kg: number | undefined | null): string {
-  if (!kg) return '0kg'
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}t`
-  return `${Math.round(kg)}kg`
-}
+// formatVol removed — use formatVolume from unitConversion.ts

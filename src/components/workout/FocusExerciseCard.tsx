@@ -8,7 +8,9 @@ import { hapticFeedback } from '../../lib/native'
 import { isCompound, generateWarmupSets } from '../../lib/warmupCalculator'
 import ExerciseGuide from '../ExerciseGuide'
 import RpeButtons from './RpeButtons'
-import type { ActiveExercise, PRBanner } from '../../types'
+import { getSettings } from '../../lib/settings'
+import { toDisplayWeight, toKg, getWeightStep, getUnitLabel } from '../../lib/unitConversion'
+import type { ActiveExercise, PRBanner, Units } from '../../types'
 
 // Helper function for progressive overload suggestion
 function suggestNextWeight(kg: number): number | null {
@@ -57,8 +59,16 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
   isCurrent,
 }: FocusExerciseCardProps) {
   const { t } = useTranslation()
+  const unit: Units = getSettings().units || 'kg'
+  const weightStep = getWeightStep(unit)
+  const unitLabel = getUnitLabel(unit)
   const [weight, setWeight] = useState(
-    exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
+    (() => {
+      const planKg = exercise.plan?.weight_kg
+      const lastKg = lastUsed?.weight_kg
+      const kg = planKg ?? lastKg
+      return kg != null ? String(toDisplayWeight(kg, unit)) : ''
+    })()
   )
   const [reps, setReps] = useState(
     exercise.plan?.reps_min?.toString() || lastUsed?.reps?.toString() || ''
@@ -116,7 +126,8 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
         setReps(prev => prev || latest.reps?.toString() || '')
       }
       if (!exercise.plan?.weight_kg) {
-        setWeight(prev => prev || latest.weight_kg?.toString() || '')
+        const displayVal = latest.weight_kg != null ? String(toDisplayWeight(latest.weight_kg, unit)) : ''
+        setWeight(prev => prev || displayVal)
       }
     }
 
@@ -128,11 +139,11 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
     return () => { cancelled = true }
   }, [exercise.name, userId, prefetchedHistory])
 
-  // Auto-fill with last logged set values
+  // Auto-fill with last logged set values (convert from stored kg to display unit)
   useEffect(() => {
     if (exercise.sets.length > 0) {
       const lastSet = exercise.sets[exercise.sets.length - 1]!
-      setWeight(lastSet.weight_kg.toString())
+      setWeight(String(toDisplayWeight(lastSet.weight_kg, unit)))
       setReps(lastSet.reps.toString())
     }
   }, [exercise.sets.length])
@@ -151,7 +162,8 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
   const progressPct = plannedSets ? Math.min(1, loggedSets / plannedSets) : 0
 
   function handleAdd() {
-    const w = parseFloat(weight) || 0
+    const displayW = parseFloat(weight) || 0
+    const w = toKg(displayW, unit)
     const r = parseInt(reps, 10)
     if (isNaN(r) || r <= 0) return
 
@@ -161,9 +173,9 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
       if (pr && pr.isPR) {
         isPR = true
         setPrBanner({
-          weight: w,
+          weight: toDisplayWeight(w, unit),
           reps: r,
-          improvement: pr.improvement,
+          improvement: toDisplayWeight(pr.improvement, unit),
           type: pr.type,
         })
       }
@@ -191,10 +203,10 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
 
   // Build AI target string
   const aiTarget = exercise.plan ? (
-    `${exercise.plan.sets}x${exercise.plan.reps_min}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${exercise.plan.weight_kg}kg${exercise.plan.rpe_target ? ` \u00B7 RPE ${exercise.plan.rpe_target}` : ''}`
+    `${exercise.plan.sets}x${exercise.plan.reps_min}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${toDisplayWeight(exercise.plan.weight_kg, unit)}${unitLabel}${exercise.plan.rpe_target ? ` \u00B7 RPE ${exercise.plan.rpe_target}` : ''}`
   ) : null
 
-  const nextSuggestion = prevData ? suggestNextWeight(prevData.weight) : null
+  const nextSuggestion = prevData ? suggestNextWeight(toDisplayWeight(prevData.weight, unit)) : null
 
   return (
     <div className={`flex flex-col h-full min-h-0 ${!isCurrent ? 'pointer-events-none' : ''}`}>
@@ -278,23 +290,35 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
 
       {/* -- Logged sets as compact pills (above input zone for visibility) -- */}
       {exercise.sets.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-1 mb-3 shrink-0">
-          {exercise.sets.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold tabular transition-colors ${
-                isDone
-                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'bg-white/[0.04] border border-white/[0.06] text-white'
-              } active:bg-white/[0.08]`}
-              aria-label={`${t('logger.set_removed')}: ${s.weight_kg}kg x ${s.reps}`}
-            >
-              <Check size={10} className={isDone ? 'text-emerald-400' : 'text-gray-600'} />
-              {s.weight_kg}kg {'\u00D7'} {s.reps}
-              {s.rpe && <span className="text-gray-600 ml-0.5">@{s.rpe}</span>}
-            </button>
-          ))}
+        <div className="px-1 mb-3 shrink-0">
+          <div className="flex flex-wrap gap-1.5">
+            <AnimatePresence mode="popLayout">
+              {exercise.sets.map((s) => (
+                <motion.button
+                  key={s.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.15 } }}
+                  onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
+                  className={`inline-flex items-center gap-1 rounded-lg pl-2.5 pr-1.5 py-1.5 text-xs font-bold tabular transition-colors ${
+                    isDone
+                      ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                      : 'bg-white/[0.04] border border-white/[0.06] text-white'
+                  } active:bg-white/[0.08]`}
+                  aria-label={`${t('logger.tap_to_remove')}: ${toDisplayWeight(s.weight_kg, unit)}${unitLabel} x ${s.reps}`}
+                >
+                  <Check size={10} className={isDone ? 'text-emerald-400' : 'text-gray-600'} />
+                  {toDisplayWeight(s.weight_kg, unit)}{unitLabel} {'\u00D7'} {s.reps}
+                  {s.rpe && <span className="text-gray-600 ml-0.5">@{s.rpe}</span>}
+                  <X size={12} className="ml-1 text-gray-600 shrink-0" aria-hidden="true" />
+                </motion.button>
+              ))}
+            </AnimatePresence>
+          </div>
+          {exercise.sets.length === 1 && (
+            <p className="text-[10px] text-gray-600 mt-1.5 px-0.5">{t('logger.tap_to_remove')}</p>
+          )}
         </div>
       )}
 
@@ -312,8 +336,8 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
             <div className="flex items-center gap-2">
               <Trophy size={15} className="text-cyan-400 shrink-0" />
               <span className="text-sm font-bold text-cyan-400">
-                {t('pr.new_record')}: {prBanner.weight}kg {'\u00B7'} {prBanner.reps} reps
-                {prBanner.improvement > 0 && <span className="ml-1.5 text-cyan-300">+{prBanner.improvement}kg</span>}
+                {t('pr.new_record')}: {prBanner.weight}{unitLabel} {'\u00B7'} {prBanner.reps} reps
+                {prBanner.improvement > 0 && <span className="ml-1.5 text-cyan-300">+{prBanner.improvement}{unitLabel}</span>}
               </span>
             </div>
             <button onClick={() => setPrBanner(null)} className="p-1 text-cyan-700 active:text-cyan-400">
@@ -405,13 +429,13 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
           {/* Weight */}
           <div>
             <div className="mb-1.5 flex h-5 items-center justify-between">
-              <span className="label-caps">{t('logger.weight')} <span className="text-[var(--text-3)] ml-1">kg</span></span>
+              <span className="label-caps">{t('logger.weight')} <span className="text-[var(--text-3)] ml-1">{unitLabel}</span></span>
             </div>
             <div className="flex items-center rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
               <button
                 type="button"
-                onClick={() => adjustWeight(-2.5)}
-                aria-label={t('logger.weight') + ' -2.5kg'}
+                onClick={() => adjustWeight(-weightStep)}
+                aria-label={`${t('logger.weight')} -${weightStep}${unitLabel}`}
                 className="flex h-14 w-11 shrink-0 items-center justify-center text-lg text-gray-500 active:bg-white/[0.06] active:text-white min-h-[44px]"
               >
                 {'\u2212'}
@@ -427,12 +451,12 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
                   aria-label={t('logger.weight')}
                   className="h-14 min-w-0 flex-1 bg-transparent px-1 text-center text-3xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700 border-none!"
                 />
-                <span className="text-xs font-semibold text-gray-600 pr-1 shrink-0">kg</span>
+                <span className="text-xs font-semibold text-gray-600 pr-1 shrink-0">{unitLabel}</span>
               </div>
               <button
                 type="button"
-                onClick={() => adjustWeight(2.5)}
-                aria-label={t('logger.weight') + ' +2.5kg'}
+                onClick={() => adjustWeight(weightStep)}
+                aria-label={`${t('logger.weight')} +${weightStep}${unitLabel}`}
                 className="flex h-14 w-11 shrink-0 items-center justify-center text-lg text-gray-500 active:bg-white/[0.06] active:text-white min-h-[44px]"
               >
                 +
@@ -480,11 +504,11 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
           <div className="flex items-center justify-center gap-2 rounded-lg bg-white/[0.02] border border-white/[0.04] px-3 py-2 mb-2">
             <span className="label-caps">{t('logger.last_session')}:</span>
             <span className="text-xs font-semibold tabular text-gray-400">
-              {prevData.weight}kg {'\u00D7'} {prevData.reps}
+              {toDisplayWeight(prevData.weight, unit)}{unitLabel} {'\u00D7'} {prevData.reps}
             </span>
             {nextSuggestion && (
               <span className="text-xs font-bold tabular text-cyan-400">
-                {t('logger.try')}: {nextSuggestion}kg
+                {t('logger.try')}: {nextSuggestion}{unitLabel}
               </span>
             )}
           </div>
@@ -539,7 +563,7 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
                 const w = parseFloat(weight) || 0
                 const r = parseInt(reps) || 0
                 return w > 0 && r > 0
-                  ? `${w}kg \u00D7 ${r} ${t('logger.log_set').toLowerCase()}`
+                  ? `${w}${unitLabel} \u00D7 ${r} ${t('logger.log_set').toLowerCase()}`
                   : t('logger.log_set')
               })()
           }

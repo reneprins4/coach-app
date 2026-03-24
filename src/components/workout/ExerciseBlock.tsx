@@ -7,7 +7,9 @@ import { hapticFeedback } from '../../lib/native'
 import { isCompound, generateWarmupSets } from '../../lib/warmupCalculator'
 import ExerciseGuide from '../ExerciseGuide'
 import RpeButtons from './RpeButtons'
-import type { ActiveExercise, PRBanner } from '../../types'
+import { getSettings } from '../../lib/settings'
+import { toDisplayWeight, toKg, getWeightStep, getUnitLabel } from '../../lib/unitConversion'
+import type { ActiveExercise, PRBanner, Units } from '../../types'
 
 // Helper function for progressive overload suggestion
 function suggestNextWeight(kg: number): number | null {
@@ -61,8 +63,16 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
   beginnerMode,
 }: ExerciseBlockProps) {
   const { t } = useTranslation()
+  const unit: Units = getSettings().units || 'kg'
+  const weightStep = getWeightStep(unit)
+  const unitLabel = getUnitLabel(unit)
   const [weight, setWeight] = useState(
-    exercise.plan?.weight_kg?.toString() || lastUsed?.weight_kg?.toString() || ''
+    (() => {
+      const planKg = exercise.plan?.weight_kg
+      const lastKg = lastUsed?.weight_kg
+      const kg = planKg ?? lastKg
+      return kg != null ? String(toDisplayWeight(kg, unit)) : ''
+    })()
   )
   const [reps, setReps] = useState(
     exercise.plan?.reps_min?.toString() || lastUsed?.reps?.toString() || ''
@@ -119,7 +129,8 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         setReps(prev => prev || latest.reps?.toString() || '')
       }
       if (!exercise.plan?.weight_kg) {
-        setWeight(prev => prev || latest.weight_kg?.toString() || '')
+        const displayVal = latest.weight_kg != null ? String(toDisplayWeight(latest.weight_kg, unit)) : ''
+        setWeight(prev => prev || displayVal)
       }
     }
 
@@ -140,7 +151,8 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
   }, [prBanner])
 
   function handleAdd() {
-    const w = parseFloat(weight) || 0
+    const displayW = parseFloat(weight) || 0
+    const w = toKg(displayW, unit)
     const r = parseInt(reps, 10)
     if (isNaN(r) || r <= 0) return
 
@@ -150,9 +162,9 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
       if (pr && pr.isPR) {
         isPR = true
         setPrBanner({
-          weight: w,
+          weight: toDisplayWeight(w, unit),
           reps: r,
-          improvement: pr.improvement,
+          improvement: toDisplayWeight(pr.improvement, unit),
           type: pr.type,
         })
       }
@@ -176,7 +188,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
 
   // Build AI target string
   const aiTarget = exercise.plan ? (
-    `${exercise.plan.sets}x${exercise.plan.reps_min}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${exercise.plan.weight_kg}kg${exercise.plan.rpe_target ? ` · RPE ${exercise.plan.rpe_target}` : ''}`
+    `${exercise.plan.sets}x${exercise.plan.reps_min}${exercise.plan.reps_max && exercise.plan.reps_max !== exercise.plan.reps_min ? `-${exercise.plan.reps_max}` : ''} @ ${toDisplayWeight(exercise.plan.weight_kg, unit)}${unitLabel}${exercise.plan.rpe_target ? ` · RPE ${exercise.plan.rpe_target}` : ''}`
   ) : null
 
   const plannedSets = exercise.plan?.sets ?? null
@@ -276,19 +288,23 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         <div className="border-t border-white/[0.04] px-5 py-3 space-y-1.5">
           {exercise.sets.map((s, i) => (
             <button key={s.id} onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-              className={`flex w-full items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-2.5 active:bg-white/[0.06] transition-colors ${isDone ? 'border-l-2 border-l-emerald-500/40' : ''}`}>
+              className={`flex w-full items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-2.5 active:bg-white/[0.06] transition-colors ${isDone ? 'border-l-2 border-l-emerald-500/40' : ''}`}
+              aria-label={`${t('logger.tap_to_remove')}: ${toDisplayWeight(s.weight_kg, unit)}${unitLabel} x ${s.reps}`}>
               <div className="flex items-center gap-3">
                 <span className="text-sm tabular font-bold text-gray-700 w-5 text-right">{i + 1}</span>
                 <span className="text-[0.9375rem] font-bold tracking-tight text-white tabular">
-                  {s.weight_kg}<span className="text-xs text-gray-600">kg</span>
+                  {toDisplayWeight(s.weight_kg, unit)}<span className="text-xs text-gray-600">{unitLabel}</span>
                   <span className="mx-1.5 text-gray-700">{'\u00D7'}</span>
                   {s.reps}
                 </span>
                 {s.rpe && <span className="text-[10px] font-semibold text-gray-600 tabular">RPE {s.rpe}</span>}
               </div>
-              <Check size={13} className="text-emerald-400/70 shrink-0" />
+              <X size={14} className="text-gray-600 shrink-0" aria-hidden="true" />
             </button>
           ))}
+          {exercise.sets.length === 1 && (
+            <p className="text-[10px] text-gray-600 mt-1 px-1">{t('logger.tap_to_remove')}</p>
+          )}
         </div>
       )}
 
@@ -299,7 +315,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
           <div className="px-5 pt-2">
             <button onClick={() => onAddSet({ weight_kg: lastSet.weight_kg, reps: lastSet.reps, rpe: lastSet.rpe })}
               className="btn-secondary h-11 w-full text-sm">
-              <RotateCcw size={13} /> {t('logger.repeat_set')} {lastSet.weight_kg}kg {'\u00D7'} {lastSet.reps}
+              <RotateCcw size={13} /> {t('logger.repeat_set')} {toDisplayWeight(lastSet.weight_kg, unit)}{unitLabel} {'\u00D7'} {lastSet.reps}
             </button>
           </div>
         )
@@ -311,8 +327,8 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
           <div className="flex items-center gap-2">
             <Trophy size={15} className="text-cyan-400 shrink-0" />
             <span className="text-sm font-bold text-cyan-400">
-              {t('pr.new_record')}: {prBanner.weight}kg · {prBanner.reps} reps
-              {prBanner.improvement > 0 && <span className="ml-1.5 text-cyan-300">+{prBanner.improvement}kg</span>}
+              {t('pr.new_record')}: {prBanner.weight}{unitLabel} · {prBanner.reps} reps
+              {prBanner.improvement > 0 && <span className="ml-1.5 text-cyan-300">+{prBanner.improvement}{unitLabel}</span>}
             </span>
           </div>
           <button onClick={() => setPrBanner(null)} className="p-1 text-cyan-700 active:text-cyan-400"><X size={13} /></button>
@@ -325,15 +341,15 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <div className="mb-2 flex h-5 items-center justify-between">
-              <span className="label-caps">{t('logger.weight')}</span>
-              <button type="button" onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)} className="label-caps text-cyan-500 active:text-cyan-400">{t('logger.plates')}</button>
+              <span className="label-caps">{t('logger.weight')} ({unitLabel})</span>
+              <button type="button" onClick={() => onOpenPlateCalc(toKg(parseFloat(weight) || 0, unit))} className="label-caps text-cyan-500 active:text-cyan-400">{t('logger.plates')}</button>
             </div>
             <div className="flex items-center gap-1.5">
-              <button type="button" onClick={() => adjustWeight(-2.5)} aria-label={t('logger.weight') + ' -2.5kg'}
+              <button type="button" onClick={() => adjustWeight(-weightStep)} aria-label={`${t('logger.weight')} -${weightStep}${unitLabel}`}
                 className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">{'\u2212'}</button>
               <input type="number" inputMode="decimal" step="0.5" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="\u2014" aria-label={t('logger.weight')}
                 className="h-12 min-w-0 flex-1 rounded-xl px-1 text-center text-xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700" />
-              <button type="button" onClick={() => adjustWeight(2.5)} aria-label={t('logger.weight') + ' +2.5kg'}
+              <button type="button" onClick={() => adjustWeight(weightStep)} aria-label={`${t('logger.weight')} +${weightStep}${unitLabel}`}
                 className="flex h-12 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-base text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]">+</button>
             </div>
           </div>
@@ -356,9 +372,9 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         {prevData && (
           <div className="flex items-center justify-center gap-2 py-1">
             <span className="label-caps">{t('logger.last_session')}:</span>
-            <span className="text-xs font-semibold tabular text-gray-400">{prevData.weight}kg {'\u00D7'} {prevData.reps}</span>
-            {suggestNextWeight(prevData.weight) && (
-              <span className="text-xs font-bold tabular text-cyan-400">{t('logger.try')}: {suggestNextWeight(prevData.weight)}kg</span>
+            <span className="text-xs font-semibold tabular text-gray-400">{toDisplayWeight(prevData.weight, unit)}{unitLabel} {'\u00D7'} {prevData.reps}</span>
+            {suggestNextWeight(toDisplayWeight(prevData.weight, unit)) && (
+              <span className="text-xs font-bold tabular text-cyan-400">{t('logger.try')}: {suggestNextWeight(toDisplayWeight(prevData.weight, unit))}{unitLabel}</span>
             )}
           </div>
         )}

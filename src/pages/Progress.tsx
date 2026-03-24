@@ -12,6 +12,7 @@ import { Skeleton } from '../components/Skeleton'
 import { computeAllPRs, sortPRsForDisplay } from '../lib/prDetector'
 import { groupVolumeByWeek, groupVolumeByMonth, groupVolumeByMuscle, calcTrend, calcAvgWeeklyVolume, findBestWeek } from '../lib/volumeTracker'
 import { getVisibleTabs, workoutsUntilAnalysis } from './progressHelpers'
+import { toDisplayWeight, formatVolume, getUnitLabel } from '../lib/unitConversion'
 import { useMeasurements } from '../hooks/useMeasurements'
 import { MEASUREMENT_TYPES, groupByType, calculateTrend, formatMeasurement } from '../lib/measurements'
 import type { MeasurementType } from '../lib/measurements'
@@ -57,6 +58,8 @@ const CHART_TOOLTIP_STYLE = {
 export default function Progress() {
   const { t, i18n } = useTranslation()
   const { user, settings, updateSettings } = useAuthContext()
+  const unit = settings?.units || 'kg'
+  const unitLabel = getUnitLabel(unit)
   const { workouts, loading } = useWorkouts(user?.id)
   const [searchParams] = useSearchParams()
   const initialTab = searchParams.get('tab') || 'exercise'
@@ -380,8 +383,8 @@ export default function Progress() {
                 <div>
                   <p className="label-caps text-cyan-500/60">{t('progress.all_time_e1rm')}</p>
                   <p className="text-4xl font-black tracking-tight text-white">
-                    {exerciseData.allTimeE1rm.toFixed(1)}
-                    <span className="ml-1.5 text-base font-semibold text-gray-500">kg</span>
+                    {toDisplayWeight(exerciseData.allTimeE1rm, unit).toFixed(1)}
+                    <span className="ml-1.5 text-base font-semibold text-gray-500">{unitLabel}</span>
                   </p>
                 </div>
               </div>
@@ -435,9 +438,9 @@ export default function Progress() {
                       <span className="text-xs text-gray-500">{s.date}</span>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-white">
-                          {s.sets.map(x => `${x.weight_kg}x${x.reps}`).join('  ')}
+                          {s.sets.map(x => `${toDisplayWeight(x.weight_kg || 0, unit)}x${x.reps}`).join('  ')}
                         </p>
-                        <p className="text-[10px] text-gray-600">e1RM {s.e1rm} kg</p>
+                        <p className="text-[10px] text-gray-600">e1RM {toDisplayWeight(s.e1rm, unit)} {unitLabel}</p>
                       </div>
                     </div>
                   ))}
@@ -477,7 +480,7 @@ export default function Progress() {
           {volumeData.length > 0 ? (
             <div className="card p-5">
               <p className="label-caps mb-4">{t('volume.total_volume')}</p>
-              <VolumeChart data={volumeData} unit="kg" />
+              <VolumeChart data={volumeData} unit={unitLabel} />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20">
@@ -600,7 +603,7 @@ export default function Progress() {
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: t('progress.workouts_stat'), value: totalStats.totalWorkouts },
-              { label: t('progress.volume_stat'),     value: totalStats.totalVol >= 1000 ? `${(totalStats.totalVol / 1000).toFixed(1)}t` : `${totalStats.totalVol.toFixed(0)}kg` },
+              { label: t('progress.volume_stat'),     value: formatVolume(totalStats.totalVol, unit) },
               { label: t('progress.favorite_stat'),   value: null, name: totalStats.favorite },
             ].map(({ label, value, name }) => (
               <div
@@ -640,12 +643,12 @@ export default function Progress() {
                           <h3 className="font-black tracking-tight text-white truncate">{pr.exercise}</h3>
                           <div className="mt-1.5 flex items-center gap-3">
                             <span className="text-lg font-bold tabular-nums text-white">
-                              {pr.bestWeight}<span className="text-sm font-normal text-gray-500">kg</span>
+                              {toDisplayWeight(pr.bestWeight, unit)}<span className="text-sm font-normal text-gray-500">{unitLabel}</span>
                               <span className="mx-1 text-gray-600">x</span>
                               {pr.bestReps}
                             </span>
                             <span className="inline-flex items-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 text-[10px] font-bold tabular-nums text-cyan-400">
-                              {t('pr.e1rm_label')}: {pr.bestE1RM}kg
+                              {t('pr.e1rm_label')}: {toDisplayWeight(pr.bestE1RM, unit)}{unitLabel}
                             </span>
                           </div>
                         </div>

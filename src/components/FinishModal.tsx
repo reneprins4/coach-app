@@ -21,12 +21,15 @@ import { buildAchievementContext, syncAchievements } from '../lib/achievements'
 import type { Achievement } from '../lib/achievements'
 import { getIcon } from '../lib/iconMap'
 import { getSettings } from '../lib/settings'
-import type { FinishModalProps } from '../types'
+import { toDisplayWeight, formatVolume as formatVolUnit, getUnitLabel } from '../lib/unitConversion'
+import type { FinishModalProps, Units } from '../types'
 
 export default function FinishModal({ result, onClose, onSaveTemplate }: FinishModalProps) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const unit: Units = getSettings().units || 'kg'
+  const unitLabel = getUnitLabel(unit)
 
   const duration = result.duration || 0
   const mins = Math.floor(duration / 60)
@@ -448,7 +451,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
           <div className="mb-6 grid grid-cols-3 gap-3">
             {[
               { value: mins, label: t('finish_modal.minutes'), accent: false },
-              { value: formatVol(result.totalVolume), label: t('finish_modal.volume'), accent: true },
+              { value: formatVolUnit(result.totalVolume || 0, unit), label: t('finish_modal.volume'), accent: true },
               { value: totalSets, label: t('common.sets'), accent: false },
             ].map((stat, i) => (
               <motion.div
@@ -509,10 +512,10 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
                     >
                       <span className="text-sm font-medium text-white">{pr.exercise}</span>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-black text-cyan-400">{pr.weight}kg</span>
+                        <span className="text-xl font-black text-cyan-400">{toDisplayWeight(pr.weight ?? 0, unit)}{unitLabel}</span>
                         {pr.prevWeight != null && (
                           <span className="text-xs text-gray-500">
-                            (was {pr.prevWeight}kg)
+                            (was {toDisplayWeight(pr.prevWeight, unit)}{unitLabel})
                           </span>
                         )}
                       </div>
@@ -725,8 +728,4 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
   )
 }
 
-function formatVol(kg: number | undefined | null): string {
-  if (!kg) return '0'
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}t`
-  return `${Math.round(kg).toLocaleString()}`
-}
+// formatVol removed — use formatVolUnit from unitConversion.ts

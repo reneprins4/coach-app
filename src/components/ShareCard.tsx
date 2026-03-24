@@ -1,7 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { Trophy, Flame, X, Share2 } from 'lucide-react'
 import { motion } from 'motion/react'
+import { getSettings } from '../lib/settings'
+import { toDisplayWeight, getUnitLabel } from '../lib/unitConversion'
 import type { ShareCardData } from '../lib/shareCard'
+import type { Units } from '../types'
 
 interface ShareCardProps {
   data: ShareCardData
@@ -11,6 +14,8 @@ interface ShareCardProps {
 
 export default function ShareCard({ data, onClose, onShare }: ShareCardProps) {
   const { t } = useTranslation()
+  const unit: Units = getSettings().units || 'kg'
+  const unitLabel = getUnitLabel(unit)
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="share-card-title" className="fixed inset-0 z-[70] flex flex-col items-center justify-center bg-black/90 px-4" onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}>
@@ -112,7 +117,7 @@ export default function ShareCard({ data, onClose, onShare }: ShareCardProps) {
                 {data.prs.map((pr) => (
                   <div key={pr.exercise} className="flex items-center justify-between rounded-lg px-1 py-0.5">
                     <span className="text-sm text-gray-300">{pr.exercise}</span>
-                    <span className="text-sm font-bold tabular text-cyan-400">{pr.weight}kg</span>
+                    <span className="text-sm font-bold tabular text-cyan-400">{toDisplayWeight(pr.weight, unit)}{unitLabel}</span>
                   </div>
                 ))}
               </div>

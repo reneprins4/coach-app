@@ -7,6 +7,8 @@ import { useWorkouts } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
 import { buildHeatmapData, type HeatmapDay } from '../lib/calendarUtils'
 import PageTransition from '../components/PageTransition'
+import { toDisplayWeight, formatVolume, getUnitLabel } from '../lib/unitConversion'
+import { getSettings } from '../lib/settings'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -289,7 +291,7 @@ function HeatmapTooltip({
   const { t } = useTranslation()
   const dateObj = new Date(day.date + 'T00:00:00')
   const formatted = formatDate(dateObj, language)
-  const locale = language === 'nl' ? 'nl-NL' : 'en-GB'
+  const unit = (getSettings().units || 'kg') as import('../types').Units
 
   if (day.workoutCount === 0) {
     return (
@@ -310,7 +312,7 @@ function HeatmapTooltip({
           <span className="text-xs font-medium text-white">{day.split}</span>
         )}
         <span className="text-xs text-gray-500">
-          {day.volume.toLocaleString(locale)} kg {t('calendar.volume_label')}
+          {formatVolume(day.volume, unit)} {t('calendar.volume_label')}
         </span>
       </div>
     </div>
@@ -323,7 +325,9 @@ function HeatmapTooltip({
 
 export default function Calendar() {
   const { t, i18n } = useTranslation()
-  const { user } = useAuthContext()
+  const { user, settings } = useAuthContext()
+  const unit = settings?.units || 'kg'
+  const unitLabel = getUnitLabel(unit)
   const { workouts, loading } = useWorkouts(user?.id)
 
   const DAYS = useMemo(() =>
@@ -614,7 +618,7 @@ export default function Calendar() {
                       <div key={name} className="flex items-center justify-between text-sm">
                         <span className="text-gray-400">{name}</span>
                         <span className="text-gray-600">
-                          {sets.length} {t('common.sets')} {maxWeight > 0 ? `/ ${maxWeight}kg` : ''}
+                          {sets.length} {t('common.sets')} {maxWeight > 0 ? `/ ${toDisplayWeight(maxWeight, unit)}${unitLabel}` : ''}
                         </span>
                       </div>
                     )
@@ -628,7 +632,7 @@ export default function Calendar() {
 
                 {workout.totalVolume > 0 && (
                   <p className="mt-3 text-sm text-gray-500">
-                    {t('common.volume')}: <span className="font-semibold text-white">{workout.totalVolume.toLocaleString(i18n.language === 'nl' ? 'nl-NL' : 'en-GB')} kg</span>
+                    {t('common.volume')}: <span className="font-semibold text-white">{formatVolume(workout.totalVolume, unit)}</span>
                   </p>
                 )}
 

@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase'
 import { getLocalDateString } from '../lib/dateUtils'
 import { getCurrentBlock, getBlockProgress, clearBlock, PHASES } from '../lib/periodization'
 import { buildExportData, exportToJSON, exportWorkoutsToCSV, exportMeasurementsToCSV, downloadFile } from '../lib/dataExport'
+import { formatVolume, getUnitLabel } from '../lib/unitConversion'
 import { ACHIEVEMENTS, buildAchievementContext, getUnlockedAchievements, syncAchievements } from '../lib/achievements'
 import AchievementBadge from '../components/AchievementBadge'
 import InjuryBanner from '../components/InjuryBanner'
@@ -243,10 +244,37 @@ export default function Profile() {
           </div>
           </motion.div>
 
-          {/* Lichaamsgewicht */}
+          {/* Gewichtseenheid */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}>
           <div className="card">
-            <label htmlFor="profile-weight" className="label-caps mb-2 block">{t('profile.weight_label')}</label>
+            <p className="label-caps mb-3">{t('profile.weight_unit')}</p>
+            <div className="flex gap-2">
+              {[
+                { value: 'kg' as const, label: t('profile.unit_kg') },
+                { value: 'lbs' as const, label: t('profile.unit_lbs') },
+              ].map(u => (
+                <motion.button
+                  key={u.value}
+                  onClick={() => update('units', u.value)}
+                  className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-colors ${
+                    settings.units === u.value
+                      ? 'bg-white text-black'
+                      : 'bg-white/[0.04] text-[var(--text-3)] active:text-[var(--text-2)]'
+                  }`}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                >
+                  {u.label}
+                </motion.button>
+              ))}
+            </div>
+          </div>
+          </motion.div>
+
+          {/* Lichaamsgewicht */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}>
+          <div className="card">
+            <label htmlFor="profile-weight" className="label-caps mb-2 block">{t('profile.weight_label')} ({settings.units})</label>
             <input
               id="profile-weight"
               type="number"
@@ -493,7 +521,7 @@ export default function Profile() {
                       {isMain && (
                         <>
                           <div>
-                            <p className="label-caps mb-1">{t('main_lift.goal_kg')}</p>
+                            <p className="label-caps mb-1">{t('main_lift.goal_kg')} ({getUnitLabel(settings.units)})</p>
                             <input
                               type="number"
                               value={settings.mainLiftGoalKg || ''}
@@ -660,7 +688,7 @@ export default function Profile() {
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: t('profile.stats_workouts'),    value: stats.totalWorkouts },
-              { label: t('profile.stats_volume'),      value: stats.totalVol >= 1000 ? `${(stats.totalVol / 1000).toFixed(1)}t` : `${stats.totalVol.toFixed(0)}kg` },
+              { label: t('profile.stats_volume'),      value: formatVolume(stats.totalVol, settings.units) },
               { label: t('profile.member_since_label'), value: stats.memberSince },
             ].map(({ label, value }) => (
               <div key={label} className="card text-center">

@@ -1,4 +1,6 @@
-import type { FinishModalResult } from '../types'
+import type { FinishModalResult, Units } from '../types'
+import { toDisplayWeight, formatVolume, getUnitLabel } from './unitConversion'
+import { getSettings } from './settings'
 
 export interface ShareCardData {
   date: string
@@ -40,8 +42,9 @@ export function generateShareCardData(
   const duration = Math.floor((result.duration || 0) / 60)
 
   // Format volume
+  const unit: Units = getSettings().units || 'kg'
   const totalVol = result.totalVolume || 0
-  const volume = formatVolume(totalVol)
+  const volume = formatVolumeForCard(totalVol, unit)
 
   // Total sets
   const sets = result.workout_sets?.length || 0
@@ -65,10 +68,9 @@ export function generateShareCardData(
   }
 }
 
-function formatVolume(kg: number): string {
-  if (!kg) return '0'
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}t`
-  return `${Math.round(kg)}`
+function formatVolumeForCard(kgVol: number, unit: Units): string {
+  if (!kgVol) return '0'
+  return formatVolume(kgVol, unit)
 }
 
 /**
@@ -97,8 +99,10 @@ export function buildShareText(data: ShareCardData, t: (key: string, opts?: Reco
   if (data.prs.length > 0) {
     lines.push('')
     lines.push(`-- ${t('share.new_records')} --`)
+    const shareUnit: Units = getSettings().units || 'kg'
+    const shareUnitLabel = getUnitLabel(shareUnit)
     for (const pr of data.prs) {
-      lines.push(`${pr.exercise}: ${pr.weight}kg`)
+      lines.push(`${pr.exercise}: ${toDisplayWeight(pr.weight, shareUnit)}${shareUnitLabel}`)
     }
   }
 

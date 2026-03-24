@@ -160,8 +160,11 @@
     "lang_en": "English",
     "name_label": "Name",
     "name_placeholder": "Your name",
-    "weight_label": "Body weight (kg)",
+    "weight_label": "Body weight",
     "weight_hint": "Helps estimate starting weights",
+    "weight_unit": "Weight unit",
+    "unit_kg": "Kilogram (kg)",
+    "unit_lbs": "Pounds (lbs)",
     "weight_placeholder": "80",
     "optional": "optional",
     "incomplete_banner": "Fill in your details for more accurate weights",
@@ -291,7 +294,8 @@
     "how_many_exercises": "How many exercises left?",
     "trimmed": "Workout trimmed",
     "menu": "Menu",
-    "overview": "Overview"
+    "overview": "Overview",
+    "tap_to_remove": "Tap to remove"
   },
   "progress": {
     "title": "Progress",
@@ -423,6 +427,7 @@
       "goal_strength": "Strength",
       "goal_endurance": "Endurance",
       "time_label": "Available time",
+      "unit_label": "Weight unit",
       "equipment_label": "Equipment",
       "equip_full": "Full gym",
       "equip_dumbbells": "Home / dumbbells",

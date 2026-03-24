@@ -4,13 +4,16 @@ import { ArrowLeft } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useWorkoutDetail } from '../hooks/useWorkouts'
 import { useAuthContext } from '../App'
+import { toDisplayWeight, formatVolume, getUnitLabel } from '../lib/unitConversion'
 import PageTransition from '../components/PageTransition'
 
 export default function WorkoutDetail() {
   const { t, i18n } = useTranslation()
   const { id } = useParams()
   const nav = useNavigate()
-  const { user } = useAuthContext()
+  const { user, settings } = useAuthContext()
+  const unit = settings?.units || 'kg'
+  const unitLabel = getUnitLabel(unit)
   const { workout, loading } = useWorkoutDetail(id, user?.id)
 
   if (loading) {
@@ -80,7 +83,7 @@ export default function WorkoutDetail() {
           { value: totalExercises, label: t('common.exercises') },
           { value: totalSets, label: t('common.sets') },
           ...(totalVol > 0
-            ? [{ value: formatVol(totalVol), label: t('workout_detail.volume').toLowerCase(), accent: true }]
+            ? [{ value: formatVolume(totalVol, unit), label: t('workout_detail.volume').toLowerCase(), accent: true }]
             : []),
         ].map((stat, i) => (
           <motion.span
@@ -125,7 +128,7 @@ export default function WorkoutDetail() {
               <div className="flex items-center justify-between px-5 pt-4 pb-3">
                 <h3 className="text-sm font-bold text-white">{exercise}</h3>
                 {exerciseVol > 0 && (
-                  <span className="text-xs tabular font-semibold text-gray-600">{formatVol(exerciseVol)}</span>
+                  <span className="text-xs tabular font-semibold text-gray-600">{formatVolume(exerciseVol, unit)}</span>
                 )}
               </div>
 
@@ -134,7 +137,7 @@ export default function WorkoutDetail() {
                 {/* Header row */}
                 <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-3 mb-1">
                   <span className="label-caps">#</span>
-                  <span className="label-caps">Kg</span>
+                  <span className="label-caps">{unitLabel}</span>
                   <span className="label-caps">{t('common.reps')}</span>
                   <span className="label-caps text-right">RPE</span>
                 </div>
@@ -153,7 +156,7 @@ export default function WorkoutDetail() {
                     }}
                   >
                     <span className="text-xs tabular text-gray-700">{i + 1}</span>
-                    <span className="text-sm tabular font-semibold text-white">{s.weight_kg ?? '—'}</span>
+                    <span className="text-sm tabular font-semibold text-white">{s.weight_kg != null ? toDisplayWeight(s.weight_kg, unit) : '—'}</span>
                     <span className="text-sm tabular font-semibold text-white">{s.reps ?? '—'}</span>
                     <span className="text-xs tabular text-gray-600 text-right">{s.rpe || '—'}</span>
                   </motion.div>
@@ -168,8 +171,4 @@ export default function WorkoutDetail() {
   )
 }
 
-function formatVol(kg: number | undefined | null): string {
-  if (!kg) return '0kg'
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}t`
-  return `${Math.round(kg)}kg`
-}
+// formatVol removed — use formatVolume from unitConversion.ts
