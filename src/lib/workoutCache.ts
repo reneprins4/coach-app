@@ -10,7 +10,7 @@
  * TTL: 4 hours. Invalidated on workout finish, injury change, or settings change.
  */
 
-import { analyzeTraining, scoreSplits } from './training-analysis'
+import { analyzeTraining, scoreSplits, getRecentSplits } from './training-analysis'
 import { getSettings } from './settings'
 import { getCurrentBlock } from './periodization'
 import { buildWorkoutPreferences } from './workoutPreferences'
@@ -147,10 +147,13 @@ export function generateWorkoutPreview(workouts: Workout[], blockOverride?: impo
       }
     : null
 
+  const recentSplits = getRecentSplits(workouts)
   const splits = scoreSplits(
     muscleStatus,
     lastWorkoutInfo,
     settings.experienceLevel || 'intermediate',
+    parseInt(settings.frequency) || 4,
+    recentSplits,
   )
 
   const bestSplit = splits[0]
@@ -161,10 +164,10 @@ export function generateWorkoutPreview(workouts: Workout[], blockOverride?: impo
 
   // Build muscle context: relevant muscles for the split, sorted by recovery
   const splitMuscleMap: Record<string, string[]> = {
-    'Push':      ['chest', 'shoulders', 'triceps'],
-    'Pull':      ['back', 'biceps'],
+    'Push':      ['chest', 'shoulders', 'triceps', 'core'],
+    'Pull':      ['back', 'biceps', 'core'],
     'Legs':      ['quads', 'hamstrings', 'glutes', 'core'],
-    'Upper':     ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
+    'Upper':     ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'core'],
     'Lower':     ['quads', 'hamstrings', 'glutes', 'core'],
     'Full Body': ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'],
   }
@@ -223,10 +226,13 @@ export async function generateFullWorkout(
       }
     : null
 
+  const recentSplits = getRecentSplits(workouts)
   const splits = scoreSplits(
     muscleStatus,
     lastWorkoutInfo,
     settings.experienceLevel || 'intermediate',
+    parseInt(settings.frequency) || 4,
+    recentSplits,
   )
 
   const recommendedSplit = overrides?.split || splits[0]?.name || 'Full Body'

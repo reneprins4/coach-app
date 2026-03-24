@@ -22,6 +22,7 @@ vi.mock('../training-analysis', () => ({
     { name: 'Push', score: 85, reasoning: 'Test reasoning' },
     { name: 'Pull', score: 70, reasoning: 'Test reasoning 2' },
   ]),
+  getRecentSplits: vi.fn(() => []),
 }))
 
 // Mock settings

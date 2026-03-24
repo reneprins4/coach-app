@@ -2,7 +2,7 @@
  * Tests for src/lib/localWorkoutGenerator.ts
  */
 import { describe, it, expect } from 'vitest'
-import { generateLocalWorkout } from '../localWorkoutGenerator'
+import { generateLocalWorkout, EXERCISE_POOL } from '../localWorkoutGenerator'
 import { createMuscleStatusMap, createRecentSession } from '../../__tests__/helpers'
 import type { MuscleGroup } from '../../types'
 
@@ -140,9 +140,16 @@ describe('localWorkoutGenerator', () => {
 
     it('assigns non-zero weights to non-bodyweight exercises', () => {
       const result = generateLocalWorkout(makeInput())
+      // Build set of all bodyweight exercise names from the pool
+      const bodyweightNames = new Set<string>()
+      for (const exercises of Object.values(EXERCISE_POOL)) {
+        for (const e of exercises) {
+          if (e.equipment === 'bodyweight') bodyweightNames.add(e.name)
+        }
+      }
       for (const ex of result.exercises) {
         // Bodyweight exercises can have 0kg
-        if (!['Pull-up', 'Plank', 'Hanging Leg Raise', 'Ab Wheel Rollout', 'Nordic Curl', 'Glute Bridge', 'Diamond Push-up'].includes(ex.name)) {
+        if (!bodyweightNames.has(ex.name)) {
           expect(ex.weight_kg).toBeGreaterThan(0)
         }
       }
@@ -272,12 +279,14 @@ describe('localWorkoutGenerator', () => {
           isDeload: true,
         },
       }))
-      // Isolation exercises in a Push split: Cable Fly, Lateral Raise, Tricep Pushdown, etc.
-      const isolations = result.exercises.filter(e =>
-        ['Cable Fly (Mid)', 'Pec Deck', 'Lateral Raise', 'Face Pull', 'Cable Lateral Raise',
-         'Rear Delt Fly', 'Tricep Pushdown', 'Skull Crusher', 'Overhead Tricep Extension',
-         'Diamond Push-up'].includes(e.name)
-      )
+      // Identify isolation exercises by checking the exercise pool
+      const isolationNames = new Set<string>()
+      for (const exercises of Object.values(EXERCISE_POOL)) {
+        for (const e of exercises) {
+          if (!e.isCompound) isolationNames.add(e.name)
+        }
+      }
+      const isolations = result.exercises.filter(e => isolationNames.has(e.name))
       expect(isolations.length).toBeGreaterThan(0)
       for (const ex of isolations) {
         expect(ex.sets).toBe(1)
@@ -312,31 +321,41 @@ describe('localWorkoutGenerator', () => {
     // --- ENGINE-008: Progressive overload uses best set (highest e1RM), not first ---
 
     it('progressive overload uses best set (highest e1RM), not first set', () => {
-      // Two sessions, older one has two sets for Incline Dumbbell Press:
+      // Incline Dumbbell Press history has two sets with different e1RMs:
       // Set 1: 20kg x 10 -> e1RM = 20*(1+10/30) = 26.7
       // Set 2: 30kg x 5  -> e1RM = 30*(1+5/30) = 35.0 (higher)
       // The generator should use the 30kg x 5 set for progression, not the 20kg x 10 set.
-      // Use a second session (most recent) with different exercises so Incline DB Press
-      // is not filtered by the variety logic.
+      // Place both exercise histories in session index 2+ (beyond the 2-session recent window)
+      // so the variety filter does not exclude them from being picked.
       const lowVolumeStatus = createMuscleStatusMap({
         chest: { setsThisWeek: 0 },
         shoulders: { setsThisWeek: 0 },
         triceps: { setsThisWeek: 0 },
       })
       const history = [
+        // Sessions 0-1 (recent window) have unrelated exercises
         createRecentSession({}, [
-          { exercise: 'Flat Barbell Bench Press', weight_kg: 80, reps: 8, rpe: 7 },
+          { exercise: 'Cable Fly (Mid)', weight_kg: 15, reps: 12, rpe: 7 },
         ]),
+        createRecentSession({}, [
+          { exercise: 'Pec Deck', weight_kg: 40, reps: 12, rpe: 7 },
+        ]),
+        // Session 2+ (outside recent window, still used for progressive overload)
         createRecentSession({}, [
           { exercise: 'Incline Dumbbell Press', weight_kg: 20, reps: 10, rpe: 7 },
           { exercise: 'Incline Dumbbell Press', weight_kg: 30, reps: 5, rpe: 7 },
         ]),
       ]
-      const result = generateLocalWorkout(makeInput({
-        muscleStatus: lowVolumeStatus,
-        recentHistory: history,
-      }))
-      const incline = result.exercises.find(e => e.name === 'Incline Dumbbell Press')
+      // Note: exercise selection is randomized, so we retry until Incline DB Press appears.
+      let incline = undefined
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const result = generateLocalWorkout(makeInput({
+          muscleStatus: lowVolumeStatus,
+          recentHistory: history,
+        }))
+        incline = result.exercises.find(e => e.name === 'Incline Dumbbell Press')
+        if (incline) break
+      }
       expect(incline).toBeDefined()
       // The vs_last_session note should reference the best set (30kg), not first (20kg).
       // Buggy: "prev 20kg x10", Fixed: "prev 30kg x5"

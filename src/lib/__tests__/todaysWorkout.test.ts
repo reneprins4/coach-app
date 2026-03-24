@@ -11,6 +11,7 @@ import type { Workout, RecentSession } from '../../types'
 vi.mock('../training-analysis', () => ({
   analyzeTraining: () => createMuscleStatusMap(),
   scoreSplits: () => [{ name: 'Push', score: 100, reasoning: 'Best split' }],
+  getRecentSplits: () => [],
 }))
 
 vi.mock('../settings', () => ({

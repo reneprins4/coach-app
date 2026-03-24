@@ -927,15 +927,11 @@ describe('Cross-cutting: Muscle balance', () => {
     const expectedMuscles: MuscleGroup[] = ['chest', 'back', 'quads', 'shoulders']
     const missingMuscles = expectedMuscles.filter(m => !musclesCovered.has(m))
 
-    // This PROVES the bug: some critical muscle groups are not covered
-    expect(missingMuscles.length).toBeGreaterThan(0)
-
-    // Specifically, chest is likely missing because EXERCISE_POOL.chest has
-    // only barbell, dumbbell, cable, and machine exercises - ZERO bodyweight options
-    // The fix: add Push-up, Wide Push-up, Decline Push-up to EXERCISE_POOL.chest
-
-    // Document which muscles ARE covered for a bodyweight user
-    // When fixed, this should be: expect(missingMuscles).toEqual([])
+    // FIXED: With randomized exercise selection and bodyweight exercises in the pool
+    // (Push-Up, Wide Push-Up, Decline Push-Up for chest; Chin-up for biceps/back;
+    // Band Pull-Apart for shoulders; Step-Up for quads), all major muscle groups
+    // should now be covered over 26 weeks of Full Body training.
+    expect(missingMuscles.length).toBe(0)
   })
 
   it('BUG-CHECK: no muscle group is vastly over-trained relative to others', () => {

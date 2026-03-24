@@ -5,7 +5,7 @@
  * a complete workout using the local generator. No network calls.
  */
 
-import { analyzeTraining, scoreSplits } from './training-analysis'
+import { analyzeTraining, scoreSplits, getRecentSplits } from './training-analysis'
 import { generateLocalWorkout } from './localWorkoutGenerator'
 import { getSettings } from './settings'
 import { getCurrentBlock } from './periodization'
@@ -41,10 +41,13 @@ export function generateTodaysWorkout(workouts: Workout[]): TodaysWorkoutSuggest
       }
     : null
 
+  const recentSplits = getRecentSplits(workouts)
   const splits = scoreSplits(
     muscleStatus,
     lastWorkoutInfo,
     settings.experienceLevel || 'intermediate',
+    0,
+    recentSplits,
   )
 
   // Pick the highest-scoring split

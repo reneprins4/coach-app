@@ -148,10 +148,10 @@ export async function generateScientificWorkout({
 
   // Filter muscle status to only relevant muscles for this split
   const splitMuscleMap: Record<string, string[]> = {
-    'Push': ['chest', 'shoulders', 'triceps'],
-    'Pull': ['back', 'biceps'],
+    'Push': ['chest', 'shoulders', 'triceps', 'core'],
+    'Pull': ['back', 'biceps', 'core'],
     'Legs': ['quads', 'hamstrings', 'glutes', 'core'],
-    'Upper': ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
+    'Upper': ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'core'],
     'Lower': ['quads', 'hamstrings', 'glutes', 'core'],
     'Full Body': ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'],
   }
@@ -250,6 +250,7 @@ Rules:
 - Compounds 3-5 sets, isolations 3-4 sets. Focus muscles get +1-2 extra sets
 - VOLUME CEILING (${level}, sets/muscle/week): ${Object.entries(getVolumeCeiling(level)).map(([m, v]) => `${m}:${v}`).join(', ')}. Check sets_done in muscle status and do NOT exceed ceiling including today's workout.
 ${preferences.isDeload ? '- DELOAD: 2-3 sets max, RPE<=6' : preferences.trainingPhase ? `- ${preferences.trainingPhase} Wk${preferences.blockWeek}: strict RPE ${preferences.targetRPE}` : ''}
+- Always include 1-2 core/ab exercises at the end of every workout regardless of split
 - Vary 1-2 exercises vs last session (rotate compound variations)
 
 Return JSON:{"split":"","reasoning":"2-3 sentences","exercises":[{"name":"","muscle_group":"chest|back|shoulders|quads|hamstrings|glutes|biceps|triceps|core","sets":0,"reps_min":0,"reps_max":0,"weight_kg":0,"rpe_target":0,"rest_seconds":0,"notes":"coaching cue","vs_last_session":"up|same|down|new - explanation"}],"estimated_duration_min":0,"volume_notes":""}`

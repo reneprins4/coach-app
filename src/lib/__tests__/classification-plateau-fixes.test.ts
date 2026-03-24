@@ -153,40 +153,44 @@ describe('BUG 12: benchMax from settings used for estimation', () => {
 
   it('when user has benchMax in settings, generator uses it instead of bodyweight estimate', () => {
     // benchMax = 100kg, so working weight should be ~75kg (75% of max)
-    const withMax = makeInput({ benchMax: '100' })
-    const withoutMax = makeInput({})
-
-    const resultWithMax = generateLocalWorkout(withMax)
-    const resultWithoutMax = generateLocalWorkout(withoutMax)
-
-    const benchWithMax = resultWithMax.exercises.find(e => e.name.toLowerCase().includes('bench'))
-    const benchWithoutMax = resultWithoutMax.exercises.find(e => e.name.toLowerCase().includes('bench'))
+    // Exercise selection is randomized, so retry until a bench exercise appears
+    let benchWithMax = undefined
+    for (let i = 0; i < 20 && !benchWithMax; i++) {
+      const result = generateLocalWorkout(makeInput({ benchMax: '100' }))
+      benchWithMax = result.exercises.find(e => e.name.toLowerCase().includes('bench'))
+    }
 
     expect(benchWithMax).toBeDefined()
-    expect(benchWithoutMax).toBeDefined()
-
     // With a 100kg max, working weight at 75% = 75kg (rounded to 2.5kg)
-    // The bodyweight estimate for 80kg intermediate = 80 * 0.8 = 64kg
-    // So the max-based weight should be higher and closer to 75
     expect(benchWithMax!.weight_kg).toBe(75)
   })
 
   it('when benchMax is empty/0, falls back to bodyweight estimate', () => {
-    const withEmpty = makeInput({ benchMax: '' })
-    const withZero = makeInput({ benchMax: '0' })
-    const withoutMax = makeInput({})
+    // Exercise selection is randomized, so retry until all three generate the same bench exercise.
+    // We need the SAME exercise name to compare bodyweight estimates meaningfully.
+    let found = false
+    for (let i = 0; i < 30 && !found; i++) {
+      const resultEmpty = generateLocalWorkout(makeInput({ benchMax: '' }))
+      const resultZero = generateLocalWorkout(makeInput({ benchMax: '0' }))
+      const resultDefault = generateLocalWorkout(makeInput({}))
 
-    const resultEmpty = generateLocalWorkout(withEmpty)
-    const resultZero = generateLocalWorkout(withZero)
-    const resultDefault = generateLocalWorkout(withoutMax)
+      const emptyBenches = resultEmpty.exercises.filter(e => e.name.toLowerCase().includes('bench'))
+      const zeroBenches = resultZero.exercises.filter(e => e.name.toLowerCase().includes('bench'))
+      const defaultBenches = resultDefault.exercises.filter(e => e.name.toLowerCase().includes('bench'))
 
-    const benchEmpty = resultEmpty.exercises.find(e => e.name.toLowerCase().includes('bench'))
-    const benchZero = resultZero.exercises.find(e => e.name.toLowerCase().includes('bench'))
-    const benchDefault = resultDefault.exercises.find(e => e.name.toLowerCase().includes('bench'))
-
-    // All three should produce the same bodyweight-based estimate
-    expect(benchEmpty!.weight_kg).toBe(benchDefault!.weight_kg)
-    expect(benchZero!.weight_kg).toBe(benchDefault!.weight_kg)
+      // Find a bench exercise name that appears in all three
+      for (const eb of emptyBenches) {
+        const zb = zeroBenches.find(e => e.name === eb.name)
+        const db = defaultBenches.find(e => e.name === eb.name)
+        if (zb && db) {
+          expect(eb.weight_kg).toBe(db.weight_kg)
+          expect(zb.weight_kg).toBe(db.weight_kg)
+          found = true
+          break
+        }
+      }
+    }
+    expect(found).toBe(true)
   })
 
   it('squatMax from settings used for squat exercises', () => {

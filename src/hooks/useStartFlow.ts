@@ -10,7 +10,7 @@ import type {
   AIWorkoutResponse,
 } from '../types'
 import { fetchRecentHistory } from './useWorkouts'
-import { analyzeTraining, scoreSplits, getRelevantHistory } from '../lib/training-analysis'
+import { analyzeTraining, scoreSplits, getRelevantHistory, getRecentSplits } from '../lib/training-analysis'
 import { generateScientificWorkout } from '../lib/ai'
 import { getSettings, saveSettings } from '../lib/settings'
 import { loadBlock } from '../lib/periodization'
@@ -278,7 +278,22 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         if (cancelled) return
 
         const muscleStatus = analyzeTraining(history) as MuscleStatusMap
-        const splits = scoreSplits(muscleStatus) as SplitScore[]
+        const settings = getSettings() as UserSettings
+        const lastWorkout = history[0]
+        const lastWorkoutInfo = lastWorkout
+          ? {
+              split: lastWorkout.split,
+              hoursSince: (Date.now() - new Date(lastWorkout.created_at).getTime()) / 3600000,
+            }
+          : null
+        const recentSplits = getRecentSplits(history)
+        const splits = scoreSplits(
+          muscleStatus,
+          lastWorkoutInfo,
+          settings.experienceLevel || 'intermediate',
+          parseInt(settings.frequency) || 4,
+          recentSplits,
+        ) as SplitScore[]
         const recommendedSplit = splits[0]?.name || 'Full Body'
 
         const recoveredMuscles = Object.entries(muscleStatus)
@@ -301,8 +316,6 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         }
 
         dispatch({ type: 'GENERATION_START' })
-
-        const settings = getSettings() as UserSettings
 
         // Check localStorage workout cache first (shared with Dashboard)
         const injuries = loadInjuries().filter(i => i.status !== 'resolved')

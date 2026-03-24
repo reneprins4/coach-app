@@ -80,7 +80,8 @@ function isCompoundExercise(name: string): boolean {
     'bench press', 'squat', 'deadlift', 'row', 'press', 'pull-up',
     'chin-up', 'pulldown', 'hip thrust', 'leg press', 'dip',
     'hack squat', 'lunge', 'split squat', 'front squat',
-    'close grip bench',
+    'close grip bench', 'push-up', 'push up', 'step-up',
+    'goblet squat', 'sumo squat',
   ]
   const lower = name.toLowerCase()
   return compoundPatterns.some(p => lower.includes(p))

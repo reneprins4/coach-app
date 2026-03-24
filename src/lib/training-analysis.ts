@@ -72,10 +72,10 @@ export const RECOVERY_HOURS: Record<MuscleGroup, number> = {
 }
 
 const SPLIT_MUSCLES: Record<SplitName | 'Lower Body', MuscleGroup[]> = {
-  'Push':       ['chest', 'shoulders', 'triceps'],
-  'Pull':       ['back', 'biceps'],
+  'Push':       ['chest', 'shoulders', 'triceps', 'core'],
+  'Pull':       ['back', 'biceps', 'core'],
   'Legs':       ['quads', 'hamstrings', 'glutes', 'core'],
-  'Upper':      ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
+  'Upper':      ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'core'],
   'Lower':      ['quads', 'hamstrings', 'glutes', 'core'],
   'Lower Body': ['quads', 'hamstrings', 'glutes'],
   'Full Body':  ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core'],
@@ -108,7 +108,7 @@ const EXERCISE_MUSCLE_MAP: Record<string, MuscleGroup> = {
   'face.*pull':         'shoulders', 'rear.*delt':   'shoulders', 'arnold':         'shoulders',
   'upright.*row':       'shoulders', 'shoulder.*press': 'shoulders', 'cable.*lateral': 'shoulders',
   'military.*press':    'shoulders', 'front.*raise': 'shoulders', 'reverse.*fly':   'shoulders',
-  'side.*raise':        'shoulders', 'delt.*raise':  'shoulders',
+  'side.*raise':        'shoulders', 'delt.*raise':  'shoulders', 'band.*pull.*apart': 'shoulders',
   // Chest dip
   'chest.*dip':         'chest',
   // Triceps
@@ -128,14 +128,14 @@ const EXERCISE_MUSCLE_MAP: Record<string, MuscleGroup> = {
   // Quads
   'squat':              'quads',  'leg.*press':    'quads',  'hack':            'quads',
   'lunge':              'quads',  'leg.*extension':'quads',  'split.*squat':    'quads',
-  'front.*squat':       'quads',  'bulgarian':     'quads',
+  'front.*squat':       'quads',  'bulgarian':     'quads',  'step.?up':        'quads',
   // Biceps
   'curl(?!.*leg)':      'biceps', 'hammer':        'biceps', 'preacher':        'biceps',
   'concentration':      'biceps', 'ez.*bar.*curl': 'biceps',
   // Core
   'plank':              'core',   'crunch':        'core',   'ab.*wheel':       'core',
   'leg.*raise':         'core',   'pallof':        'core',   'dead.*bug':       'core',
-  'russian.*twist':     'core',   'sit.?up':       'core',
+  'russian.*twist':     'core',   'sit.?up':       'core',   'woodchop':        'core',
 }
 
 // Compound exercises hit multiple muscle groups
@@ -389,6 +389,7 @@ export function scoreSplits(
   lastWorkoutInfo: LastWorkoutInfo | null = null,
   experienceLevel: ExperienceLevel = 'intermediate',
   frequency: number = 0,
+  recentSplits: string[] = [],
 ): SplitScore[] {
   const scores: Record<string, number> = {}
   for (const [splitName, muscles] of Object.entries(SPLIT_MUSCLES)) {
@@ -409,7 +410,7 @@ export function scoreSplits(
       else if (ms.recoveryPct < 75 && isPrimary) score -= 20
     }
 
-    const normFactor = primaryMuscles.length || 1
+    const normFactor = Math.min(primaryMuscles.length || 1, 5)
     score = score / normFactor
 
     const fatiguedPrimary = primaryMuscles.filter(m => (muscleStatus[m]?.recoveryPct ?? 100) < 50)
@@ -420,6 +421,11 @@ export function scoreSplits(
     if (lastWorkoutInfo && lastWorkoutInfo.split === splitName) {
       score -= 25 // penalty for same split consecutively
     }
+
+    // Weekly split distribution penalty: escalating -15 per occurrence this week
+    const thisWeekCount = recentSplits.filter(s => s === splitName).length
+    score -= thisWeekCount * 15
+
     if (splitName === 'Full Body' && lastWorkoutInfo?.split === 'Full Body' && lastWorkoutInfo.hoursSince < 24) {
       score -= 30
     }
@@ -513,6 +519,47 @@ export function getRelevantHistory(workouts: Workout[], splitName: string): Rele
     }
   }
   return history
+}
+
+/**
+ * Detect which split a workout belongs to based on its `split` field
+ * or by analyzing the exercises performed.
+ */
+export function detectSplit(workout: Workout): string | null {
+  // Prefer the explicit split field if it matches a known split
+  if (workout.split && Object.keys(SPLIT_MUSCLES).includes(workout.split)) {
+    return workout.split
+  }
+
+  // Fallback: classify exercises and find best-matching split
+  const muscles = new Set<MuscleGroup>()
+  for (const s of (workout.workout_sets || [])) {
+    const m = classifyExercise(s.exercise)
+    if (m) muscles.add(m)
+  }
+  if (muscles.size === 0) return null
+
+  let bestSplit: string | null = null
+  let bestOverlap = 0
+  for (const [splitName, splitMuscles] of Object.entries(SPLIT_MUSCLES)) {
+    const overlap = splitMuscles.filter(m => muscles.has(m)).length
+    if (overlap > bestOverlap) {
+      bestOverlap = overlap
+      bestSplit = splitName
+    }
+  }
+  return bestSplit
+}
+
+/**
+ * Get split names from workouts in the last 7 days for weekly distribution tracking.
+ */
+export function getRecentSplits(workouts: Workout[]): string[] {
+  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  return workouts
+    .filter(w => new Date(w.created_at) > oneWeekAgo)
+    .map(w => detectSplit(w))
+    .filter((s): s is string => s != null)
 }
 
 export { SPLIT_MUSCLES }

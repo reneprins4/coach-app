@@ -74,80 +74,66 @@ describe('BUG 1: complete_beginner volume ceiling', () => {
 // BUG 7: Gender-aware weight estimation
 // ============================================================================
 
+// Helper: find a common weighted exercise across multiple workout results
+function findCommonExercise(
+  ...workouts: ReturnType<typeof generateLocalWorkout>[]
+): { name: string; weights: number[] } | null {
+  if (workouts.length < 2) return null
+  const firstExNames = workouts[0]!.exercises.filter(e => e.weight_kg > 0).map(e => e.name)
+  for (const name of firstExNames) {
+    const weights = workouts.map(w => {
+      const ex = w.exercises.find(e => e.name === name && e.weight_kg > 0)
+      return ex?.weight_kg ?? null
+    })
+    if (weights.every((w): w is number => w != null)) {
+      return { name, weights }
+    }
+  }
+  return null
+}
+
+// Helper: retry generation until a common exercise is found across all gender variants
+function generateWithCommonExercise(
+  genders: (string | undefined)[],
+  bodyweight: string,
+  maxAttempts = 20,
+): { name: string; weights: number[] } | null {
+  for (let i = 0; i < maxAttempts; i++) {
+    const results = genders.map(gender =>
+      generateLocalWorkout(makeInput({
+        preferences: {
+          experienceLevel: 'intermediate',
+          bodyweight,
+          gender,
+        },
+      }))
+    )
+    const common = findCommonExercise(...results)
+    if (common) return common
+  }
+  return null
+}
+
 describe('BUG 7: Gender-aware weight estimation', () => {
   it('female 65kg gets lower bench estimate than male 65kg', () => {
-    const male = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '65',
-        gender: 'male',
-      },
-    }))
-    const female = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '65',
-        gender: 'female',
-      },
-    }))
-
-    const maleBench = male.exercises.find(e => e.name.toLowerCase().includes('bench'))
-    const femaleBench = female.exercises.find(e => e.name.toLowerCase().includes('bench'))
-
-    expect(maleBench).toBeDefined()
-    expect(femaleBench).toBeDefined()
-    expect(femaleBench!.weight_kg).toBeLessThan(maleBench!.weight_kg)
+    // Retry until both male and female generate a common weighted exercise
+    const common = generateWithCommonExercise(['male', 'female'], '65')
+    expect(common).toBeDefined()
+    expect(common!.weights[1]).toBeLessThan(common!.weights[0]!)
   })
 
   it('female multiplier is approximately 0.6-0.7x of male', () => {
-    const male = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '80',
-        gender: 'male',
-      },
-    }))
-    const female = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '80',
-        gender: 'female',
-      },
-    }))
-
-    // Compare first weighted exercise
-    const maleEx = male.exercises.find(e => e.weight_kg > 0)
-    const femaleEx = female.exercises.find(e => e.name === maleEx?.name && e.weight_kg > 0)
-
-    expect(maleEx).toBeDefined()
-    expect(femaleEx).toBeDefined()
-    const ratio = femaleEx!.weight_kg / maleEx!.weight_kg
+    const common = generateWithCommonExercise(['male', 'female'], '80')
+    expect(common).toBeDefined()
+    const ratio = common!.weights[1]! / common!.weights[0]!
     expect(ratio).toBeGreaterThanOrEqual(0.55)
     expect(ratio).toBeLessThanOrEqual(0.75)
   })
 
   it('male is the default/baseline (multiplier 1.0)', () => {
-    const male = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '80',
-        gender: 'male',
-      },
-    }))
-    const noGender = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '80',
-        gender: undefined,
-      },
-    }))
-
-    // Male and no-gender should produce same weights
-    const maleEx = male.exercises.find(e => e.weight_kg > 0)
-    const noGenderEx = noGender.exercises.find(e => e.name === maleEx?.name)
-    expect(maleEx).toBeDefined()
-    expect(noGenderEx).toBeDefined()
-    expect(maleEx!.weight_kg).toBe(noGenderEx!.weight_kg)
+    const common = generateWithCommonExercise(['male', undefined], '80')
+    expect(common).toBeDefined()
+    expect(common!.weights[0]).toBe(common!.weights[1])
   })
 
   it('gender factor applies to all muscle groups', () => {
@@ -180,39 +166,13 @@ describe('BUG 7: Gender-aware weight estimation', () => {
   })
 
   it('"other" gender uses average between male and female', () => {
-    const male = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '80',
-        gender: 'male',
-      },
-    }))
-    const female = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '80',
-        gender: 'female',
-      },
-    }))
-    const other = generateLocalWorkout(makeInput({
-      preferences: {
-        experienceLevel: 'intermediate',
-        bodyweight: '80',
-        gender: 'other',
-      },
-    }))
-
-    const maleEx = male.exercises.find(e => e.weight_kg > 0)
-    const femaleEx = female.exercises.find(e => e.name === maleEx?.name)
-    const otherEx = other.exercises.find(e => e.name === maleEx?.name)
-
-    expect(maleEx).toBeDefined()
-    expect(femaleEx).toBeDefined()
-    expect(otherEx).toBeDefined()
+    const common = generateWithCommonExercise(['male', 'female', 'other'], '80')
+    expect(common).toBeDefined()
+    const [maleW, femaleW, otherW] = common!.weights
 
     // "other" weight should be between male and female
-    expect(otherEx!.weight_kg).toBeLessThanOrEqual(maleEx!.weight_kg)
-    expect(otherEx!.weight_kg).toBeGreaterThanOrEqual(femaleEx!.weight_kg)
+    expect(otherW).toBeLessThanOrEqual(maleW!)
+    expect(otherW).toBeGreaterThanOrEqual(femaleW!)
   })
 })
 

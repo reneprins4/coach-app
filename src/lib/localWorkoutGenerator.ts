@@ -125,12 +125,12 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
 // Split templates: which muscles and how many exercises per muscle
 const SPLIT_TEMPLATES: Record<string, { muscles: MuscleGroup[]; exercisesPerMuscle: Record<MuscleGroup, number>; shoulderFilter?: string }> = {
   'Push': {
-    muscles: ['chest', 'shoulders', 'triceps'],
-    exercisesPerMuscle: { chest: 3, shoulders: 2, triceps: 2, back: 0, quads: 0, hamstrings: 0, glutes: 0, biceps: 0, core: 0 },
+    muscles: ['chest', 'shoulders', 'triceps', 'core'],
+    exercisesPerMuscle: { chest: 3, shoulders: 2, triceps: 2, back: 0, quads: 0, hamstrings: 0, glutes: 0, biceps: 0, core: 1 },
   },
   'Pull': {
-    muscles: ['back', 'shoulders', 'biceps'],
-    exercisesPerMuscle: { back: 3, shoulders: 1, biceps: 2, chest: 0, triceps: 0, quads: 0, hamstrings: 0, glutes: 0, core: 0 },
+    muscles: ['back', 'shoulders', 'biceps', 'core'],
+    exercisesPerMuscle: { back: 3, shoulders: 1, biceps: 2, chest: 0, triceps: 0, quads: 0, hamstrings: 0, glutes: 0, core: 1 },
     /** Only posterior shoulder exercises (rear delts) on Pull day */
     shoulderFilter: 'posterior',
   },
@@ -139,8 +139,8 @@ const SPLIT_TEMPLATES: Record<string, { muscles: MuscleGroup[]; exercisesPerMusc
     exercisesPerMuscle: { quads: 2, hamstrings: 2, glutes: 1, core: 1, chest: 0, back: 0, shoulders: 0, biceps: 0, triceps: 0 },
   },
   'Upper': {
-    muscles: ['chest', 'back', 'shoulders', 'biceps', 'triceps'],
-    exercisesPerMuscle: { chest: 2, back: 2, shoulders: 1, biceps: 1, triceps: 1, quads: 0, hamstrings: 0, glutes: 0, core: 0 },
+    muscles: ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'core'],
+    exercisesPerMuscle: { chest: 2, back: 2, shoulders: 1, biceps: 1, triceps: 1, quads: 0, hamstrings: 0, glutes: 0, core: 1 },
   },
   'Lower': {
     muscles: ['quads', 'hamstrings', 'glutes', 'core'],
@@ -353,12 +353,22 @@ export function pickExercises(
   const notRecent = filtered.filter(e => !recentExerciseNames.has(e.name))
   const preferred = notRecent.length >= count ? notRecent : filtered
 
-  // Compounds first, then isolations
-  const compounds = preferred.filter(e => e.isCompound)
-  const isolations = preferred.filter(e => !e.isCompound)
+  // Compounds first, then isolations — shuffle within each category for variety
+  const compounds = shuffle(preferred.filter(e => e.isCompound))
+  const isolations = shuffle(preferred.filter(e => !e.isCompound))
   const sorted = [...compounds, ...isolations]
 
   return sorted.slice(0, count)
+}
+
+/** Fisher-Yates shuffle — returns a new array */
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!]
+  }
+  return a
 }
 
 // --- Main Generator ---
@@ -388,11 +398,11 @@ export function generateLocalWorkout({
   const energy = preferences.energy || 'medium'
   const gender = preferences.gender
 
-  // Build recent exercise set for variety
+  // Build recent exercise set for variety (last 2 sessions for better rotation)
   const recentExerciseNames = new Set<string>()
-  if (recentHistory.length > 0) {
-    // Only consider the most recent session's exercises
-    for (const set of recentHistory[0]?.sets || []) {
+  const recentSessions = recentHistory.slice(0, 2)
+  for (const session of recentSessions) {
+    for (const set of session.sets || []) {
       recentExerciseNames.add(set.exercise)
     }
   }
