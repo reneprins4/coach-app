@@ -127,7 +127,7 @@ export default function InjuryBanner({ injuries, onCheckIn, onResolve }: InjuryB
                 </span>
                 <button
                   onClick={() => handleResolveClick(injury)}
-                  className="rounded-md bg-white/[0.04] border border-white/[0.06] px-3 py-1 text-xs font-semibold text-green-400 active:bg-white/[0.08]"
+                  className="rounded-md bg-white/[0.04] border border-white/[0.06] px-3 py-1 text-xs font-semibold text-emerald-400 active:bg-white/[0.08]"
                 >
                   {t('common.confirm')}
                 </button>

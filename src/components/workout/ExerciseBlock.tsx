@@ -184,7 +184,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
   const isDone = plannedSets !== null && loggedSets >= plannedSets
 
   return (
-    <div className={`card min-w-0 w-full p-0 overflow-hidden transition-colors ${isDone ? 'border-green-500/20' : ''}`}>
+    <div className={`card min-w-0 w-full p-0 overflow-hidden transition-colors ${isDone ? 'border-emerald-500/20' : ''}`}>
 
       {/* ━━ Identity zone ━━ */}
       <div className={`px-5 ${compact ? 'py-3' : 'pt-5 pb-4'}`}>
@@ -220,7 +220,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         <div className="flex items-center gap-2 flex-wrap">
           {exercise.muscle_group && <span className="label-caps">{exercise.muscle_group}</span>}
           {plannedSets !== null && (
-            <span className={`label-caps font-bold ${isDone ? 'text-green-400' : 'text-gray-600'}`}>
+            <span className={`label-caps font-bold ${isDone ? 'text-emerald-400' : 'text-gray-600'}`}>
               {isDone ? `\u2713 ${loggedSets}/${plannedSets} sets` : `${loggedSets}/${plannedSets} sets`}
             </span>
           )}
@@ -250,7 +250,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
               {warmupSets.map((ws, idx) => {
                 const wsIsDone = warmupDone.includes(idx)
                 return (
-                  <div key={idx} className={`flex items-center justify-between rounded-xl px-3 py-2 ${wsIsDone ? 'bg-green-500/5' : 'bg-white/[0.02]'}`}>
+                  <div key={idx} className={`flex items-center justify-between rounded-xl px-3 py-2 ${wsIsDone ? 'bg-emerald-500/5' : 'bg-white/[0.02]'}`}>
                     <div className="flex items-center gap-3">
                       <span className="label-caps w-6 text-right text-gray-700">{idx + 1}</span>
                       <span className="text-sm font-bold text-white tabular">
@@ -260,7 +260,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
                     </div>
                     <button
                       onClick={() => { wsIsDone ? setWarmupDone(prev => prev.filter(i => i !== idx)) : (() => { const nd = [...warmupDone, idx]; setWarmupDone(nd); if (nd.length === warmupSets.length) setTimeout(() => setShowWarmup(false), 300) })() }}
-                      className={`flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-semibold transition-colors ${wsIsDone ? 'bg-green-500/15 text-green-400' : 'bg-white/[0.04] text-gray-500 active:bg-white/[0.08]'}`}
+                      className={`flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-semibold transition-colors ${wsIsDone ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.04] text-gray-500 active:bg-white/[0.08]'}`}
                     >{wsIsDone ? <Check size={14} /> : t('warmup.done_btn')}</button>
                   </div>
                 )
@@ -276,7 +276,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         <div className="border-t border-white/[0.04] px-5 py-3 space-y-1.5">
           {exercise.sets.map((s, i) => (
             <button key={s.id} onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-              className={`flex w-full items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-2.5 active:bg-white/[0.06] transition-colors ${isDone ? 'border-l-2 border-l-green-500/40' : ''}`}>
+              className={`flex w-full items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-2.5 active:bg-white/[0.06] transition-colors ${isDone ? 'border-l-2 border-l-emerald-500/40' : ''}`}>
               <div className="flex items-center gap-3">
                 <span className="text-sm tabular font-bold text-gray-700 w-5 text-right">{i + 1}</span>
                 <span className="text-[0.9375rem] font-bold tracking-tight text-white tabular">
@@ -286,7 +286,7 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
                 </span>
                 {s.rpe && <span className="text-[10px] font-semibold text-gray-600 tabular">RPE {s.rpe}</span>}
               </div>
-              <Check size={13} className="text-green-400/70 shrink-0" />
+              <Check size={13} className="text-emerald-400/70 shrink-0" />
             </button>
           ))}
         </div>
@@ -370,10 +370,10 @@ const ExerciseBlock = React.memo(function ExerciseBlock({
         <RpeButtons value={rpe} onChange={setRpe} beginnerMode={beginnerMode} />
 
         {isDone ? (
-          <div className="flex items-center justify-between rounded-2xl border border-green-500/15 bg-green-500/5 px-5 py-3">
+          <div className="flex items-center justify-between rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-5 py-3">
             <div className="flex items-center gap-2">
-              <Check size={14} className="text-green-400 shrink-0" />
-              <span className="text-sm font-semibold text-green-400">{t('logger.exercise_done')}</span>
+              <Check size={14} className="text-emerald-400 shrink-0" />
+              <span className="text-sm font-semibold text-emerald-400">{t('logger.exercise_done')}</span>
             </div>
             <button onClick={handleAdd} className="text-xs font-medium text-gray-600 active:text-gray-400">{t('logger.extra_set')}</button>
           </div>

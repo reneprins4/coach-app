@@ -290,7 +290,8 @@
     "less_time": "Less time",
     "how_many_exercises": "How many exercises left?",
     "trimmed": "Workout trimmed",
-    "menu": "Menu"
+    "menu": "Menu",
+    "overview": "Overview"
   },
   "progress": {
     "title": "Progress",
@@ -309,7 +310,8 @@
     "workouts_stat": "Workouts",
     "volume_stat": "Volume",
     "favorite_stat": "Favorite",
-    "workouts_until_analysis": "{{count}} more workouts to unlock analysis"
+    "workouts_until_analysis": "{{count}} more workouts to unlock analysis",
+    "tab_optimal_hour": "Best time"
   },
   "plan": {
     "title": "Training Plan",

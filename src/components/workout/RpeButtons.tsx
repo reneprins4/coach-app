@@ -22,15 +22,15 @@ const RPE_LABELS: Record<RpeValue, string> = {
 }
 
 const RPE_COLORS: Record<RpeValue, { bg: string; ring: string; text: string }> = {
-  6:  { bg: 'bg-green-500/15', ring: 'border-green-500', text: 'text-green-400' },
-  7:  { bg: 'bg-green-500/15', ring: 'border-green-500', text: 'text-green-400' },
+  6:  { bg: 'bg-emerald-500/15', ring: 'border-emerald-500', text: 'text-emerald-400' },
+  7:  { bg: 'bg-emerald-500/15', ring: 'border-emerald-500', text: 'text-emerald-400' },
   8:  { bg: 'bg-yellow-500/15', ring: 'border-yellow-500', text: 'text-yellow-400' },
   9:  { bg: 'bg-orange-500/15', ring: 'border-orange-500', text: 'text-orange-400' },
   10: { bg: 'bg-red-500/15', ring: 'border-red-500', text: 'text-red-400' },
 }
 
 const SIMPLE_RPE_OPTIONS: { key: SimpleRpe; numericValue: number; color: { bg: string; ring: string; text: string } }[] = [
-  { key: 'easy',   numericValue: 6,   color: { bg: 'bg-green-500/15', ring: 'border-green-500', text: 'text-green-400' } },
+  { key: 'easy',   numericValue: 6,   color: { bg: 'bg-emerald-500/15', ring: 'border-emerald-500', text: 'text-emerald-400' } },
   { key: 'medium', numericValue: 7.5, color: { bg: 'bg-yellow-500/15', ring: 'border-yellow-500', text: 'text-yellow-400' } },
   { key: 'hard',   numericValue: 9,   color: { bg: 'bg-red-500/15', ring: 'border-red-500', text: 'text-red-400' } },
 ]
@@ -96,7 +96,7 @@ export default function RpeButtons({ value, onChange, beginnerMode = false }: Rp
             <>
               <p className="font-semibold text-white text-sm">{t('rpe.beginner_explanation_title')}</p>
               <div className="space-y-1">
-                <p><span className="font-bold text-green-400">{t('rpe_simple_easy')}</span> — {t('rpe.beginner_explanation_easy')}</p>
+                <p><span className="font-bold text-emerald-400">{t('rpe_simple_easy')}</span> — {t('rpe.beginner_explanation_easy')}</p>
                 <p><span className="font-bold text-yellow-400">{t('rpe_simple_medium')}</span> — {t('rpe.beginner_explanation_medium')}</p>
                 <p><span className="font-bold text-red-400">{t('rpe_simple_hard')}</span> — {t('rpe.beginner_explanation_hard')}</p>
               </div>
@@ -106,8 +106,8 @@ export default function RpeButtons({ value, onChange, beginnerMode = false }: Rp
             <>
               <p className="font-semibold text-white text-sm">{t('rpe.explanation_title')}</p>
               <div className="space-y-1">
-                <p><span className="font-bold text-green-400">6</span> — {t('rpe.explanation_6')}</p>
-                <p><span className="font-bold text-green-400">7</span> — {t('rpe.explanation_7')}</p>
+                <p><span className="font-bold text-emerald-400">6</span> — {t('rpe.explanation_6')}</p>
+                <p><span className="font-bold text-emerald-400">7</span> — {t('rpe.explanation_7')}</p>
                 <p><span className="font-bold text-yellow-400">8</span> — {t('rpe.explanation_8')}</p>
                 <p><span className="font-bold text-orange-400">9</span> — {t('rpe.explanation_9')}</p>
                 <p><span className="font-bold text-red-400">10</span> — {t('rpe.explanation_10')}</p>

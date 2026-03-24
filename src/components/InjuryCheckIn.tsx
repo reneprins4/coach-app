@@ -14,7 +14,7 @@ interface InjuryCheckInProps {
 const FEELINGS: { key: CheckInFeeling; icon: LucideIcon; color: string }[] = [
   { key: 'worse', icon: TrendingDown, color: 'text-red-400' },
   { key: 'same', icon: Minus, color: 'text-gray-400' },
-  { key: 'better', icon: TrendingUp, color: 'text-green-400' },
+  { key: 'better', icon: TrendingUp, color: 'text-emerald-400' },
   { key: 'recovered', icon: CheckCircle, color: 'text-cyan-400' },
 ]
 

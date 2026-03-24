@@ -172,7 +172,7 @@ export default function StartFlowView({
             </span>
           )}
           {isReady && (
-            <span className="flex items-center gap-1.5 rounded-lg bg-green-500/15 px-2.5 py-1 text-xs font-bold text-green-400">
+            <span className="flex items-center gap-1.5 rounded-lg bg-emerald-500/15 px-2.5 py-1 text-xs font-bold text-emerald-400">
               <Check size={12} /> {t('logger.ready')}
             </span>
           )}
@@ -206,7 +206,7 @@ export default function StartFlowView({
         {recoveredMuscles.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {recoveredMuscles.map(muscle => (
-              <span key={muscle} className="rounded-lg bg-green-500/10 border border-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-400">
+              <span key={muscle} className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
                 {getMuscleLabel(muscle)}
               </span>
             ))}

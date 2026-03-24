@@ -260,19 +260,41 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
       {plannedSets !== null && (
         <div className="px-1 mb-4 shrink-0">
           <div className="flex items-baseline gap-2 mb-1.5">
-            <span className={`text-lg font-bold tabular tracking-tight ${isDone ? 'text-green-400' : 'text-white'}`}>
+            <span className={`text-lg font-bold tabular tracking-tight ${isDone ? 'text-emerald-400' : 'text-white'}`}>
               {loggedSets}
             </span>
             <span className="text-sm font-semibold text-gray-600">/ {plannedSets}</span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
             <motion.div
-              className={`h-full rounded-full ${isDone ? 'bg-green-500' : 'bg-cyan-500'}`}
+              className={`h-full rounded-full ${isDone ? 'bg-emerald-500' : 'bg-cyan-500'}`}
               initial={false}
               animate={{ width: `${progressPct * 100}%` }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
+        </div>
+      )}
+
+      {/* -- Logged sets as compact pills (above input zone for visibility) -- */}
+      {exercise.sets.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-1 mb-3 shrink-0">
+          {exercise.sets.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
+              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold tabular transition-colors ${
+                isDone
+                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                  : 'bg-white/[0.04] border border-white/[0.06] text-white'
+              } active:bg-white/[0.08]`}
+              aria-label={`${t('logger.set_removed')}: ${s.weight_kg}kg x ${s.reps}`}
+            >
+              <Check size={10} className={isDone ? 'text-emerald-400' : 'text-gray-600'} />
+              {s.weight_kg}kg {'\u00D7'} {s.reps}
+              {s.rpe && <span className="text-gray-600 ml-0.5">@{s.rpe}</span>}
+            </button>
+          ))}
         </div>
       )}
 
@@ -303,9 +325,9 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
 
       {/* -- Done state -- */}
       {isDone && (
-        <div className="flex items-center justify-center gap-2 rounded-2xl border border-green-500/15 bg-green-500/5 px-4 py-3 mx-1 mb-3 shrink-0">
-          <Check size={16} className="text-green-400 shrink-0" />
-          <span className="text-sm font-semibold text-green-400">{t('logger.exercise_done')}</span>
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-4 py-3 mx-1 mb-3 shrink-0">
+          <Check size={16} className="text-emerald-400 shrink-0" />
+          <span className="text-sm font-semibold text-emerald-400">{t('logger.exercise_done')}</span>
         </div>
       )}
 
@@ -332,7 +354,7 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center justify-between rounded-xl px-3 py-2 ${wsIsDone ? 'bg-green-500/5' : 'bg-white/[0.02]'}`}
+                    className={`flex items-center justify-between rounded-xl px-3 py-2 ${wsIsDone ? 'bg-emerald-500/5' : 'bg-white/[0.02]'}`}
                   >
                     <div className="flex items-center gap-3">
                       <span className="label-caps w-6 text-right text-gray-700">{idx + 1}</span>
@@ -356,7 +378,7 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
                       }}
                       className={`flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-semibold transition-colors ${
                         wsIsDone
-                          ? 'bg-green-500/15 text-green-400'
+                          ? 'bg-emerald-500/15 text-emerald-400'
                           : 'bg-white/[0.04] text-gray-500 active:bg-white/[0.08]'
                       }`}
                     >
@@ -523,28 +545,6 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
           }
         </button>
       </div>
-
-      {/* -- Logged sets as compact pills -- */}
-      {exercise.sets.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-1 mt-3 shrink-0">
-          {exercise.sets.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
-              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold tabular transition-colors ${
-                isDone
-                  ? 'bg-green-500/10 border border-green-500/20 text-green-400'
-                  : 'bg-white/[0.04] border border-white/[0.06] text-white'
-              } active:bg-white/[0.08]`}
-              aria-label={`${t('logger.set_removed')}: ${s.weight_kg}kg x ${s.reps}`}
-            >
-              <Check size={10} className={isDone ? 'text-green-400' : 'text-gray-600'} />
-              {s.weight_kg}kg {'\u00D7'} {s.reps}
-              {s.rpe && <span className="text-gray-600 ml-0.5">@{s.rpe}</span>}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* -- Bottom options row -- */}
       <div className="flex items-center justify-center gap-4 mt-3 pt-2 border-t border-white/[0.04] shrink-0">

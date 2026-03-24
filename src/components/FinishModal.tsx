@@ -322,7 +322,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
   function getRecoveryBarColor(daysFromNow: number): string {
     if (daysFromNow > 3) return 'bg-red-500'
     if (daysFromNow > 1) return 'bg-orange-400'
-    return 'bg-green-400'
+    return 'bg-emerald-400'
   }
 
   function getRecoveryGlowColor(daysFromNow: number): string {
@@ -680,7 +680,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
           )}
 
           {saved && (
-            <div className="mb-6 rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3 text-center text-sm font-medium text-green-400">
+            <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-center text-sm font-medium text-emerald-400">
               {t('finish_modal.template_saved')}
             </div>
           )}

@@ -273,7 +273,7 @@ export default function AICoach() {
         {recoveredNames.length > 0 && (
           <div className="card-accent mb-3">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-green-400" />
+              <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
               <p className="text-sm text-gray-300">
                 <span className="font-semibold text-white">{recoveredNames.join(', ')}</span>
                 {' '}{t('aicoach.ready').toLowerCase()}

@@ -286,10 +286,10 @@ export default function FocusMode({
         <button
           onClick={() => setShowOverview(true)}
           className="flex items-center justify-center gap-1.5 w-full py-3 rounded-t-xl bg-white/[0.03] border-t border-white/[0.06] text-xs font-semibold text-gray-500 active:text-gray-300"
-          aria-label={t('logger.overview') || 'Overview'}
+          aria-label={t('logger.overview')}
         >
           <ChevronUp size={14} />
-          {t('logger.overview') || 'Overview'}
+          {t('logger.overview')}
         </button>
       </div>
 
@@ -324,7 +324,7 @@ export default function FocusMode({
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 pb-3 shrink-0">
-                <h3 id="focus-overview-title" className="text-title">{t('logger.overview') || 'Overview'}</h3>
+                <h3 id="focus-overview-title" className="text-title">{t('logger.overview')}</h3>
                 <button
                   onClick={() => setShowOverview(false)}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 active:text-white min-h-[44px] min-w-[44px]"
@@ -354,13 +354,13 @@ export default function FocusMode({
                       {/* Status indicator */}
                       <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
                         done
-                          ? 'bg-green-500/20'
+                          ? 'bg-emerald-500/20'
                           : isCurrent
                             ? 'bg-cyan-500/20'
                             : 'bg-white/[0.04]'
                       }`}>
                         {done ? (
-                          <Check size={12} className="text-green-400" />
+                          <Check size={12} className="text-emerald-400" />
                         ) : (
                           <span className={`text-[10px] font-bold tabular ${isCurrent ? 'text-cyan-400' : 'text-gray-600'}`}>
                             {i + 1}
@@ -380,7 +380,7 @@ export default function FocusMode({
 
                       {/* Set count */}
                       {planned > 0 && (
-                        <span className={`text-xs font-bold tabular ${done ? 'text-green-400' : 'text-gray-600'}`}>
+                        <span className={`text-xs font-bold tabular ${done ? 'text-emerald-400' : 'text-gray-600'}`}>
                           {logged}/{planned}
                         </span>
                       )}

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { MomentumIndicatorProps, MomentumStatus } from '../types'
 
 const CONFIGS: Record<MomentumStatus, { bg: string; border: string; dot: string; text: string; labelKey: string }> = {
-  peak:      { bg: 'bg-green-500/10',  border: 'border-green-500/25',  dot: 'bg-green-400',  text: 'text-green-400',  labelKey: 'momentum.peak'   },
+  peak:      { bg: 'bg-emerald-500/10',  border: 'border-emerald-500/25',  dot: 'bg-emerald-400',  text: 'text-emerald-400',  labelKey: 'momentum.peak'   },
   good:      { bg: 'bg-blue-500/10',   border: 'border-blue-500/25',   dot: 'bg-blue-400',   text: 'text-blue-400',   labelKey: 'momentum.good' },
   declining: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/25', dot: 'bg-yellow-400', text: 'text-yellow-400', labelKey: 'momentum.declining'       },
   fatigue:   { bg: 'bg-red-500/10',    border: 'border-red-500/25',    dot: 'bg-red-400',    text: 'text-red-400',    labelKey: 'momentum.fatigue'     },
@@ -24,7 +24,7 @@ export default function MomentumIndicator({ momentum }: MomentumIndicatorProps) 
       <span className={`h-2 w-2 shrink-0 rounded-full ${config.dot}`} />
       <p className={`text-xs font-semibold ${config.text}`}>{t(config.labelKey)}</p>
       {momentum.showPRHint && (
-        <span className="ml-auto rounded bg-green-500/20 px-1.5 py-0.5 text-[10px] font-bold text-green-400">
+        <span className="ml-auto rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
           {t('momentum.pr_moment')}
         </span>
       )}

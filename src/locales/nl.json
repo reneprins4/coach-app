@@ -290,7 +290,8 @@
     "less_time": "Minder tijd",
     "how_many_exercises": "Hoeveel oefeningen nog?",
     "trimmed": "Workout ingekort",
-    "menu": "Menu"
+    "menu": "Menu",
+    "overview": "Overzicht"
   },
   "progress": {
     "title": "Voortgang",
@@ -309,7 +310,8 @@
     "workouts_stat": "Trainingen",
     "volume_stat": "Volume",
     "favorite_stat": "Favoriet",
-    "workouts_until_analysis": "Nog {{count}} trainingen voor je analyse"
+    "workouts_until_analysis": "Nog {{count}} trainingen voor je analyse",
+    "tab_optimal_hour": "Beste tijd"
   },
   "plan": {
     "title": "Trainingsplan",

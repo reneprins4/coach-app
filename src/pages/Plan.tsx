@@ -213,7 +213,7 @@ export default function Plan() {
                     <span className={`mt-1 text-[11px] tabular ${isCurrent ? 'text-white font-semibold' : 'text-[var(--text-3)]'}`}>
                       {wt.isDeload ? t('phases.deload') : `RPE ${wt.rpe}`}
                     </span>
-                    {isDone && <CheckCircle2 size={13} className="mt-1.5 text-green-500" />}
+                    {isDone && <CheckCircle2 size={13} className="mt-1.5 text-emerald-500" />}
                     {isCurrent && (
                       <span className={`mt-1.5 text-[9px] font-black uppercase tracking-wider ${phaseColor.text}`}>{t('plan.now')}</span>
                     )}
