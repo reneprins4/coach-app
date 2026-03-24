@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { BookmarkPlus, Loader2, Calendar, CheckCircle, Trophy, Star, Share2 } from 'lucide-react'
@@ -362,7 +363,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
 
   useModalA11y(true, onClose)
 
-  return (
+  return createPortal(
     <motion.div
       role="dialog"
       aria-modal="true"
@@ -713,7 +714,8 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
           onShare={handleShare}
         />
       )}
-    </motion.div>
+    </motion.div>,
+    document.body,
   )
 }
 
