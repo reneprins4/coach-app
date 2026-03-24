@@ -692,7 +692,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
           )}
 
           {/* ── CTA Buttons ── */}
-          <div className="mt-10 space-y-3 pb-4">
+          <div className="mt-10 space-y-3 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)]">
             <button onClick={onClose} className="btn-primary">
               {t('finish_modal.done')}
             </button>

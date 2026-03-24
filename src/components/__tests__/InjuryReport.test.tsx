@@ -20,6 +20,10 @@ vi.mock('react-i18next', () => ({
         'injury.area_hip': 'Hip',
         'injury.area_neck': 'Neck',
         'injury.area_ankle': 'Ankle',
+        'injury.area_upper_back': 'Upper Back',
+        'injury.area_chest': 'Chest',
+        'injury.area_groin': 'Groin',
+        'injury.area_foot': 'Foot',
         'injury.severity_mild': 'Mild',
         'injury.severity_moderate': 'Moderate',
         'injury.severity_severe': 'Severe',
@@ -40,6 +44,23 @@ vi.mock('../../hooks/useModalA11y', () => ({
   useModalA11y: vi.fn(),
 }))
 
+// Mock motion/react to bypass animations in tests
+vi.mock('motion/react', () => {
+  const React = require('react')
+  const motion = new Proxy({}, {
+    get: (_target: object, prop: string) => {
+      return React.forwardRef((props: Record<string, unknown>, ref: React.Ref<HTMLElement>) => {
+        const { initial, animate, exit, transition, whileTap, variants, custom, ...rest } = props
+        return React.createElement(prop, { ...rest, ref })
+      })
+    },
+  })
+  return {
+    motion,
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  }
+})
+
 describe('InjuryReport Modal', () => {
   const defaultProps = {
     isOpen: true,
@@ -51,9 +72,9 @@ describe('InjuryReport Modal', () => {
     return render(<InjuryReport {...defaultProps} {...props} />)
   }
 
-  it('renders body area selection (8 areas)', () => {
+  it('renders body area selection (12 areas)', () => {
     renderModal()
-    const areas = ['Shoulder', 'Knee', 'Lower Back', 'Elbow', 'Wrist', 'Hip', 'Neck', 'Ankle']
+    const areas = ['Shoulder', 'Knee', 'Lower Back', 'Elbow', 'Wrist', 'Hip', 'Neck', 'Ankle', 'Upper Back', 'Chest', 'Groin', 'Foot']
     for (const area of areas) {
       expect(screen.getByText(area)).toBeDefined()
     }
@@ -62,8 +83,8 @@ describe('InjuryReport Modal', () => {
   it('each area is a clickable button with localized name', () => {
     renderModal()
     const buttons = screen.getAllByRole('button')
-    // 8 area buttons + 1 close button = 9
-    expect(buttons.length).toBeGreaterThanOrEqual(9)
+    // 12 area buttons + 1 close button = 13
+    expect(buttons.length).toBeGreaterThanOrEqual(13)
     expect(screen.getByText('Shoulder')).toBeDefined()
     expect(screen.getByText('Knee')).toBeDefined()
   })
