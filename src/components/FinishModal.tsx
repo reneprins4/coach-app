@@ -363,6 +363,12 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
 
   useModalA11y(true, onClose)
 
+  // Hide the nav bar while this modal is open
+  useEffect(() => {
+    document.documentElement.classList.add('modal-open')
+    return () => { document.documentElement.classList.remove('modal-open') }
+  }, [])
+
   return createPortal(
     <motion.div
       role="dialog"

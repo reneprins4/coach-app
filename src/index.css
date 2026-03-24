@@ -344,6 +344,9 @@ input[type="range"]::-webkit-slider-thumb {
 .story-delay-6 { animation-delay: 900ms }
 .story-stagger { opacity: 0 }
 
+/* ━━━━ MODAL NAV HIDE ━━━━ */
+.modal-open nav[aria-label="Main navigation"] { display: none !important; }
+
 /* ━━━━ BOTTOM SHEET ━━━━ */
 @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .animate-slide-up { animation: slide-up 0.3s ease-out; }
