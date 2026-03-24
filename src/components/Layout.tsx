@@ -38,7 +38,8 @@ export default function Layout() {
 
   const isOnLogPage = location.pathname === '/log'
   const hideNav =
-    location.pathname.startsWith('/history/')
+    location.pathname.startsWith('/history/') ||
+    (isOnLogPage && hasActiveWorkout)
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-950">
@@ -71,7 +72,7 @@ export default function Layout() {
           </button>
         </header>
       )}
-      <main id="main-content" className={`flex-1 pb-24 ${hasActiveWorkout && !isOnLogPage ? 'pt-12' : ''}`}>
+      <main id="main-content" className={`flex-1 ${isOnLogPage ? 'pb-0' : 'pb-24'} ${hasActiveWorkout && !isOnLogPage ? 'pt-12' : ''}`}>
         <Outlet />
       </main>
 
