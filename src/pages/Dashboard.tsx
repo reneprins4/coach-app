@@ -26,6 +26,7 @@ import { computeTrainingStory, isStoryViewed, markStoryViewed } from '../lib/tra
 import { getMonthName } from '../lib/trainingStoryShare'
 import { buildStoryShareText } from '../lib/trainingStoryShare'
 import PageTransition from '../components/PageTransition'
+import MuscleRadar from '../components/MuscleRadar'
 import type { AIExercise, AIWorkoutResponse } from '../types'
 
 const TrainingStory = lazy(() => import('../components/TrainingStory'))
@@ -384,30 +385,17 @@ export default function Dashboard() {
       {/* ━━ Custom PR Goals ━━ */}
       <PrGoalsDashboard onNavigate={() => nav('/profile')} />
 
-      {/* ━━ Muscle Recovery ━━ */}
+      {/* ━━ Muscle Recovery Radar ━━ */}
       {muscles.length > 0 && (
         <motion.div variants={fadeUp} className="card mb-4">
-          <p className="label-caps mb-4">{t('dashboard.recovery')}</p>
-          <div className="space-y-3">
-            {muscles.map(([muscle, ms]) => {
-              const pct = ms.recoveryPct ?? 100
-              const color = pct < 40 ? '#ef4444' : pct < 75 ? '#f97316' : '#22c55e'
-              return (
-                <div key={muscle}>
-                  <div className="mb-1.5 flex items-baseline justify-between">
-                    <span className="text-sm font-semibold text-white">{MUSCLE_DISPLAY[muscle] || muscle}</span>
-                    <span className="tabular text-xs font-bold" style={{ color }}>{Math.round(pct)}%</span>
-                  </div>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${pct}%`, backgroundColor: color }}
-                    />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <p className="label-caps mb-2">{t('dashboard.recovery')}</p>
+          <MuscleRadar
+            muscles={muscles.map(([muscle, ms]) => ({
+              key: muscle,
+              label: MUSCLE_DISPLAY[muscle] || muscle,
+              recoveryPct: ms.recoveryPct ?? 100,
+            }))}
+          />
         </motion.div>
       )}
 
