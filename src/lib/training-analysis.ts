@@ -423,7 +423,9 @@ export function scoreSplits(
 
     const lastSplit = lastWorkoutInfo?.split || null
     if (lastSplit && lastSplit === splitName) {
-      score -= 25 // penalty for same split consecutively
+      // Stronger penalty when the same split was done very recently
+      const hoursSinceLast = lastWorkoutInfo?.hoursSince ?? 48
+      score -= hoursSinceLast < 24 ? 50 : 25
     }
 
     // Weekly split distribution penalty: escalating -15 per occurrence this week

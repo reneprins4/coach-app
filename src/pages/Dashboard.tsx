@@ -88,7 +88,8 @@ export default function Dashboard() {
   const phase = block ? PHASES[block.phase] : null
   const PhaseIcon = block ? ({ accumulation: Zap, intensification: TrendingUp, strength: Target, deload: Battery } as Record<string, typeof Zap>)[block.phase] : null
 
-  const todaysWorkout = useMemo(() => generateWorkoutPreview(workouts, block), [workouts, block])
+  // Don't compute preview while workouts are still loading (prevents stale split after finishing)
+  const todaysWorkout = useMemo(() => loading ? null : generateWorkoutPreview(workouts, block), [workouts, block, loading])
 
   // Pre-generate full workout in background on mount
   const [preGeneratedWorkout, setPreGeneratedWorkout] = useState<AIWorkoutResponse | null>(null)
