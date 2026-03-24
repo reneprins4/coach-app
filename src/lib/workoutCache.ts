@@ -261,7 +261,7 @@ export async function generateFullWorkout(
     blockWeek: block?.currentWeek || null,
     energy: overrides?.energy || 'medium',
     focusedMuscles: overrides?.focusedMuscles || [],
-    frequency: parseInt(settings.frequency) || 4,
+    frequency: parseFrequency(settings.frequency),
   })
 
   // Check cache

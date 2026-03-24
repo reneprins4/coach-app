@@ -14,13 +14,14 @@ import {
   classifyExercise,
   analyzeTraining,
   scoreSplits,
+  getRecentSplits,
   RECOVERY_HOURS,
   SPLIT_MUSCLES,
 } from '../lib/training-analysis'
 import { buildAchievementContext, syncAchievements } from '../lib/achievements'
 import type { Achievement } from '../lib/achievements'
 import { getIcon } from '../lib/iconMap'
-import { getSettings } from '../lib/settings'
+import { getSettings, parseFrequency } from '../lib/settings'
 import { toDisplayWeight, formatVolume as formatVolUnit, getUnitLabel } from '../lib/unitConversion'
 import type { FinishModalProps, Units } from '../types'
 
@@ -187,8 +188,23 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
             }))
           ]
 
-          const muscleStatus = analyzeTraining(allWorkouts as unknown as import('../types').Workout[])
-          const splits = scoreSplits(muscleStatus)
+          const settings = getSettings()
+          const muscleStatus = analyzeTraining(allWorkouts as unknown as import('../types').Workout[], settings.trainingGoal || 'hypertrophy')
+          const lastWk = allWorkouts[0]
+          const lastWorkoutInfo = lastWk
+            ? {
+                split: (lastWk as Record<string, unknown>).split as string || '',
+                hoursSince: (Date.now() - new Date(lastWk.created_at).getTime()) / 3600000,
+              }
+            : null
+          const recentSplits = getRecentSplits(allWorkouts as unknown as import('../types').Workout[])
+          const splits = scoreSplits(
+            muscleStatus,
+            lastWorkoutInfo,
+            settings.experienceLevel || 'intermediate',
+            parseFrequency(settings.frequency),
+            recentSplits,
+          )
 
           if (splits.length > 0) {
             const best = splits[0]!

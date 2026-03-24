@@ -8,11 +8,12 @@ import {
 import { WorkoutReview } from '../components/workout/WorkoutReview'
 import { generateScientificWorkout } from '../lib/ai'
 import { fetchRecentHistory } from '../hooks/useWorkouts'
-import { analyzeTraining, scoreSplits, getRelevantHistory, calcMuscleRecovery, classifyExercise } from '../lib/training-analysis'
+import { analyzeTraining, scoreSplits, getRelevantHistory, getRecentSplits, calcMuscleRecovery, classifyExercise } from '../lib/training-analysis'
 import { analyzeWeaknesses } from '../lib/weaknessHunter'
-import { getSettings } from '../lib/settings'
+import { getSettings, parseFrequency } from '../lib/settings'
 import { supabase } from '../lib/supabase'
-import { getCurrentBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
+import { getCurrentBlock, loadBlock, getCurrentWeekTarget, PHASES } from '../lib/periodization'
+import type { TrainingBlock } from '../types'
 import { buildWorkoutPreferences } from '../lib/workoutPreferences'
 import { useAuthContext } from '../App'
 
@@ -57,7 +58,12 @@ export default function AICoach() {
   const [splitScores, setSplitScores] = useState<import('../types').SplitScore[]>([])
   const [selectedSplit, setSelectedSplit] = useState<string | null>(null)
 
-  const block = getCurrentBlock()
+  const [block, setBlock] = useState<TrainingBlock | null>(getCurrentBlock())
+  useEffect(() => {
+    let cancelled = false
+    loadBlock(user?.id ?? null).then(b => { if (!cancelled) setBlock(b) })
+    return () => { cancelled = true }
+  }, [user?.id])
   const weekTarget = block ? getCurrentWeekTarget(block) : null
   const phase = block ? PHASES[block.phase] : null
 
@@ -102,7 +108,8 @@ export default function AICoach() {
 
         if (cancelled) return
 
-        const scores = scoreSplits(analysis, lwInfo, settings.experienceLevel || 'intermediate')
+        const recentSplits = getRecentSplits(history)
+        const scores = scoreSplits(analysis, lwInfo, settings.experienceLevel || 'intermediate', parseFrequency(settings.frequency), recentSplits)
         if (cancelled) return
 
         setSplitScores(scores)

@@ -337,7 +337,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
           blockWeek: block?.currentWeek || null,
           energy: state.energy || 'medium',
           focusedMuscles: state.focusedMuscles || [],
-          frequency: parseInt(settings.frequency) || 4,
+          frequency: parseFrequency(settings.frequency),
         })
         const cachedResult = getCachedWorkout(cacheHash)
 
