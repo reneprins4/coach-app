@@ -186,7 +186,7 @@ export default function FocusMode({
   }
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden relative">
+    <div className="flex flex-col w-full overflow-hidden relative" style={{ minHeight: 'calc(100dvh - 52px)' }}>
       {/* -- Progress dots -- */}
       <div className="flex items-center justify-center gap-1.5 py-3 shrink-0 px-4" role="tablist" aria-label={t('logger.exercises') || 'Exercises'}>
         {exercises.map((exercise, i) => {

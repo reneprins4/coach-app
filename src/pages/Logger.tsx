@@ -708,7 +708,7 @@ export default function Logger() {
 
       {/* Exercise content */}
       {useFocusMode ? (
-        <div className="flex-1">
+        <div className="flex-1" style={{ minHeight: 'calc(100dvh - 48px)' }}>
           <FocusMode
             exercises={workout.exercises}
             userId={user?.id}
