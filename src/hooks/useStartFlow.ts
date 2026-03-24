@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type {
   StartFlowState,
   ActiveExercise,
+  MuscleGroup,
   MuscleStatusMap,
   SplitScore,
   UserSettings,
@@ -48,6 +49,8 @@ type StartFlowAction =
   | { type: 'TOGGLE_SPLIT_PICKER'; payload: { show: boolean } }
   | { type: 'STOP_LOADING' }
   | { type: 'CLEAR_WORKOUT' }
+  | { type: 'SET_ENERGY'; payload: { energy: 'low' | 'medium' | 'high' } }
+  | { type: 'SET_FOCUSED_MUSCLES'; payload: { focusedMuscles: MuscleGroup[] } }
 
 const initialState: StartFlowState = {
   loading: true,
@@ -66,6 +69,8 @@ const initialState: StartFlowState = {
   cachedAt: null,
   availableTime: null,
   aiResponse: null,
+  energy: 'medium',
+  focusedMuscles: [],
 }
 
 function startFlowReducer(state: StartFlowState, action: StartFlowAction): StartFlowState {
@@ -144,6 +149,12 @@ function startFlowReducer(state: StartFlowState, action: StartFlowAction): Start
         aiResponse: null,
         error: null,
       }
+
+    case 'SET_ENERGY':
+      return { ...state, energy: action.payload.energy }
+
+    case 'SET_FOCUSED_MUSCLES':
+      return { ...state, focusedMuscles: action.payload.focusedMuscles }
 
     default:
       return state
@@ -315,7 +326,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         } else {
           const block = getCurrentBlock()
           const recentHistory = getRelevantHistory(history, recommendedSplit)
-          const preferences = buildWorkoutPreferences(settings, block, { time: currentTime })
+          const preferences = buildWorkoutPreferences(settings, block, { time: currentTime, energy: state.energy, focusedMuscles: state.focusedMuscles })
 
           result = await (generateScientificWorkout as CallableFunction)({
             muscleStatus,
@@ -420,7 +431,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
       } else {
         const block = getCurrentBlock()
         const recentHistory = getRelevantHistory(history, splitName)
-        const preferences = buildWorkoutPreferences(settings, block, { time: timeToUse })
+        const preferences = buildWorkoutPreferences(settings, block, { time: timeToUse, energy: state.energy, focusedMuscles: state.focusedMuscles })
 
         result = await (generateScientificWorkout as CallableFunction)({
           muscleStatus: state.muscleStatus,
@@ -473,7 +484,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         : error.message
       dispatch({ type: 'GENERATION_ERROR', payload: { error: message } })
     }
-  }, [userId, state.muscleStatus, state.splits, state.recommendedSplit, state.recoveredMuscles, state.availableTime, t])
+  }, [userId, state.muscleStatus, state.splits, state.recommendedSplit, state.recoveredMuscles, state.availableTime, state.energy, state.focusedMuscles, t])
 
   // Handle time change
   const handleTimeChange = useCallback((newTime: number) => {

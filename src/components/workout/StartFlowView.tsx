@@ -4,9 +4,11 @@ import { Loader2, Check, RefreshCw, Dumbbell, BookOpen, ChevronDown, ChevronUp, 
 import { getCurrentBlock, PHASES } from '../../lib/periodization'
 import { generateFirstWorkout, isFirstWorkoutEligible } from '../../lib/firstWorkout'
 import { getSettings } from '../../lib/settings'
-import type { StartFlowState, LastWorkoutPreview, PeriodizationPhase } from '../../types'
+import type { StartFlowState, LastWorkoutPreview, PeriodizationPhase, MuscleGroup } from '../../types'
 import TemplateLibrary from '../TemplateLibrary'
 import Toast from '../Toast'
+
+const ALL_MUSCLES: MuscleGroup[] = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
 
 const LOCALE_MAP: Record<string, string> = { nl: 'nl-NL', en: 'en-GB' }
 const SPLIT_OPTIONS = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Lower Body', 'Full Body'] as const
@@ -31,7 +33,8 @@ interface StartFlowViewProps {
   onTimeChange: (time: number) => void
   onGenerateForSplit: (split: string) => void
   onToggleSplitPicker: (show: boolean) => void
-  onNavigateToCoach: () => void
+  onEnergyChange: (energy: 'low' | 'medium' | 'high') => void
+  onFocusedMusclesChange: (muscles: MuscleGroup[]) => void
   onShowReview?: () => void
   workoutCount?: number
   onStartFirstWorkout?: () => void
@@ -40,7 +43,7 @@ interface StartFlowViewProps {
 export default function StartFlowView({
   state, user, formattedDate, lastWorkout, templates, showTemplates, toast,
   onStartEmpty, onStartAIWorkout, onRepeatLastWorkout, onLoadTemplate, onDeleteTemplate,
-  onSetShowTemplates, onSetToast, onTimeChange, onGenerateForSplit, onToggleSplitPicker, onNavigateToCoach, onShowReview,
+  onSetShowTemplates, onSetToast, onTimeChange, onGenerateForSplit, onToggleSplitPicker, onEnergyChange, onFocusedMusclesChange, onShowReview,
   workoutCount, onStartFirstWorkout,
 }: StartFlowViewProps) {
   const { t } = useTranslation()
@@ -60,13 +63,20 @@ export default function StartFlowView({
   const {
     loading, generating, error, selectedSplit, generatedWorkout,
     recoveredMuscles, showSplitPicker, estimatedDuration, exerciseCount,
-    availableTime, retryCount,
+    availableTime, retryCount, energy, focusedMuscles,
   } = state
 
   const timeSelected = availableTime !== null
   const isReady = timeSelected && !loading && !generating && generatedWorkout && !error
 
   const getMuscleLabel = useCallback((muscle: string) => t(`muscles.${muscle}`), [t])
+
+  const toggleFocus = useCallback((muscle: MuscleGroup) => {
+    const next = focusedMuscles.includes(muscle)
+      ? focusedMuscles.filter(m => m !== muscle)
+      : [...focusedMuscles, muscle]
+    onFocusedMusclesChange(next)
+  }, [focusedMuscles, onFocusedMusclesChange])
 
   // Not logged in — simple start
   if (!user) {
@@ -235,7 +245,8 @@ export default function StartFlowView({
               {exerciseCount} {t('common.exercises')} · ~{estimatedDuration} min
             </p>
             {onShowReview && (
-              <button onClick={onShowReview} className="mt-1 text-xs font-medium text-cyan-500/70 active:text-cyan-400">
+              <button onClick={onShowReview} className="btn-secondary mt-3 text-sm">
+                <BookOpen size={14} />
                 {t('logger.view_details')}
               </button>
             )}
@@ -250,7 +261,7 @@ export default function StartFlowView({
             <button onClick={() => onGenerateForSplit(selectedSplit || 'Full Body')} className="btn-secondary h-11 flex-1 text-sm">
               <RefreshCw size={14} /> {t('common.retry')}
             </button>
-            <button onClick={onNavigateToCoach} className="btn-secondary h-11 flex-1 text-sm">
+            <button onClick={onStartEmpty} className="btn-secondary h-11 flex-1 text-sm">
               {t('logger.choose_exercises')}
             </button>
           </div>
@@ -320,9 +331,49 @@ export default function StartFlowView({
               </div>
             )}
 
-            <button onClick={onNavigateToCoach} className="w-full py-2 text-center text-xs text-gray-700 active:text-gray-500">
-              {t('logger.advanced_options')}
-            </button>
+            {/* Energy level */}
+            <div className="card">
+              <p className="label-caps mb-3">{t('aicoach.energy_today')}</p>
+              <div className="flex gap-2">
+                {([
+                  { value: 'low' as const, labelKey: 'aicoach.energy_low' },
+                  { value: 'medium' as const, labelKey: 'aicoach.energy_medium' },
+                  { value: 'high' as const, labelKey: 'aicoach.energy_high' },
+                ]).map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => onEnergyChange(opt.value)}
+                    className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all active:scale-[0.97] ${
+                      energy === opt.value
+                        ? 'bg-cyan-500 text-white shadow-[0_0_16px_rgba(6,182,212,0.3)]'
+                        : 'bg-white/[0.04] text-gray-400 border border-white/[0.06]'
+                    }`}
+                  >
+                    {t(opt.labelKey)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Muscle focus */}
+            <div className="card">
+              <p className="label-caps mb-3">{t('aicoach.want_extra')}</p>
+              <div className="flex flex-wrap gap-2">
+                {ALL_MUSCLES.map(m => (
+                  <button
+                    key={m}
+                    onClick={() => toggleFocus(m)}
+                    className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.97] ${
+                      focusedMuscles.includes(m)
+                        ? 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-400'
+                        : 'bg-white/[0.03] text-gray-400 border border-white/[0.06]'
+                    }`}
+                  >
+                    {t(`muscles.${m}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

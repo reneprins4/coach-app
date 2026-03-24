@@ -182,8 +182,7 @@ export default function Dashboard() {
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
         <h1 className="text-display mb-3">{t(getGreetingKey())}</h1>
         <p className="mb-8 text-sm text-gray-500">{t('dashboard.time_to_start')}</p>
-        <button onClick={() => nav('/log')} className="btn-primary mb-3 max-w-xs">{t('dashboard.start_training')}</button>
-        <button onClick={() => nav('/log')} className="btn-secondary max-w-xs">{t('dashboard.free_training')}</button>
+        <button onClick={() => nav('/log')} className="btn-primary max-w-xs">{t('dashboard.start_training')}</button>
       </div>
     )
   }
@@ -407,10 +406,7 @@ export default function Dashboard() {
 
       {/* ━━ CTAs ━━ */}
       {!todaysWorkout && (
-        <>
-          <button onClick={() => nav('/log')} className="btn-primary mb-3">{t('dashboard.start_training')}</button>
-          <button onClick={() => nav('/log')} className="btn-secondary mb-4">{t('dashboard.free_training')}</button>
-        </>
+        <button onClick={() => nav('/log')} className="btn-primary mb-4">{t('dashboard.start_training')}</button>
       )}
       {todaysWorkout && (
         <button onClick={() => nav('/log')} className="btn-secondary mb-4">

@@ -48,6 +48,8 @@ const baseState: StartFlowState = {
   cachedAt: null,
   availableTime: null,
   aiResponse: null,
+  energy: 'medium' as const,
+  focusedMuscles: [],
 }
 
 const defaultProps = {
@@ -69,7 +71,8 @@ const defaultProps = {
   onTimeChange: vi.fn(),
   onGenerateForSplit: vi.fn(),
   onToggleSplitPicker: vi.fn(),
-  onNavigateToCoach: vi.fn(),
+  onEnergyChange: vi.fn(),
+  onFocusedMusclesChange: vi.fn(),
 }
 
 describe('StartFlowView - Simplified Layout', () => {

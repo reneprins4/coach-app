@@ -18,7 +18,6 @@ const Logger = lazy(() => import('./pages/Logger'))
 const History = lazy(() => import('./pages/History'))
 const WorkoutDetail = lazy(() => import('./pages/WorkoutDetail'))
 const Progress = lazy(() => import('./pages/Progress'))
-const AICoach = lazy(() => import('./pages/AICoach'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Plan = lazy(() => import('./pages/Plan'))
 const Calendar = lazy(() => import('./pages/Calendar'))
@@ -166,7 +165,6 @@ export default function App() {
                 <Route path="/history" element={<History />} />
                 <Route path="/history/:id" element={<WorkoutDetail />} />
                 <Route path="/progress" element={<Progress />} />
-                <Route path="/coach" element={<AICoach />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
             </Routes>

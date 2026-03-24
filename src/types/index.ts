@@ -312,6 +312,8 @@ export interface StartFlowState {
   cachedAt: number | null
   availableTime: number | null
   aiResponse: AIWorkoutResponse | null
+  energy: 'low' | 'medium' | 'high'
+  focusedMuscles: MuscleGroup[]
 }
 
 // ---- Junk Volume Warning ----

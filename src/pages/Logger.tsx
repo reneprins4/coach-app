@@ -550,7 +550,8 @@ export default function Logger() {
           onTimeChange={startFlow.handleTimeChange}
           onGenerateForSplit={startFlow.generateForSplit}
           onToggleSplitPicker={(show) => startFlow.dispatch({ type: 'TOGGLE_SPLIT_PICKER', payload: { show } })}
-          onNavigateToCoach={() => nav('/coach')}
+          onEnergyChange={(energy) => startFlow.dispatch({ type: 'SET_ENERGY', payload: { energy } })}
+          onFocusedMusclesChange={(muscles) => startFlow.dispatch({ type: 'SET_FOCUSED_MUSCLES', payload: { focusedMuscles: muscles } })}
           onShowReview={startFlow.state.generatedWorkout ? handleShowReview : undefined}
           workoutCount={workoutCount}
           onStartFirstWorkout={handleStartFirstWorkout}

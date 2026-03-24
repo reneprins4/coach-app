@@ -89,7 +89,7 @@ export default function Onboarding() {
   }
 
   function handleStartTraining() {
-    navigate('/coach', { replace: true })
+    navigate('/log', { replace: true })
   }
 
   // Completion screen

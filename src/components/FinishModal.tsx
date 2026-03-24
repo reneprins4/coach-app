@@ -299,7 +299,7 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
 
   function handlePlanNext() {
     onClose()
-    navigate('/coach')
+    navigate('/log')
   }
 
   function formatDate(date: Date): string {
