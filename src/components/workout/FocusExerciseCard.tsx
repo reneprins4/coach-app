@@ -260,12 +260,12 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
       {plannedSets !== null && (
         <div className="px-1 mb-4 shrink-0">
           <div className="flex items-baseline gap-2 mb-1.5">
-            <span className={`text-2xl font-black tabular tracking-tight ${isDone ? 'text-green-400' : 'text-white'}`}>
+            <span className={`text-lg font-bold tabular tracking-tight ${isDone ? 'text-green-400' : 'text-white'}`}>
               {loggedSets}
             </span>
             <span className="text-sm font-semibold text-gray-600">/ {plannedSets}</span>
           </div>
-          <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
+          <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
             <motion.div
               className={`h-full rounded-full ${isDone ? 'bg-green-500' : 'bg-cyan-500'}`}
               initial={false}
@@ -383,32 +383,35 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
           {/* Weight */}
           <div>
             <div className="mb-1.5 flex h-5 items-center justify-between">
-              <span className="label-caps">{t('logger.weight')}</span>
+              <span className="label-caps">{t('logger.weight')} <span className="text-[var(--text-3)] ml-1">kg</span></span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
               <button
                 type="button"
                 onClick={() => adjustWeight(-2.5)}
                 aria-label={t('logger.weight') + ' -2.5kg'}
-                className="flex h-14 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-lg text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]"
+                className="flex h-14 w-11 shrink-0 items-center justify-center text-lg text-gray-500 active:bg-white/[0.06] active:text-white min-h-[44px]"
               >
                 {'\u2212'}
               </button>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.5"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                placeholder={'\u2014'}
-                aria-label={t('logger.weight')}
-                className="h-14 min-w-0 flex-1 rounded-xl px-1 text-center text-3xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700"
-              />
+              <div className="flex flex-1 items-center justify-center min-w-0">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.5"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder={'\u2014'}
+                  aria-label={t('logger.weight')}
+                  className="h-14 min-w-0 flex-1 bg-transparent px-1 text-center text-3xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700 border-none!"
+                />
+                <span className="text-xs font-semibold text-gray-600 pr-1 shrink-0">kg</span>
+              </div>
               <button
                 type="button"
                 onClick={() => adjustWeight(2.5)}
                 aria-label={t('logger.weight') + ' +2.5kg'}
-                className="flex h-14 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-lg text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]"
+                className="flex h-14 w-11 shrink-0 items-center justify-center text-lg text-gray-500 active:bg-white/[0.06] active:text-white min-h-[44px]"
               >
                 +
               </button>
@@ -420,12 +423,12 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
             <div className="mb-1.5 flex h-5 items-center">
               <span className="label-caps">{t('logger.reps_label')}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
               <button
                 type="button"
                 onClick={() => adjustReps(-1)}
                 aria-label={t('logger.reps_label') + ' -1'}
-                className="flex h-14 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-lg text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]"
+                className="flex h-14 w-11 shrink-0 items-center justify-center text-lg text-gray-500 active:bg-white/[0.06] active:text-white min-h-[44px]"
               >
                 {'\u2212'}
               </button>
@@ -436,13 +439,13 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
                 onChange={(e) => setReps(e.target.value)}
                 placeholder={'\u2014'}
                 aria-label={t('logger.reps_label')}
-                className="h-14 min-w-0 flex-1 rounded-xl px-1 text-center text-3xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700"
+                className="h-14 min-w-0 flex-1 bg-transparent px-1 text-center text-3xl font-black tracking-tight text-white tabular outline-none placeholder-gray-700 border-none!"
               />
               <button
                 type="button"
                 onClick={() => adjustReps(1)}
                 aria-label={t('logger.reps_label') + ' +1'}
-                className="flex h-14 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-lg text-gray-500 active:bg-white/[0.08] active:text-white min-h-[44px]"
+                className="flex h-14 w-11 shrink-0 items-center justify-center text-lg text-gray-500 active:bg-white/[0.06] active:text-white min-h-[44px]"
               >
                 +
               </button>
@@ -452,7 +455,7 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
 
         {/* Previous session hint */}
         {prevData && (
-          <div className="flex items-center justify-center gap-2 py-1 mb-2">
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-white/[0.02] border border-white/[0.04] px-3 py-2 mb-2">
             <span className="label-caps">{t('logger.last_session')}:</span>
             <span className="text-xs font-semibold tabular text-gray-400">
               {prevData.weight}kg {'\u00D7'} {prevData.reps}
@@ -508,7 +511,16 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
           className={`btn-primary ${isDone ? 'opacity-60' : ''}`}
           aria-label={isDone ? t('logger.extra_set') : t('logger.log_set')}
         >
-          {isDone ? t('logger.extra_set') : t('logger.log_set')}
+          {isDone
+            ? t('logger.extra_set')
+            : (() => {
+                const w = parseFloat(weight) || 0
+                const r = parseInt(reps) || 0
+                return w > 0 && r > 0
+                  ? `${w}kg \u00D7 ${r} ${t('logger.log_set').toLowerCase()}`
+                  : t('logger.log_set')
+              })()
+          }
         </button>
       </div>
 

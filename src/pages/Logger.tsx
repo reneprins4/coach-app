@@ -684,7 +684,7 @@ export default function Logger() {
           <button
             onClick={handleFinishClick}
             disabled={aw.saving || aw.totalSets === 0}
-            className="btn-primary h-9 w-auto px-4 text-xs disabled:opacity-40"
+            className="h-8 rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-600 px-4 text-xs font-bold text-white shadow-[0_2px_12px_rgba(6,182,212,0.3)] active:scale-[0.97] transition-transform disabled:opacity-40"
             data-testid="finish-btn"
           >
             {aw.saving ? t('logger.saving') : t('logger.finish')}

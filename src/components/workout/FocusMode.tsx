@@ -199,7 +199,7 @@ export default function FocusMode({
               onClick={() => goTo(i)}
               aria-label={`${exercise.name}${done ? ' - ' + (t('logger.exercise_done') || 'done') : ''}`}
               aria-selected={isCurrent}
-              className="p-1 -m-1"
+              className="p-2 -m-2"
             >
               <div
                 className={`h-2 w-2 rounded-full transition-all duration-200 ${
@@ -282,10 +282,10 @@ export default function FocusMode({
       </div>
 
       {/* -- Overview button -- */}
-      <div className="shrink-0 flex justify-center pb-2 pt-1">
+      <div className="shrink-0">
         <button
           onClick={() => setShowOverview(true)}
-          className="inline-flex items-center gap-1 text-xs font-medium text-gray-600 active:text-gray-400 py-2 px-4"
+          className="flex items-center justify-center gap-1.5 w-full py-3 rounded-t-xl bg-white/[0.03] border-t border-white/[0.06] text-xs font-semibold text-gray-500 active:text-gray-300"
           aria-label={t('logger.overview') || 'Overview'}
         >
           <ChevronUp size={14} />
