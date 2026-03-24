@@ -73,7 +73,14 @@ export default function Dashboard() {
 
   const muscleStatus = useMemo(() => analyzeTraining(workouts.slice(0, 30)), [workouts])
 
-  const block = getCurrentBlock()
+  const [block, setBlock] = useState<import('../types').TrainingBlock | null>(getCurrentBlock())
+  useEffect(() => {
+    let cancelled = false
+    import('../lib/periodization').then(({ loadBlock: loadBlockAsync }) => {
+      loadBlockAsync(user?.id ?? null).then(b => { if (!cancelled) setBlock(b) })
+    })
+    return () => { cancelled = true }
+  }, [user?.id])
   const progress = block ? getBlockProgress(block) : null
   const phase = block ? PHASES[block.phase] : null
   const PhaseIcon = block ? ({ accumulation: Zap, intensification: TrendingUp, strength: Target, deload: Battery } as Record<string, typeof Zap>)[block.phase] : null
