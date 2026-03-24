@@ -10,7 +10,7 @@ import type {
   AIWorkoutResponse,
 } from '../types'
 import { fetchRecentHistory } from './useWorkouts'
-import { analyzeTraining, scoreSplits, getRecentSplits } from '../lib/training-analysis'
+import { analyzeTraining, scoreSplits, getRecentSplits, detectSplit } from '../lib/training-analysis'
 import { generateScientificWorkout } from '../lib/ai'
 import { getSettings, saveSettings, parseFrequency } from '../lib/settings'
 import { loadBlock } from '../lib/periodization'
@@ -286,7 +286,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         const lastWorkout = history[0]
         const lastWorkoutInfo = lastWorkout
           ? {
-              split: lastWorkout.split,
+              split: lastWorkout.split || detectSplit(lastWorkout) || '',
               hoursSince: (Date.now() - new Date(lastWorkout.created_at).getTime()) / 3600000,
             }
           : null

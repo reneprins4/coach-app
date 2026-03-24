@@ -174,10 +174,26 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
 
         // Process next workout recommendation
         if (!workoutsError && !cancelled) {
-          // Add current workout to analysis
+          // Add current workout to analysis — include split so scoreSplits can penalize it
+          const currentExerciseNames = [...new Set((result.workout_sets || []).map(s => s.exercise))]
+          const detectedCurrentSplit = (() => {
+            // Try to detect split from exercises
+            const muscles = new Set<string>()
+            for (const name of currentExerciseNames) {
+              const m = classifyExercise(name)
+              if (m) muscles.add(String(m))
+            }
+            const muscleArr = Array.from(muscles)
+            for (const [splitName, splitMuscles] of Object.entries(SPLIT_MUSCLES)) {
+              const matches = muscleArr.filter(m => (splitMuscles as string[]).includes(m)).length
+              if (matches >= muscleArr.length * 0.6 && matches >= 2) return splitName
+            }
+            return 'Full Body'
+          })()
           const currentWorkout = {
             id: result.id,
             created_at: new Date().toISOString(),
+            split: detectedCurrentSplit,
             workout_sets: result.workout_sets || [],
           }
           const allWorkouts = [

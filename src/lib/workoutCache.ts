@@ -15,7 +15,7 @@
  * Both are invalidated by invalidateWorkoutCache(). The AI cache also auto-expires.
  */
 
-import { analyzeTraining, scoreSplits, getRecentSplits } from './training-analysis'
+import { analyzeTraining, scoreSplits, getRecentSplits, detectSplit } from './training-analysis'
 import { getSettings, parseFrequency } from './settings'
 import { getCurrentBlock } from './periodization'
 import { buildWorkoutPreferences } from './workoutPreferences'
@@ -146,7 +146,7 @@ export function generateWorkoutPreview(workouts: Workout[], blockOverride?: impo
   const lastWorkout = workouts[0]
   const lastWorkoutInfo = lastWorkout
     ? {
-        split: lastWorkout.split,
+        split: lastWorkout.split || detectSplit(lastWorkout) || '',
         hoursSince: (Date.now() - new Date(lastWorkout.created_at).getTime()) / 3600000,
       }
     : null
@@ -228,7 +228,7 @@ export async function generateFullWorkout(
   const lastWorkout = workouts[0]
   const lastWorkoutInfo = lastWorkout
     ? {
-        split: lastWorkout.split,
+        split: lastWorkout.split || detectSplit(lastWorkout) || '',
         hoursSince: (Date.now() - new Date(lastWorkout.created_at).getTime()) / 3600000,
       }
     : null
