@@ -186,7 +186,7 @@ export default function FocusMode({
   }
 
   return (
-    <div className="flex flex-col w-full overflow-hidden relative" style={{ minHeight: 'calc(100dvh - 52px)' }}>
+    <div className="flex flex-col h-full w-full overflow-hidden relative">
       {/* -- Progress dots -- */}
       <div className="flex items-center justify-center gap-1.5 py-3 shrink-0 px-4" role="tablist" aria-label={t('logger.exercises') || 'Exercises'}>
         {exercises.map((exercise, i) => {
@@ -285,10 +285,10 @@ export default function FocusMode({
       <div className="shrink-0">
         <button
           onClick={() => setShowOverview(true)}
-          className="flex items-center justify-center gap-1.5 w-full py-3 rounded-t-xl bg-white/[0.03] border-t border-white/[0.06] text-xs font-semibold text-gray-500 active:text-gray-300"
+          className="flex items-center justify-center gap-1 w-full py-2 border-t border-white/[0.04] text-[11px] font-medium text-gray-600 active:text-gray-400"
           aria-label={t('logger.overview')}
         >
-          <ChevronUp size={14} />
+          <ChevronUp size={12} />
           {t('logger.overview')}
         </button>
       </div>

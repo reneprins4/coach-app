@@ -662,7 +662,7 @@ export default function Logger() {
   )
 
   return (
-    <div className="flex min-h-dvh flex-col bg-gray-950 pb-28">
+    <div className="flex h-dvh flex-col bg-gray-950 overflow-hidden">
       {/* Compact Sticky Header - single row */}
       <header className="sticky top-0 z-40 flex items-center justify-between px-4 py-2 bg-[var(--bg-base)]/95 backdrop-blur-xl border-b border-[var(--border-subtle)]" data-testid="compact-header">
         <div className="flex items-center gap-2 min-w-0">
@@ -716,7 +716,7 @@ export default function Logger() {
 
       {/* Exercise content */}
       {useFocusMode ? (
-        <div className="flex-1" style={{ minHeight: 'calc(100dvh - 48px)' }}>
+        <div className="flex-1 overflow-hidden">
           <FocusMode
             exercises={workout.exercises}
             userId={user?.id}
