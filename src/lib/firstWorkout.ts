@@ -25,11 +25,11 @@ interface FirstWorkoutExercise {
 
 const FIRST_WORKOUT_POOL: FirstWorkoutExercise[] = [
   // Compounds — full gym
-  { name: 'Back Squat', muscle_group: 'quads', isCompound: true, equipment: ['barbell'], bwMultiplier: 0.5, note: 'Focus op de juiste techniek, niet op gewicht. Hak naar achteren, borst omhoog.' },
-  { name: 'Flat Barbell Bench Press', muscle_group: 'chest', isCompound: true, equipment: ['barbell'], bwMultiplier: 0.4, note: 'Focus op de juiste techniek, niet op gewicht. Schouderbladen samen, gecontroleerde beweging.' },
-  { name: 'Barbell Row', muscle_group: 'back', isCompound: true, equipment: ['barbell'], bwMultiplier: 0.35, note: 'Focus op de juiste techniek, niet op gewicht. Trek de stang naar je navel, rug recht.' },
-  { name: 'Dumbbell Overhead Press', muscle_group: 'shoulders', isCompound: true, equipment: ['dumbbell'], bwMultiplier: 0.15, note: 'Focus op de juiste techniek, niet op gewicht. Druk recht omhoog, core aanspannen.' },
-  { name: 'Lying Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: ['machine'], bwMultiplier: 0.2, note: 'Langzame, gecontroleerde beweging. Voel de hamstrings werken.' },
+  { name: 'Back Squat', muscle_group: 'quads', isCompound: true, equipment: ['barbell'], bwMultiplier: 0.25, note: 'Focus op de juiste techniek, niet op gewicht. Hak naar achteren, borst omhoog.' },
+  { name: 'Flat Barbell Bench Press', muscle_group: 'chest', isCompound: true, equipment: ['barbell'], bwMultiplier: 0.25, note: 'Focus op de juiste techniek, niet op gewicht. Schouderbladen samen, gecontroleerde beweging.' },
+  { name: 'Barbell Row', muscle_group: 'back', isCompound: true, equipment: ['barbell'], bwMultiplier: 0.2, note: 'Focus op de juiste techniek, niet op gewicht. Trek de stang naar je navel, rug recht.' },
+  { name: 'Dumbbell Overhead Press', muscle_group: 'shoulders', isCompound: true, equipment: ['dumbbell'], bwMultiplier: 0.1, note: 'Focus op de juiste techniek, niet op gewicht. Druk recht omhoog, core aanspannen.' },
+  { name: 'Lying Leg Curl', muscle_group: 'hamstrings', isCompound: false, equipment: ['machine'], bwMultiplier: 0.15, note: 'Langzame, gecontroleerde beweging. Voel de hamstrings werken.' },
   { name: 'Plank', muscle_group: 'core', isCompound: false, equipment: ['bodyweight'], bwMultiplier: 0, note: 'Houd je lichaam in een rechte lijn. Begin met 20-30 seconden.' },
 
   // Dumbbell alternatives
@@ -47,11 +47,11 @@ const FIRST_WORKOUT_POOL: FirstWorkoutExercise[] = [
   { name: 'Step-Up', muscle_group: 'quads', isCompound: true, equipment: ['bodyweight'], bwMultiplier: 0, note: 'Gebruik een stabiele verhoging. Duw af met het bovenste been.' },
 
   // Machine alternatives for full gym
-  { name: 'Leg Press', muscle_group: 'quads', isCompound: true, equipment: ['machine'], bwMultiplier: 0.8, note: 'Voeten op schouderbreedte. Laat je knieen niet naar binnen vallen.' },
-  { name: 'Machine Chest Press', muscle_group: 'chest', isCompound: true, equipment: ['machine'], bwMultiplier: 0.25, note: 'Goed alternatief om het bewegingspatroon te leren. Gecontroleerde beweging.' },
-  { name: 'Seated Cable Row', muscle_group: 'back', isCompound: true, equipment: ['cable'], bwMultiplier: 0.3, note: 'Trek naar je navel, schouderbladen samen. Rug recht houden.' },
-  { name: 'Lat Pulldown (Wide)', muscle_group: 'back', isCompound: true, equipment: ['cable'], bwMultiplier: 0.3, note: 'Trek de stang naar je bovenborst. Leun licht achterover.' },
-  { name: 'Leg Extension', muscle_group: 'quads', isCompound: false, equipment: ['machine'], bwMultiplier: 0.25, note: 'Langzame, gecontroleerde beweging. Strek volledig uit aan de top.' },
+  { name: 'Leg Press', muscle_group: 'quads', isCompound: true, equipment: ['machine'], bwMultiplier: 0.5, note: 'Voeten op schouderbreedte. Laat je knieen niet naar binnen vallen.' },
+  { name: 'Machine Chest Press', muscle_group: 'chest', isCompound: true, equipment: ['machine'], bwMultiplier: 0.2, note: 'Goed alternatief om het bewegingspatroon te leren. Gecontroleerde beweging.' },
+  { name: 'Seated Cable Row', muscle_group: 'back', isCompound: true, equipment: ['cable'], bwMultiplier: 0.2, note: 'Trek naar je navel, schouderbladen samen. Rug recht houden.' },
+  { name: 'Lat Pulldown (Wide)', muscle_group: 'back', isCompound: true, equipment: ['cable'], bwMultiplier: 0.2, note: 'Trek de stang naar je bovenborst. Leun licht achterover.' },
+  { name: 'Leg Extension', muscle_group: 'quads', isCompound: false, equipment: ['machine'], bwMultiplier: 0.2, note: 'Langzame, gecontroleerde beweging. Strek volledig uit aan de top.' },
 ]
 
 // --- Equipment mapping ---

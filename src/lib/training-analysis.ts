@@ -300,18 +300,19 @@ export function analyzeTraining(workouts: Workout[], goal: string = 'hypertrophy
         }
       }
 
-      // Process secondary muscles (50% credit)
+      // Process secondary muscles (50% set credit, NO recovery timer update)
+      // Secondary muscles get volume credit but don't get fatigued like
+      // directly trained muscles. E.g., triceps during bench press gets
+      // 0.5 set credit but the recovery timer is NOT set — the user didn't
+      // specifically train triceps, so they shouldn't show as "recovering."
       for (const secMuscle of secondary) {
         if (muscleStatus[secMuscle]) {
           if (isThisWeek) muscleStatus[secMuscle].setsThisWeek += 0.5
 
-          if (
-            muscleStatus[secMuscle].hoursSinceLastTrained === null ||
-            hoursAgo < muscleStatus[secMuscle].hoursSinceLastTrained
-          ) {
-            muscleStatus[secMuscle].daysSinceLastTrained = Math.floor(daysAgo)
-            muscleStatus[secMuscle].hoursSinceLastTrained = hoursAgo
-          }
+          // Only update hoursSinceLastTrained if the muscle has NEVER been
+          // directly trained (primary). Once a muscle has a primary training
+          // session, secondary work should not override that timer.
+          // This prevents "biceps 2% recovered" when user only did rows.
 
           if (daysAgo <= 7 && !muscleStatus[secMuscle].recentExercises.includes(s.exercise + ' (compound)')) {
             muscleStatus[secMuscle].recentExercises.push(s.exercise + ' (compound)')
