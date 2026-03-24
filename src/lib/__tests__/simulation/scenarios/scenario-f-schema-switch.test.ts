@@ -16,6 +16,7 @@ import {
   generatePPLCycle,
 } from '../workoutGenerator'
 import { detectFatigue } from '../../../fatigueDetector'
+import { parseFrequency } from '../../../settings'
 import { analyzeTraining } from '../../../training-analysis'
 import type { Workout } from '../../../../types'
 
@@ -126,7 +127,7 @@ describe('Scenario F: Schema switch (Full Body -> PPL) false fatigue', () => {
     // to simulate what the fatigue detector would see
     const recentWorkouts = allWorkouts.slice(-18) // last 3 weeks of PPL
 
-    const result = detectFatigue(recentWorkouts, 3, parseInt(LENA.frequency))
+    const result = detectFatigue(recentWorkouts, 3, parseFrequency(LENA.frequency))
 
     // The fatigue detector should NOT flag this as fatigued
     expect(result.fatigued).toBe(false)
@@ -145,7 +146,7 @@ describe('Scenario F: Schema switch (Full Body -> PPL) false fatigue', () => {
 
     // Get the last 3 weeks of workouts (post-switch PPL)
     const recentWorkouts = allWorkouts.slice(-18)
-    const result = detectFatigue(recentWorkouts, 3, parseInt(LENA.frequency))
+    const result = detectFatigue(recentWorkouts, 3, parseFrequency(LENA.frequency))
 
     // The volume_drop signal checks per-workout average, not per-week total.
     // As long as the recent 3 workouts' avg is not < 75% of overall avg,

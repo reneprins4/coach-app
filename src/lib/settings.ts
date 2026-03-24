@@ -33,6 +33,17 @@ const DEFAULTS: UserSettings = {
   priorityMusclesUntil: null,
 }
 
+/**
+ * Safely parse frequency from string (e.g. "4x", "3") or number to a number.
+ * Returns the default (4) if the input is undefined, empty, or not parseable.
+ */
+export function parseFrequency(freq: string | number | undefined): number {
+  if (typeof freq === 'number') return freq
+  if (!freq) return 4
+  const parsed = parseInt(String(freq))
+  return isNaN(parsed) ? 4 : parsed
+}
+
 // Get settings from localStorage (fallback/cache)
 export function getSettings(): UserSettings {
   try {

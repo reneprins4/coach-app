@@ -286,7 +286,7 @@ const CANONICAL_NAMES: string[] = [
   'Barbell Curl', 'EZ-Bar Curl', 'Dumbbell Curl', 'Hammer Curl',
   'Incline Dumbbell Curl', 'Cable Curl', 'Preacher Curl', 'Concentration Curl',
   'Tricep Pushdown', 'Overhead Tricep Extension', 'Skull Crusher',
-  'Close Grip Bench Press', 'Tricep Kickback', 'Diamond Push-up', 'Spider Curl',
+  'Close Grip Bench Press', 'Tricep Kickback', 'Diamond Push-Up', 'Spider Curl',
   'Cable Hammer Curl', 'Reverse Barbell Curl', 'Machine Preacher Curl',
   'Bayesian Cable Curl', 'Cross Body Hammer Curl', 'Zottman Curl',
   '21s Barbell Curl', 'Dip', 'Overhead Dumbbell Extension', 'Cable Overhead Extension',

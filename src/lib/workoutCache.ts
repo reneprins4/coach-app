@@ -8,10 +8,15 @@
  * split, date, workout count, injuries, equipment, goal, experience, time.
  *
  * TTL: 4 hours. Invalidated on workout finish, injury change, or settings change.
+ *
+ * NOTE: Two cache layers exist:
+ * 1. This localStorage cache (4h TTL) — shared between Dashboard and Trainen tab
+ * 2. aiCache inside generateScientificWorkout (2h TTL) — AI-specific response cache
+ * Both are invalidated by invalidateWorkoutCache(). The AI cache also auto-expires.
  */
 
 import { analyzeTraining, scoreSplits, getRecentSplits } from './training-analysis'
-import { getSettings } from './settings'
+import { getSettings, parseFrequency } from './settings'
 import { getCurrentBlock } from './periodization'
 import { buildWorkoutPreferences } from './workoutPreferences'
 import { generateScientificWorkout } from './ai'
@@ -49,23 +54,22 @@ interface CachedWorkout {
 export function buildContextHash(params: {
   split: string
   date: string        // YYYY-MM-DD
+  // workoutCount is included as a rough proxy for training history changes.
+  // The primary invalidation mechanism is invalidateWorkoutCache() called after finishWorkout.
   workoutCount: number
   injuryCount: number
   equipment: string
   trainingGoal: string
   experienceLevel: string
   time: number
+  trainingPhase?: string | null
+  blockWeek?: number | null
+  energy?: string
+  focusedMuscles?: string[]
+  frequency?: number
 }): string {
-  return [
-    params.split,
-    params.date,
-    params.workoutCount,
-    params.injuryCount,
-    params.equipment,
-    params.trainingGoal,
-    params.experienceLevel,
-    params.time,
-  ].join('-')
+  const raw = `${params.split}|${params.date}|${params.workoutCount}|${params.injuryCount}|${params.equipment}|${params.trainingGoal}|${params.experienceLevel}|${params.time}|${params.trainingPhase || ''}|${params.blockWeek || 0}|${params.energy || 'medium'}|${(params.focusedMuscles || []).sort().join(',')}|${params.frequency || 4}`
+  return raw
 }
 
 // ---- Cache Operations ----
@@ -152,7 +156,7 @@ export function generateWorkoutPreview(workouts: Workout[], blockOverride?: impo
     muscleStatus,
     lastWorkoutInfo,
     settings.experienceLevel || 'intermediate',
-    parseInt(settings.frequency) || 4,
+    parseFrequency(settings.frequency),
     recentSplits,
   )
 
@@ -210,8 +214,11 @@ export function generateWorkoutPreview(workouts: Workout[], blockOverride?: impo
 export async function generateFullWorkout(
   workouts: Workout[],
   userId: string | null,
-  overrides?: { split?: string; time?: number },
-): Promise<AIWorkoutResponse> {
+  overrides?: { split?: string; time?: number; energy?: string; focusedMuscles?: string[] },
+): Promise<AIWorkoutResponse | null> {
+  // Guard: not enough history for meaningful split recommendation
+  if (workouts.length < 1) return null
+
   const settings = getSettings()
   const muscleStatus = analyzeTraining(
     workouts.slice(0, 30),
@@ -231,13 +238,14 @@ export async function generateFullWorkout(
     muscleStatus,
     lastWorkoutInfo,
     settings.experienceLevel || 'intermediate',
-    parseInt(settings.frequency) || 4,
+    parseFrequency(settings.frequency),
     recentSplits,
   )
 
   const recommendedSplit = overrides?.split || splits[0]?.name || 'Full Body'
   const time = overrides?.time ?? settings.time ?? 60
   const injuries = loadInjuries().filter(i => i.status !== 'resolved')
+  const block = getCurrentBlock()
 
   // Build context hash
   const contextHash = buildContextHash({
@@ -249,6 +257,11 @@ export async function generateFullWorkout(
     trainingGoal: settings.trainingGoal || 'hypertrophy',
     experienceLevel: settings.experienceLevel || 'intermediate',
     time,
+    trainingPhase: block?.phase || null,
+    blockWeek: block?.currentWeek || null,
+    energy: overrides?.energy || 'medium',
+    focusedMuscles: overrides?.focusedMuscles || [],
+    frequency: parseInt(settings.frequency) || 4,
   })
 
   // Check cache
@@ -260,7 +273,6 @@ export async function generateFullWorkout(
   if (import.meta.env.DEV) console.log('[workoutCache] MISS — generating:', contextHash)
 
   // Generate
-  const block = getCurrentBlock()
   const preferences = buildWorkoutPreferences(settings, block, { time })
 
   // Build recent history for the recommended split
@@ -268,8 +280,8 @@ export async function generateFullWorkout(
     date: w.created_at,
     sets: (w.workout_sets || []).map(s => ({
       exercise: s.exercise,
-      weight_kg: s.weight_kg || 0,
-      reps: s.reps || 0,
+      weight_kg: s.weight_kg ?? null,
+      reps: s.reps ?? 0,
       rpe: s.rpe ?? null,
     })),
   }))
@@ -280,6 +292,7 @@ export async function generateFullWorkout(
     recentHistory,
     preferences,
     userId,
+    workouts,
   })
 
   // Cache the result

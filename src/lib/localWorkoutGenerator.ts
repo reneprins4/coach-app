@@ -42,7 +42,6 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Pec Deck', muscle_group: 'chest', isCompound: false, equipment: 'machine', bwMultiplier: 0.5 },
     { name: 'Push-Up', muscle_group: 'chest', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.65 },
     { name: 'Wide Push-Up', muscle_group: 'chest', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.65 },
-    { name: 'Diamond Push-Up', muscle_group: 'chest', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0.65 },
     { name: 'Decline Push-Up', muscle_group: 'chest', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.65 },
   ],
   back: [
@@ -51,6 +50,8 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Seated Cable Row', muscle_group: 'back', isCompound: true, equipment: 'cable', bwMultiplier: 0.6 },
     { name: 'Dumbbell Row', muscle_group: 'back', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.4 },
     { name: 'Pull-up', muscle_group: 'back', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Chin-up', muscle_group: 'back', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Inverted Row (underhand)', muscle_group: 'back', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Straight Arm Pulldown', muscle_group: 'back', isCompound: false, equipment: 'cable', bwMultiplier: 0.25 },
   ],
   shoulders: [
@@ -100,8 +101,7 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Hammer Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.14 },
     { name: 'Incline Dumbbell Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
     { name: 'Cable Curl', muscle_group: 'biceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.2 },
-    { name: 'Chin-up', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.9 },
-    { name: 'Inverted Row (underhand)', muscle_group: 'biceps', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0.5 },
+    { name: 'EZ Bar Curl', muscle_group: 'biceps', isCompound: false, equipment: 'barbell', bwMultiplier: 0.25 },
   ],
   triceps: [
     { name: 'Tricep Pushdown', muscle_group: 'triceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.25 },
@@ -110,7 +110,7 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Close Grip Bench Press', muscle_group: 'triceps', isCompound: true, equipment: 'barbell', bwMultiplier: 0.6 },
     { name: 'Dumbbell Overhead Tricep Extension', muscle_group: 'triceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.15 },
     { name: 'Dumbbell Kickback', muscle_group: 'triceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
-    { name: 'Diamond Push-up', muscle_group: 'triceps', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Diamond Push-Up', muscle_group: 'triceps', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
   ],
   core: [
     { name: 'Cable Crunch', muscle_group: 'core', isCompound: false, equipment: 'cable', bwMultiplier: 0.3 },
@@ -143,6 +143,10 @@ const SPLIT_TEMPLATES: Record<string, { muscles: MuscleGroup[]; exercisesPerMusc
     exercisesPerMuscle: { chest: 2, back: 2, shoulders: 1, biceps: 1, triceps: 1, quads: 0, hamstrings: 0, glutes: 0, core: 1 },
   },
   'Lower': {
+    muscles: ['quads', 'hamstrings', 'glutes', 'core'],
+    exercisesPerMuscle: { quads: 2, hamstrings: 2, glutes: 1, core: 1, chest: 0, back: 0, shoulders: 0, biceps: 0, triceps: 0 },
+  },
+  'Lower Body': {
     muscles: ['quads', 'hamstrings', 'glutes', 'core'],
     exercisesPerMuscle: { quads: 2, hamstrings: 2, glutes: 1, core: 1, chest: 0, back: 0, shoulders: 0, biceps: 0, triceps: 0 },
   },
@@ -276,7 +280,7 @@ function buildHistoryMap(history: RecentSession[]): Record<string, { weight: num
 
 /**
  * Apply percentage-based progressive overload using the new progression engine.
- * Returns [adjustedWeight, suggestedReps, vsLastSession note].
+ * Returns [adjustedWeight, suggestedReps, vsLastSession note, isEstimate].
  */
 function applyOverload(
   exerciseName: string,
@@ -284,10 +288,10 @@ function applyOverload(
   muscleGroup: MuscleGroup,
   repRange: [number, number],
   historyMap: Record<string, { weight: number; reps: number; rpe: number | null }>,
-): [number, number | null, AIExercise['vs_last_session']] {
+): [number, number | null, AIExercise['vs_last_session'], boolean] {
   const prev = historyMap[exerciseName]
   if (!prev) {
-    return [estimatedWeight, null, 'new']
+    return [estimatedWeight, null, 'new', true]
   }
 
   const result = calculateProgression({
@@ -310,7 +314,7 @@ function applyOverload(
   const label = strategyLabels[result.strategy] ?? 'same'
   const vsNote = `${label} - prev ${prev.weight}kg x${prev.reps}${prev.rpe != null ? ` @RPE${prev.rpe}` : ''}, ${result.reason}` as AIExercise['vs_last_session']
 
-  return [result.suggestedWeight, result.suggestedReps, vsNote]
+  return [result.suggestedWeight, result.suggestedReps, vsNote, result.strategy === 'estimate']
 }
 
 /**
@@ -450,7 +454,7 @@ export function generateLocalWorkout({
       const estimatedWt = storedMax ?? estimateWeight(tmpl, bwKg, level, gender)
       const repRange: [number, number] = targetRepRange || getRepRange(goal, tmpl.isCompound)
       const [repsMin, repsMax] = repRange
-      const [weight, suggestedReps, vsNote] = applyOverload(tmpl.name, estimatedWt, tmpl.muscle_group, repRange, historyMap)
+      const [weight, suggestedReps, vsNote, isEstimate] = applyOverload(tmpl.name, estimatedWt, tmpl.muscle_group, repRange, historyMap)
       const sets = getSets(tmpl.isCompound, isDeload, level)
       const restSec = getRestSeconds(tmpl.isCompound, goal)
 
@@ -463,7 +467,7 @@ export function generateLocalWorkout({
         weight_kg: weight,
         rpe_target: Math.min(targetRPE, isDeload ? 6 : rpeCap),
         rest_seconds: restSec,
-        notes: vsNote.startsWith('new') ? 'First time — focus on form and control' : '',
+        notes: isEstimate ? 'First time — focus on form and control' : '',
         vs_last_session: vsNote,
       })
     }

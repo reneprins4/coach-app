@@ -18,6 +18,7 @@ import {
 } from '../workoutGenerator'
 import { detectPlateaus } from '../../../plateauDetector'
 import { detectFatigue } from '../../../fatigueDetector'
+import { parseFrequency } from '../../../settings'
 import { calculateForecast } from '../../../performanceForecast'
 import type { Workout, ForecastSession } from '../../../../types'
 
@@ -153,7 +154,7 @@ describe('Scenario B: Vacation/break false positive', () => {
   it('fatigue detector does NOT trigger on frequency drop from vacation', () => {
     // detectFatigue looks at the last N weeks from now.
     // With 5 return workouts in the last 2 weeks, RPE and volume are consistent.
-    const fatigue = detectFatigue(workouts, 3, parseInt(MARCUS.frequency))
+    const fatigue = detectFatigue(workouts, 3, parseFrequency(MARCUS.frequency))
 
     // No RPE drift signals (Marcus returns with controlled RPE)
     const rpeSignals = fatigue.signals.filter(s => s.type === 'rpe_drift')

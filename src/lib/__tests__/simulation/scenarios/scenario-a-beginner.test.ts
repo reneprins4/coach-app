@@ -32,7 +32,7 @@ const BODYWEIGHT_EXERCISES = [
   'Bodyweight Squat',
   'Glute Bridge',
   'Plank',
-  'Diamond Push-up',
+  'Diamond Push-Up',
   'Wall Sit',
 ]
 

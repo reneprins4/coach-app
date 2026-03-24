@@ -192,7 +192,7 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       'Barbell Curl': 'Hammer Curl (light)',
       'EZ-Bar Curl': 'Hammer Curl (light)',
       'Skull Crusher': 'Tricep Pushdown (light)',
-      'Close Grip Bench Press': 'Diamond Push-up',
+      'Close Grip Bench Press': 'Diamond Push-Up',
       'Preacher Curl': 'Hammer Curl (light)',
     },
     rehabExercises: [

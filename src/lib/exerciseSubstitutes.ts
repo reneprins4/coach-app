@@ -99,13 +99,13 @@ const DIRECT_SUBSTITUTES: Record<string, Record<string, string>> = {
   'Preacher Curl':                { machine_busy: 'Barbell Curl',               no_equipment: 'Chin-up',              injury: 'Concentration Curl' },
   'Incline Dumbbell Curl':        { machine_busy: 'Dumbbell Curl',              no_equipment: 'Chin-up',              injury: 'Concentration Curl' },
   // ---- ARMS (triceps) ----
-  'Skull Crusher':                { machine_busy: 'Close Grip Bench Press',     no_equipment: 'Diamond Push-up',      injury: 'Tricep Pushdown' },
-  'Close Grip Bench Press':       { machine_busy: 'Skull Crusher',              no_equipment: 'Diamond Push-up',      injury: 'Tricep Pushdown' },
-  'Tricep Pushdown':              { machine_busy: 'Skull Crusher',              no_equipment: 'Diamond Push-up',      injury: 'Overhead Tricep Extension' },
-  'Overhead Tricep Extension':    { machine_busy: 'Skull Crusher',              no_equipment: 'Diamond Push-up',      injury: 'Tricep Pushdown' },
-  'Tricep Kickback':              { machine_busy: 'Tricep Pushdown',            no_equipment: 'Diamond Push-up',      injury: 'Tricep Pushdown' },
-  'Dip':                          { machine_busy: 'Close Grip Bench Press',     no_equipment: 'Diamond Push-up',      injury: 'Tricep Pushdown' },
-  'Diamond Push-up':              { machine_busy: 'Tricep Pushdown',            no_equipment: 'Diamond Push-up',      injury: 'Diamond Push-up' },
+  'Skull Crusher':                { machine_busy: 'Close Grip Bench Press',     no_equipment: 'Diamond Push-Up',      injury: 'Tricep Pushdown' },
+  'Close Grip Bench Press':       { machine_busy: 'Skull Crusher',              no_equipment: 'Diamond Push-Up',      injury: 'Tricep Pushdown' },
+  'Tricep Pushdown':              { machine_busy: 'Skull Crusher',              no_equipment: 'Diamond Push-Up',      injury: 'Overhead Tricep Extension' },
+  'Overhead Tricep Extension':    { machine_busy: 'Skull Crusher',              no_equipment: 'Diamond Push-Up',      injury: 'Tricep Pushdown' },
+  'Tricep Kickback':              { machine_busy: 'Tricep Pushdown',            no_equipment: 'Diamond Push-Up',      injury: 'Tricep Pushdown' },
+  'Dip':                          { machine_busy: 'Close Grip Bench Press',     no_equipment: 'Diamond Push-Up',      injury: 'Tricep Pushdown' },
+  'Diamond Push-Up':              { machine_busy: 'Tricep Pushdown',            no_equipment: 'Diamond Push-Up',      injury: 'Diamond Push-Up' },
   // ---- CORE ----
   'Plank':                        { machine_busy: 'Dead Bug',                   no_equipment: 'Plank',                injury: 'Dead Bug' },
   'Cable Crunch':                 { machine_busy: 'Ab Wheel Rollout',           no_equipment: 'Bicycle Crunch',       injury: 'Dead Bug' },
@@ -142,7 +142,7 @@ const NOTES: Record<string, string> = {
   'Glute Bridge':         'Drive through heels, squeeze glutes at top. 1-second hold.',
   'Nordic Curl':          'Control descent as much as possible. Use hands to assist on the way up.',
   'Concentration Curl':   'Brace elbow against inner thigh. Slow, controlled movement.',
-  'Diamond Push-up':      'Hands close together under chest. Lock elbows out at top.',
+  'Diamond Push-Up':      'Hands close together under chest. Lock elbows out at top.',
   'Dead Bug':             'Press lower back into floor throughout. Slow and controlled.',
 }
 
@@ -155,7 +155,7 @@ const ALL_EXERCISES: StaticExercise[] = [
   { name: 'Cable Curl',                muscle_group: 'arms',      equipment: 'cable' },
   { name: 'Close Grip Bench Press',    muscle_group: 'arms',      equipment: 'barbell' },
   { name: 'Concentration Curl',        muscle_group: 'arms',      equipment: 'dumbbell' },
-  { name: 'Diamond Push-up',           muscle_group: 'arms',      equipment: 'bodyweight' },
+  { name: 'Diamond Push-Up',           muscle_group: 'arms',      equipment: 'bodyweight' },
   { name: 'Dip',                       muscle_group: 'arms',      equipment: 'bodyweight' },
   { name: 'Dumbbell Curl',             muscle_group: 'arms',      equipment: 'dumbbell' },
   { name: 'EZ-Bar Curl',               muscle_group: 'arms',      equipment: 'barbell' },

@@ -42,6 +42,7 @@ vi.mock('../settings', () => ({
     deadliftMax: '',
     priorityMuscles: [],
   })),
+  parseFrequency: vi.fn((f: string) => parseInt(f) || 4),
 }))
 
 // Mock periodization

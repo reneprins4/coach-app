@@ -23,12 +23,15 @@ vi.mock('../../App', () => ({
       mainLift: null,
       mainLiftGoalKg: null,
       mainLiftGoalDate: null,
+      trainingGoal: 'hypertrophy',
+      units: 'kg',
     },
   })),
 }))
 
 vi.mock('../../lib/periodization', () => ({
   getCurrentBlock: vi.fn(() => null),
+  loadBlock: vi.fn(() => Promise.resolve(null)),
   getBlockProgress: vi.fn(() => null),
   PHASES: {
     accumulation: { label: 'Opbouw', labelKey: 'phases.accumulation', weeks: 4, description: '', descriptionKey: 'phases.accumulation_desc', color: 'blue', weekTargets: [] },
@@ -84,6 +87,30 @@ vi.mock('../../components/PrGoalsDashboard', () => ({ default: () => null }))
 vi.mock('../../components/OptimalHourCard', () => ({ default: () => null }))
 vi.mock('../../components/PageTransition', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+
+vi.mock('../../lib/settings', () => ({
+  getSettings: vi.fn(() => ({})),
+  parseFrequency: vi.fn((freq: string | number | undefined) => Number(freq) || 4),
+}))
+
+vi.mock('../../lib/unitConversion', () => ({
+  toDisplayWeight: vi.fn((kg: number) => kg),
+  formatVolume: vi.fn((vol: number) => `${Math.round(vol)} kg`),
+  getUnitLabel: vi.fn(() => 'kg'),
+  formatVolumeShort: vi.fn((vol: number) => `${Math.round(vol)} kg`),
+}))
+
+vi.mock('../../lib/optimalHour', () => ({
+  formatSlotLabel: vi.fn(() => ''),
+}))
+
+vi.mock('../../lib/dateUtils', () => ({
+  getLocalDateString: vi.fn((d: Date) => d.toISOString().slice(0, 10)),
+}))
+
+vi.mock('../../components/MuscleRadar', () => ({
+  default: () => null,
 }))
 
 // i18n mock

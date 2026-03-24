@@ -119,18 +119,22 @@ describe('BUG 2: Beginner split recommendation', () => {
 // ---------------------------------------------------------------------------
 
 describe('BUG 3: Exercise name casing', () => {
-  it('Chin-up casing matches canonical form (lowercase after hyphen)', () => {
-    const bicepsPool = EXERCISE_POOL.biceps
-    const chinUp = bicepsPool.find(e => e.name.toLowerCase() === 'chin-up')
+  it('Chin-up casing matches canonical form', () => {
+    // Chin-up is a compound back exercise (primary: back, secondary: biceps)
+    const backPool = EXERCISE_POOL.back
+    const chinUp = backPool.find(e => e.name.toLowerCase() === 'chin-up')
     expect(chinUp).toBeDefined()
     expect(chinUp!.name).toBe('Chin-up')
+    expect(chinUp!.muscle_group).toBe('back')
   })
 
   it('Inverted Row (underhand) casing matches canonical form', () => {
-    const bicepsPool = EXERCISE_POOL.biceps
-    const invertedRow = bicepsPool.find(e => e.name.toLowerCase().includes('inverted row'))
+    // Inverted Row is a compound back exercise (primary: back, secondary: biceps)
+    const backPool = EXERCISE_POOL.back
+    const invertedRow = backPool.find(e => e.name.toLowerCase().includes('inverted row'))
     expect(invertedRow).toBeDefined()
     expect(invertedRow!.name).toBe('Inverted Row (underhand)')
+    expect(invertedRow!.muscle_group).toBe('back')
   })
 })
 

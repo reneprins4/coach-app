@@ -1149,5 +1149,8 @@
     "foot_towel_scrunch_desc": "Handdoek met tenen naar je toe trekken",
     "foot_calf_stretch_desc": "Tegen muur leunen, achterste been gestrekt",
     "foot_marble_pickup_desc": "Knikkers of kleine voorwerpen oppakken met tenen"
+  },
+  "split": {
+    "rest_suggestion": "Overweeg een rustdag — alle spiergroepen zijn vermoeid."
   }
 }

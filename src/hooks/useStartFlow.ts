@@ -10,9 +10,9 @@ import type {
   AIWorkoutResponse,
 } from '../types'
 import { fetchRecentHistory } from './useWorkouts'
-import { analyzeTraining, scoreSplits, getRelevantHistory, getRecentSplits } from '../lib/training-analysis'
+import { analyzeTraining, scoreSplits, getRecentSplits } from '../lib/training-analysis'
 import { generateScientificWorkout } from '../lib/ai'
-import { getSettings, saveSettings } from '../lib/settings'
+import { getSettings, saveSettings, parseFrequency } from '../lib/settings'
 import { loadBlock } from '../lib/periodization'
 import { buildWorkoutPreferences } from '../lib/workoutPreferences'
 import { getCachedWorkout, cacheWorkout, buildContextHash } from '../lib/workoutCache'
@@ -265,7 +265,11 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
     }
   }, [userId])
 
-  // Background analysis and workout generation on mount
+  // Background analysis and workout generation on mount.
+  // Note: this runs with initial state (energy='medium', focusedMuscles=[]).
+  // This is intentional — the auto-generation uses defaults because the user
+  // hasn't had a chance to change energy/focus yet. If the user later changes
+  // energy or focus, generateForSplit() is called with the updated state.
   useEffect(() => {
     if (isActive || !userId) return
     if (hasWorkoutRef.current) return
@@ -277,8 +281,8 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         const history = await fetchRecentHistory(userId!, 20)
         if (cancelled) return
 
-        const muscleStatus = analyzeTraining(history) as MuscleStatusMap
         const settings = getSettings() as UserSettings
+        const muscleStatus = analyzeTraining(history, settings.trainingGoal || 'hypertrophy') as MuscleStatusMap
         const lastWorkout = history[0]
         const lastWorkoutInfo = lastWorkout
           ? {
@@ -291,7 +295,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
           muscleStatus,
           lastWorkoutInfo,
           settings.experienceLevel || 'intermediate',
-          parseInt(settings.frequency) || 4,
+          parseFrequency(settings.frequency),
           recentSplits,
         ) as SplitScore[]
         const recommendedSplit = splits[0]?.name || 'Full Body'
@@ -319,6 +323,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
 
         // Check localStorage workout cache first (shared with Dashboard)
         const injuries = loadInjuries().filter(i => i.status !== 'resolved')
+        const block = await loadBlock(userId ?? null)
         const cacheHash = buildContextHash({
           split: recommendedSplit,
           date: new Date().toISOString().slice(0, 10),
@@ -328,6 +333,11 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
           trainingGoal: settings.trainingGoal || 'hypertrophy',
           experienceLevel: settings.experienceLevel || 'intermediate',
           time: currentTime,
+          trainingPhase: block?.phase || null,
+          blockWeek: block?.currentWeek || null,
+          energy: state.energy || 'medium',
+          focusedMuscles: state.focusedMuscles || [],
+          frequency: parseInt(settings.frequency) || 4,
         })
         const cachedResult = getCachedWorkout(cacheHash)
 
@@ -337,8 +347,15 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
           if (import.meta.env.DEV) console.log('[useStartFlow] Cache HIT')
           result = cachedResult
         } else {
-          const block = await loadBlock(userId ?? null)
-          const recentHistory = getRelevantHistory(history, recommendedSplit)
+          const recentHistory = history.slice(0, 5).map(w => ({
+            date: w.created_at,
+            sets: (w.workout_sets || []).map(s => ({
+              exercise: s.exercise,
+              weight_kg: s.weight_kg ?? null,
+              reps: s.reps ?? 0,
+              rpe: s.rpe ?? null,
+            })),
+          }))
           const preferences = buildWorkoutPreferences(settings, block, { time: currentTime, energy: state.energy, focusedMuscles: state.focusedMuscles })
 
           result = await (generateScientificWorkout as CallableFunction)({
@@ -424,6 +441,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
 
       // Check localStorage workout cache first (shared with Dashboard)
       const injuries = loadInjuries().filter(i => i.status !== 'resolved')
+      const block = await loadBlock(userId ?? null)
       const cacheHash = buildContextHash({
         split: splitName,
         date: new Date().toISOString().slice(0, 10),
@@ -433,6 +451,11 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         trainingGoal: settings.trainingGoal || 'hypertrophy',
         experienceLevel: settings.experienceLevel || 'intermediate',
         time: timeToUse,
+        trainingPhase: block?.phase || null,
+        blockWeek: block?.currentWeek || null,
+        energy: state.energy || 'medium',
+        focusedMuscles: state.focusedMuscles || [],
+        frequency: parseInt(settings.frequency) || 4,
       })
       const cachedResult = getCachedWorkout(cacheHash)
 
@@ -442,8 +465,15 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         if (import.meta.env.DEV) console.log('[useStartFlow] Cache HIT for split:', splitName)
         result = cachedResult
       } else {
-        const block = await loadBlock(userId ?? null)
-        const recentHistory = getRelevantHistory(history, splitName)
+        const recentHistory = history.slice(0, 5).map(w => ({
+          date: w.created_at,
+          sets: (w.workout_sets || []).map(s => ({
+            exercise: s.exercise,
+            weight_kg: s.weight_kg ?? null,
+            reps: s.reps ?? 0,
+            rpe: s.rpe ?? null,
+          })),
+        }))
         const preferences = buildWorkoutPreferences(settings, block, { time: timeToUse, energy: state.energy, focusedMuscles: state.focusedMuscles })
 
         result = await (generateScientificWorkout as CallableFunction)({

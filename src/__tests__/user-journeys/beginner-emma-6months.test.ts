@@ -1122,7 +1122,7 @@ describe('Cross-cutting: Equipment enforcement', () => {
   })
 
   it('BUG-CHECK: triceps have bodyweight options available', () => {
-    // Pool: Diamond Push-up is bodyweight for triceps
+    // Pool: Diamond Push-Up is bodyweight for triceps
     const muscleStatus = getDefaultMuscleStatus()
     const workout = generateLocalWorkout({
       muscleStatus,
@@ -1138,7 +1138,7 @@ describe('Cross-cutting: Equipment enforcement', () => {
 
     const tricepsExercises = workout.exercises.filter(e => e.muscle_group === 'triceps')
     if (tricepsExercises.length > 0) {
-      expect(tricepsExercises[0]!.name).toBe('Diamond Push-up')
+      expect(tricepsExercises[0]!.name).toBe('Diamond Push-Up')
     }
   })
 })
@@ -1217,7 +1217,7 @@ describe('Cross-cutting: Full Body template completeness for bodyweight', () => 
       hamstrings: ['Nordic Curl'],
       glutes: ['Glute Bridge'],
       biceps: [], // None!
-      triceps: ['Diamond Push-up'],
+      triceps: ['Diamond Push-Up'],
       core: ['Hanging Leg Raise', 'Plank', 'Ab Wheel Rollout'],
     }
 

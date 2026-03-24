@@ -20,6 +20,7 @@ import MeasurementInput from '../components/MeasurementInput'
 import MeasurementChart from '../components/MeasurementChart'
 import { useOptimalHour } from '../hooks/useOptimalHour'
 import { computeTrainingStory, markStoryViewed } from '../lib/trainingStory'
+import { parseFrequency } from '../lib/settings'
 import { buildStoryShareText } from '../lib/trainingStoryShare'
 
 // Lazy load heavy analysis components (only rendered when their tab is active)
@@ -94,7 +95,7 @@ export default function Progress() {
       workouts,
       storyContext.prevMonth,
       storyContext.prevYear,
-      parseInt(settings.frequency) || 4,
+      parseFrequency(settings.frequency),
     )
     if (!data.hasEnoughData) return null
     return data

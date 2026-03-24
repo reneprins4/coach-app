@@ -68,7 +68,7 @@ export const RECOVERY_HOURS: Record<MuscleGroup, number> = {
   glutes:     72,
   biceps:     48,
   triceps:    48,
-  core:       24,
+  core:       36,
 }
 
 const SPLIT_MUSCLES: Record<SplitName | 'Lower Body', MuscleGroup[]> = {
@@ -250,6 +250,9 @@ export function analyzeTraining(workouts: Workout[], goal: string = 'hypertrophy
   const safeGoal: GoalKey = validGoals.includes(goal as GoalKey) ? goal as GoalKey : 'hypertrophy'
   const targets = SET_TARGETS_BY_GOAL[safeGoal]
   const now = new Date()
+  // Note: weekStart uses local time (via Date constructor + setDate), which is
+  // consistent with getLocalDateString() from dateUtils.ts. Both rely on the
+  // browser's local timezone, so weekly boundary matches the user's calendar day.
   const weekStart = new Date(now)
   weekStart.setDate(now.getDate() - 7)
 
@@ -418,7 +421,8 @@ export function scoreSplits(
       score -= 15 * fatiguedPrimary.length
     }
 
-    if (lastWorkoutInfo && lastWorkoutInfo.split === splitName) {
+    const lastSplit = lastWorkoutInfo?.split || null
+    if (lastSplit && lastSplit === splitName) {
       score -= 25 // penalty for same split consecutively
     }
 
@@ -479,7 +483,7 @@ export function scoreSplits(
   }
 
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1])
-  return sorted.map(([name, score]) => {
+  const scored = sorted.map(([name, score]) => {
     const muscles = SPLIT_MUSCLES[name as keyof typeof SPLIT_MUSCLES] || []
     const fatigued = muscles.filter(m => muscleStatus[m]?.status === 'fatigued')
     const ready = muscles.filter(m => muscleStatus[m]?.status === 'ready')
@@ -493,6 +497,13 @@ export function scoreSplits(
 
     return { name, score, reasoning }
   })
+
+  // If the best score is deeply negative, all muscles are fatigued — suggest rest
+  if (scored.length > 0 && scored[0]!.score < -20) {
+    scored[0]!.reasoning = (scored[0]!.reasoning || '') + ' Overweeg een rustdag — alle spiergroepen zijn vermoeid.'
+  }
+
+  return scored
 }
 
 interface RelevantHistoryEntry {

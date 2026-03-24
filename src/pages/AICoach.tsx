@@ -165,7 +165,7 @@ export default function AICoach() {
       }
       const preferences = buildWorkoutPreferences(settings, block, { energy, time, focusedMuscles })
       const workout = await generateScientificWorkout({
-        muscleStatus, recommendedSplit: selectedSplit, recentHistory: relevantHistory, userId: user?.id || null, preferences,
+        muscleStatus, recommendedSplit: selectedSplit, recentHistory: relevantHistory, userId: user?.id || null, preferences, workouts: workoutHistory,
       })
       setResult(workout)
       setRetryCount(0)

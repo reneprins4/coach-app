@@ -22,6 +22,7 @@ import { getCurrentBlock, getBlockProgress, PHASES } from '../lib/periodization'
 import { getLocalDateString } from '../lib/dateUtils'
 import { analyzeTraining } from '../lib/training-analysis'
 import { generateWorkoutPreview, generateFullWorkout } from '../lib/workoutCache'
+import { parseFrequency } from '../lib/settings'
 import { computeTrainingStory, isStoryViewed, markStoryViewed } from '../lib/trainingStory'
 import { getMonthName } from '../lib/trainingStoryShare'
 import { buildStoryShareText } from '../lib/trainingStoryShare'
@@ -73,7 +74,7 @@ export default function Dashboard() {
     return { thisWeekCount: thisWeek.length, streak }
   }, [workouts])
 
-  const muscleStatus = useMemo(() => analyzeTraining(workouts.slice(0, 30)), [workouts])
+  const muscleStatus = useMemo(() => analyzeTraining(workouts.slice(0, 30), settings.trainingGoal || 'hypertrophy'), [workouts, settings.trainingGoal])
 
   const [block, setBlock] = useState<import('../types').TrainingBlock | null>(getCurrentBlock())
   useEffect(() => {
@@ -114,7 +115,7 @@ export default function Dashboard() {
 
   const storyData = useMemo(() => {
     if (workouts.length < 3) return null
-    const data = computeTrainingStory(workouts, storyContext.prevMonth, storyContext.prevYear, parseInt(settings.frequency) || 4)
+    const data = computeTrainingStory(workouts, storyContext.prevMonth, storyContext.prevYear, parseFrequency(settings.frequency))
     if (!data.hasEnoughData) return null
     return data
   }, [workouts, storyContext.prevMonth, storyContext.prevYear, settings.frequency])
@@ -162,6 +163,7 @@ export default function Dashboard() {
     setIsGenerating(true)
     try {
       const result = await generateFullWorkout(workouts, user?.id ?? null)
+      if (!result) return
       const pending = result.exercises.map((ex: AIExercise) => ({
         name: ex.name,
         muscle_group: ex.muscle_group,

@@ -4,6 +4,7 @@ import { getExerciseSubstituteLocal } from './exerciseSubstitutes'
 import { getVolumeCeiling } from './training-analysis'
 import { generateLocalWorkout } from './localWorkoutGenerator'
 import { logWarn } from './logger'
+import { detectFatigue } from './fatigueDetector'
 import { loadInjuries, filterWorkoutForInjuries } from './injuryRecovery'
 import type {
   MuscleStatusMap, MuscleGroup, ExperienceLevel, AIWorkoutResponse,
@@ -45,6 +46,8 @@ interface WorkoutGenerationInput {
   preferences: WorkoutGenerationPreferences
   userId?: string | null
   signal?: AbortSignal | null
+  /** Raw workouts for fatigue detection (optional, enables fatigue-aware prompts) */
+  workouts?: import('../types').Workout[]
 }
 
 /**
@@ -122,6 +125,7 @@ export async function generateScientificWorkout({
   preferences,
   userId = null,
   signal = null,
+  workouts,
 }: WorkoutGenerationInput): Promise<AIWorkoutResponse> {
   // --- Cache check ---
   const cacheKeyVal = workoutCacheKey({
@@ -228,7 +232,15 @@ export async function generateScientificWorkout({
       ).join('\n')}`
     : ''
 
-  const prompt = `Athlete: ${preferences.gender || '?'}/${bw}/${level}, goal:${preferences.goal || 'hypertrophy'}, equip:${equipment}, freq:${preferences.frequency || '4x'}/wk, energy:${preferences.energy || 'medium'}, time:${preferences.time || 60}min${focusNote}${priorityNote}${mainLiftNote}${trainingGoalNote}${goalRepNote}${genderNote ? `\nGender note: ${preferences.gender} — adjust volume/recovery accordingly` : ''}${injuryNote}
+  // Fatigue detection: if enough workout history is available, check for fatigue signals
+  const fatigue = workouts && workouts.length >= 4
+    ? detectFatigue(workouts, 3, parseInt(preferences.frequency || '') || 4)
+    : null
+  const fatigueNote = fatigue?.fatigued
+    ? '\nFATIGUE ALERT: User shows fatigue signals. Reduce total volume by 20% and lower RPE targets by 1.'
+    : ''
+
+  const prompt = `Athlete: ${preferences.gender || '?'}/${bw}/${level}, goal:${preferences.goal || 'hypertrophy'}, equip:${equipment}, freq:${preferences.frequency || '4x'}/wk, energy:${preferences.energy || 'medium'}, time:${preferences.time || 60}min${focusNote}${priorityNote}${mainLiftNote}${trainingGoalNote}${goalRepNote}${genderNote ? `\nGender note: ${preferences.gender} — adjust volume/recovery accordingly` : ''}${injuryNote}${fatigueNote}
 ${periodizationNote}
 ${weightGuidance}
 
@@ -279,7 +291,14 @@ Return JSON:{"split":"","reasoning":"2-3 sentences","exercises":[{"name":"","mus
 
     // Post-process: fix any 0kg weights using bodyweight estimates
     const bwKg = parseFloat(preferences.bodyweight || '') || 80
-    const levelMult = preferences.experienceLevel === 'beginner' ? 0.5 : preferences.experienceLevel === 'advanced' ? 1.2 : 0.8
+    const LEVEL_MULTIPLIERS: Record<string, number> = {
+      complete_beginner: 0.45,
+      beginner: 0.6,
+      returning: 0.6,
+      intermediate: 1.0,
+      advanced: 1.3,
+    }
+    const levelMult = LEVEL_MULTIPLIERS[preferences.experienceLevel || 'intermediate'] ?? 1.0
     const fallbacks: Record<string, number> = {
       chest: Math.round(bwKg * levelMult * 0.6 / 2.5) * 2.5,
       back: Math.round(bwKg * levelMult * 0.7 / 2.5) * 2.5,
@@ -353,6 +372,10 @@ Return JSON:{"split":"","reasoning":"2-3 sentences","exercises":[{"name":"","mus
         targetRPE: preferences.targetRPE ?? null,
         targetRepRange: preferences.targetRepRange ?? null,
         focusedMuscles: preferences.focusedMuscles || [],
+        gender: preferences.gender,
+        benchMax: preferences.benchMax,
+        squatMax: preferences.squatMax,
+        deadliftMax: preferences.deadliftMax,
       },
     })
     result.reasoning = (result.reasoning || '') + ' (Lokaal gegenereerd)'

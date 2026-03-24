@@ -7,7 +7,7 @@ import {
   PHASES, loadBlock, startBlock, clearBlock,
   getCurrentWeekTarget, getBlockProgress
 } from '../lib/periodization'
-import { getSettings } from '../lib/settings'
+import { getSettings, parseFrequency } from '../lib/settings'
 import { useAuthContext } from '../App'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { detectFatigue } from '../lib/fatigueDetector'
@@ -42,7 +42,7 @@ export default function Plan() {
   const [confirmClear, setConfirmClear] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(false)
 
-  const targetFrequency = parseInt(settings.frequency) || 4
+  const targetFrequency = parseFrequency(settings.frequency)
   const fatigue = workouts.length >= 4 ? detectFatigue(workouts, 3, targetFrequency) : null
 
   useEffect(() => {

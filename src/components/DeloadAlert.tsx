@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, TrendingDown, Activity, Calendar, X, ChevronRight } from 'lucide-react'
 import { detectFatigue } from '../lib/fatigueDetector'
+import { parseFrequency } from '../lib/settings'
 import type { DeloadAlertProps, FatigueSignal } from '../types'
 
 const DISMISS_DAYS = 7
@@ -28,7 +29,7 @@ export default function DeloadAlert({ workouts, settings, updateSettings }: Delo
 
   const fatigue = useMemo(() => {
     if (!workouts || workouts.length < 4) return null
-    const targetFrequency = parseInt(settings?.frequency ?? '4') || 4
+    const targetFrequency = parseFrequency(settings?.frequency)
     return detectFatigue(workouts, 3, targetFrequency)
   }, [workouts, settings?.frequency])
 

@@ -9,6 +9,7 @@
  */
 
 import type { UserSettings, AIWorkoutResponse, AIExercise, MuscleGroup } from '../types'
+import { loadInjuries, filterWorkoutForInjuries } from './injuryRecovery'
 
 // --- Exercise templates for first workout ---
 
@@ -91,7 +92,7 @@ function estimateBeginnerWeight(exercise: FirstWorkoutExercise, bodyweightKg: nu
 export function generateFirstWorkout(settings: UserSettings): AIWorkoutResponse {
   const equipment = settings.equipment || 'full_gym'
   const availableEquipment = EQUIPMENT_AVAILABLE[equipment] || EQUIPMENT_AVAILABLE['full_gym']!
-  const bwKg = parseFloat(settings.bodyweight || '') || 70
+  const bwKg = parseFloat(settings.bodyweight || '') || 80
 
   const exercises: AIExercise[] = []
   const usedNames = new Set<string>()
@@ -145,12 +146,38 @@ export function generateFirstWorkout(settings: UserSettings): AIWorkoutResponse 
     : 1
   const estimatedDuration = Math.round(totalSets * (1.5 + avgRestMin))
 
+  // Filter exercises for active injuries before returning
+  const activeInjuries = loadInjuries().filter(i => i.status !== 'resolved')
+  let finalExercises: AIExercise[] = exercises
+  if (activeInjuries.length > 0) {
+    const filtered = filterWorkoutForInjuries(
+      exercises as unknown as Array<{ name: string; muscle_group: string; [key: string]: unknown }>,
+      activeInjuries,
+    )
+    finalExercises = filtered.map(fe => {
+      const existing = exercises.find(e => e.name === fe.name)
+      if (existing) return existing
+      return {
+        name: fe.name,
+        muscle_group: fe.muscle_group as MuscleGroup,
+        sets: fe.isRehab ? 2 : 2,
+        reps_min: fe.isRehab ? 12 : 8,
+        reps_max: fe.isRehab ? 15 : 12,
+        weight_kg: 0,
+        rpe_target: fe.isRehab ? 5 : 6.5,
+        rest_seconds: fe.isRehab ? 60 : 90,
+        notes: fe.isRehab ? 'Rehab exercise' : `Alternative for ${fe.originalExercise || 'excluded exercise'}`,
+        vs_last_session: 'new' as const,
+      }
+    })
+  }
+
   return {
     split: 'Full Body',
     reasoning: 'Je eerste training! Een Full Body workout is ideaal om te starten. Alle grote spiergroepen komen aan bod met veilige, effectieve oefeningen. Focus op techniek, niet op gewicht.',
-    exercises,
+    exercises: finalExercises,
     estimated_duration_min: estimatedDuration,
-    volume_notes: `Eerste training: ${exercises.length} oefeningen, ${totalSets} sets totaal. Conservatieve opbouw.`,
+    volume_notes: `Eerste training: ${finalExercises.length} oefeningen, ${totalSets} sets totaal. Conservatieve opbouw.`,
   }
 }
 

@@ -1111,9 +1111,11 @@ describe('Marcus 6-Month Simulation', () => {
       )
 
       if (bench) {
-        // Advanced bench for 90kg male: BW * 0.8 * 1.3 = 93.6kg
-        // This is an estimate for someone without history
-        expect(bench.weight_kg).toBeGreaterThanOrEqual(50)
+        // Advanced bench for 90kg male: BW * bwMultiplier * 1.3
+        // Different bench variants have different bwMultipliers (0.35-0.8)
+        // Dumbbell Bench Press (0.35): 90 * 0.35 * 1.3 = 40.95 -> 40
+        // Barbell Bench Press (0.8): 90 * 0.8 * 1.3 = 93.6 -> 92.5
+        expect(bench.weight_kg).toBeGreaterThanOrEqual(30)
         expect(bench.weight_kg).toBeLessThanOrEqual(200)
         // Should be rounded to 2.5
         expect(bench.weight_kg % 2.5).toBe(0)

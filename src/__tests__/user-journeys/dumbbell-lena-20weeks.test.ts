@@ -35,6 +35,7 @@ import {
   SET_TARGETS_BY_GOAL, MUSCLE_GROUPS,
 } from '../../lib/training-analysis'
 import { detectFatigue } from '../../lib/fatigueDetector'
+import { parseFrequency } from '../../lib/settings'
 import { detectPlateaus } from '../../lib/plateauDetector'
 import {
   generateWarmupSets, isCompound as warmupIsCompound, BAR_WEIGHT,
@@ -375,7 +376,7 @@ describe('Exercise Pool Audit: Dumbbell coverage', () => {
 
     // Pool has: Tricep Pushdown (cable), Skull Crusher (barbell),
     // Overhead Tricep Extension (cable), Close Grip Bench (barbell),
-    // Diamond Push-up (bodyweight)
+    // Diamond Push-Up (bodyweight)
     // ISSUE: No dumbbell tricep exercises at all!
     // Missing: DB Overhead Tricep Extension, DB Kickback, DB Skull Crusher
     const dbOnly = pool.filter(e => e.equipment === 'dumbbell')
@@ -747,7 +748,7 @@ describe('Week 5-12: Progressive overload with dumbbells', () => {
 
   it('BUG-CHECK: no false fatigue at 3x/week', () => {
     const midWorkouts = sim.allWorkouts.slice(0, 36) // up to week 12
-    const fatigue = detectFatigue(midWorkouts, 3, Number(LENA.frequency))
+    const fatigue = detectFatigue(midWorkouts, 3, parseFrequency(LENA.frequency))
     expect(fatigue.fatigued).toBe(false)
   })
 
@@ -1523,7 +1524,7 @@ describe('SUMMARY: Identified issues for dumbbell-only users', () => {
         id: 'DB-003',
         severity: 'MEDIUM',
         title: 'No dumbbell tricep exercises in pool',
-        description: 'All tricep exercises are cable/barbell. Only Diamond Push-up (bodyweight) available for dumbbell users. Missing: DB Overhead Tricep Extension, DB Kickback.',
+        description: 'All tricep exercises are cable/barbell. Only Diamond Push-Up (bodyweight) available for dumbbell users. Missing: DB Overhead Tricep Extension, DB Kickback.',
       },
       {
         id: 'DB-004',

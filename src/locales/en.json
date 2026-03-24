@@ -1149,5 +1149,8 @@
     "foot_towel_scrunch_desc": "Pull towel towards you with toes",
     "foot_calf_stretch_desc": "Lean against wall, back leg straight",
     "foot_marble_pickup_desc": "Pick up marbles or small objects with toes"
+  },
+  "split": {
+    "rest_suggestion": "Consider a rest day — all muscle groups show fatigue."
   }
 }
