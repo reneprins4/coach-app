@@ -19,6 +19,7 @@ export interface FocusModeProps {
   beginnerMode?: boolean
   workoutNotes: string
   onUpdateNotes: (notes: string) => void
+  onAddExercise?: () => void
 }
 
 // Slide transition settings
@@ -50,6 +51,7 @@ export default function FocusMode({
   beginnerMode,
   workoutNotes,
   onUpdateNotes,
+  onAddExercise,
 }: FocusModeProps) {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -149,7 +151,23 @@ export default function FocusMode({
   }
 
   const currentExercise = exercises[currentIndex]
-  if (!currentExercise || exercises.length === 0) return null
+
+  // Empty state — no exercises yet
+  if (!currentExercise || exercises.length === 0) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.04] mb-4">
+          <ChevronUp size={28} className="text-[var(--text-3)]" />
+        </div>
+        <p className="text-sm text-[var(--text-2)] mb-6">{t('logger.add_exercise_hint')}</p>
+        {onAddExercise && (
+          <button onClick={onAddExercise} className="btn-primary max-w-xs">
+            {t('logger.add_exercise')}
+          </button>
+        )}
+      </div>
+    )
+  }
 
   // Variants for AnimatePresence with custom direction
   const variants = {
@@ -369,6 +387,18 @@ export default function FocusMode({
                     </button>
                   )
                 })}
+
+                {/* Add exercise button */}
+                {onAddExercise && (
+                  <div className="pt-3">
+                    <button
+                      onClick={() => { setShowOverview(false); onAddExercise() }}
+                      className="btn-secondary w-full"
+                    >
+                      {t('logger.add_exercise')}
+                    </button>
+                  </div>
+                )}
 
                 {/* Notes section inside overview */}
                 <div className="pt-3 pb-4">

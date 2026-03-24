@@ -725,6 +725,7 @@ export default function Logger() {
             beginnerMode={beginnerModeActive}
             workoutNotes={workout.notes}
             onUpdateNotes={(notes: string) => aw.updateNotes(notes)}
+            onAddExercise={() => setShowPicker(true)}
           />
         </div>
       ) : (
