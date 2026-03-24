@@ -99,8 +99,15 @@ export function getCurrentBlock(_userId?: string): TrainingBlock | null {
 
 // Laad trainingsblok van Supabase, val terug op localStorage.
 // Compares lastModified timestamps to resolve multi-device conflicts (DATA-002).
+// Safety: only syncs local → cloud when the local data belongs to the current user session.
 export async function loadBlock(userId: string | null): Promise<TrainingBlock | null> {
   if (userId) {
+    // Guard: verify the local block belongs to this user session.
+    // If a different user just logged in, handleUserSwitch() already cleared BLOCK_KEY,
+    // but we double-check here to prevent any race condition from pushing stale data.
+    const currentUser = localStorage.getItem('coach-current-user')
+    const localBelongsToCurrentUser = currentUser === userId
+
     try {
       const { data } = await supabase
         .from('training_blocks')
@@ -117,15 +124,15 @@ export async function loadBlock(userId: string | null): Promise<TrainingBlock | 
         const cloudTime = new Date(cloudBlock.lastModified || '1970-01-01').getTime()
         const localTime = new Date(localBlock.lastModified || '1970-01-01').getTime()
 
-        if (localTime > cloudTime) {
-          // localStorage is newer — push it to Supabase
+        if (localTime > cloudTime && localBelongsToCurrentUser) {
+          // localStorage is newer AND belongs to this user — push it to Supabase
           try {
             await supabase
               .from('training_blocks')
               .upsert({ user_id: userId, block: localBlock, updated_at: new Date().toISOString() })
           } catch { /* best-effort sync */ }
         } else {
-          // Supabase is newer or equal — update localStorage
+          // Supabase is newer, equal, or local data is stale — update localStorage
           localStorage.setItem(BLOCK_KEY, JSON.stringify(cloudBlock))
         }
       } else if (cloudBlock) {

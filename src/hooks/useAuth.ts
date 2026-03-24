@@ -20,6 +20,58 @@ interface UseAuthReturn {
   signOut: () => Promise<OtpResult>
 }
 
+/**
+ * localStorage keys that contain user-specific data and MUST be cleared
+ * when switching users or signing out to prevent data leakage.
+ *
+ * Intentionally excluded (device-level, not user-level):
+ *   - coach-lang (language preference)
+ *   - kravex-exercises-cache (shared exercise library)
+ */
+export const USER_LOCAL_STORAGE_KEYS = [
+  'coach-training-block',
+  'coach-app-settings',
+  'coach-active-workout',
+  'coach-workout-backup',
+  'coach-last-used',
+  'coach-pending-workout',
+  'coach-offline-queue',
+  'coach-measurements',
+  'kravex_injuries',
+  'kravex-achievements',
+  'kravex-training-story',
+  'kravex-workout-cache',
+  'kravex-pr-goals',
+  'ragnarok_form_analysis',
+  'e2e-bypass',
+] as const
+
+const CURRENT_USER_KEY = 'coach-current-user'
+
+/** Remove all user-specific data from localStorage. */
+export function clearUserLocalStorage(): void {
+  for (const key of USER_LOCAL_STORAGE_KEYS) {
+    try { localStorage.removeItem(key) } catch { /* ignore */ }
+  }
+}
+
+/**
+ * Detect whether a different user is logging in and clear stale data
+ * left behind by the previous session.
+ * Returns true when the incoming user differs from the stored user.
+ */
+export function handleUserSwitch(newUserId: string): boolean {
+  const previousUser = localStorage.getItem(CURRENT_USER_KEY)
+  const isDifferentUser = !!previousUser && previousUser !== newUserId
+
+  if (isDifferentUser) {
+    clearUserLocalStorage()
+  }
+
+  localStorage.setItem(CURRENT_USER_KEY, newUserId)
+  return isDifferentUser
+}
+
 export function useAuth(): UseAuthReturn {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,8 +88,16 @@ export function useAuth(): UseAuthReturn {
       setUser(session?.user ?? null)
       setLoading(false)
 
-      // Clear session caches on logout to prevent data leakage
+      // On login: detect user switch and clear stale data
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user?.id) {
+        handleUserSwitch(session.user.id)
+      }
+
+      // On logout: clear ALL user-specific localStorage + sessionStorage
       if (event === 'SIGNED_OUT') {
+        clearUserLocalStorage()
+        try { localStorage.removeItem(CURRENT_USER_KEY) } catch { /* ignore */ }
+
         try {
           for (const key of Object.keys(sessionStorage)) {
             if (key.startsWith('__kravex_')) {

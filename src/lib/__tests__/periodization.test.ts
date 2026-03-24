@@ -267,6 +267,7 @@ describe('periodization', () => {
 
     it('loadBlock prefers localStorage when its lastModified is newer', async () => {
       // localStorage has newer data
+      localStorage.setItem('coach-current-user', 'user-1')
       localStorage.setItem(BLOCK_KEY, JSON.stringify(makeStoredBlock(newTimestamp)))
       // Supabase has older data
       mockSingle.mockResolvedValue({
@@ -281,6 +282,7 @@ describe('periodization', () => {
 
     it('loadBlock syncs newer localStorage data back to Supabase', async () => {
       // localStorage has newer data
+      localStorage.setItem('coach-current-user', 'user-1')
       localStorage.setItem(BLOCK_KEY, JSON.stringify(makeStoredBlock(newTimestamp)))
       // Supabase has older data
       mockSingle.mockResolvedValue({

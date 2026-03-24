@@ -122,15 +122,26 @@ export async function loadSettingsFromCloud(userId: string): Promise<UserSetting
 export async function mergeSettingsOnLogin(userId: string): Promise<UserSettings> {
   if (!userId) return getSettings()
 
+  // Detect user switch: if a different user is logging in, ignore stale local settings
+  const previousUser = localStorage.getItem('coach-current-user')
+  const isNewSession = !!previousUser && previousUser !== userId
+
+  if (isNewSession) {
+    // Clear stale settings from previous user so they don't contaminate this session
+    localStorage.removeItem(SETTINGS_KEY)
+  }
+
   // Load from cloud
   const cloudSettings = await loadSettingsFromCloud(userId)
-  const localSettings = getSettings()
+
+  // For a new session (different user), start from defaults instead of stale local data
+  const localSettings = isNewSession ? { ...DEFAULTS } : getSettings()
 
   if (cloudSettings) {
     // Cloud settings exist - merge with cloud taking precedence
-    // But keep local memberSince if it's older
+    // But keep local memberSince if it's older (only meaningful for same-user re-login)
     const merged: UserSettings = { ...localSettings, ...cloudSettings }
-    if (localSettings.memberSince && cloudSettings.memberSince) {
+    if (!isNewSession && localSettings.memberSince && cloudSettings.memberSince) {
       const localDate = new Date(localSettings.memberSince)
       const cloudDate = new Date(cloudSettings.memberSince)
       merged.memberSince = localDate < cloudDate ? localSettings.memberSince : cloudSettings.memberSince
@@ -145,6 +156,7 @@ export async function mergeSettingsOnLogin(userId: string): Promise<UserSettings
     return merged
   } else {
     // No cloud settings - upload local settings to cloud
+    // For a new session this means uploading defaults (clean slate)
     await syncSettingsToCloud(userId, localSettings)
     return localSettings
   }
