@@ -841,6 +841,10 @@
     "area_hip": "Heup",
     "area_neck": "Nek",
     "area_ankle": "Enkel",
+    "area_upper_back": "Bovenrug",
+    "area_chest": "Borst",
+    "area_groin": "Lies",
+    "area_foot": "Voet",
     "severity_mild": "Licht",
     "severity_mild_desc": "Lichte ongemak, je kunt trainen met aanpassingen",
     "severity_moderate": "Matig",
@@ -1114,6 +1118,20 @@
     "ankle_circles_desc": "Voet optillen, langzame cirkels draaien",
     "ankle_towel_scrunches_desc": "Handdoek met tenen naar je toe trekken",
     "ankle_single_leg_balance_desc": "Op een been staan, ogen open/dicht",
-    "ankle_calf_stretch_desc": "Tegen muur leunen, achterste been gestrekt"
+    "ankle_calf_stretch_desc": "Tegen muur leunen, achterste been gestrekt",
+    "upper_back_band_pull_apart_desc": "Houd band op schouderbreedte, trek uit elkaar",
+    "upper_back_foam_roller_desc": "Lig met bovenrug op foamroller, strek achterover",
+    "upper_back_cat_cow_desc": "Op handen en knieen, rug ronden en hollen",
+    "upper_back_face_pull_light_desc": "Cable op gezichtshoogte, licht gewicht, trek naar gezicht",
+    "chest_doorway_stretch_desc": "Arm tegen deurpost, draai romp weg voor stretch",
+    "chest_light_cable_fly_desc": "Lichte cable fly, focus op gecontroleerde beweging",
+    "chest_band_press_desc": "Druk band naar voren vanuit borsthoogte",
+    "groin_adductor_stretch_desc": "Benen wijd, leun naar een kant voor stretch",
+    "groin_side_lying_raise_desc": "Op zij liggend, onderste been optillen",
+    "groin_copenhagen_plank_desc": "Zijplank met bovenste been op bank, onderste been optillen",
+    "groin_adductor_squeeze_desc": "Bal of kussen tussen knieen knijpen",
+    "foot_towel_scrunch_desc": "Handdoek met tenen naar je toe trekken",
+    "foot_calf_stretch_desc": "Tegen muur leunen, achterste been gestrekt",
+    "foot_marble_pickup_desc": "Knikkers of kleine voorwerpen oppakken met tenen"
   }
 }

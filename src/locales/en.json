@@ -841,6 +841,10 @@
     "area_hip": "Hip",
     "area_neck": "Neck",
     "area_ankle": "Ankle",
+    "area_upper_back": "Upper back",
+    "area_chest": "Chest",
+    "area_groin": "Groin",
+    "area_foot": "Foot",
     "severity_mild": "Mild",
     "severity_mild_desc": "Minor discomfort, you can train with modifications",
     "severity_moderate": "Moderate",
@@ -1114,6 +1118,20 @@
     "ankle_circles_desc": "Lift foot, make slow circles",
     "ankle_towel_scrunches_desc": "Pull towel towards you with toes",
     "ankle_single_leg_balance_desc": "Stand on one leg, eyes open/closed",
-    "ankle_calf_stretch_desc": "Lean against wall, back leg straight"
+    "ankle_calf_stretch_desc": "Lean against wall, back leg straight",
+    "upper_back_band_pull_apart_desc": "Hold band at shoulder width, pull apart",
+    "upper_back_foam_roller_desc": "Lie with upper back on foam roller, extend backwards",
+    "upper_back_cat_cow_desc": "On hands and knees, round and arch back",
+    "upper_back_face_pull_light_desc": "Cable at face height, light weight, pull towards face",
+    "chest_doorway_stretch_desc": "Arm against doorframe, rotate torso away to stretch",
+    "chest_light_cable_fly_desc": "Light cable fly, focus on controlled movement",
+    "chest_band_press_desc": "Press band forward from chest height",
+    "groin_adductor_stretch_desc": "Legs wide, lean to one side for stretch",
+    "groin_side_lying_raise_desc": "Lying on side, raise bottom leg",
+    "groin_copenhagen_plank_desc": "Side plank with top leg on bench, raise bottom leg",
+    "groin_adductor_squeeze_desc": "Squeeze ball or pillow between knees",
+    "foot_towel_scrunch_desc": "Pull towel towards you with toes",
+    "foot_calf_stretch_desc": "Lean against wall, back leg straight",
+    "foot_marble_pickup_desc": "Pick up marbles or small objects with toes"
   }
 }

@@ -9,7 +9,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type InjuryArea = 'shoulder' | 'knee' | 'lower_back' | 'elbow' | 'wrist' | 'hip' | 'neck' | 'ankle'
+export type InjuryArea = 'shoulder' | 'knee' | 'lower_back' | 'elbow' | 'wrist' | 'hip' | 'neck' | 'ankle' | 'upper_back' | 'chest' | 'groin' | 'foot'
 export type InjurySeverity = 'mild' | 'moderate' | 'severe'
 export type InjurySide = 'left' | 'right' | 'both'
 export type InjuryStatus = 'active' | 'recovering' | 'resolved'
@@ -306,6 +306,124 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
       { name: 'Towel Scrunches', description: 'rehab.ankle_towel_scrunches_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_daily' },
       { name: 'Single Leg Balance', description: 'rehab.ankle_single_leg_balance_desc', sets: 3, reps: '30s per been', frequency: 'rehab.frequency_daily' },
       { name: 'Calf Stretch', description: 'rehab.ankle_calf_stretch_desc', sets: 2, reps: '30s per kant', frequency: 'rehab.frequency_daily' },
+    ],
+  },
+
+  upper_back: {
+    nameKey: 'injury.area.upper_back',
+    affectedMuscles: ['back', 'shoulders'],
+    excludedPatterns: [
+      'barbell row', 'bent.?over.*row', 't.?bar row', 'face pull',
+      'shrug', 'upright row',
+    ],
+    severeOnlyExclusions: [
+      'deadlift', 'pull.?up', 'chin.?up', 'lat pulldown',
+      'seated row', 'cable row',
+    ],
+    moderateExclusions: [
+      'deadlift', 'pull.?up', 'chin.?up',
+    ],
+    alternatives: {
+      'Barbell Row': 'Chest Supported Row',
+      'Pendlay Row': 'Chest Supported Row',
+      'Pull-up': 'Lat Pulldown (light)',
+      'Chin-up': 'Lat Pulldown (light)',
+      'Conventional Deadlift': 'Hip Thrust',
+      'Deadlift': 'Hip Thrust',
+    },
+    rehabExercises: [
+      { name: 'Band Pull-Apart', description: 'rehab.upper_back_band_pull_apart_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_daily' },
+      { name: 'Thoracic Extension (foam roller)', description: 'rehab.upper_back_foam_roller_desc', sets: 2, reps: '10-12', frequency: 'rehab.frequency_daily' },
+      { name: 'Cat-Cow Stretch', description: 'rehab.upper_back_cat_cow_desc', sets: 2, reps: '10-12', frequency: 'rehab.frequency_daily' },
+      { name: 'Face Pull (light)', description: 'rehab.upper_back_face_pull_light_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_3x_week' },
+    ],
+  },
+
+  chest: {
+    nameKey: 'injury.area.chest',
+    affectedMuscles: ['chest', 'shoulders', 'triceps'],
+    excludedPatterns: [
+      'bench press', 'chest fly', 'cable fly', 'pec deck',
+      'dip', 'push.?up',
+    ],
+    severeOnlyExclusions: [
+      'incline.*press', 'decline.*press', 'floor press',
+      'overhead press', 'close grip bench', 'cable crossover',
+    ],
+    moderateExclusions: [
+      'incline.*press', 'dip', 'overhead press',
+    ],
+    alternatives: {
+      'Flat Barbell Bench Press': 'Landmine Press',
+      'Incline Barbell Bench Press': 'Landmine Press',
+      'Bench Press': 'Landmine Press',
+      'Chest Fly': 'Cable Row',
+      'Cable Fly': 'Cable Row',
+      'Dip': 'Tricep Pushdown',
+    },
+    rehabExercises: [
+      { name: 'Doorway Pec Stretch', description: 'rehab.chest_doorway_stretch_desc', sets: 2, reps: '30s hold per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Light Cable Fly', description: 'rehab.chest_light_cable_fly_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_3x_week' },
+      { name: 'Band Chest Press', description: 'rehab.chest_band_press_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_3x_week' },
+    ],
+  },
+
+  groin: {
+    nameKey: 'injury.area.groin',
+    affectedMuscles: ['quads', 'hamstrings', 'glutes'],
+    excludedPatterns: [
+      'sumo.*deadlift', 'sumo.*squat', 'adductor',
+      'lateral.*lunge', 'side.*lunge', 'cossack',
+    ],
+    severeOnlyExclusions: [
+      'squat', 'lunge', 'leg press', 'split squat',
+      'bulgarian', 'hip thrust', 'deadlift', 'step.?up',
+    ],
+    moderateExclusions: [
+      'squat', 'lunge', 'leg press',
+    ],
+    alternatives: {
+      'Back Squat': 'Leg Extension',
+      'Front Squat': 'Leg Extension',
+      'Barbell Squat': 'Leg Extension',
+      'Walking Lunges': 'Leg Curl',
+      'Bulgarian Split Squat': 'Leg Curl',
+      'Leg Press': 'Seated Leg Curl',
+    },
+    rehabExercises: [
+      { name: 'Adductor Stretch', description: 'rehab.groin_adductor_stretch_desc', sets: 2, reps: '30s hold per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Side-Lying Adductor Raise', description: 'rehab.groin_side_lying_raise_desc', sets: 3, reps: '12-15 per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Copenhagen Plank', description: 'rehab.groin_copenhagen_plank_desc', sets: 3, reps: '15-20s hold per kant', frequency: 'rehab.frequency_3x_week' },
+      { name: 'Light Adductor Squeeze', description: 'rehab.groin_adductor_squeeze_desc', sets: 3, reps: '10-12', frequency: 'rehab.frequency_daily' },
+    ],
+  },
+
+  foot: {
+    nameKey: 'injury.area.foot',
+    affectedMuscles: ['quads', 'glutes'],
+    excludedPatterns: [
+      'calf raise', 'jump', 'box jump', 'jump squat',
+      'skipping',
+    ],
+    severeOnlyExclusions: [
+      'squat', 'deadlift', 'lunge', 'leg press',
+      'walking.*lunge', 'farmer.*walk', 'step.?up',
+    ],
+    moderateExclusions: [
+      'squat', 'lunge', 'standing.*calf raise',
+    ],
+    alternatives: {
+      'Back Squat': 'Leg Extension',
+      'Front Squat': 'Leg Extension',
+      'Barbell Squat': 'Leg Extension',
+      'Standing Calf Raise': 'Seated Calf Raise',
+      'Walking Lunges': 'Leg Curl',
+      'Lunge': 'Leg Curl',
+    },
+    rehabExercises: [
+      { name: 'Towel Scrunch', description: 'rehab.foot_towel_scrunch_desc', sets: 3, reps: '15-20', frequency: 'rehab.frequency_daily' },
+      { name: 'Calf Stretch', description: 'rehab.foot_calf_stretch_desc', sets: 2, reps: '30s per kant', frequency: 'rehab.frequency_daily' },
+      { name: 'Marble Pickup', description: 'rehab.foot_marble_pickup_desc', sets: 2, reps: '10-15', frequency: 'rehab.frequency_daily' },
     ],
   },
 }

@@ -364,6 +364,10 @@ const INJURY_MUSCLE_PENALTIES: Record<InjuryArea, MuscleGroup[]> = {
   hip:        ['quads', 'hamstrings', 'glutes'],
   neck:       [],  // small general penalty handled separately
   ankle:      ['quads', 'glutes'],
+  upper_back: ['back', 'shoulders'],
+  chest:      ['chest', 'shoulders', 'triceps'],
+  groin:      ['quads', 'hamstrings', 'glutes'],
+  foot:       ['quads', 'glutes'],
 }
 
 const INJURY_SEVERITY_PENALTY: Record<InjurySeverity, number> = {

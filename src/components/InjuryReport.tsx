@@ -12,6 +12,7 @@ interface InjuryReportProps {
 
 const BODY_AREAS: InjuryArea[] = [
   'shoulder', 'knee', 'lower_back', 'elbow', 'wrist', 'hip', 'neck', 'ankle',
+  'upper_back', 'chest', 'groin', 'foot',
 ]
 
 const SEVERITIES: { key: InjurySeverity; color: string; glow: string }[] = [

@@ -45,12 +45,13 @@ describe('Injury Recovery System', () => {
   })
 
   describe('INJURY_AREAS config', () => {
-    it('contains 8 body areas', () => {
+    it('contains 12 body areas', () => {
       const areas = Object.keys(INJURY_AREAS)
-      expect(areas).toHaveLength(8)
+      expect(areas).toHaveLength(12)
       expect(areas).toEqual(
         expect.arrayContaining([
           'shoulder', 'knee', 'lower_back', 'elbow', 'wrist', 'hip', 'neck', 'ankle',
+          'upper_back', 'chest', 'groin', 'foot',
         ]),
       )
     })
