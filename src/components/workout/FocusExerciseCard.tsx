@@ -251,6 +251,12 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
               >
                 {t('logger.swap_exercise')}
               </button>
+              <button
+                onClick={() => { onRemove(); setShowMenu(false) }}
+                className="block w-full px-4 py-3 text-left text-sm font-medium text-gray-400 active:bg-white/[0.04]"
+              >
+                {t('common.skip')}
+              </button>
               <div className="mx-4 border-t border-white/[0.04]" />
               <button
                 onClick={() => { onRemove(); setShowMenu(false) }}
@@ -422,14 +428,21 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
         </div>
       )}
 
-      {/* -- PRIMARY INPUT ZONE (centered, thumb-friendly) -- */}
-      <div className={`flex-1 flex flex-col justify-center px-1 ${isDone ? 'opacity-40' : ''}`}>
+      {/* -- PRIMARY INPUT ZONE (thumb-friendly) -- */}
+      <div className={`flex flex-col px-1 ${isDone ? 'opacity-40' : ''}`}>
         {/* Weight + Reps side by side */}
         <div className="grid grid-cols-2 gap-3 mb-3">
           {/* Weight */}
           <div>
             <div className="mb-1.5 flex h-5 items-center justify-between">
               <span className="label-caps">{t('logger.weight')} <span className="text-[var(--text-3)] ml-1">{unitLabel}</span></span>
+              <button
+                type="button"
+                onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
+                className="text-[10px] font-semibold text-cyan-500/70 active:text-cyan-400"
+              >
+                {t('logger.plates')}
+              </button>
             </div>
             <div className="flex items-center rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
               <button
@@ -570,32 +583,6 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
         </button>
       </div>
 
-      {/* -- Bottom options row -- */}
-      <div className="flex items-center justify-center gap-4 mt-3 pt-2 border-t border-white/[0.04] shrink-0">
-        <button
-          type="button"
-          onClick={() => onOpenPlateCalc(parseFloat(weight) || 0)}
-          className="text-xs font-medium text-gray-600 active:text-gray-400"
-        >
-          {t('logger.plates')}
-        </button>
-        <span className="text-gray-800">|</span>
-        <button
-          type="button"
-          onClick={() => { setShowGuide(true) }}
-          className="text-xs font-medium text-gray-600 active:text-gray-400"
-        >
-          {t('logger.technique')}
-        </button>
-        <span className="text-gray-800">|</span>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="text-xs font-medium text-gray-600 active:text-gray-400"
-        >
-          {t('common.skip')}
-        </button>
-      </div>
     </div>
   )
 })

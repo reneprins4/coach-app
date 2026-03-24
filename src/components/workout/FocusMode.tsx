@@ -335,7 +335,7 @@ export default function FocusMode({
               </div>
 
               {/* Exercise list */}
-              <div className="flex-1 overflow-y-auto px-5 pb-safe space-y-1.5">
+              <div className="flex-1 overflow-y-auto px-5 space-y-1.5" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 1rem))' }}>
                 {exercises.map((exercise, i) => {
                   const done = isExerciseDone(exercise)
                   const isCurrent = i === currentIndex

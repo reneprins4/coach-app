@@ -53,7 +53,7 @@ export default function ExercisePicker({ exercises, addedNames = [], onSelect, o
             placeholder={t('exercise_picker.search_placeholder')}
             aria-label={t('exercise_picker.search_placeholder')}
             autoFocus
-            className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-white placeholder-gray-500 outline-none border border-gray-800 focus:border-gray-600"
+            className="h-12 w-full rounded-xl bg-gray-900 pl-10 pr-4 text-base text-white placeholder-gray-500 outline-none border border-gray-800 focus:border-white/[0.12] focus:shadow-none"
           />
         </div>
       </div>
