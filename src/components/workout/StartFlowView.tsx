@@ -17,6 +17,7 @@ interface StartFlowViewProps {
   state: StartFlowState
   user: { id: string } | null | undefined
   formattedDate: string
+  block?: import('../../types').TrainingBlock | null
   lastWorkout: LastWorkoutPreview | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   templates: { templates: any[]; loadTemplate: (t: any) => any[]; deleteTemplate: (id: string) => Promise<void>; saveTemplate: (...args: any[]) => Promise<any> }
@@ -44,7 +45,7 @@ export default function StartFlowView({
   state, user, formattedDate, lastWorkout, templates, showTemplates, toast,
   onStartEmpty, onStartAIWorkout, onRepeatLastWorkout, onLoadTemplate, onDeleteTemplate,
   onSetShowTemplates, onSetToast, onTimeChange, onGenerateForSplit, onToggleSplitPicker, onEnergyChange, onFocusedMusclesChange, onShowReview,
-  workoutCount, onStartFirstWorkout,
+  workoutCount, onStartFirstWorkout, block: blockProp,
 }: StartFlowViewProps) {
   const { t } = useTranslation()
   const [moreOptionsOpen, setMoreOptionsOpen] = useState(false)
@@ -57,7 +58,8 @@ export default function StartFlowView({
     [showFirstWorkout, settings],
   )
 
-  const block = getCurrentBlock()
+  // Use async-loaded block from parent (falls back to sync localStorage)
+  const block = blockProp ?? getCurrentBlock()
   const phase = block ? PHASES[block.phase as PeriodizationPhase] : null
 
   const {

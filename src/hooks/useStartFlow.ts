@@ -13,7 +13,7 @@ import { fetchRecentHistory } from './useWorkouts'
 import { analyzeTraining, scoreSplits, getRelevantHistory } from '../lib/training-analysis'
 import { generateScientificWorkout } from '../lib/ai'
 import { getSettings, saveSettings } from '../lib/settings'
-import { getCurrentBlock } from '../lib/periodization'
+import { loadBlock } from '../lib/periodization'
 import { buildWorkoutPreferences } from '../lib/workoutPreferences'
 import { getCachedWorkout, cacheWorkout, buildContextHash } from '../lib/workoutCache'
 import { loadInjuries } from '../lib/injuryRecovery'
@@ -324,7 +324,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
           if (import.meta.env.DEV) console.log('[useStartFlow] Cache HIT')
           result = cachedResult
         } else {
-          const block = getCurrentBlock()
+          const block = await loadBlock(userId ?? null)
           const recentHistory = getRelevantHistory(history, recommendedSplit)
           const preferences = buildWorkoutPreferences(settings, block, { time: currentTime, energy: state.energy, focusedMuscles: state.focusedMuscles })
 
@@ -429,7 +429,7 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         if (import.meta.env.DEV) console.log('[useStartFlow] Cache HIT for split:', splitName)
         result = cachedResult
       } else {
-        const block = getCurrentBlock()
+        const block = await loadBlock(userId ?? null)
         const recentHistory = getRelevantHistory(history, splitName)
         const preferences = buildWorkoutPreferences(settings, block, { time: timeToUse, energy: state.energy, focusedMuscles: state.focusedMuscles })
 

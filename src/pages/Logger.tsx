@@ -263,11 +263,18 @@ export default function Logger() {
     return () => { cancelled = true }
   }, [user?.id, aw.isActive, exerciseNames.join(',')])
 
+  const [loggerBlock, setLoggerBlock] = useState<import('../types').TrainingBlock | null>(getCurrentBlock())
+  useEffect(() => {
+    let cancelled = false
+    import('../lib/periodization').then(({ loadBlock: lb }) => {
+      lb(user?.id ?? null).then(b => { if (!cancelled) setLoggerBlock(b) })
+    })
+    return () => { cancelled = true }
+  }, [user?.id])
   const isDeload = useMemo(() => {
-    const block = getCurrentBlock()
-    const weekTarget = getCurrentWeekTarget(block)
+    const weekTarget = getCurrentWeekTarget(loggerBlock)
     return weekTarget?.isDeload ?? false
-  }, [])
+  }, [loggerBlock])
   const momentum = useMemo(() => aw.workout ? calculateMomentum(aw.workout, { isDeload }) : null, [aw.workout, isDeload])
 
   // Enrich workout exercises with image URLs from exercise library
@@ -535,6 +542,7 @@ export default function Logger() {
           state={startFlow.state}
           user={user}
           formattedDate={formattedDate}
+          block={loggerBlock}
           lastWorkout={lastWorkout}
           templates={templates}
           showTemplates={showTemplates}

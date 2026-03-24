@@ -130,7 +130,7 @@ export function invalidateWorkoutCache(): void {
  *
  * Returns null if fewer than 3 workouts (insufficient data).
  */
-export function generateWorkoutPreview(workouts: Workout[]): WorkoutPreview | null {
+export function generateWorkoutPreview(workouts: Workout[], blockOverride?: import('../types').TrainingBlock | null): WorkoutPreview | null {
   if (workouts.length < 3) return null
 
   const settings = getSettings()
@@ -156,7 +156,7 @@ export function generateWorkoutPreview(workouts: Workout[]): WorkoutPreview | nu
   const bestSplit = splits[0]
   if (!bestSplit) return null
 
-  const block = getCurrentBlock()
+  const block = blockOverride !== undefined ? blockOverride : getCurrentBlock()
   const preferences = buildWorkoutPreferences(settings, block)
 
   // Build muscle context: relevant muscles for the split, sorted by recovery
