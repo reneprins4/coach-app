@@ -372,8 +372,8 @@ export default function FinishModal({ result, onClose, onSaveTemplate }: FinishM
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Radial gradient glow overlay */}
-      <div className="absolute inset-0 bg-gray-950/90 backdrop-blur-sm" />
+      {/* Solid background — must be fully opaque to cover the nav bar beneath */}
+      <div className="absolute inset-0 bg-[var(--bg-base)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(6,182,212,0.12)_0%,transparent_70%)]" />
 
       <div className="relative min-h-full px-4 py-8">
