@@ -1,11 +1,17 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { ActiveWorkout, ActiveExercise, ActiveWorkoutSet } from '../types'
 import { supabase } from '../lib/supabase'
 import { trimWorkout } from '../lib/workoutTrimmer'
 import { invalidateWorkoutCache } from '../lib/workoutCache'
 
 const STORAGE_KEY = 'coach-active-workout'
+const BACKUP_KEY = 'coach-workout-backup'
 const LAST_USED_KEY = 'coach-last-used'
+
+const STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000   // 2 hours
+const ABANDONED_THRESHOLD_MS = 6 * 60 * 60 * 1000 // 6 hours
+const BACKUP_MAX_AGE_MS = 12 * 60 * 60 * 1000     // 12 hours
+const BACKUP_INTERVAL_MS = 30 * 1000               // 30 seconds
 
 interface LastUsedData {
   weight_kg: number
@@ -48,6 +54,8 @@ interface FinishedWorkoutResult {
   exercises: ActiveExercise[]
 }
 
+export type StaleStatus = 'fresh' | 'stale' | 'abandoned'
+
 interface UseActiveWorkoutReturn {
   workout: ActiveWorkout | null
   saving: boolean
@@ -55,6 +63,8 @@ interface UseActiveWorkoutReturn {
   elapsed: number
   totalSets: number
   totalVolume: number
+  staleStatus: StaleStatus
+  hasBackup: boolean
   startWorkout: (preloadedExercises?: ActiveExercise[]) => void
   addExercise: (exercise: NewExerciseInput) => void
   removeExercise: (name: string) => void
@@ -65,6 +75,8 @@ interface UseActiveWorkoutReturn {
   updateNotes: (notes: string) => void
   finishWorkout: () => Promise<FinishedWorkoutResult | null>
   discardWorkout: () => void
+  recoverFromBackup: () => void
+  dismissBackup: () => void
   getLastUsed: (name: string) => LastUsedData | null
   isActive: boolean
 }
@@ -94,11 +106,53 @@ function save(key: string, val: unknown): void {
   }
 }
 
+export function getStaleStatus(workout: ActiveWorkout | null): StaleStatus {
+  if (!workout?.lastActivityAt) return 'fresh'
+  const totalSets = workout.exercises.reduce((s, e) => s + e.sets.length, 0)
+  if (totalSets === 0) return 'fresh'
+  const age = Date.now() - new Date(workout.lastActivityAt).getTime()
+  if (age >= ABANDONED_THRESHOLD_MS) return 'abandoned'
+  if (age >= STALE_THRESHOLD_MS) return 'stale'
+  return 'fresh'
+}
+
+export { STALE_THRESHOLD_MS, ABANDONED_THRESHOLD_MS, BACKUP_MAX_AGE_MS }
+
 export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutReturn {
   const [workout, setWorkout] = useState<ActiveWorkout | null>(() => load<ActiveWorkout>(STORAGE_KEY))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [elapsed, setElapsed] = useState(0)
+  const [hasBackup, setHasBackup] = useState(false)
+  const lastBackupRef = useRef<string | null>(null)
+
+  // Check for recoverable backup on mount (only when no active workout)
+  useEffect(() => {
+    if (workout) { setHasBackup(false); return }
+    try {
+      const raw = localStorage.getItem(BACKUP_KEY)
+      if (!raw) { setHasBackup(false); return }
+      const backup = JSON.parse(raw) as ActiveWorkout
+      if (!backup?.startedAt) { setHasBackup(false); return }
+      const backupAge = Date.now() - new Date(backup.lastActivityAt || backup.startedAt).getTime()
+      setHasBackup(backupAge < BACKUP_MAX_AGE_MS)
+    } catch { setHasBackup(false) }
+  }, [workout])
+
+  // Periodic backup every 30 seconds
+  useEffect(() => {
+    if (!workout) return
+    const doBackup = (): void => {
+      const serialized = JSON.stringify(workout)
+      if (serialized !== lastBackupRef.current) {
+        save(BACKUP_KEY, workout)
+        lastBackupRef.current = serialized
+      }
+    }
+    doBackup() // immediate backup
+    const id = setInterval(doBackup, BACKUP_INTERVAL_MS)
+    return () => clearInterval(id)
+  }, [workout])
 
   // Persist on change
   useEffect(() => { save(STORAGE_KEY, workout) }, [workout])
@@ -128,9 +182,11 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
     setWorkout(prev => {
       // Guard: don't overwrite an active workout
       if (prev) return prev
+      const now = new Date().toISOString()
       return {
         tempId: crypto.randomUUID(),
-        startedAt: new Date().toISOString(),
+        startedAt: now,
+        lastActivityAt: now,
         exercises: preloadedExercises || [],
         notes: '',
       }
@@ -141,12 +197,12 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
   const addExercise = useCallback((exercise: NewExerciseInput): void => {
     setWorkout(prev => {
       if (!prev || prev.exercises.some(e => e.name === exercise.name)) return prev
-      return { ...prev, exercises: [...prev.exercises, { ...exercise, sets: [] }] }
+      return { ...prev, lastActivityAt: new Date().toISOString(), exercises: [...prev.exercises, { ...exercise, sets: [] }] }
     })
   }, [])
 
   const removeExercise = useCallback((name: string): void => {
-    setWorkout(prev => prev ? { ...prev, exercises: prev.exercises.filter(e => e.name !== name) } : prev)
+    setWorkout(prev => prev ? { ...prev, lastActivityAt: new Date().toISOString(), exercises: prev.exercises.filter(e => e.name !== name) } : prev)
   }, [])
 
   const replaceExercise = useCallback((oldName: string, newExercise: NewExerciseInput): void => {
@@ -169,8 +225,10 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
 
     setWorkout(prev => {
       if (!prev) return prev
+      const now = new Date().toISOString()
       return {
         ...prev,
+        lastActivityAt: now,
         exercises: prev.exercises.map(e => {
           if (e.name !== exerciseName) return e
           const newSet: ActiveWorkoutSet = {
@@ -178,7 +236,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
             weight_kg: setData.weight_kg,
             reps: setData.reps,
             rpe: setData.rpe || null,
-            created_at: new Date().toISOString(),
+            created_at: now,
           }
           return {
             ...e,
@@ -194,6 +252,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
       if (!prev) return prev
       return {
         ...prev,
+        lastActivityAt: new Date().toISOString(),
         exercises: prev.exercises.map(e => {
           if (e.name !== exerciseName) return e
           return { ...e, sets: e.sets.filter(s => s.id !== setId) }
@@ -212,7 +271,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
   }, [])
 
   const updateNotes = useCallback((notes: string): void => {
-    setWorkout(prev => prev ? { ...prev, notes } : prev)
+    setWorkout(prev => prev ? { ...prev, notes, lastActivityAt: new Date().toISOString() } : prev)
   }, [])
 
   const finishWorkout = useCallback(async (): Promise<FinishedWorkoutResult | null> => {
@@ -264,6 +323,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
         exercises: workout.exercises, // Include for template saving
       }
       setWorkout(null)
+      try { localStorage.removeItem(BACKUP_KEY) } catch { /* ignore */ }
       invalidateWorkoutCache() // New workout logged → recovery changed → regenerate
       return result
     } catch (err: unknown) {
@@ -291,7 +351,26 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
     }
   }, [workout, elapsed, userId])
 
-  const discardWorkout = useCallback((): void => { setWorkout(null) }, [])
+  const discardWorkout = useCallback((): void => {
+    setWorkout(null)
+    try { localStorage.removeItem(BACKUP_KEY) } catch { /* ignore */ }
+  }, [])
+
+  const recoverFromBackup = useCallback((): void => {
+    try {
+      const raw = localStorage.getItem(BACKUP_KEY)
+      if (!raw) return
+      const backup = JSON.parse(raw) as ActiveWorkout
+      if (backup?.startedAt) {
+        setWorkout(backup)
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  const dismissBackup = useCallback((): void => {
+    try { localStorage.removeItem(BACKUP_KEY) } catch { /* ignore */ }
+    setHasBackup(false)
+  }, [])
 
   const getLastUsed = useCallback((name: string): LastUsedData | null => {
     const store = load<LastUsedStore>(LAST_USED_KEY) || {}
@@ -303,10 +382,14 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
     ? workout.exercises.reduce((s, e) => s + e.sets.reduce((ss, set) => ss + (set.weight_kg || 0) * (set.reps || 0), 0), 0)
     : 0
 
+  const staleStatus = getStaleStatus(workout)
+
   return {
     workout, saving, error, elapsed, totalSets, totalVolume,
+    staleStatus, hasBackup,
     startWorkout, addExercise, removeExercise, replaceExercise, addSet, removeSet,
-    trimExercises, updateNotes, finishWorkout, discardWorkout, getLastUsed,
+    trimExercises, updateNotes, finishWorkout, discardWorkout,
+    recoverFromBackup, dismissBackup, getLastUsed,
     isActive: !!workout,
   }
 }

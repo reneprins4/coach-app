@@ -289,6 +289,7 @@ export interface ExercisePlan {
 export interface ActiveWorkout {
   tempId: string
   startedAt: string
+  lastActivityAt?: string
   exercises: ActiveExercise[]
   notes: string
 }

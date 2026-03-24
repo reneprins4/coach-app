@@ -25,17 +25,18 @@ export default function ResumeWorkoutBanner() {
     }
   }, [])
 
-  // Update elapsed time
+  // Update elapsed time based on lastActivityAt or startedAt
   useEffect(() => {
     if (!workout?.startedAt) return
     const tick = () => {
-      const elapsed = Math.floor((Date.now() - new Date(workout.startedAt).getTime()) / 60000)
+      const refTime = workout.lastActivityAt || workout.startedAt
+      const elapsed = Math.floor((Date.now() - new Date(refTime).getTime()) / 60000)
       setElapsedMin(elapsed)
     }
     tick()
     const id = setInterval(tick, 60000)
     return () => clearInterval(id)
-  }, [workout?.startedAt])
+  }, [workout?.startedAt, workout?.lastActivityAt])
 
   if (!workout) return null
 
@@ -65,8 +66,11 @@ export default function ResumeWorkoutBanner() {
             <p className="text-sm font-black tracking-tight text-white">
               {t('resume_banner.title')}
             </p>
-            <p className="mt-0.5 text-xs text-cyan-300">
-              {elapsedMin} min
+            <p className={`mt-0.5 text-xs ${elapsedMin >= 120 ? 'text-amber-400' : 'text-cyan-300'}`}>
+              {elapsedMin >= 120
+                ? t('resume_banner.ago', { time: elapsedMin >= 1440 ? `${Math.floor(elapsedMin / 1440)}d` : `${Math.floor(elapsedMin / 60)}u` })
+                : `${elapsedMin} min`
+              }
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">

@@ -1072,7 +1072,16 @@
     "resume": "Hervat",
     "discard": "Verwijder",
     "confirm_discard": "Weet je het zeker? Je verliest je voortgang.",
-    "elapsed": "{{minutes}} min bezig"
+    "elapsed": "{{minutes}} min bezig",
+    "ago": "{{time}} geleden"
+  },
+  "stale_workout": {
+    "title": "Open training gevonden",
+    "description": "Je hebt een training open staan van {{time}} geleden met {{sets}} sets.",
+    "resume": "Doorgaan",
+    "discard": "Verwijderen",
+    "save_finish": "Opslaan en afsluiten",
+    "discard_confirm": "Weet je zeker dat je deze training wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
   },
   "auth": {
     "session_expired": "Je sessie is verlopen, log opnieuw in"

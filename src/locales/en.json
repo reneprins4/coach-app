@@ -1072,7 +1072,16 @@
     "resume": "Resume",
     "discard": "Discard",
     "confirm_discard": "Are you sure? You will lose your progress.",
-    "elapsed": "{{minutes}} min elapsed"
+    "elapsed": "{{minutes}} min elapsed",
+    "ago": "{{time}} ago"
+  },
+  "stale_workout": {
+    "title": "Open workout found",
+    "description": "You have an open workout from {{time}} ago with {{sets}} sets.",
+    "resume": "Resume",
+    "discard": "Discard",
+    "save_finish": "Save and finish",
+    "discard_confirm": "Are you sure you want to discard this workout? This cannot be undone."
   },
   "auth": {
     "session_expired": "Your session has expired, please log in again"

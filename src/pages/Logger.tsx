@@ -37,6 +37,7 @@ import SwapModal from '../components/workout/SwapModal'
 import WorkoutMenu from '../components/workout/WorkoutMenu'
 import StartFlowView, { formatDateForStartFlow } from '../components/workout/StartFlowView'
 import { WorkoutReview } from '../components/workout/WorkoutReview'
+import StaleWorkoutPrompt from '../components/StaleWorkoutPrompt'
 import { logError } from '../lib/logger'
 import { hapticFeedback } from '../lib/native'
 import type {
@@ -253,6 +254,7 @@ export default function Logger() {
   const [supersetMode, setSupersetMode] = useState<SupersetModeState | null>(null)
   const [junkWarning, setJunkWarning] = useState<JunkVolumeWarning | null>(null)
   const [showReview, setShowReview] = useState(false)
+  const [stalePromptDismissed, setStalePromptDismissed] = useState(false)
   const [exerciseHistoryMap, setExerciseHistoryMap] = useState<Map<string, ExerciseHistorySet[]>>(new Map())
 
   // Batch-fetch exercise histories for all exercises in the active workout
@@ -524,6 +526,12 @@ export default function Logger() {
       />
     )
   }
+
+  // ---- Stale Workout Prompt ----
+  const showStalePrompt = aw.isActive
+    && aw.staleStatus !== 'fresh'
+    && !stalePromptDismissed
+    && aw.totalSets > 0
 
   // ---- Workout Review Screen ----
   if (!aw.isActive && showReview && startFlow.state.aiResponse) {
@@ -847,6 +855,28 @@ export default function Logger() {
           exercises={workout.exercises as unknown as import('../types').SupersetExerciseInput[]}
           onApply={handleApplySupersets as unknown as import('../types').SupersetModalProps['onApply']}
           onClose={() => setShowSupersetModal(false)}
+        />
+      )}
+
+      {showStalePrompt && aw.workout && (
+        <StaleWorkoutPrompt
+          startedAt={new Date(aw.workout.startedAt)}
+          totalSets={aw.totalSets}
+          totalExercises={aw.workout.exercises.length}
+          onResume={() => setStalePromptDismissed(true)}
+          onDiscard={() => {
+            aw.discardWorkout()
+            setStalePromptDismissed(true)
+          }}
+          onSaveAndFinish={async () => {
+            setStalePromptDismissed(true)
+            const result = await aw.finishWorkout()
+            if (result) {
+              hapticFeedback('medium')
+              setFinishResult(result as unknown as FinishModalResult)
+              setShowFinish(true)
+            }
+          }}
         />
       )}
 

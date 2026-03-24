@@ -8,6 +8,7 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [hasActiveWorkout, setHasActiveWorkout] = useState(false)
+  const [workoutAgeMinutes, setWorkoutAgeMinutes] = useState(0)
 
   const tabs = [
     { to: '/',          icon: Home,       label: t('nav.today')   },
@@ -21,6 +22,13 @@ export default function Layout() {
       try {
         const raw = localStorage.getItem('coach-active-workout')
         setHasActiveWorkout(!!raw)
+        if (raw) {
+          const parsed = JSON.parse(raw) as { lastActivityAt?: string; startedAt?: string }
+          const refTime = parsed.lastActivityAt || parsed.startedAt
+          if (refTime) {
+            setWorkoutAgeMinutes(Math.floor((Date.now() - new Date(refTime).getTime()) / 60000))
+          }
+        }
       } catch { setHasActiveWorkout(false) }
     }
     check()
@@ -52,7 +60,12 @@ export default function Layout() {
           >
             <div className="flex items-center gap-3">
               <Timer size={16} className="text-white" aria-hidden="true" />
-              <span className="text-sm font-bold text-white">Training actief</span>
+              <span className={`text-sm font-bold ${workoutAgeMinutes >= 120 ? 'text-amber-200' : 'text-white'}`}>
+                {workoutAgeMinutes >= 120
+                  ? `${t('nav.train')} · ${t('resume_banner.ago', { time: workoutAgeMinutes >= 1440 ? `${Math.floor(workoutAgeMinutes / 1440)}d` : `${Math.floor(workoutAgeMinutes / 60)}u` })}`
+                  : workoutAgeMinutes > 0 ? `${t('nav.train')} · ${workoutAgeMinutes} min` : t('nav.train')
+                }
+              </span>
             </div>
             <span className="text-sm font-medium text-cyan-100">Ga terug</span>
           </button>
