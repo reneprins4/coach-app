@@ -1,8 +1,9 @@
 // ---------------------------------------------------------------------------
 // MF-009: Custom PR Goals for any exercise
-// Stored in localStorage independently from UserSettings.
-// Sync to Supabase can be added later if needed.
+// Stored in localStorage with Supabase cloud sync.
 // ---------------------------------------------------------------------------
+
+import { supabase } from './supabase'
 
 export interface PrGoal {
   exercise: string
@@ -25,15 +26,18 @@ export function getPrGoals(): PrGoal[] {
   }
 }
 
-export function savePrGoals(goals: PrGoal[]): void {
+export function savePrGoals(goals: PrGoal[], userId?: string | null): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(goals))
   } catch (e) {
     console.error('Failed to save PR goals:', e)
   }
+  if (userId) {
+    syncPrGoalsToCloud(userId, goals).catch(() => {})
+  }
 }
 
-export function addPrGoal(goal: Omit<PrGoal, 'createdAt'>): PrGoal | null {
+export function addPrGoal(goal: Omit<PrGoal, 'createdAt'>, userId?: string | null): PrGoal | null {
   const goals = getPrGoals()
 
   // Enforce max limit
@@ -48,21 +52,63 @@ export function addPrGoal(goal: Omit<PrGoal, 'createdAt'>): PrGoal | null {
   }
 
   goals.push(newGoal)
-  savePrGoals(goals)
+  savePrGoals(goals, userId)
   return newGoal
 }
 
-export function removePrGoal(exercise: string): void {
+export function removePrGoal(exercise: string, userId?: string | null): void {
   const goals = getPrGoals()
   const filtered = goals.filter(g => g.exercise !== exercise)
-  savePrGoals(filtered)
+  savePrGoals(filtered, userId)
 }
 
-export function updatePrGoal(exercise: string, updates: Partial<Omit<PrGoal, 'createdAt'>>): void {
+export function updatePrGoal(exercise: string, updates: Partial<Omit<PrGoal, 'createdAt'>>, userId?: string | null): void {
   const goals = getPrGoals()
   const index = goals.findIndex(g => g.exercise === exercise)
   if (index === -1) return
 
   goals[index] = { ...goals[index]!, ...updates }
-  savePrGoals(goals)
+  savePrGoals(goals, userId)
+}
+
+/**
+ * Sync PR goals to Supabase (best-effort, fire-and-forget).
+ */
+async function syncPrGoalsToCloud(userId: string, goals: PrGoal[]): Promise<void> {
+  try {
+    await supabase
+      .from('pr_goals')
+      .upsert({
+        user_id: userId,
+        data: goals,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' })
+  } catch { /* best-effort sync */ }
+}
+
+/**
+ * Load PR goals from Supabase, update localStorage. Falls back to localStorage on failure.
+ */
+export async function loadPrGoalsFromCloud(userId: string): Promise<PrGoal[]> {
+  try {
+    const { data } = await supabase
+      .from('pr_goals')
+      .select('data, updated_at')
+      .eq('user_id', userId)
+      .single()
+
+    if (data?.data) {
+      const cloudGoals = data.data as PrGoal[]
+      // Cloud is source of truth - update localStorage
+      savePrGoals(cloudGoals)
+      return cloudGoals
+    }
+  } catch { /* fall back to localStorage */ }
+
+  // No cloud data or error - push local data to cloud if any exists
+  const local = getPrGoals()
+  if (local.length > 0) {
+    syncPrGoalsToCloud(userId, local).catch(() => {})
+  }
+  return local
 }

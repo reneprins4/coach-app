@@ -48,7 +48,7 @@ export default function Dashboard() {
   const { user, settings } = useAuthContext()
   const { workouts, loading } = useWorkouts(user?.id)
   const nav = useNavigate()
-  const { activeInjuries, addInjury, checkIn, resolve } = useInjuries()
+  const { activeInjuries, addInjury, checkIn, resolve } = useInjuries(user?.id)
   const [checkInInjury, setCheckInInjury] = useState<ActiveInjury | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
   const [showStory, setShowStory] = useState(false)

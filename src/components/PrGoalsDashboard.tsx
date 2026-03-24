@@ -1,9 +1,21 @@
 import { useTranslation } from 'react-i18next'
 import { getPrGoals, type PrGoal } from '../lib/prGoals'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuthContext } from '../App'
+import { loadPrGoalsFromCloud } from '../lib/prGoals'
 
 export default function PrGoalsDashboard({ onNavigate }: { onNavigate?: () => void }) {
-  const [goals] = useState<PrGoal[]>(getPrGoals)
+  const { user } = useAuthContext()
+  const [goals, setGoals] = useState<PrGoal[]>(getPrGoals)
+
+  // Sync from cloud when user is available
+  useEffect(() => {
+    if (user?.id) {
+      loadPrGoalsFromCloud(user.id).then(cloudGoals => {
+        setGoals(cloudGoals)
+      }).catch(() => {})
+    }
+  }, [user?.id])
 
   if (goals.length === 0) return null
 

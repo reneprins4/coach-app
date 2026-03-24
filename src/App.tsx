@@ -4,6 +4,8 @@ import { SplashScreen } from '@capacitor/splash-screen'
 import { useAuth } from './hooks/useAuth'
 import { getSettings, saveSettings, mergeSettingsOnLogin } from './lib/settings'
 import { invalidateWorkoutCache } from './lib/workoutCache'
+import { loadInjuriesFromCloud } from './lib/injuryRecovery'
+import { loadPrGoalsFromCloud } from './lib/prGoals'
 import { isBeginnerMode as checkBeginnerMode } from './lib/beginnerMode'
 import { supabase } from './lib/supabase'
 import { logError } from './lib/logger'
@@ -76,6 +78,10 @@ export default function App() {
       }
 
       mergeSettingsOnLogin(userId).then(async merged => {
+        // Load injuries and PR goals from cloud (best-effort, non-blocking)
+        loadInjuriesFromCloud(userId).catch(() => {})
+        loadPrGoalsFromCloud(userId).catch(() => {})
+
         if (merged) {
           setSettings(merged)
           if (merged.onboardingCompleted) {

@@ -38,7 +38,7 @@ export default function Profile() {
   const [showSaved, setShowSaved] = useState(false)
 
   // Injury management
-  const { activeInjuries, addInjury, checkIn, resolve } = useInjuries()
+  const { activeInjuries, addInjury, checkIn, resolve } = useInjuries(user?.id)
   const [showInjuryReport, setShowInjuryReport] = useState(false)
   const [checkInInjury, setCheckInInjury] = useState<ActiveInjury | null>(null)
 

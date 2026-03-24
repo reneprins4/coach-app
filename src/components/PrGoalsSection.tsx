@@ -1,27 +1,39 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Plus, Trash2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { getPrGoals, addPrGoal, removePrGoal, type PrGoal } from '../lib/prGoals'
+import { getPrGoals, addPrGoal, removePrGoal, loadPrGoalsFromCloud, type PrGoal } from '../lib/prGoals'
 import { useExercises, type ExerciseLibraryEntry } from '../hooks/useExercises'
+import { useAuthContext } from '../App'
 
 const MAX_GOALS = 5
 
 export default function PrGoalsSection() {
   const { t } = useTranslation()
+  const { user } = useAuthContext()
+  const userId = user?.id ?? null
   const [goals, setGoals] = useState<PrGoal[]>(getPrGoals)
   const [showForm, setShowForm] = useState(false)
+
+  // Load from cloud on mount if user is logged in
+  useEffect(() => {
+    if (userId) {
+      loadPrGoalsFromCloud(userId).then(cloudGoals => {
+        setGoals(cloudGoals)
+      }).catch(() => {})
+    }
+  }, [userId])
 
   function refresh() {
     setGoals(getPrGoals())
   }
 
   function handleRemove(exercise: string) {
-    removePrGoal(exercise)
+    removePrGoal(exercise, userId)
     refresh()
   }
 
   function handleAdd(exercise: string, targetKg: number, targetDate: string | null) {
-    const result = addPrGoal({ exercise, targetKg, targetDate })
+    const result = addPrGoal({ exercise, targetKg, targetDate }, userId)
     if (result) {
       refresh()
       setShowForm(false)

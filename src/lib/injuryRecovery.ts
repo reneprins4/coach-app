@@ -432,6 +432,8 @@ export const INJURY_AREAS: Record<InjuryArea, InjuryAreaConfig> = {
 // Constants
 // ---------------------------------------------------------------------------
 
+import { supabase } from './supabase'
+
 const STORAGE_KEY = 'kravex_injuries'
 
 // ---------------------------------------------------------------------------
@@ -729,13 +731,16 @@ export function getRecoveryGuidance(injury: ActiveInjury): RecoveryGuidance {
 // ---------------------------------------------------------------------------
 
 /**
- * Save injuries to localStorage.
+ * Save injuries to localStorage and optionally sync to Supabase.
  */
-export function saveInjuries(injuries: ActiveInjury[]): void {
+export function saveInjuries(injuries: ActiveInjury[], userId?: string | null): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(injuries))
   } catch {
     // Storage full or unavailable
+  }
+  if (userId) {
+    syncInjuriesToCloud(userId, injuries).catch(() => {})
   }
 }
 
@@ -752,6 +757,48 @@ export function loadInjuries(): ActiveInjury[] {
   } catch {
     return []
   }
+}
+
+/**
+ * Sync injuries to Supabase (best-effort, fire-and-forget).
+ */
+async function syncInjuriesToCloud(userId: string, injuries: ActiveInjury[]): Promise<void> {
+  try {
+    await supabase
+      .from('injuries')
+      .upsert({
+        user_id: userId,
+        data: injuries,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' })
+  } catch { /* best-effort sync */ }
+}
+
+/**
+ * Load injuries from Supabase, update localStorage. Falls back to localStorage on failure.
+ */
+export async function loadInjuriesFromCloud(userId: string): Promise<ActiveInjury[]> {
+  try {
+    const { data } = await supabase
+      .from('injuries')
+      .select('data, updated_at')
+      .eq('user_id', userId)
+      .single()
+
+    if (data?.data) {
+      const cloudInjuries = data.data as ActiveInjury[]
+      // Cloud is source of truth - update localStorage
+      saveInjuries(cloudInjuries)
+      return cloudInjuries
+    }
+  } catch { /* fall back to localStorage */ }
+
+  // No cloud data or error - push local data to cloud if any exists
+  const local = loadInjuries()
+  if (local.length > 0) {
+    syncInjuriesToCloud(userId, local).catch(() => {})
+  }
+  return local
 }
 
 // ---------------------------------------------------------------------------
