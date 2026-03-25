@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Check, RefreshCw, Dumbbell, BookOpen, ChevronDown, ChevronUp, Play } from 'lucide-react'
+import { Loader2, Check, RefreshCw, Dumbbell, BookOpen, ChevronDown, ChevronUp, ChevronRight, Play, Zap } from 'lucide-react'
 import { getCurrentBlock, PHASES } from '../../lib/periodization'
 import { generateFirstWorkout, isFirstWorkoutEligible } from '../../lib/firstWorkout'
 import { getSettings } from '../../lib/settings'
@@ -159,6 +159,23 @@ export default function StartFlowView({
       <h1 className="text-display mb-8">
         {loading ? t('dashboard.title') : (selectedSplit || t('dashboard.title'))}
       </h1>
+
+      {/* ━━ Plan suggestion — if no plan and has workouts ━━ */}
+      {!block && workoutCount !== undefined && workoutCount >= 3 && (
+        <button
+          onClick={() => { window.location.assign('/plan') }}
+          className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.04] p-4 text-left transition-colors active:bg-cyan-500/[0.08]"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">
+            <Zap size={16} className="text-cyan-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white">{t('dashboard.plan_suggestion')}</p>
+            <p className="text-xs text-[var(--text-3)]">{t('profile.plan_suggestion')}</p>
+          </div>
+          <ChevronRight size={14} className="text-cyan-500/50 shrink-0" />
+        </button>
+      )}
 
       {/* ━━ Hero: Generate Workout ━━ */}
       <div className="card-accent mb-4">

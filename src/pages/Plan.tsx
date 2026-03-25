@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, ChevronRight, RotateCcw, Sparkles, Info, Zap, TrendingUp, Target, Battery } from 'lucide-react'
+import { CheckCircle2, ChevronRight, RotateCcw, Info, Zap, TrendingUp, Target, Battery } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   PHASES, loadBlock, startBlock, clearBlock,
@@ -397,14 +397,13 @@ export default function Plan() {
                 <p className="text-sm font-medium text-[var(--text-2)]">{t('plan.new_hint')}</p>
                 <p className="mt-1 text-xs text-[var(--text-3)]">{t('plan.new_hint_sub')}</p>
               </div>
-              <button
+              <motion.button
                 onClick={() => setWizardOpen(true)}
                 className="btn-primary mt-4"
+                whileTap={{ scale: 0.97 }}
               >
-                <Sparkles size={18} />
                 {t('plan.start_block')}
-                <ChevronRight size={16} className="ml-auto" />
-              </button>
+              </motion.button>
             </>
           )}
         </>
