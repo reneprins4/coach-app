@@ -65,8 +65,11 @@ export default function StartFlowView({
   const {
     loading, generating, error, selectedSplit, generatedWorkout,
     recoveredMuscles, showSplitPicker, estimatedDuration, exerciseCount,
-    availableTime, retryCount, energy, focusedMuscles,
+    availableTime, retryCount, energy, focusedMuscles, splits,
   } = state
+
+  // Get the reasoning for the recommended split (the "why" behind the suggestion)
+  const splitReasoning = splits.length > 0 ? splits[0]?.reasoning : null
 
   const timeSelected = availableTime !== null
   const isReady = timeSelected && !loading && !generating && generatedWorkout && !error
@@ -217,6 +220,13 @@ export default function StartFlowView({
         {block && phase && (
           <p className="label-caps text-gray-600 mb-3">
             {t(phase.labelKey)} · {t('plan.week')} {block.currentWeek}/{phase.weeks}
+          </p>
+        )}
+
+        {/* Split reasoning — the "why" behind today's suggestion */}
+        {splitReasoning && isReady && (
+          <p className="mb-4 border-l-2 border-cyan-500/20 pl-3 text-xs leading-relaxed text-[var(--text-2)] line-clamp-2">
+            {splitReasoning}
           </p>
         )}
 

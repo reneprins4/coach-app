@@ -14,7 +14,7 @@ import { generateFirstWorkout } from '../lib/firstWorkout'
 import { detectJunkVolume } from '../lib/junkVolumeDetector'
 // calculateMomentum removed from compact header; can be re-added to finish modal
 // import { calculateMomentum } from '../lib/momentumCalculator'
-import { getCurrentBlock } from '../lib/periodization'
+import { getCurrentBlock, PHASES } from '../lib/periodization'
 import { useAuthContext } from '../App'
 import { supabase } from '../lib/supabase'
 import { motion } from 'motion/react'
@@ -625,6 +625,16 @@ export default function Logger() {
   const workout = enrichedWorkout || aw.workout!
   const workoutType = getWorkoutType(workout.exercises)
 
+  // Build workout context string for FocusMode
+  const workoutContext = useMemo(() => {
+    const parts: string[] = [workoutType]
+    if (loggerBlock) {
+      const p = PHASES[loggerBlock.phase]
+      if (p) parts.push(`${p.label} wk${loggerBlock.currentWeek}`)
+    }
+    return parts.join(' \u00B7 ')
+  }, [workoutType, loggerBlock])
+
   // Use FocusMode if available, fallback to list view
   const useFocusMode = true // Toggle for gradual rollout
 
@@ -771,6 +781,7 @@ export default function Logger() {
             workoutNotes={workout.notes}
             onUpdateNotes={(notes: string) => aw.updateNotes(notes)}
             onAddExercise={() => setShowPicker(true)}
+            workoutContext={workoutContext}
           />
         </div>
       ) : (

@@ -341,6 +341,9 @@ export default function Dashboard() {
                   return <> · {ready.length}/{total} {t('dashboard.muscle_ready')}</>
                 })()}
               </p>
+              {todaysWorkout.reasoning && (
+                <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-3)] line-clamp-1">{todaysWorkout.reasoning}</p>
+              )}
             </div>
             <div className="ml-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cyan-500 glow-cyan">
               {isGenerating

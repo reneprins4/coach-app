@@ -20,6 +20,7 @@ export interface FocusModeProps {
   workoutNotes: string
   onUpdateNotes: (notes: string) => void
   onAddExercise?: () => void
+  workoutContext?: string | null
 }
 
 // Slide transition settings
@@ -52,6 +53,7 @@ export default function FocusMode({
   workoutNotes,
   onUpdateNotes,
   onAddExercise,
+  workoutContext,
 }: FocusModeProps) {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -214,6 +216,11 @@ export default function FocusMode({
           )
         })}
       </div>
+
+      {/* -- Workout context whisper -- */}
+      {workoutContext && (
+        <p className="shrink-0 text-center text-[11px] text-[var(--text-3)] px-4 pb-1 line-clamp-1">{workoutContext}</p>
+      )}
 
       {/* -- Auto-advance toast -- */}
       <AnimatePresence>
