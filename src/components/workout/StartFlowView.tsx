@@ -160,8 +160,14 @@ export default function StartFlowView({
         {loading ? t('dashboard.title') : (selectedSplit || t('dashboard.title'))}
       </h1>
 
-      {/* ━━ Plan suggestion — if no plan and has workouts ━━ */}
-      {!block && workoutCount !== undefined && workoutCount >= 3 && (
+      {/* ━━ Plan suggestion — experience-based timing ━━ */}
+      {!block && workoutCount !== undefined && (
+        // Beginners: show after first workout (onboarding is enough for day 1)
+        // Experienced users: show immediately (they know what a plan is)
+        ['returning', 'intermediate', 'advanced'].includes(settings.experienceLevel || '')
+          ? workoutCount >= 0
+          : workoutCount >= 1
+      ) && (
         <button
           onClick={() => { window.location.assign('/plan') }}
           className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.04] p-4 text-left transition-colors active:bg-cyan-500/[0.08]"
