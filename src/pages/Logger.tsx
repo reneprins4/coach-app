@@ -54,6 +54,43 @@ import type {
 
 // ---- Helpers ----
 
+/** Fuzzy-match an exercise name against the exercise library image map.
+ *  1. Exact match (case-insensitive)
+ *  2. Contains match (either direction)
+ *  3. Core name match (strip common prefixes/suffixes)
+ */
+function findExerciseImage(
+  name: string,
+  imageMap: Map<string, { image_url_0?: string | null; image_url_1?: string | null }>,
+): { image_url_0?: string | null; image_url_1?: string | null } | null {
+  const lower = name.toLowerCase()
+
+  // 1. Exact match
+  if (imageMap.has(lower)) return imageMap.get(lower)!
+
+  // 2. Contains match (either direction)
+  for (const [dbName, images] of imageMap) {
+    if (lower.includes(dbName) || dbName.includes(lower)) return images
+  }
+
+  // 3. Core name match — strip common prefixes and parenthetical suffixes
+  const stripCore = (s: string) =>
+    s
+      .replace(/^(flat|incline|decline|seated|standing|lying|cable|barbell|dumbbell|machine|single[ -]?arm|single[ -]?leg)\s+/gi, '')
+      .replace(/\s*\([^)]*\)\s*$/g, '')
+      .trim()
+
+  const core = stripCore(lower)
+  if (core !== lower) {
+    for (const [dbName, images] of imageMap) {
+      const dbCore = stripCore(dbName)
+      if (core === dbCore || core.includes(dbCore) || dbCore.includes(core)) return images
+    }
+  }
+
+  return null
+}
+
 function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
@@ -286,7 +323,7 @@ export default function Logger() {
   // }, [loggerBlock])
   // const momentum = useMemo(() => aw.workout ? calculateMomentum(aw.workout, { isDeload }) : null, [aw.workout, isDeload])
 
-  // Enrich workout exercises with image URLs from exercise library
+  // Enrich workout exercises with image URLs from exercise library (fuzzy matching)
   const enrichedWorkout = useMemo(() => {
     if (!aw.workout) return null
     const imageMap = new Map(exercises.map(e => [e.name.toLowerCase(), { image_url_0: e.image_url_0, image_url_1: e.image_url_1 }]))
@@ -294,7 +331,7 @@ export default function Logger() {
       ...aw.workout,
       exercises: aw.workout.exercises.map((ex: ActiveExercise) => {
         if (ex.image_url_0) return ex // already has images
-        const images = imageMap.get(ex.name.toLowerCase())
+        const images = findExerciseImage(ex.name, imageMap)
         if (images?.image_url_0) return { ...ex, ...images }
         return ex
       })

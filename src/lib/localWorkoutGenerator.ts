@@ -94,6 +94,9 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Dumbbell Sumo Squat', muscle_group: 'glutes', isCompound: true, equipment: 'dumbbell', bwMultiplier: 0.5 },
     { name: 'Glute Bridge', muscle_group: 'glutes', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Cable Kickback', muscle_group: 'glutes', isCompound: false, equipment: 'cable', bwMultiplier: 0.15 },
+    { name: 'Sumo Deadlift', muscle_group: 'glutes', isCompound: true, equipment: 'barbell', bwMultiplier: 0.9 },
+    { name: 'Barbell Glute Bridge', muscle_group: 'glutes', isCompound: true, equipment: 'barbell', bwMultiplier: 0.8 },
+    { name: 'Single Leg Hip Thrust', muscle_group: 'glutes', isCompound: true, equipment: 'bodyweight', bwMultiplier: 0 },
   ],
   biceps: [
     { name: 'Barbell Curl', muscle_group: 'biceps', isCompound: false, equipment: 'barbell', bwMultiplier: 0.3 },
@@ -102,6 +105,8 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Incline Dumbbell Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
     { name: 'Cable Curl', muscle_group: 'biceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.2 },
     { name: 'EZ Bar Curl', muscle_group: 'biceps', isCompound: false, equipment: 'barbell', bwMultiplier: 0.25 },
+    { name: 'Concentration Curl', muscle_group: 'biceps', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.1 },
+    { name: 'Preacher Curl', muscle_group: 'biceps', isCompound: false, equipment: 'barbell', bwMultiplier: 0.2 },
   ],
   triceps: [
     { name: 'Tricep Pushdown', muscle_group: 'triceps', isCompound: false, equipment: 'cable', bwMultiplier: 0.25 },
@@ -119,6 +124,8 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Hanging Leg Raise', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Plank', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Ab Wheel Rollout', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Pallof Press', muscle_group: 'core', isCompound: false, equipment: 'cable', bwMultiplier: 0.1 },
+    { name: 'Dead Bug', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
   ],
 }
 
