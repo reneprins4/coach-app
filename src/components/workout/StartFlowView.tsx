@@ -71,7 +71,9 @@ export default function StartFlowView({
   } = state
 
   // Get the reasoning for the recommended split (the "why" behind the suggestion)
-  const splitReasoning = splits.length > 0 ? splits[0]?.reasoning : null
+  const splitReasoning = splits.length > 0 && splits[0]?.reasoning
+    ? String(splits[0].reasoning)
+    : null
 
   const timeSelected = availableTime !== null
   const isReady = timeSelected && !loading && !generating && generatedWorkout && !error

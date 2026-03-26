@@ -218,7 +218,7 @@ export default function FocusMode({
       </div>
 
       {/* -- Workout context whisper -- */}
-      {workoutContext && (
+      {workoutContext && typeof workoutContext === 'string' && (
         <p className="shrink-0 text-center text-[11px] text-[var(--text-3)] px-4 pb-1 line-clamp-1">{workoutContext}</p>
       )}
 

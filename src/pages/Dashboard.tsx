@@ -341,7 +341,7 @@ export default function Dashboard() {
                   return <> · {ready.length}/{total} {t('dashboard.muscle_ready')}</>
                 })()}
               </p>
-              {todaysWorkout.reasoning && (
+              {todaysWorkout.reasoning && typeof todaysWorkout.reasoning === 'string' && (
                 <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-3)] line-clamp-1">{todaysWorkout.reasoning}</p>
               )}
             </div>
