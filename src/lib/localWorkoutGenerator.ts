@@ -392,13 +392,17 @@ export function generateLocalWorkout({
   muscleStatus,
   recommendedSplit,
   recentHistory,
-  preferences,
+  preferences: rawPreferences,
 }: LocalWorkoutInput): AIWorkoutResponse {
-  const split = recommendedSplit
+  // Guard against null/undefined preferences
+  const preferences = rawPreferences ?? {} as LocalWorkoutInput['preferences']
+
+  const split = recommendedSplit || 'Full Body'
   const template = SPLIT_TEMPLATES[split] || SPLIT_TEMPLATES['Full Body']!
   const goal = preferences.trainingGoal || preferences.goal || 'hypertrophy'
   const level = preferences.experienceLevel || 'intermediate'
-  const bwKg = parseFloat(preferences.bodyweight || '') || 80
+  const parsedBw = parseFloat(preferences.bodyweight || '')
+  const bwKg = (Number.isFinite(parsedBw) && parsedBw > 0) ? parsedBw : 80
   const equipment = preferences.equipment || 'full_gym'
   const isDeload = preferences.isDeload || false
   const rpeCap = getRpeCap(level)

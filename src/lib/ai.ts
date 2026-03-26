@@ -357,28 +357,40 @@ Return JSON:{"split":"","reasoning":"2-3 sentences","exercises":[{"name":"","mus
 
     // Fallback to local workout generator (zero cost, works offline)
     logWarn('ai.generateScientificWorkout', 'API unavailable, using local generator')
-    result = generateLocalWorkout({
-      muscleStatus,
-      recommendedSplit,
-      recentHistory,
-      preferences: {
-        trainingGoal: preferences.trainingGoal || preferences.goal || 'hypertrophy',
-        experienceLevel: preferences.experienceLevel || 'intermediate',
-        equipment: preferences.equipment || 'full_gym',
-        bodyweight: preferences.bodyweight || '80',
-        time: preferences.time || 60,
-        energy: preferences.energy || 'medium',
-        isDeload: preferences.isDeload,
-        targetRPE: preferences.targetRPE ?? null,
-        targetRepRange: preferences.targetRepRange ?? null,
-        focusedMuscles: preferences.focusedMuscles || [],
-        gender: preferences.gender,
-        benchMax: preferences.benchMax,
-        squatMax: preferences.squatMax,
-        deadliftMax: preferences.deadliftMax,
-      },
-    })
-    result.reasoning = (result.reasoning || '') + ' (Lokaal gegenereerd)'
+    try {
+      result = generateLocalWorkout({
+        muscleStatus,
+        recommendedSplit,
+        recentHistory,
+        preferences: {
+          trainingGoal: preferences.trainingGoal || preferences.goal || 'hypertrophy',
+          experienceLevel: preferences.experienceLevel || 'intermediate',
+          equipment: preferences.equipment || 'full_gym',
+          bodyweight: preferences.bodyweight || '80',
+          time: preferences.time || 60,
+          energy: preferences.energy || 'medium',
+          isDeload: preferences.isDeload,
+          targetRPE: preferences.targetRPE ?? null,
+          targetRepRange: preferences.targetRepRange ?? null,
+          focusedMuscles: preferences.focusedMuscles || [],
+          gender: preferences.gender,
+          benchMax: preferences.benchMax,
+          squatMax: preferences.squatMax,
+          deadliftMax: preferences.deadliftMax,
+        },
+      })
+      result.reasoning = (result.reasoning || '') + ' (Lokaal gegenereerd)'
+    } catch (localErr: unknown) {
+      // Local generator also failed — return minimal valid response instead of crashing
+      logWarn('ai.generateScientificWorkout', `Local generator failed: ${localErr instanceof Error ? localErr.message : String(localErr)}`)
+      result = {
+        split: recommendedSplit,
+        reasoning: 'Fallback workout',
+        exercises: [],
+        estimated_duration_min: 0,
+        volume_notes: '',
+      }
+    }
   }
 
   return result

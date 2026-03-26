@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import StartFlowView from '../StartFlowView'
 import type { StartFlowState, LastWorkoutPreview } from '../../../types'
 
@@ -78,7 +79,7 @@ const defaultProps = {
 describe('StartFlowView - Simplified Layout', () => {
   // Primary CTAs
   it('renders AI Workout as prominent hero card', () => {
-    render(<StartFlowView {...defaultProps} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} /></MemoryRouter>)
     // The AI hero card should contain the generate workout button text
     expect(screen.getByText('logger.generate_workout')).toBeDefined()
   })
@@ -88,19 +89,19 @@ describe('StartFlowView - Simplified Layout', () => {
       preview: 'Push - 6 oefeningen',
       exercises: [],
     }
-    render(<StartFlowView {...defaultProps} lastWorkout={lastWorkout} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} lastWorkout={lastWorkout} /></MemoryRouter>)
     expect(screen.getByText('logger.repeat_last')).toBeDefined()
     // Should also show the preview summary
     expect(screen.getByText('Push - 6 oefeningen')).toBeDefined()
   })
 
   it('hides "Herhaal Laatste" when no workout history', () => {
-    render(<StartFlowView {...defaultProps} lastWorkout={null} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} lastWorkout={null} /></MemoryRouter>)
     expect(screen.queryByText('logger.repeat_last')).toBeNull()
   })
 
   it('AI hero card contains inline time picker', () => {
-    render(<StartFlowView {...defaultProps} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} /></MemoryRouter>)
     // Time picker should be inside the hero card with options
     expect(screen.getByText('45m')).toBeDefined()
     expect(screen.getByText('60m')).toBeDefined()
@@ -110,7 +111,7 @@ describe('StartFlowView - Simplified Layout', () => {
 
   // Collapsed section
   it('"Meer opties" section is collapsed by default', () => {
-    render(<StartFlowView {...defaultProps} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} /></MemoryRouter>)
     expect(screen.getByText('logger.more_options')).toBeDefined()
     // Template and empty training options should NOT be visible
     expect(screen.queryByText('logger.empty_training')).toBeNull()
@@ -118,19 +119,19 @@ describe('StartFlowView - Simplified Layout', () => {
   })
 
   it('expanding "Meer opties" reveals templates option', () => {
-    render(<StartFlowView {...defaultProps} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} /></MemoryRouter>)
     fireEvent.click(screen.getByText('logger.more_options'))
     expect(screen.getByText('logger.template')).toBeDefined()
   })
 
   it('expanding reveals empty training option', () => {
-    render(<StartFlowView {...defaultProps} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} /></MemoryRouter>)
     fireEvent.click(screen.getByText('logger.more_options'))
     expect(screen.getByText('logger.empty_training')).toBeDefined()
   })
 
   it('expanding reveals split picker', () => {
-    render(<StartFlowView {...defaultProps} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} /></MemoryRouter>)
     fireEvent.click(screen.getByText('logger.more_options'))
     expect(screen.getByText('logger.change_split')).toBeDefined()
   })
@@ -138,7 +139,7 @@ describe('StartFlowView - Simplified Layout', () => {
   // Interactions
   it('time picker updates selected time', () => {
     const onTimeChange = vi.fn()
-    render(<StartFlowView {...defaultProps} onTimeChange={onTimeChange} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} onTimeChange={onTimeChange} /></MemoryRouter>)
     fireEvent.click(screen.getByText('60m'))
     expect(onTimeChange).toHaveBeenCalledWith(60)
   })
@@ -154,11 +155,13 @@ describe('StartFlowView - Simplified Layout', () => {
       estimatedDuration: 55,
     }
     render(
-      <StartFlowView
-        {...defaultProps}
-        state={readyState}
-        onStartAIWorkout={onStartAIWorkout}
-      />
+      <MemoryRouter>
+        <StartFlowView
+          {...defaultProps}
+          state={readyState}
+          onStartAIWorkout={onStartAIWorkout}
+        />
+      </MemoryRouter>
     )
     // Find and click the start button (it shows "Start Push" when ready)
     const startBtn = screen.getByRole('button', { name: /Start Push/i })
@@ -169,7 +172,7 @@ describe('StartFlowView - Simplified Layout', () => {
   // Race condition regression tests
   it('time buttons are disabled while loading (analysis in progress)', () => {
     const loadingState: StartFlowState = { ...baseState, loading: true }
-    render(<StartFlowView {...defaultProps} state={loadingState} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} state={loadingState} /></MemoryRouter>)
     const btn45 = screen.getByText('45m').closest('button')!
     const btn60 = screen.getByText('60m').closest('button')!
     expect(btn45.disabled).toBe(true)
@@ -178,13 +181,13 @@ describe('StartFlowView - Simplified Layout', () => {
 
   it('time buttons are disabled while generating', () => {
     const genState: StartFlowState = { ...baseState, generating: true }
-    render(<StartFlowView {...defaultProps} state={genState} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} state={genState} /></MemoryRouter>)
     const btn60 = screen.getByText('60m').closest('button')!
     expect(btn60.disabled).toBe(true)
   })
 
   it('time buttons are enabled when idle (not loading, not generating)', () => {
-    render(<StartFlowView {...defaultProps} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} /></MemoryRouter>)
     const btn60 = screen.getByText('60m').closest('button')!
     expect(btn60.disabled).toBe(false)
   })
@@ -192,7 +195,7 @@ describe('StartFlowView - Simplified Layout', () => {
   it('clicking disabled time button does not trigger onTimeChange', () => {
     const onTimeChange = vi.fn()
     const loadingState: StartFlowState = { ...baseState, loading: true }
-    render(<StartFlowView {...defaultProps} state={loadingState} onTimeChange={onTimeChange} />)
+    render(<MemoryRouter><StartFlowView {...defaultProps} state={loadingState} onTimeChange={onTimeChange} /></MemoryRouter>)
     fireEvent.click(screen.getByText('60m'))
     expect(onTimeChange).not.toHaveBeenCalled()
   })
@@ -204,11 +207,13 @@ describe('StartFlowView - Simplified Layout', () => {
       exercises: [],
     }
     render(
-      <StartFlowView
-        {...defaultProps}
-        lastWorkout={lastWorkout}
-        onRepeatLastWorkout={onRepeatLastWorkout}
-      />
+      <MemoryRouter>
+        <StartFlowView
+          {...defaultProps}
+          lastWorkout={lastWorkout}
+          onRepeatLastWorkout={onRepeatLastWorkout}
+        />
+      </MemoryRouter>
     )
     fireEvent.click(screen.getByText('logger.repeat_last'))
     expect(onRepeatLastWorkout).toHaveBeenCalledTimes(1)

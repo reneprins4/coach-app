@@ -395,6 +395,11 @@ export function scoreSplits(
   frequency: number = 0,
   recentSplits: string[] = [],
 ): SplitScore[] {
+  // Guard against null/undefined/empty muscleStatus
+  if (!muscleStatus || Object.keys(muscleStatus).length === 0) {
+    return [{ name: 'Full Body', score: 0, reasoning: 'Default recommendation' }]
+  }
+
   const scores: Record<string, number> = {}
   for (const [splitName, muscles] of Object.entries(SPLIT_MUSCLES)) {
     let score = 0

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Loader2, Check, RefreshCw, Dumbbell, BookOpen, ChevronDown, ChevronUp, ChevronRight, Play, Zap } from 'lucide-react'
 import { getCurrentBlock, PHASES } from '../../lib/periodization'
@@ -48,6 +49,7 @@ export default function StartFlowView({
   workoutCount, onStartFirstWorkout, block: blockProp,
 }: StartFlowViewProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [moreOptionsOpen, setMoreOptionsOpen] = useState(false)
 
   // First workout detection
@@ -169,7 +171,7 @@ export default function StartFlowView({
           : workoutCount >= 1
       ) && (
         <button
-          onClick={() => { window.location.assign('/plan') }}
+          onClick={() => { navigate('/plan') }}
           className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.04] p-4 text-left transition-colors active:bg-cyan-500/[0.08]"
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">

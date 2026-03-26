@@ -401,11 +401,13 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         )
       } catch (err: unknown) {
         if (cancelled) return
-        const error = err as Error
-        if (import.meta.env.DEV) console.error('Workout generation failed:', error)
+        const message = err instanceof Error
+          ? (err.name === 'AbortError' ? '' : err.message)
+          : String(err ?? 'Unknown error')
+        if (import.meta.env.DEV) console.error('Workout generation failed:', err)
         dispatch({
           type: 'GENERATION_ERROR',
-          payload: { error: error.name === 'AbortError' ? '' : error.message },
+          payload: { error: message },
         })
       }
     }
@@ -519,12 +521,14 @@ export function useStartFlow({ userId, isActive }: UseStartFlowOptions) {
         }
       )
     } catch (err: unknown) {
-      const error = err as Error
-      if (error.name === 'AbortError') return
-      if (import.meta.env.DEV) console.error('Workout generation failed:', error)
-      const message = error.message === 'SESSION_EXPIRED'
-        ? t('auth.session_expired', 'Je sessie is verlopen, log opnieuw in')
-        : error.message
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      if (err instanceof Error && err.name === 'AbortError') return
+      if (import.meta.env.DEV) console.error('Workout generation failed:', err)
+      const message = err instanceof Error
+        ? (err.message === 'SESSION_EXPIRED'
+            ? t('auth.session_expired', 'Je sessie is verlopen, log opnieuw in')
+            : err.message)
+        : String(err ?? 'Unknown error')
       dispatch({ type: 'GENERATION_ERROR', payload: { error: message } })
     }
   }, [userId, state.muscleStatus, state.splits, state.recommendedSplit, state.recoveredMuscles, state.availableTime, state.energy, state.focusedMuscles, t])
