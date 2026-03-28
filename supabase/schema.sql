@@ -5,11 +5,12 @@
 -- Exercises: library of available exercises
 -- ============================================================
 create table if not exists exercises (
-  id          uuid primary key default gen_random_uuid(),
-  name        text not null unique,
-  muscle_group text not null,          -- e.g. 'chest', 'back', 'legs', 'shoulders', 'arms', 'core'
-  category    text not null,           -- e.g. 'compound', 'isolation', 'cardio', 'bodyweight'
-  created_at  timestamptz not null default now()
+  id            uuid primary key default gen_random_uuid(),
+  name          text not null unique,
+  muscle_group  text not null,          -- e.g. 'chest', 'back', 'legs', 'shoulders', 'arms', 'core'
+  category      text not null,          -- e.g. 'compound', 'isolation', 'cardio', 'bodyweight'
+  exercise_type text not null default 'reps',  -- 'reps' | 'time'
+  created_at    timestamptz not null default now()
 );
 
 -- ============================================================
@@ -26,13 +27,15 @@ create table if not exists workouts (
 -- Sets: individual sets within a workout
 -- ============================================================
 create table if not exists sets (
-  id          uuid primary key default gen_random_uuid(),
-  workout_id  uuid not null references workouts(id) on delete cascade,
-  exercise    text not null,           -- exercise name (denormalized for flexibility)
-  weight_kg   numeric(6,2),
-  reps        integer not null,
-  rpe         numeric(3,1),            -- rate of perceived exertion (1-10)
-  created_at  timestamptz not null default now()
+  id                uuid primary key default gen_random_uuid(),
+  workout_id        uuid not null references workouts(id) on delete cascade,
+  exercise          text not null,           -- exercise name (denormalized for flexibility)
+  weight_kg         numeric(6,2),
+  reps              integer,                 -- null for time-based exercises
+  duration_seconds  integer,                 -- null for rep-based exercises
+  rpe               numeric(3,1),            -- rate of perceived exertion (1-10)
+  created_at        timestamptz not null default now(),
+  constraint sets_reps_or_duration check (reps is not null or duration_seconds is not null)
 );
 
 -- ============================================================
