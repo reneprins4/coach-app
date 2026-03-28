@@ -515,6 +515,7 @@ export type MomentumSignal =
   | 'e1rm_rising' | 'e1rm_dropping'
   | 'rpe_improving' | 'rpe_degrading'
   | 'reps_peak' | 'reps_dropping'
+  | 'duration_rising' | 'duration_dropping'
 
 export interface MomentumResult {
   score: number
@@ -608,7 +609,7 @@ export interface PlateauResult {
 
 // ---- PR Detection ----
 
-export type PRType = 'weight' | 'e1rm'
+export type PRType = 'weight' | 'e1rm' | 'duration'
 
 export interface PRDetectionResult {
   isPR: boolean

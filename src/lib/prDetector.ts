@@ -79,6 +79,38 @@ export function detectPR(
 }
 
 /**
+ * Detect if a duration-based set is a Personal Record (longest hold/time)
+ */
+export function detectDurationPR(
+  exerciseName: string,
+  durationSeconds: number,
+  historicalSets: Pick<WorkoutSet, 'exercise' | 'duration_seconds'>[]
+): PRDetectionResult | null {
+  if (!durationSeconds || durationSeconds <= 0) return null
+  if (!historicalSets || historicalSets.length === 0) return null
+
+  const exerciseSets = historicalSets.filter(s =>
+    areExercisesEquivalent(s.exercise ?? '', exerciseName) && s.duration_seconds
+  )
+
+  if (exerciseSets.length === 0) return null
+
+  const bestHistorical = Math.max(...exerciseSets.map(s => s.duration_seconds!))
+
+  if (durationSeconds > bestHistorical) {
+    return {
+      isPR: true,
+      type: 'duration',
+      previousBest: bestHistorical,
+      newBest: durationSeconds,
+      improvement: durationSeconds - bestHistorical,
+    }
+  }
+
+  return null
+}
+
+/**
  * Format PR badge text
  */
 export function formatPRBadge(pr: PRDetectionResult | null): string {
