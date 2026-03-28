@@ -104,6 +104,7 @@ describe('generateTodaysWorkout', () => {
       exercise: 'Flat Barbell Bench Press',
       weight_kg: 80,
       reps: 10,
+      duration_seconds: null,
       rpe: 7,
     })
   })

@@ -282,6 +282,7 @@ export async function generateFullWorkout(
       exercise: s.exercise,
       weight_kg: s.weight_kg ?? null,
       reps: s.reps ?? 0,
+      duration_seconds: s.duration_seconds ?? null,
       rpe: s.rpe ?? null,
     })),
   }))

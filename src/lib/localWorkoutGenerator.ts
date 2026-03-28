@@ -30,6 +30,8 @@ interface TemplateExercise {
   bwMultiplier: number
   /** Tags for sub-classification (e.g. 'posterior' for rear delt exercises) */
   tags?: string[]
+  /** Exercise type: 'time' for duration-based exercises (plank, hold, etc.) */
+  exercise_type?: 'reps' | 'time'
 }
 
 export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
@@ -122,10 +124,14 @@ export const EXERCISE_POOL: Record<MuscleGroup, TemplateExercise[]> = {
     { name: 'Dumbbell Russian Twist', muscle_group: 'core', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.15 },
     { name: 'Dumbbell Woodchop', muscle_group: 'core', isCompound: false, equipment: 'dumbbell', bwMultiplier: 0.2 },
     { name: 'Hanging Leg Raise', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
-    { name: 'Plank', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Plank', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, exercise_type: 'time' as const },
     { name: 'Ab Wheel Rollout', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
     { name: 'Pallof Press', muscle_group: 'core', isCompound: false, equipment: 'cable', bwMultiplier: 0.1 },
-    { name: 'Dead Bug', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0 },
+    { name: 'Dead Bug', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, exercise_type: 'time' as const },
+    { name: 'Copenhagen Plank', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, exercise_type: 'time' as const },
+    { name: 'Side Plank', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, exercise_type: 'time' as const },
+    { name: 'Hollow Body Hold', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, exercise_type: 'time' as const },
+    { name: 'L-Sit', muscle_group: 'core', isCompound: false, equipment: 'bodyweight', bwMultiplier: 0, exercise_type: 'time' as const },
   ],
 }
 
@@ -469,7 +475,7 @@ export function generateLocalWorkout({
       const sets = getSets(tmpl.isCompound, isDeload, level)
       const restSec = getRestSeconds(tmpl.isCompound, goal)
 
-      exercises.push({
+      const exercise: AIExercise = {
         name: tmpl.name,
         muscle_group: tmpl.muscle_group,
         sets,
@@ -480,7 +486,18 @@ export function generateLocalWorkout({
         rest_seconds: restSec,
         notes: isEstimate ? 'First time — focus on form and control' : '',
         vs_last_session: vsNote,
-      })
+      }
+
+      // Time-based exercises get duration targets instead of rep ranges
+      if (tmpl.exercise_type === 'time') {
+        exercise.exercise_type = 'time'
+        exercise.duration_min = 20
+        exercise.duration_max = 60
+        exercise.reps_min = 0
+        exercise.reps_max = 0
+      }
+
+      exercises.push(exercise)
     }
   }
 

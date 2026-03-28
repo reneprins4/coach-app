@@ -57,7 +57,7 @@ function formatExerciseHistory(history: RecentSession[]): string {
   if (!history || history.length === 0) return 'No previous session data available'
 
   // Group all sets by exercise name
-  const byExercise: Record<string, { weight: number | null; reps: number | null; rpe: number | null; date: string }[]> = {}
+  const byExercise: Record<string, { weight: number | null; reps: number | null; duration_seconds: number | null; rpe: number | null; date: string }[]> = {}
   for (const workout of history) {
     for (const set of (workout.sets || [])) {
       if (!set.exercise) continue
@@ -65,6 +65,7 @@ function formatExerciseHistory(history: RecentSession[]): string {
       byExercise[set.exercise]!.push({
         weight: set.weight_kg,
         reps: set.reps,
+        duration_seconds: set.duration_seconds ?? null,
         rpe: set.rpe,
         date: workout.date,
       })
@@ -77,9 +78,12 @@ function formatExerciseHistory(history: RecentSession[]): string {
   for (const [name, sets] of exercises) {
     // Take last 2 sets to show recent progression
     const recent = sets.slice(-2)
-    const summary = recent.map(s =>
-      `${s.weight || '?'}kg x${s.reps || '?'}${s.rpe ? ` @${s.rpe}` : ''}`
-    ).join(', ')
+    const summary = recent.map(s => {
+      if (s.duration_seconds) {
+        return `${s.duration_seconds}s${s.rpe ? ` @${s.rpe}` : ''}`
+      }
+      return `${s.weight || '?'}kg x${s.reps || '?'}${s.rpe ? ` @${s.rpe}` : ''}`
+    }).join(', ')
     lines.push(`${name}:${summary}`)
   }
 

@@ -64,6 +64,7 @@ export function generateTodaysWorkout(workouts: Workout[]): TodaysWorkoutSuggest
       exercise: s.exercise,
       weight_kg: s.weight_kg || 0,
       reps: s.reps || 0,
+      duration_seconds: s.duration_seconds ?? null,
       rpe: s.rpe ?? null,
     })),
   }))
