@@ -205,12 +205,20 @@ export function classifyExerciseFull(exerciseName: string): ExerciseClassificati
  * - RPE floor clamped to 0.95 so RPE 6 doesn't give unrealistic recovery bonus
  * - Compound-heavy groups (quads, back, glutes) already use higher base hours
  */
-export function calcMuscleRecovery(muscle: string, hoursSinceTrained: number | null, avgRPE: number | null, setsCount: number): number {
+export function calcMuscleRecovery(
+  muscle: string,
+  hoursSinceTrained: number | null,
+  avgRPE: number | null,
+  setsCount: number,
+  totalDurationSeconds: number = 0
+): number {
   if (hoursSinceTrained == null || !Number.isFinite(hoursSinceTrained)) return 100
   const safeHours = Math.max(0, hoursSinceTrained)
   const baseHours = RECOVERY_HOURS[muscle as MuscleGroup] || 72
   const safeSets = Number.isFinite(setsCount) ? setsCount : 0
-  const volumeMult = 1 + Math.max(0, (safeSets - 6) * 0.13)
+  const durationSetEquivalent = totalDurationSeconds > 0 ? totalDurationSeconds / 30 : 0
+  const effectiveSets = safeSets + durationSetEquivalent
+  const volumeMult = 1 + Math.max(0, (effectiveSets - 6) * 0.13)
   const safeRPE = (avgRPE != null && Number.isFinite(avgRPE)) ? avgRPE : 7
   const clampedRPE = Math.max(1, Math.min(10, safeRPE))
   // Floor at 0.95: RPE 6 and below should not dramatically reduce recovery time
@@ -264,6 +272,7 @@ export function analyzeTraining(workouts: Workout[], goal: string = 'hypertrophy
       hoursSinceLastTrained: null,
       avgRpeLastSession: null,
       setsLastSession: 0,
+      totalDurationLastSession: 0,
       recoveryPct: 100,
       recentExercises: [],
       lastSessionSets: [],
@@ -333,13 +342,14 @@ export function analyzeTraining(workouts: Workout[], goal: string = 'hypertrophy
           ? Math.round(rpeSets.reduce((sum, s) => sum + Number(s.rpe), 0) / rpeSets.length * 10) / 10
           : null
         ms.setsLastSession = sets.length
+        ms.totalDurationLastSession = sets.reduce((sum, s) => sum + (s.duration_seconds || 0), 0)
         ms.lastSessionSets = sets.map(s => ({
           exercise: s.exercise, weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe,
         } satisfies LastSessionSet))
         break
       }
     }
-    ms.recoveryPct = calcMuscleRecovery(muscle, ms.hoursSinceLastTrained, ms.avgRpeLastSession, ms.setsLastSession)
+    ms.recoveryPct = calcMuscleRecovery(muscle, ms.hoursSinceLastTrained, ms.avgRpeLastSession, ms.setsLastSession, ms.totalDurationLastSession)
     ms.status = recoveryStatus(ms.recoveryPct)
     if (ms.daysSinceLastTrained === null) ms.status = 'needs_work'
   }

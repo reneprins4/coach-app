@@ -48,6 +48,7 @@ function freshMuscleStatus(): MuscleStatusMap {
       hoursSinceLastTrained: null,
       avgRpeLastSession: null,
       setsLastSession: 0,
+      totalDurationLastSession: 0,
       recoveryPct: 100,
       recentExercises: [],
       lastSessionSets: [],

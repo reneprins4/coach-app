@@ -49,6 +49,7 @@ function freshMuscleStatus(goal: 'strength' | 'hypertrophy' = 'strength'): Muscl
       hoursSinceLastTrained: null,
       avgRpeLastSession: null,
       setsLastSession: 0,
+      totalDurationLastSession: 0,
       recoveryPct: 100,
       recentExercises: [],
       lastSessionSets: [],

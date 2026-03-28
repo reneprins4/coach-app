@@ -20,7 +20,7 @@ import { useAuthContext } from '../App'
 const ALL_MUSCLES: import('../types').MuscleGroup[] = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
 
 function calcRecovery(muscle: string, ms: import('../types').MuscleStatus) {
-  return calcMuscleRecovery(muscle, ms.hoursSinceLastTrained, ms.avgRpeLastSession, ms.setsLastSession)
+  return calcMuscleRecovery(muscle, ms.hoursSinceLastTrained, ms.avgRpeLastSession, ms.setsLastSession, ms.totalDurationLastSession)
 }
 
 function RecoveryBar({ muscle, ms, t }: { muscle: string; ms: import('../types').MuscleStatus; t: import('i18next').TFunction }) {
@@ -408,7 +408,7 @@ export default function AICoach() {
                   muscle={m}
                   ms={(muscleStatus as Record<string, import('../types').MuscleStatus>)[m] || {
                     setsThisWeek: 0, daysSinceLastTrained: null, hoursSinceLastTrained: null,
-                    avgRpeLastSession: null, setsLastSession: 0, recoveryPct: 100,
+                    avgRpeLastSession: null, setsLastSession: 0, totalDurationLastSession: 0, recoveryPct: 100,
                     recentExercises: [], lastSessionSets: [],
                     target: { min: 10, max: 16, mev: 6 }, status: 'ready' as const,
                   }}

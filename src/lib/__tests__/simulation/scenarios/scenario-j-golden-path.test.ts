@@ -241,7 +241,7 @@ function runSimulation(): SimResult {
   return { weeks, allWorkouts, generatedResponses }
 }
 
-function getDefaultMuscleStatus(): Record<MuscleGroup, { setsThisWeek: number; daysSinceLastTrained: number | null; hoursSinceLastTrained: number | null; avgRpeLastSession: number | null; setsLastSession: number; recoveryPct: number; recentExercises: string[]; lastSessionSets: never[]; target: { min: number; max: number; mev: number }; status: 'needs_work' }> {
+function getDefaultMuscleStatus(): Record<MuscleGroup, { setsThisWeek: number; daysSinceLastTrained: number | null; hoursSinceLastTrained: number | null; avgRpeLastSession: number | null; setsLastSession: number; totalDurationLastSession: number; recoveryPct: number; recentExercises: string[]; lastSessionSets: never[]; target: { min: number; max: number; mev: number }; status: 'needs_work' }> {
   const muscles: MuscleGroup[] = ['chest', 'back', 'shoulders', 'quads', 'hamstrings', 'glutes', 'biceps', 'triceps', 'core']
   const result = {} as ReturnType<typeof getDefaultMuscleStatus>
   for (const m of muscles) {
@@ -251,6 +251,7 @@ function getDefaultMuscleStatus(): Record<MuscleGroup, { setsThisWeek: number; d
       hoursSinceLastTrained: null,
       avgRpeLastSession: null,
       setsLastSession: 0,
+      totalDurationLastSession: 0,
       recoveryPct: 100,
       recentExercises: [],
       lastSessionSets: [],
