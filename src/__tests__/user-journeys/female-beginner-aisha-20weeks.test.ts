@@ -218,6 +218,7 @@ function runAishaSimulation() {
             exercise: exercise.name,
             weight_kg: actualWeight,
             reps: actualReps,
+            duration_seconds: null,
             rpe: actualRpe + (s * 0.2),
             created_at: sessionDate.toISOString(),
           })

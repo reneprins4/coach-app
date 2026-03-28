@@ -10,6 +10,7 @@ function makeExercise(name: string, setCount: number): ActiveExercise {
       id: `${name}-set-${i}`,
       weight_kg: 80,
       reps: 10,
+      duration_seconds: null,
       rpe: null,
       created_at: new Date().toISOString(),
     })),

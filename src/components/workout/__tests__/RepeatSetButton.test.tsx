@@ -68,6 +68,7 @@ function makeSet(overrides: Partial<ActiveWorkoutSet> = {}): ActiveWorkoutSet {
     id: 'set-' + Math.random().toString(36).slice(2, 8),
     weight_kg: 80,
     reps: 8,
+    duration_seconds: null,
     rpe: null,
     created_at: new Date().toISOString(),
     ...overrides,
@@ -116,6 +117,7 @@ describe('Repeat Set Button', () => {
     expect(props.onAddSet).toHaveBeenCalledWith({
       weight_kg: 100,
       reps: 5,
+      duration_seconds: null,
       rpe: null,
     })
   })
@@ -127,6 +129,7 @@ describe('Repeat Set Button', () => {
     expect(props.onAddSet).toHaveBeenCalledWith({
       weight_kg: 80,
       reps: 8,
+      duration_seconds: null,
       rpe: 7,
     })
   })
@@ -151,6 +154,7 @@ describe('Repeat Set Button', () => {
     expect(props.onAddSet).toHaveBeenCalledWith({
       weight_kg: 60,
       reps: 12,
+      duration_seconds: null,
       rpe: null,
     })
   })

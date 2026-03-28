@@ -147,12 +147,12 @@ interface SupersetGroupBlockProps {
   groupIndex: number
   allExercises: ActiveExercise[]
   userId: string | undefined
-  onAddSet: (exerciseName: string, data: { weight_kg: number; reps: number; rpe: number | null }) => void
-  onRemoveSet: (exerciseName: string, id: string, setData: { weight_kg: number; reps: number; rpe: number | null }) => void
+  onAddSet: (exerciseName: string, data: { weight_kg: number | null; reps: number | null; duration_seconds: number | null; rpe: number | null }) => void
+  onRemoveSet: (exerciseName: string, id: string, setData: { weight_kg: number | null; reps: number | null; duration_seconds: number | null; rpe: number | null }) => void
   onRemove: (exerciseName: string) => void
   onSwap: (exercise: ActiveExercise) => void
   onOpenPlateCalc: (weight: number) => void
-  getLastUsed: (name: string) => { weight_kg: number; reps: number } | null
+  getLastUsed: (name: string) => { weight_kg: number | null; reps: number | null; duration_seconds: number | null } | null
   junkWarning: JunkVolumeWarning | null
   onClearJunkWarning: () => void
   exerciseHistoryMap: Map<string, ExerciseHistorySet[]>
@@ -416,7 +416,7 @@ export default function Logger() {
     }
   }, [aw])
 
-  const handleRemoveSet = useCallback((exerciseName: string, setId: string, setData: { weight_kg: number; reps: number; rpe: number | null }) => {
+  const handleRemoveSet = useCallback((exerciseName: string, setId: string, setData: { weight_kg: number | null; reps: number | null; duration_seconds: number | null; rpe: number | null }) => {
     aw.removeSet(exerciseName, setId)
     setToast({
       message: t('logger.set_removed'),
@@ -463,7 +463,7 @@ export default function Logger() {
     setToast({ message: t('logger.superset_exit') })
   }, [t])
 
-  const handleAddSet = useCallback((exerciseName: string, data: { weight_kg: number; reps: number; rpe: number | null }) => {
+  const handleAddSet = useCallback((exerciseName: string, data: { weight_kg: number | null; reps: number | null; duration_seconds: number | null; rpe: number | null }) => {
     aw.addSet(exerciseName, data)
     const exercise = aw.workout?.exercises.find((e: ActiveExercise) => e.name === exerciseName)
     const planRest = exercise?.plan?.rest_seconds || null

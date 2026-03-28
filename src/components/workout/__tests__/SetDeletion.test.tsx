@@ -104,7 +104,7 @@ function makeExercise(
     id: 'ex-1',
     name: 'Bench Press',
     muscle_group: 'Chest',
-    sets: sets.map((s) => ({ ...s, created_at: new Date().toISOString() })),
+    sets: sets.map((s) => ({ ...s, duration_seconds: null, created_at: new Date().toISOString() })),
     image_url_0: undefined,
     image_url_1: undefined,
     plan: null,
@@ -167,6 +167,7 @@ describe('FocusExerciseCard - set deletion UX', () => {
     expect(baseProps.onRemoveSet).toHaveBeenCalledWith('s1', {
       weight_kg: 80,
       reps: 8,
+      duration_seconds: null,
       rpe: null,
     })
   })
@@ -229,6 +230,7 @@ describe('ExerciseBlock - set deletion UX', () => {
     expect(baseProps.onRemoveSet).toHaveBeenCalledWith('s1', {
       weight_kg: 80,
       reps: 8,
+      duration_seconds: null,
       rpe: null,
     })
   })

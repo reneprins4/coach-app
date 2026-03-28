@@ -46,6 +46,7 @@ function buildWorkout(opts: {
     exercise: s.exercise,
     weight_kg: s.weight_kg,
     reps: s.reps,
+    duration_seconds: null,
     rpe: s.rpe ?? 7,
     created_at: dateStr,
   }))

@@ -20,8 +20,9 @@ function suggestNextWeight(kg: number): number | null {
 }
 
 interface SetData {
-  weight_kg: number
-  reps: number
+  weight_kg: number | null
+  reps: number | null
+  duration_seconds: number | null
   rpe: number | null
 }
 
@@ -39,7 +40,7 @@ export interface FocusExerciseCardProps {
   onRemove: () => void
   onSwap: () => void
   onOpenPlateCalc: (weight: number) => void
-  lastUsed: { weight_kg: number; reps: number } | null
+  lastUsed: { weight_kg: number | null; reps: number | null; duration_seconds: number | null } | null
   prefetchedHistory?: ExerciseHistorySet[] | null
   beginnerMode?: boolean
   isCurrent?: boolean
@@ -143,8 +144,8 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
   useEffect(() => {
     if (exercise.sets.length > 0) {
       const lastSet = exercise.sets[exercise.sets.length - 1]!
-      setWeight(String(toDisplayWeight(lastSet.weight_kg, unit)))
-      setReps(lastSet.reps.toString())
+      setWeight(String(toDisplayWeight(lastSet.weight_kg ?? 0, unit)))
+      setReps(String(lastSet.reps ?? ''))
     }
   }, [exercise.sets.length])
 
@@ -182,7 +183,7 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
     }
 
     hapticFeedback(isPR ? 'heavy' : 'light')
-    onAddSet({ weight_kg: w, reps: r, rpe })
+    onAddSet({ weight_kg: w, reps: r, duration_seconds: null, rpe })
 
     // Reset RPE after logging
     if (rpe !== null) {
@@ -306,16 +307,16 @@ const FocusExerciseCard = React.memo(function FocusExerciseCard({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.15 } }}
-                  onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, rpe: s.rpe })}
+                  onClick={() => onRemoveSet(s.id, { weight_kg: s.weight_kg, reps: s.reps, duration_seconds: s.duration_seconds, rpe: s.rpe })}
                   className={`inline-flex items-center gap-1 rounded-lg pl-2.5 pr-1.5 py-1.5 text-xs font-bold tabular transition-colors ${
                     isDone
                       ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
                       : 'bg-white/[0.04] border border-white/[0.06] text-white'
                   } active:bg-white/[0.08]`}
-                  aria-label={`${t('logger.tap_to_remove')}: ${toDisplayWeight(s.weight_kg, unit)}${unitLabel} x ${s.reps}`}
+                  aria-label={`${t('logger.tap_to_remove')}: ${toDisplayWeight(s.weight_kg ?? 0, unit)}${unitLabel} x ${s.reps}`}
                 >
                   <Check size={10} className={isDone ? 'text-emerald-400' : 'text-gray-600'} />
-                  {toDisplayWeight(s.weight_kg, unit)}{unitLabel} {'\u00D7'} {s.reps}
+                  {toDisplayWeight(s.weight_kg ?? 0, unit)}{unitLabel} {'\u00D7'} {s.reps}
                   {s.rpe && <span className="text-gray-600 ml-0.5">@{s.rpe}</span>}
                   <X size={12} className="ml-1 text-gray-600 shrink-0" aria-hidden="true" />
                 </motion.button>

@@ -49,6 +49,7 @@ function makeStaleWorkout(ageMs: number, setsCount: number): ActiveWorkout {
           id: `set-${i}`,
           weight_kg: 80,
           reps: 8,
+          duration_seconds: null,
           rpe: null,
           created_at: lastActivity,
         })),
@@ -121,7 +122,7 @@ describe('lastActivityAt tracking', () => {
 
     // Small delay to ensure different timestamp
     act(() => {
-      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, rpe: 7 })
+      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, duration_seconds: null, rpe: 7 })
     })
 
     expect(result.current.workout?.lastActivityAt).toBeDefined()
@@ -137,7 +138,7 @@ describe('lastActivityAt tracking', () => {
       result.current.startWorkout([{ name: 'Bench Press', sets: [] }])
     })
     act(() => {
-      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, rpe: 7 })
+      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, duration_seconds: null, rpe: 7 })
     })
 
     const setId = result.current.workout!.exercises[0]!.sets[0]!.id
@@ -223,7 +224,7 @@ describe('Backup and recovery', () => {
       r1.current.startWorkout([{ name: 'Bench Press', sets: [] }])
     })
     act(() => {
-      r1.current.addSet('Bench Press', { weight_kg: 80, reps: 8, rpe: 7 })
+      r1.current.addSet('Bench Press', { weight_kg: 80, reps: 8, duration_seconds: null, rpe: 7 })
     })
 
     // Simulate crash: remove active workout but keep backup
@@ -313,7 +314,7 @@ describe('staleStatus in hook', () => {
       result.current.startWorkout([{ name: 'Bench Press', sets: [] }])
     })
     act(() => {
-      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, rpe: 7 })
+      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, duration_seconds: null, rpe: 7 })
     })
 
     expect(result.current.staleStatus).toBe('fresh')

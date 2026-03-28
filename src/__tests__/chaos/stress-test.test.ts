@@ -280,6 +280,7 @@ describe('Stress: Extreme edge cases', () => {
       exercise: 'Bench Press',
       weight_kg: 80,
       reps: 5,
+      duration_seconds: null,
       rpe: 8,
       created_at: new Date().toISOString(),
     }))

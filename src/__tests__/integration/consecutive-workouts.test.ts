@@ -105,6 +105,7 @@ function aiResponseToWorkout(
         exercise: ex.name,
         weight_kg: ex.weight_kg,
         reps,
+        duration_seconds: null,
         rpe: ex.rpe_target - 0.5 + Math.random(), // slight RPE variation
         created_at: createdAt,
       })

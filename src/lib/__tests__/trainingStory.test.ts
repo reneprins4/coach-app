@@ -32,6 +32,7 @@ function createWorkoutSet(overrides: Partial<WorkoutSet> = {}): WorkoutSet {
     exercise: 'Bench Press',
     weight_kg: 80,
     reps: 10,
+    duration_seconds: null,
     rpe: 7,
     created_at: '2026-02-15T10:00:00Z',
     ...overrides,

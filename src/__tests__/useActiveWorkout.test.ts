@@ -67,7 +67,7 @@ describe('BUG-002: useActiveWorkout.finishWorkout', () => {
       result.current.startWorkout([{ name: 'Bench Press', sets: [] }])
     })
     act(() => {
-      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, rpe: 7 })
+      result.current.addSet('Bench Press', { weight_kg: 80, reps: 8, duration_seconds: null, rpe: 7 })
     })
 
     expect(result.current.totalSets).toBe(1)

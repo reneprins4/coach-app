@@ -197,6 +197,7 @@ function runSimulation(): SimResult {
             exercise: exercise.name,
             weight_kg: actualWeight,
             reps: actualReps,
+            duration_seconds: null,
             rpe: actualRpe + (s * 0.3), // RPE increases slightly per set
             created_at: sessionDate.toISOString(),
           })

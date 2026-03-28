@@ -212,6 +212,7 @@ function runEmmaSimulation() {
             exercise: exercise.name,
             weight_kg: actualWeight,
             reps: actualReps,
+            duration_seconds: null,
             rpe: actualRpe + (s * 0.2),
             created_at: sessionDate.toISOString(),
           })
@@ -647,6 +648,7 @@ describe('Week 17-20: Plateau detection', () => {
             exercise: 'Flat Barbell Bench Press',
             weight_kg: 30,
             reps: 10,
+            duration_seconds: null,
             rpe: 7.5,
             created_at: date.toISOString(),
           })
@@ -693,12 +695,12 @@ describe('Week 17-20: Plateau detection', () => {
           {
             id: `pr-${week}-${session}-1`, workout_id: `pr-w-${week}-${session}`,
             user_id: 'emma-sim', exercise: 'Flat Barbell Bench Press',
-            weight_kg: 30, reps: 10, rpe: 7.5, created_at: date.toISOString(),
+            weight_kg: 30, reps: 10, duration_seconds: null, rpe: 7.5, created_at: date.toISOString(),
           },
           {
             id: `pr-${week}-${session}-2`, workout_id: `pr-w-${week}-${session}`,
             user_id: 'emma-sim', exercise: 'Barbell Row',
-            weight_kg: 25 + week * 1.25, reps: 10, rpe: 7, created_at: date.toISOString(),
+            weight_kg: 25 + week * 1.25, reps: 10, duration_seconds: null, rpe: 7, created_at: date.toISOString(),
           },
         ]
 
@@ -745,7 +747,7 @@ describe('Week 17-20: Plateau detection', () => {
           {
             id: `mix-${week}-${session}-row`, workout_id: `mix-w-${week}-${session}`,
             user_id: 'emma-sim', exercise: 'Barbell Row',
-            weight_kg: rowWeight, reps: 10, rpe: 7, created_at: date.toISOString(),
+            weight_kg: rowWeight, reps: 10, duration_seconds: null, rpe: 7, created_at: date.toISOString(),
           },
         ]
 

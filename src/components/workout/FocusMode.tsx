@@ -9,12 +9,12 @@ import type { ExerciseHistorySet } from '../../hooks/useWorkouts'
 export interface FocusModeProps {
   exercises: ActiveExercise[]
   userId: string | undefined
-  onAddSet: (exerciseName: string, data: { weight_kg: number; reps: number; rpe: number | null }) => void
-  onRemoveSet: (exerciseName: string, id: string, setData: { weight_kg: number; reps: number; rpe: number | null }) => void
+  onAddSet: (exerciseName: string, data: { weight_kg: number | null; reps: number | null; duration_seconds: number | null; rpe: number | null }) => void
+  onRemoveSet: (exerciseName: string, id: string, setData: { weight_kg: number | null; reps: number | null; duration_seconds: number | null; rpe: number | null }) => void
   onRemove: (exerciseName: string) => void
   onSwap: (exercise: ActiveExercise) => void
   onOpenPlateCalc: (weight: number) => void
-  getLastUsed: (name: string) => { weight_kg: number; reps: number } | null
+  getLastUsed: (name: string) => { weight_kg: number | null; reps: number | null; duration_seconds: number | null } | null
   exerciseHistoryMap: Map<string, ExerciseHistorySet[]>
   beginnerMode?: boolean
   workoutNotes: string

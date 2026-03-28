@@ -234,6 +234,7 @@ function runLenaDumbbellSimulation() {
             exercise: exercise.name,
             weight_kg: actualWeight,
             reps: actualReps,
+            duration_seconds: null,
             rpe: actualRpe + (s * 0.2),
             created_at: sessionDate.toISOString(),
           })
@@ -845,6 +846,7 @@ describe('Week 13-20: Variety and plateau handling', () => {
             exercise: 'Flat Dumbbell Bench Press',
             weight_kg: 24,
             reps: 10,
+            duration_seconds: null,
             rpe: 8.5,
             created_at: date.toISOString(),
           })
@@ -905,6 +907,7 @@ describe('Week 13-20: Variety and plateau handling', () => {
             exercise: 'Incline Dumbbell Press',
             weight_kg: 17.5,
             reps: 10,
+            duration_seconds: null,
             rpe: 8,
             created_at: date.toISOString(),
           }],

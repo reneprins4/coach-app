@@ -14,15 +14,17 @@ const BACKUP_MAX_AGE_MS = 12 * 60 * 60 * 1000     // 12 hours
 const BACKUP_INTERVAL_MS = 30 * 1000               // 30 seconds
 
 interface LastUsedData {
-  weight_kg: number
-  reps: number
+  weight_kg: number | null
+  reps: number | null
+  duration_seconds: number | null
 }
 
 type LastUsedStore = Record<string, LastUsedData>
 
 interface SetInput {
-  weight_kg: number
-  reps: number
+  weight_kg: number | null
+  reps: number | null
+  duration_seconds: number | null
   rpe?: number | null
 }
 
@@ -43,8 +45,9 @@ interface FinishedWorkoutResult {
   workout_sets: Array<{
     user_id: string
     exercise: string
-    weight_kg: number
-    reps: number
+    weight_kg: number | null
+    reps: number | null
+    duration_seconds: number | null
     rpe: number | null
     workout_id: string
   }>
@@ -220,7 +223,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
   const addSet = useCallback((exerciseName: string, setData: SetInput): void => {
     // Save to last-used
     const store = load<LastUsedStore>(LAST_USED_KEY) || {}
-    store[exerciseName] = { weight_kg: setData.weight_kg, reps: setData.reps }
+    store[exerciseName] = { weight_kg: setData.weight_kg, reps: setData.reps, duration_seconds: setData.duration_seconds }
     save(LAST_USED_KEY, store)
 
     setWorkout(prev => {
@@ -235,6 +238,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
             id: crypto.randomUUID(),
             weight_kg: setData.weight_kg,
             reps: setData.reps,
+            duration_seconds: setData.duration_seconds,
             rpe: setData.rpe || null,
             created_at: now,
           }
@@ -286,6 +290,7 @@ export function useActiveWorkout(userId: string | undefined): UseActiveWorkoutRe
         exercise: ex.name,
         weight_kg: s.weight_kg,
         reps: s.reps,
+        duration_seconds: s.duration_seconds,
         rpe: s.rpe,
       }))
     )
