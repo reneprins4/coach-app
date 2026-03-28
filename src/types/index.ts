@@ -82,6 +82,7 @@ export interface WorkoutSet {
   exercise: string
   weight_kg: number | null
   reps: number | null
+  duration_seconds: number | null
   rpe: number | null
   created_at: string
 }
@@ -111,6 +112,9 @@ export interface Exercise {
   rest_seconds: number
   notes: string
   vs_last_session: string
+  exercise_type?: 'reps' | 'time'
+  duration_min?: number
+  duration_max?: number
 }
 
 // ---- Training Analysis ----
@@ -202,6 +206,9 @@ export interface AIExercise {
   rest_seconds: number
   notes: string
   vs_last_session: `${ProgressionDirection} - ${string}` | ProgressionDirection
+  exercise_type?: 'reps' | 'time'
+  duration_min?: number
+  duration_max?: number
 }
 
 export interface AIWorkoutResponse {
@@ -260,8 +267,9 @@ export interface WorkoutPreferences {
 
 export interface ActiveWorkoutSet {
   id: string
-  weight_kg: number
-  reps: number
+  weight_kg: number | null
+  reps: number | null
+  duration_seconds: number | null
   rpe: number | null
   created_at: string
 }
@@ -284,6 +292,9 @@ export interface ExercisePlan {
   rpe_target: number
   rest_seconds: number
   notes: string
+  exercise_type?: 'reps' | 'time'
+  duration_min?: number
+  duration_max?: number
 }
 
 export interface ActiveWorkout {
