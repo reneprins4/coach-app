@@ -11,8 +11,9 @@ import type { Measurement } from './measurements'
 
 export interface ExportWorkoutSet {
   exercise: string
-  weight_kg: number
-  reps: number
+  weight_kg: number | null
+  reps: number | null
+  duration_seconds: number | null
   rpe: number | null
 }
 
@@ -64,6 +65,7 @@ export function buildExportData(
         exercise: s.exercise,
         weight_kg: s.weight_kg ?? 0,
         reps: s.reps ?? 0,
+        duration_seconds: s.duration_seconds ?? null,
         rpe: s.rpe,
       })),
     })),
@@ -107,7 +109,7 @@ const UTF8_BOM = '\uFEFF'
 // ---------------------------------------------------------------------------
 
 export function exportWorkoutsToCSV(workouts: Workout[]): string {
-  const headers = ['Date', 'Workout ID', 'Split', 'Exercise', 'Weight (kg)', 'Reps', 'RPE', 'Volume (kg)']
+  const headers = ['Date', 'Workout ID', 'Split', 'Exercise', 'Weight (kg)', 'Reps', 'Duration (s)', 'RPE', 'Volume (kg)']
   const rows: string[] = [csvRow(headers)]
 
   for (const w of workouts) {
@@ -116,14 +118,16 @@ export function exportWorkoutsToCSV(workouts: Workout[]): string {
     for (const s of (w.workout_sets || [])) {
       const weight = s.weight_kg ?? 0
       const reps = s.reps ?? 0
-      const volume = (weight * reps).toFixed(1)
+      const duration = s.duration_seconds ?? ''
+      const volume = s.duration_seconds ? 'N/A' : (weight * reps).toFixed(1)
       rows.push(csvRow([
         date,
         shortId,
         w.split,
         s.exercise,
         String(weight),
-        String(reps),
+        s.reps != null ? String(reps) : '',
+        String(duration),
         s.rpe != null ? String(s.rpe) : '',
         volume,
       ]))

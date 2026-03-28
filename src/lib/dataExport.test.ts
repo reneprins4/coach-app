@@ -49,9 +49,9 @@ const mockWorkouts: Workout[] = [
     completed_at: '2025-03-01T11:00:00.000Z',
     notes: 'Great session',
     workout_sets: [
-      { id: 's1', workout_id: 'w1-uuid-1234', user_id: 'user-1', exercise: 'Bench Press', weight_kg: 80, reps: 8, rpe: 7, created_at: '2025-03-01T10:05:00.000Z' },
-      { id: 's2', workout_id: 'w1-uuid-1234', user_id: 'user-1', exercise: 'Bench Press', weight_kg: 85, reps: 6, rpe: 8, created_at: '2025-03-01T10:10:00.000Z' },
-      { id: 's3', workout_id: 'w1-uuid-1234', user_id: 'user-1', exercise: 'Overhead Press', weight_kg: 40, reps: 10, rpe: null, created_at: '2025-03-01T10:20:00.000Z' },
+      { id: 's1', workout_id: 'w1-uuid-1234', user_id: 'user-1', exercise: 'Bench Press', weight_kg: 80, reps: 8, duration_seconds: null, rpe: 7, created_at: '2025-03-01T10:05:00.000Z' },
+      { id: 's2', workout_id: 'w1-uuid-1234', user_id: 'user-1', exercise: 'Bench Press', weight_kg: 85, reps: 6, duration_seconds: null, rpe: 8, created_at: '2025-03-01T10:10:00.000Z' },
+      { id: 's3', workout_id: 'w1-uuid-1234', user_id: 'user-1', exercise: 'Overhead Press', weight_kg: 40, reps: 10, duration_seconds: null, rpe: null, created_at: '2025-03-01T10:20:00.000Z' },
     ],
     totalVolume: 80 * 8 + 85 * 6 + 40 * 10,
     exerciseNames: ['Bench Press', 'Overhead Press'],
@@ -64,7 +64,7 @@ const mockWorkouts: Workout[] = [
     completed_at: '2025-03-03T10:00:00.000Z',
     notes: null,
     workout_sets: [
-      { id: 's4', workout_id: 'w2-uuid-5678', user_id: 'user-1', exercise: 'Deadlift', weight_kg: 140, reps: 5, rpe: 9, created_at: '2025-03-03T09:10:00.000Z' },
+      { id: 's4', workout_id: 'w2-uuid-5678', user_id: 'user-1', exercise: 'Deadlift', weight_kg: 140, reps: 5, duration_seconds: null, rpe: 9, created_at: '2025-03-03T09:10:00.000Z' },
     ],
     totalVolume: 140 * 5,
     exerciseNames: ['Deadlift'],
@@ -156,6 +156,7 @@ describe('exportWorkoutsToCSV', () => {
     expect(lines[0]).toContain('Exercise')
     expect(lines[0]).toContain('Weight (kg)')
     expect(lines[0]).toContain('Reps')
+    expect(lines[0]).toContain('Duration (s)')
     expect(lines[0]).toContain('RPE')
     expect(lines[0]).toContain('Volume (kg)')
   })
@@ -180,7 +181,7 @@ describe('exportWorkoutsToCSV', () => {
       completed_at: null,
       notes: null,
       workout_sets: [
-        { id: 's5', workout_id: 'w3', user_id: 'user-1', exercise: 'Incline Press, Dumbbell', weight_kg: 30, reps: 12, rpe: 7, created_at: '2025-03-05T10:05:00.000Z' },
+        { id: 's5', workout_id: 'w3', user_id: 'user-1', exercise: 'Incline Press, Dumbbell', weight_kg: 30, reps: 12, duration_seconds: null, rpe: 7, created_at: '2025-03-05T10:05:00.000Z' },
       ],
       totalVolume: 360,
       exerciseNames: ['Incline Press, Dumbbell'],
