@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { groupVolumeByWeek, groupVolumeByMuscle } from './volumeTracker'
+import { groupVolumeByWeek, groupVolumeByMuscle, calcWorkoutTUT, groupTUTByWeek } from './volumeTracker'
 import type { Workout } from '../types'
 
 /** Helper to create a workout with sets at a given date (default: now) */
 function makeWorkout(
-  sets: { exercise: string; weight_kg: number | null; reps: number | null }[],
+  sets: { exercise: string; weight_kg: number | null; reps: number | null; duration_seconds?: number | null }[],
   daysAgo: number = 0,
 ): Workout {
   const date = new Date()
@@ -26,6 +26,7 @@ function makeWorkout(
       weight_kg: s.weight_kg,
       reps: s.reps,
       rpe: null,
+      duration_seconds: s.duration_seconds ?? null,
       created_at: date.toISOString(),
     })),
   }
@@ -112,5 +113,59 @@ describe('groupVolumeByMuscle - extended periods (MF-010)', () => {
 
     // Only today's workout should count
     expect(result['chest']).toBe(3)
+  })
+})
+
+describe('TUT (Time Under Tension) tracking', () => {
+  it('calcWorkoutTUT sums duration_seconds from time-based sets', () => {
+    const workout = makeWorkout([
+      { exercise: 'Plank', weight_kg: null, reps: null, duration_seconds: 60 },
+      { exercise: 'L-Sit', weight_kg: null, reps: null, duration_seconds: 30 },
+    ])
+    expect(calcWorkoutTUT(workout)).toBe(90)
+  })
+
+  it('calcWorkoutTUT ignores rep-based sets', () => {
+    const workout = makeWorkout([
+      { exercise: 'Bench Press', weight_kg: 80, reps: 10 },
+      { exercise: 'Plank', weight_kg: null, reps: null, duration_seconds: 45 },
+    ])
+    expect(calcWorkoutTUT(workout)).toBe(45)
+  })
+
+  it('calcWorkoutTUT returns 0 when no time-based sets exist', () => {
+    const workout = makeWorkout([
+      { exercise: 'Bench Press', weight_kg: 80, reps: 10 },
+    ])
+    expect(calcWorkoutTUT(workout)).toBe(0)
+  })
+
+  it('time-based sets are excluded from rep volume', () => {
+    const workout = makeWorkout([
+      { exercise: 'Bench Press', weight_kg: 80, reps: 10 },
+      { exercise: 'Plank', weight_kg: null, reps: null, duration_seconds: 60 },
+    ])
+    const result = groupVolumeByWeek([workout], 1)
+    expect(result.length).toBeGreaterThan(0)
+    // Only bench press contributes to volume (800), plank excluded
+    expect(result[0]!.totalVolume).toBe(800)
+  })
+
+  it('groupTUTByWeek groups time-based volume by week', () => {
+    const workout = makeWorkout([
+      { exercise: 'Plank', weight_kg: null, reps: null, duration_seconds: 60 },
+      { exercise: 'L-Sit', weight_kg: null, reps: null, duration_seconds: 30 },
+    ])
+    const result = groupTUTByWeek([workout], 1)
+    expect(result.length).toBeGreaterThan(0)
+    expect(result[0]!.totalVolume).toBe(90)
+  })
+
+  it('groupTUTByWeek returns empty for workouts with no time-based sets', () => {
+    const workout = makeWorkout([
+      { exercise: 'Bench Press', weight_kg: 80, reps: 10 },
+    ])
+    const result = groupTUTByWeek([workout], 1)
+    expect(result).toEqual([])
   })
 })

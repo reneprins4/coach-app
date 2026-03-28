@@ -34,6 +34,8 @@ function getMonthStart(date: Date): Date {
 function calcWorkoutVolume(workout: Workout): number {
   const sets = workout.workout_sets || []
   return sets.reduce((sum, s) => {
+    // Skip time-based sets (e.g. Plank, L-Sit) — tracked via TUT instead
+    if (s.duration_seconds && !s.reps) return sum
     const weight = s.weight_kg || 0
     const reps = s.reps || 0
     // Bodyweight exercises (weight 0 or null): use reps as volume
@@ -207,4 +209,70 @@ export function findBestWeek(weeklyData: { label: string; totalVolume: number }[
   return weeklyData.reduce<{ label: string; totalVolume: number } | null>((best, w) =>
     w.totalVolume > (best?.totalVolume || 0) ? w : best
   , null)
+}
+
+/**
+ * Calculate total Time Under Tension (TUT) for a workout in seconds.
+ * Only counts sets that have a duration_seconds value.
+ */
+export function calcWorkoutTUT(workout: Workout): number {
+  const sets = workout.workout_sets || []
+  return sets.reduce((sum, s) => {
+    if (!s.duration_seconds) return sum
+    return sum + s.duration_seconds
+  }, 0)
+}
+
+/**
+ * Group workouts by week (Mon-Sun) and sum TUT (Time Under Tension)
+ */
+export function groupTUTByWeek(workouts: Workout[], weeksBack: number = 12): WeeklyVolumeEntry[] {
+  if (!workouts || workouts.length === 0) return []
+
+  const now = new Date()
+  const cutoff = new Date(now)
+  cutoff.setDate(cutoff.getDate() - weeksBack * 7)
+
+  // Group workouts by week
+  const weekMap = new Map<string, { weekStart: Date; totalVolume: number; workoutCount: number }>()
+
+  for (const w of workouts) {
+    const workoutDate = new Date(w.created_at)
+    if (workoutDate < cutoff) continue
+
+    const weekStart = getWeekStart(workoutDate)
+    const weekKey = weekStart.toISOString()
+    const tut = calcWorkoutTUT(w)
+
+    if (tut === 0) continue // Skip workouts with no time-based sets
+
+    if (!weekMap.has(weekKey)) {
+      weekMap.set(weekKey, { weekStart, totalVolume: 0, workoutCount: 0 })
+    }
+    const entry = weekMap.get(weekKey)!
+    entry.totalVolume += tut
+    entry.workoutCount += 1
+  }
+
+  // Convert to array and sort oldest to newest
+  const weeks = Array.from(weekMap.values())
+    .filter(w => w.workoutCount > 0)
+    .sort((a, b) => a.weekStart.getTime() - b.weekStart.getTime())
+
+  // Add labels
+  const currentWeekStart = getWeekStart(now)
+  return weeks.map(w => {
+    const diffWeeks = Math.round((currentWeekStart.getTime() - w.weekStart.getTime()) / (7 * 24 * 60 * 60 * 1000))
+    let label: string
+    if (diffWeeks === 0) label = 'Nu'
+    else if (diffWeeks === 1) label = '-1w'
+    else label = `-${diffWeeks}w`
+
+    return {
+      label,
+      weekStart: w.weekStart,
+      totalVolume: Math.round(w.totalVolume),
+      workoutCount: w.workoutCount,
+    }
+  })
 }
