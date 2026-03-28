@@ -136,6 +136,7 @@ const EXERCISE_MUSCLE_MAP: Record<string, MuscleGroup> = {
   'plank':              'core',   'crunch':        'core',   'ab.*wheel':       'core',
   'leg.*raise':         'core',   'pallof':        'core',   'dead.*bug':       'core',
   'russian.*twist':     'core',   'sit.?up':       'core',   'woodchop':        'core',
+  'l.?sit':             'core',   'hollow.*body':  'core',   'copenhagen':      'core',
 }
 
 // Compound exercises hit multiple muscle groups

@@ -225,6 +225,7 @@ function runLenaDumbbellSimulation() {
           actualRpe = phaseInfo.rpe
         }
 
+        const isTimeBased = exercise.exercise_type === 'time'
         for (let s = 0; s < exercise.sets; s++) {
           setIdCounter++
           workoutSets.push({
@@ -233,8 +234,8 @@ function runLenaDumbbellSimulation() {
             user_id: 'lena-sim',
             exercise: exercise.name,
             weight_kg: actualWeight,
-            reps: actualReps,
-            duration_seconds: null,
+            reps: isTimeBased ? 0 : actualReps,
+            duration_seconds: isTimeBased ? (exercise.duration_min ?? 30) : null,
             rpe: actualRpe + (s * 0.2),
             created_at: sessionDate.toISOString(),
           })
@@ -1380,7 +1381,10 @@ describe('Cross-cutting: Data integrity across 60 workouts', () => {
   it('all reps are positive', () => {
     for (const w of sim.allWorkouts) {
       for (const s of w.workout_sets) {
-        if (s.reps !== null) {
+        if (s.duration_seconds && s.duration_seconds > 0) {
+          // Time-based sets have reps=0 and duration_seconds > 0
+          expect(s.duration_seconds).toBeGreaterThan(0)
+        } else if (s.reps !== null) {
           expect(s.reps).toBeGreaterThan(0)
         }
       }

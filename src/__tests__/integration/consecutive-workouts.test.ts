@@ -95,9 +95,11 @@ function aiResponseToWorkout(
 
   for (const ex of response.exercises) {
     const numSets = ex.sets || 3
+    const isTimeBased = ex.exercise_type === 'time'
     for (let s = 0; s < numSets; s++) {
       setCounter++
-      const reps = Math.min(ex.reps_max, Math.max(ex.reps_min, ex.reps_min + Math.floor(Math.random() * 3)))
+      const reps = isTimeBased ? 0 : Math.min(ex.reps_max, Math.max(ex.reps_min, ex.reps_min + Math.floor(Math.random() * 3)))
+      const duration = isTimeBased ? ((ex.duration_min ?? 20) + Math.floor(Math.random() * ((ex.duration_max ?? 40) - (ex.duration_min ?? 20)))) : null
       sets.push({
         id: `set-int-${setCounter}`,
         workout_id: workoutId,
@@ -105,7 +107,7 @@ function aiResponseToWorkout(
         exercise: ex.name,
         weight_kg: ex.weight_kg,
         reps,
-        duration_seconds: null,
+        duration_seconds: duration,
         rpe: ex.rpe_target - 0.5 + Math.random(), // slight RPE variation
         created_at: createdAt,
       })
@@ -293,11 +295,16 @@ describe('Consecutive Workouts Integration (7 workouts over 10 days)', () => {
   it('all sets have valid weight_kg and reps values', () => {
     for (const workout of generatedWorkouts) {
       for (const set of workout.workout_sets) {
-        expect(set.weight_kg).not.toBeNull()
-        expect(set.reps).not.toBeNull()
         expect(typeof set.weight_kg).toBe('number')
         expect(typeof set.reps).toBe('number')
-        expect(set.reps).toBeGreaterThan(0)
+        if (set.duration_seconds && set.duration_seconds > 0) {
+          // Time-based sets have reps=0 and duration_seconds > 0
+          expect(set.duration_seconds).toBeGreaterThan(0)
+        } else {
+          expect(set.weight_kg).not.toBeNull()
+          expect(set.reps).not.toBeNull()
+          expect(set.reps).toBeGreaterThan(0)
+        }
       }
     }
   })
