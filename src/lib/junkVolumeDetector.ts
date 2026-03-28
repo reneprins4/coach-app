@@ -35,8 +35,12 @@ export function detectJunkVolume(exerciseName: string, allSetsThisExercise: Junk
   // Minimaal 3 sets nodig voor trend detectie
   if (!allSetsThisExercise || allSetsThisExercise.length < 3) return null
 
+  // Skip time-based exercises — junk volume is a rep/weight concept
+  const repSets = allSetsThisExercise.filter(s => s.reps != null && !s.duration_seconds)
+  if (repSets.length < 3) return null
+
   // Filter out warmup sets before analysis (ALGO-010)
-  const workSets = filterWarmupSets(allSetsThisExercise)
+  const workSets = filterWarmupSets(repSets)
   if (workSets.length < 3) return null
 
   // Check RPE trend: stijgt RPE terwijl gewicht gelijk blijft?

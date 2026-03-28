@@ -458,6 +458,7 @@ export interface RecentSessionSet {
   exercise: string
   weight_kg: number | null
   reps: number | null
+  duration_seconds?: number | null
   rpe: number | null
 }
 
