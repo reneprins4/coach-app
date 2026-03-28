@@ -11,6 +11,7 @@ interface MomentumSet {
   weight_kg?: number | null
   reps?: number | null
   rpe?: number | null
+  duration_seconds?: number | null
   exercise?: string
 }
 
@@ -35,7 +36,7 @@ export function calculateMomentum(workout: MomentumWorkout, options?: MomentumOp
     (e.sets || []).map(s => ({ ...s, exercise: e.name }))
   ).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 
-  const validSets = allSets.filter(s => (s.reps && s.weight_kg) || s.rpe)
+  const validSets = allSets.filter(s => (s.reps && s.weight_kg) || s.rpe || s.duration_seconds)
   if (validSets.length < 3) return null
 
   const recentSets = validSets.slice(-5) // laatste 5 sets
@@ -77,12 +78,23 @@ export function calculateMomentum(workout: MomentumWorkout, options?: MomentumOp
     else if (maxReps > 0 && lastReps < maxReps * 0.7) { score -= 15; signals.push('reps_dropping') }
   }
 
+  // Signal 4: Duration trend (for time-based exercises)
+  const setsWithDuration = recentSets.filter(s => s.duration_seconds)
+  if (setsWithDuration.length >= 3) {
+    const durations = setsWithDuration.map(s => s.duration_seconds!)
+    const trend = durations[durations.length - 1]! - durations[0]!
+    const trendPct = durations[0]! > 0 ? (trend / durations[0]!) * 100 : 0
+
+    if (trendPct > 5) { score += 15; signals.push('duration_rising') }
+    else if (trendPct < -10) { score -= 15; signals.push('duration_dropping') }
+  }
+
   score = Math.max(0, Math.min(100, score))
 
   // During deload weeks, suppress negative signals and override status
   if (options?.isDeload) {
     const filteredSignals = signals.filter(
-      s => s !== 'e1rm_dropping' && s !== 'rpe_degrading' && s !== 'reps_dropping'
+      s => s !== 'e1rm_dropping' && s !== 'rpe_degrading' && s !== 'reps_dropping' && s !== 'duration_dropping'
     )
     return {
       score: Math.max(score, 50), // floor at 50 during deload

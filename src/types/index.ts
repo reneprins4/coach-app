@@ -138,6 +138,7 @@ export interface MuscleStatus {
   hoursSinceLastTrained: number | null
   avgRpeLastSession: number | null
   setsLastSession: number
+  totalDurationLastSession: number
   recoveryPct: number
   recentExercises: string[]
   lastSessionSets: LastSessionSet[]
@@ -506,6 +507,7 @@ export interface JunkVolumeSet {
   rpe?: number | null
   weight_kg?: number | null
   reps?: number | null
+  duration_seconds?: number | null
 }
 
 // ---- Momentum Calculator ----
